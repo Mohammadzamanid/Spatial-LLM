@@ -46,3 +46,12 @@ spatial:
 evaluation:
   eval_every: 1
   metrics: [perplexity, spatial_accuracy, temporal_consistency]
+
+# Conceptual dataset roles
+dataset_roles:
+  babi: symbolic_spatial_logic
+  spartqa: controlled_language_spatial_qa
+  clevr: object_centric_relations
+  gqa: real_world_grounded_spatial_qa
+  nlvr2: logical_verification
+  scanqa: true_3d_spatial_grounding
