@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+logs/
+checkpoints/
+results/
+data/raw/
+data/processed/
+*.tar.gz
+.env
+wandb/
