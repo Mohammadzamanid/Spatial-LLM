@@ -1,0 +1,57 @@
+model:
+  vocab_size: 50257
+  d_model: 256
+  n_layers: 6
+  n_heads: 4
+  n_reference_frames: 4
+  max_seq_len: 512
+  dropout: 0.1
+  n_schema_types: 8
+  memory_slots: 256
+  visual_dim: 512
+
+training:
+  batch_size: 8
+  learning_rate: 3.0e-05
+  weight_decay: 0.01
+  num_epochs: 15
+  gradient_clip: 0.5
+  warmup_steps: 300
+  scheduler_type: cosine
+  aux_loss_weight: 0.02
+  temporal_smoothness_weight: 0.01
+  velocity_loss_weight: 0.1
+  vector_loss_weight: 0.1
+  patience: 7
+
+data:
+  train_path: data/processed/real_train.json
+  val_path: data/processed/real_val.json
+  test_path: data/processed/real_test.json
+  max_seq_len: 256
+  num_workers: 2
+  synthetic: false
+
+logging:
+  log_dir: ./logs
+  checkpoint_dir: ./checkpoints
+  save_every: 2
+  log_every: 20
+
+spatial:
+  max_spatial_distance: 50.0
+  temporal_decay: 0.1
+  use_rotation_equivariance: false
+
+evaluation:
+  eval_every: 1
+  metrics: [perplexity, spatial_accuracy, temporal_consistency]
+
+# Conceptual dataset roles
+dataset_roles:
+  babi: symbolic_spatial_logic
+  spartqa: controlled_language_spatial_qa
+  clevr: object_centric_relations
+  gqa: real_world_grounded_spatial_qa
+  nlvr2: logical_verification
+  scanqa: true_3d_spatial_grounding

@@ -6,6 +6,9 @@ model:
   n_reference_frames: 4
   max_seq_len: 512
   dropout: 0.1
+  n_schema_types: 8
+  memory_slots: 256
+  visual_dim: 512
 
 training:
   batch_size: 8
@@ -16,6 +19,9 @@ training:
   warmup_steps: 200
   scheduler_type: cosine
   aux_loss_weight: 0.01
+  temporal_smoothness_weight: 0.005
+  velocity_loss_weight: 0.05
+  vector_loss_weight: 0.05
   patience: 5
   min_delta: 0.001
 
@@ -45,6 +51,4 @@ logging:
 
 evaluation:
   eval_every: 1
-  metrics:
-    - perplexity
-    - spatial_accuracy
+  metrics: [perplexity, spatial_accuracy, temporal_consistency]
