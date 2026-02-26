@@ -37,12 +37,40 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
 
         optimizer.zero_grad()
 
-        logits, aux_outputs = model(input_ids)
+        schema_types = batch.get("schema_types")
+        spatial_features = batch.get("spatial_features")
+        temporal_distances = batch.get("temporal_distances")
+        spatial_distances = batch.get("spatial_distances")
+        velocity = batch.get("velocity")
+
+        if schema_types is not None:
+            schema_types = schema_types.to(device)
+        if spatial_features is not None:
+            spatial_features = spatial_features.to(device)
+        if temporal_distances is not None:
+            temporal_distances = temporal_distances.to(device)
+        if spatial_distances is not None:
+            spatial_distances = spatial_distances.to(device)
+        if velocity is not None:
+            velocity = velocity.to(device)
+
+        logits, aux_outputs = model(
+            input_ids,
+            schema_types=schema_types,
+            spatial_features=spatial_features,
+            temporal_distances=temporal_distances,
+            spatial_distances=spatial_distances,
+            velocity=velocity,
+            attention_mask=mask,
+        )
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
+            velocity_targets=velocity,
+            temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
+            velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
         )
 
         # Skip NaN losses
@@ -94,12 +122,40 @@ def evaluate(model, dataloader, config, device):
         if mask is not None:
             mask = mask.to(device)
 
-        logits, aux_outputs = model(input_ids)
+        schema_types = batch.get("schema_types")
+        spatial_features = batch.get("spatial_features")
+        temporal_distances = batch.get("temporal_distances")
+        spatial_distances = batch.get("spatial_distances")
+        velocity = batch.get("velocity")
+
+        if schema_types is not None:
+            schema_types = schema_types.to(device)
+        if spatial_features is not None:
+            spatial_features = spatial_features.to(device)
+        if temporal_distances is not None:
+            temporal_distances = temporal_distances.to(device)
+        if spatial_distances is not None:
+            spatial_distances = spatial_distances.to(device)
+        if velocity is not None:
+            velocity = velocity.to(device)
+
+        logits, aux_outputs = model(
+            input_ids,
+            schema_types=schema_types,
+            spatial_features=spatial_features,
+            temporal_distances=temporal_distances,
+            spatial_distances=spatial_distances,
+            velocity=velocity,
+            attention_mask=mask,
+        )
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
+            velocity_targets=velocity,
+            temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
+            velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
         )
 
         if not torch.isnan(loss):
@@ -133,6 +189,8 @@ def main():
         n_reference_frames=mc["n_reference_frames"],
         max_seq_len=mc["max_seq_len"],
         dropout=mc["dropout"],
+        n_schema_types=mc.get("n_schema_types", 8),
+        memory_slots=mc.get("memory_slots", 256),
     ).to(device)
 
     params = count_parameters(model)
