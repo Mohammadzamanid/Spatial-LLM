@@ -36,22 +36,31 @@ class FiLMLayer(nn.Module):
 
 
 class AdaptiveFiLMLayer(nn.Module):
-    """Adaptive FiLM (delegates to FiLMLayer for stability)."""
+    """Mixture-of-experts FiLM: routes input to specialized expert FiLM layers.
+
+    Neuroscience analog: multiple cortical columns providing parallel
+    modulation, with a gating network selecting the most relevant expert
+    for the current spatial context.
+    """
 
     def __init__(self, d_model=512, d_condition=512, n_experts=4, dropout=0.1):
         super().__init__()
-        self.film = FiLMLayer(d_model, d_condition, dropout)
+        self.n_experts = n_experts
+        self.experts = nn.ModuleList([
+            FiLMLayer(d_model, d_condition, dropout) for _ in range(n_experts)
+        ])
+        self.gate = nn.Linear(d_condition, n_experts)
+        nn.init.zeros_(self.gate.bias)
 
     def forward(self, x, condition):
-        return self.film(x, condition)
+        if condition.dim() == 2:
+            gate_input = condition
+        else:
+            gate_input = condition.mean(dim=1)  # Pool over seq dim for gating
 
-
-class ContextualFiLMLayer(nn.Module):
-    """Contextual FiLM (delegates to FiLMLayer for stability)."""
-
-    def __init__(self, d_model=512, d_condition=512, dropout=0.1):
-        super().__init__()
-        self.film = FiLMLayer(d_model, d_condition, dropout)
-
-    def forward(self, x, condition):
-        return self.film(x, condition)
+        weights = torch.softmax(self.gate(gate_input), dim=-1)  # (batch, n_experts)
+        out = torch.zeros_like(x)
+        for i, expert in enumerate(self.experts):
+            w = weights[:, i].unsqueeze(-1).unsqueeze(-1)  # (batch, 1, 1)
+            out = out + w * expert(x, condition)
+        return out

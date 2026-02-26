@@ -1,8 +1,19 @@
 """Synthetic spatial reasoning dataset and data loading utilities."""
 
+import hashlib
+
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
+
+
+def _deterministic_hash(word, vocab_size):
+    """Deterministic word-to-id hash, consistent across Python versions and runs.
+
+    Python's built-in hash() is randomized per process (PYTHONHASHSEED),
+    making it non-reproducible. This uses SHA-256 for consistency.
+    """
+    return int(hashlib.sha256(word.encode("utf-8")).hexdigest(), 16) % vocab_size
 
 
 SPATIAL_TEMPLATES = [
@@ -54,7 +65,7 @@ class SpatialReasoningDataset(Dataset):
         sample = self.data[idx]
         text = f"{sample['context']} {sample['question']} {sample['answer']}"
         words = text.lower().split()
-        input_ids = [hash(w) % self.vocab_size for w in words[: self.max_seq_len]]
+        input_ids = [_deterministic_hash(w, self.vocab_size) for w in words[: self.max_seq_len]]
         while len(input_ids) < self.max_seq_len:
             input_ids.append(0)
         input_ids = torch.tensor(input_ids[: self.max_seq_len], dtype=torch.long)
@@ -99,8 +110,18 @@ class SpatialReasoningDataset(Dataset):
 
 
 def collate_spatial_batch(batch):
-    """Collate a list of samples into a batch dict."""
-    return {key: torch.stack([b[key] for b in batch]) for key in batch[0]}
+    """Collate a list of samples into a batch dict.
+
+    Handles both tensor fields (stacked) and non-tensor fields (kept as lists).
+    """
+    result = {}
+    for key in batch[0]:
+        values = [b[key] for b in batch]
+        if isinstance(values[0], torch.Tensor):
+            result[key] = torch.stack(values)
+        else:
+            result[key] = values  # strings, ints, etc.
+    return result
 
 
 def create_spatial_dataloader(dataset, batch_size=8, shuffle=True, num_workers=0):

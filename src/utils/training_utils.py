@@ -74,9 +74,11 @@ def compute_loss(logits, labels, mask=None, aux_outputs=None, aux_loss_weight=0.
 
         if "gain" in aux_outputs:
             gain = aux_outputs["gain"]
-            gain_sparsity_loss = torch.abs(gain - 0.5).mean()
-            total_loss = total_loss + aux_loss_weight * gain_sparsity_loss
-            loss_dict["gain_sparsity"] = gain_sparsity_loss.item()
+            # Gain is initialized near 1.0 (sigmoid(~0)+0.5). Encourage gain
+            # to stay near 1.0 (identity transform) and only deviate when needed.
+            gain_reg_loss = torch.abs(gain - 1.0).mean()
+            total_loss = total_loss + aux_loss_weight * gain_reg_loss
+            loss_dict["gain_reg"] = gain_reg_loss.item()
 
     loss_dict["total_loss"] = total_loss.item()
     return total_loss, loss_dict

@@ -1,8 +1,14 @@
 """Dataset loaders for spatial reasoning evaluation with real data files."""
 
+import hashlib
 import json
 import torch
 from torch.utils.data import Dataset, DataLoader
+
+
+def _deterministic_hash(word, vocab_size):
+    """Deterministic word-to-id hash, consistent across Python versions and runs."""
+    return int(hashlib.sha256(word.encode("utf-8")).hexdigest(), 16) % vocab_size
 
 
 class SpatialTestDataset(Dataset):
@@ -21,7 +27,7 @@ class SpatialTestDataset(Dataset):
         sample = self.data[idx]
         text = f"{sample['context']} {sample['question']} {sample['answer']}"
         words = text.lower().split()
-        input_ids = [hash(w) % self.vocab_size for w in words[: self.max_length]]
+        input_ids = [_deterministic_hash(w, self.vocab_size) for w in words[: self.max_length]]
         while len(input_ids) < self.max_length:
             input_ids.append(0)
         input_ids = torch.tensor(input_ids[: self.max_length], dtype=torch.long)

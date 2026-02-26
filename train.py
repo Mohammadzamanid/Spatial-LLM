@@ -37,7 +37,7 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
 
         optimizer.zero_grad()
 
-        logits, aux_outputs = model(input_ids)
+        logits, aux_outputs = model(input_ids, attention_mask=mask)
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
@@ -94,7 +94,7 @@ def evaluate(model, dataloader, config, device):
         if mask is not None:
             mask = mask.to(device)
 
-        logits, aux_outputs = model(input_ids)
+        logits, aux_outputs = model(input_ids, attention_mask=mask)
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
