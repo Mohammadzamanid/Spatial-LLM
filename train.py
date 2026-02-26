@@ -42,6 +42,7 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
         temporal_distances = batch.get("temporal_distances")
         spatial_distances = batch.get("spatial_distances")
         velocity = batch.get("velocity")
+        visual_features = batch.get("visual_features")
 
         if schema_types is not None:
             schema_types = schema_types.to(device)
@@ -53,6 +54,8 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
             spatial_distances = spatial_distances.to(device)
         if velocity is not None:
             velocity = velocity.to(device)
+        if visual_features is not None:
+            visual_features = visual_features.to(device)
 
         logits, aux_outputs = model(
             input_ids,
@@ -61,6 +64,7 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
             temporal_distances=temporal_distances,
             spatial_distances=spatial_distances,
             velocity=velocity,
+            visual_features=visual_features,
             attention_mask=mask,
         )
 
@@ -69,8 +73,10 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
             velocity_targets=velocity,
+            vector_targets=visual_features,
             temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
             velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
+            vector_loss_weight=config["training"].get("vector_loss_weight", 0.0),
         )
 
         # Skip NaN losses
@@ -127,6 +133,7 @@ def evaluate(model, dataloader, config, device):
         temporal_distances = batch.get("temporal_distances")
         spatial_distances = batch.get("spatial_distances")
         velocity = batch.get("velocity")
+        visual_features = batch.get("visual_features")
 
         if schema_types is not None:
             schema_types = schema_types.to(device)
@@ -138,6 +145,8 @@ def evaluate(model, dataloader, config, device):
             spatial_distances = spatial_distances.to(device)
         if velocity is not None:
             velocity = velocity.to(device)
+        if visual_features is not None:
+            visual_features = visual_features.to(device)
 
         logits, aux_outputs = model(
             input_ids,
@@ -146,6 +155,7 @@ def evaluate(model, dataloader, config, device):
             temporal_distances=temporal_distances,
             spatial_distances=spatial_distances,
             velocity=velocity,
+            visual_features=visual_features,
             attention_mask=mask,
         )
 
@@ -154,8 +164,10 @@ def evaluate(model, dataloader, config, device):
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
             velocity_targets=velocity,
+            vector_targets=visual_features,
             temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
             velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
+            vector_loss_weight=config["training"].get("vector_loss_weight", 0.0),
         )
 
         if not torch.isnan(loss):
@@ -191,6 +203,7 @@ def main():
         dropout=mc["dropout"],
         n_schema_types=mc.get("n_schema_types", 8),
         memory_slots=mc.get("memory_slots", 256),
+        visual_dim=mc.get("visual_dim", 512),
     ).to(device)
 
     params = count_parameters(model)
@@ -203,12 +216,14 @@ def main():
         max_seq_len=dc["max_seq_len"],
         num_samples=dc.get("num_samples", 1000),
         data_path=dc.get("train_path"),
+        visual_dim=mc.get("visual_dim", 512),
     )
     val_dataset = SpatialReasoningDataset(
         synthetic=dc.get("synthetic", True),
         max_seq_len=dc["max_seq_len"],
         num_samples=dc.get("num_val_samples", 200),
         data_path=dc.get("val_path"),
+        visual_dim=mc.get("visual_dim", 512),
     )
 
     tc = config["training"]
