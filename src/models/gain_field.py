@@ -45,6 +45,7 @@ class GainFieldTransform(nn.Module):
         concat = torch.cat([egocentric_repr, ref_embed], dim=-1)
         gain = self.gain_network(concat)
         gain = torch.sigmoid(gain) + 0.5  # Output range: [0.5, 1.5]
+        gain = torch.clamp(gain, 0.5, 1.5)
 
         modulated = egocentric_repr * gain
         allocentric = self.ego_to_allo(modulated)

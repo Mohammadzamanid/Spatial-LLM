@@ -36,7 +36,18 @@ def get_scheduler(optimizer, scheduler_type="cosine", num_training_steps=1000,
     return scheduler
 
 
-def compute_loss(logits, labels, mask=None, aux_outputs=None, aux_loss_weight=0.1):
+def compute_loss(
+    logits,
+    labels,
+    mask=None,
+    aux_outputs=None,
+    aux_loss_weight=0.1,
+    velocity_targets=None,
+    vector_targets=None,
+    temporal_smoothness_weight=0.0,
+    velocity_loss_weight=0.0,
+    vector_loss_weight=0.0,
+):
     """Compute total loss including language modeling and auxiliary losses.
 
     Args:
@@ -45,6 +56,11 @@ def compute_loss(logits, labels, mask=None, aux_outputs=None, aux_loss_weight=0.
         mask: (batch, seq_len) optional mask for valid positions
         aux_outputs: dict with auxiliary model outputs
         aux_loss_weight: weight for auxiliary losses
+        velocity_targets: (batch, seq_len, 2) ground-truth velocity
+        vector_targets: (batch, visual_dim) ground-truth visual vectors
+        temporal_smoothness_weight: weight for gate temporal smoothness loss
+        velocity_loss_weight: weight for velocity prediction loss
+        vector_loss_weight: weight for vector prediction loss
 
     Returns:
         total_loss: combined loss tensor
@@ -66,19 +82,33 @@ def compute_loss(logits, labels, mask=None, aux_outputs=None, aux_loss_weight=0.
     total_loss = lm_loss
 
     if aux_outputs is not None:
-        if "gate_values" in aux_outputs:
-            gate_vals = aux_outputs["gate_values"]
+        gate_vals = aux_outputs.get("gate_values")
+        if gate_vals is not None:
             gate_diversity_loss = -torch.std(gate_vals)
             total_loss = total_loss + aux_loss_weight * gate_diversity_loss
             loss_dict["gate_diversity"] = gate_diversity_loss.item()
 
-        if "gain" in aux_outputs:
-            gain = aux_outputs["gain"]
-            # Gain is initialized near 1.0 (sigmoid(~0)+0.5). Encourage gain
-            # to stay near 1.0 (identity transform) and only deviate when needed.
-            gain_reg_loss = torch.abs(gain - 1.0).mean()
-            total_loss = total_loss + aux_loss_weight * gain_reg_loss
-            loss_dict["gain_reg"] = gain_reg_loss.item()
+            if temporal_smoothness_weight > 0 and gate_vals.size(1) > 1:
+                smooth = torch.abs(gate_vals[:, 1:] - gate_vals[:, :-1]).mean()
+                total_loss = total_loss + temporal_smoothness_weight * smooth
+                loss_dict["gate_temporal_smoothness"] = smooth.item()
+
+        gain = aux_outputs.get("gain")
+        if gain is not None:
+            gain_sparsity = torch.abs(gain - 0.5).mean()
+            total_loss = total_loss + aux_loss_weight * gain_sparsity
+            loss_dict["gain_sparsity"] = gain_sparsity.item()
+
+        if velocity_targets is not None and velocity_loss_weight > 0 and "pred_velocity" in aux_outputs:
+            vel_loss = nn.functional.mse_loss(aux_outputs["pred_velocity"], velocity_targets)
+            total_loss = total_loss + velocity_loss_weight * vel_loss
+            loss_dict["velocity_loss"] = vel_loss.item()
+
+        if vector_targets is not None and vector_loss_weight > 0 and "pred_vector" in aux_outputs:
+            pred_vec = aux_outputs["pred_vector"].mean(dim=1)
+            vec_loss = nn.functional.mse_loss(pred_vec, vector_targets)
+            total_loss = total_loss + vector_loss_weight * vec_loss
+            loss_dict["vector_loss"] = vec_loss.item()
 
     loss_dict["total_loss"] = total_loss.item()
     return total_loss, loss_dict

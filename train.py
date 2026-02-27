@@ -19,6 +19,17 @@ def load_config(path):
         return yaml.safe_load(f)
 
 
+def _move_batch_to_device(batch, device):
+    """Move all tensor fields in a batch dict to the given device."""
+    out = {}
+    for key, val in batch.items():
+        if isinstance(val, torch.Tensor):
+            out[key] = val.to(device)
+        else:
+            out[key] = val
+    return out
+
+
 def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
     model.train()
     total_loss = 0.0
@@ -29,20 +40,34 @@ def train_epoch(model, dataloader, optimizer, scheduler, config, device, epoch):
 
     pbar = tqdm(dataloader, desc=f"Epoch {epoch+1}")
     for step, batch in enumerate(pbar):
-        input_ids = batch["input_ids"].to(device)
-        labels = batch["labels"].to(device)
+        batch = _move_batch_to_device(batch, device)
+
+        input_ids = batch["input_ids"]
+        labels = batch["labels"]
         mask = batch.get("attention_mask")
-        if mask is not None:
-            mask = mask.to(device)
 
         optimizer.zero_grad()
 
-        logits, aux_outputs = model(input_ids, attention_mask=mask)
+        logits, aux_outputs = model(
+            input_ids,
+            schema_types=batch.get("schema_types"),
+            spatial_features=batch.get("spatial_features"),
+            temporal_distances=batch.get("temporal_distances"),
+            spatial_distances=batch.get("spatial_distances"),
+            velocity=batch.get("velocity"),
+            visual_features=batch.get("visual_features"),
+            attention_mask=mask,
+        )
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
+            velocity_targets=batch.get("velocity"),
+            vector_targets=batch.get("visual_features"),
+            temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
+            velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
+            vector_loss_weight=config["training"].get("vector_loss_weight", 0.0),
         )
 
         # Skip NaN losses
@@ -88,18 +113,32 @@ def evaluate(model, dataloader, config, device):
     aux_weight = config["training"].get("aux_loss_weight", 0.0)
 
     for batch in dataloader:
-        input_ids = batch["input_ids"].to(device)
-        labels = batch["labels"].to(device)
-        mask = batch.get("attention_mask")
-        if mask is not None:
-            mask = mask.to(device)
+        batch = _move_batch_to_device(batch, device)
 
-        logits, aux_outputs = model(input_ids, attention_mask=mask)
+        input_ids = batch["input_ids"]
+        labels = batch["labels"]
+        mask = batch.get("attention_mask")
+
+        logits, aux_outputs = model(
+            input_ids,
+            schema_types=batch.get("schema_types"),
+            spatial_features=batch.get("spatial_features"),
+            temporal_distances=batch.get("temporal_distances"),
+            spatial_distances=batch.get("spatial_distances"),
+            velocity=batch.get("velocity"),
+            visual_features=batch.get("visual_features"),
+            attention_mask=mask,
+        )
 
         loss, loss_dict = compute_loss(
             logits, labels, mask=mask,
             aux_outputs=aux_outputs if aux_weight > 0 else None,
             aux_loss_weight=aux_weight,
+            velocity_targets=batch.get("velocity"),
+            vector_targets=batch.get("visual_features"),
+            temporal_smoothness_weight=config["training"].get("temporal_smoothness_weight", 0.0),
+            velocity_loss_weight=config["training"].get("velocity_loss_weight", 0.0),
+            vector_loss_weight=config["training"].get("vector_loss_weight", 0.0),
         )
 
         if not torch.isnan(loss):
@@ -133,6 +172,9 @@ def main():
         n_reference_frames=mc["n_reference_frames"],
         max_seq_len=mc["max_seq_len"],
         dropout=mc["dropout"],
+        n_schema_types=mc.get("n_schema_types", 8),
+        memory_slots=mc.get("memory_slots", 256),
+        visual_dim=mc.get("visual_dim", 512),
     ).to(device)
 
     params = count_parameters(model)
@@ -145,12 +187,14 @@ def main():
         max_seq_len=dc["max_seq_len"],
         num_samples=dc.get("num_samples", 1000),
         data_path=dc.get("train_path"),
+        visual_dim=mc.get("visual_dim", 512),
     )
     val_dataset = SpatialReasoningDataset(
         synthetic=dc.get("synthetic", True),
         max_seq_len=dc["max_seq_len"],
         num_samples=dc.get("num_val_samples", 200),
         data_path=dc.get("val_path"),
+        visual_dim=mc.get("visual_dim", 512),
     )
 
     tc = config["training"]

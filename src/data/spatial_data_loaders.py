@@ -33,15 +33,22 @@ class SpatialTestDataset(Dataset):
         input_ids = torch.tensor(input_ids[: self.max_length], dtype=torch.long)
 
         schema_type = self._get_schema_type(sample.get("task_type", "unknown"))
-        spatial_features = torch.randn(self.max_length, 4)
+
+        velocity = torch.randn(self.max_length, 2) * 0.05
+        coordinates = torch.cumsum(velocity, dim=0)
+        spatial_features = torch.zeros(self.max_length, 4)
+        spatial_features[:, :2] = coordinates
+        spatial_features[:, 2:] = velocity
 
         return {
             "input_ids": input_ids,
             "labels": input_ids.clone(),
             "schema_types": torch.full((self.max_length,), schema_type, dtype=torch.long),
             "spatial_features": spatial_features,
-            "coordinates": torch.randn(self.max_length, 2),
-            "timestamps": torch.arange(self.max_length, dtype=torch.float32),
+            "velocity": velocity,
+            "temporal_distances": torch.ones(self.max_length, dtype=torch.float32),
+            "spatial_distances": torch.norm(coordinates, dim=-1),
+            "attention_mask": (input_ids != 0).float(),
             "task_type": sample.get("task_type", "unknown"),
             "difficulty": sample.get("difficulty", 1),
             "answer": sample["answer"],
