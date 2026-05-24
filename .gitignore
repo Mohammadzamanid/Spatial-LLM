@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Data (large files — track with DVC or Git LFS instead)
+data/raw/*
+data/processed/*
+data/tiles/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/tiles/.gitkeep
+
+# Model checkpoints & outputs
+outputs/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Environment & secrets
+.env
+*.env
+wandb/
+
+# IDE
+.vscode/
+.idea/
