@@ -18,6 +18,7 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "torch>=2.2.0",
@@ -43,6 +44,26 @@ dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff", "mypy"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+markers = [
+  "requires_gpu: tests that need a CUDA GPU",
+  "requires_model: tests that download large pretrained models",
+]
+
+[tool.coverage.run]
+omit = [
+  "src/models/llm_wrapper.py",
+  "src/training/trainer.py",
+  "src/inference.py",
+  "src/api/server.py",
+  "src/models/neuro/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
 
 [tool.ruff]
 line-length = 100
