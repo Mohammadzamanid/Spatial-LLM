@@ -24,7 +24,6 @@ Implementation:
 import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class GridModule(nn.Module):
@@ -45,8 +44,9 @@ class GridModule(nn.Module):
         self.register_buffer("basis_angle1", torch.tensor(0.0))
         self.register_buffer("basis_angle2", torch.tensor(math.pi / 3))
 
-        # Input: sin/cos × u/v = num_cells * 2 features
-        self.proj = nn.Linear(num_cells * 2, embed_dim)
+        # Input: [cos_u, sin_u, cos_v, sin_v] × num_harmonics = num_harmonics * 4
+        num_harmonics = max(1, num_cells // 16)
+        self.proj = nn.Linear(num_harmonics * 4, embed_dim)
 
     def _hex_basis(self) -> torch.Tensor:
         """Compute rotated hexagonal basis — always (2, 2), no batch dims."""
@@ -63,22 +63,28 @@ class GridModule(nn.Module):
         Returns:
             activations: (B, embed_dim)
         """
-        coords_norm = coords / self.scale                         # (B, 2)
+        # Project onto the hexagonal basis, THEN divide by scale so that
+        # `scale` acts as the grid wavelength (in degrees). One spatial period
+        # per `scale` degrees — no aliasing as long as scale is sensible.
         basis = self._hex_basis()                                  # (2, 2)
-        projected = torch.mm(coords_norm, basis.t())               # (B, 2)
+        projected = torch.mm(coords, basis.t()) / self.scale       # (B, 2)
 
+        # Use a SMALL number of low harmonics (1..num_harmonics) to stay
+        # band-limited. Each harmonic adds a finer sub-pattern without aliasing.
+        num_harmonics = max(1, self.num_cells // 16)
         freqs = torch.arange(
-            1, self.num_cells + 1, device=coords.device, dtype=coords.dtype
-        )  # (num_cells,)
+            1, num_harmonics + 1, device=coords.device, dtype=coords.dtype
+        )  # (num_harmonics,)
 
-        # (B, 1) * (1, num_cells) → (B, num_cells) — explicit unsqueeze
-        u = projected[:, 0].unsqueeze(1) * freqs.unsqueeze(0)
-        v = projected[:, 1].unsqueeze(1) * freqs.unsqueeze(0)
+        u = projected[:, 0].unsqueeze(1) * freqs.unsqueeze(0)      # (B, H)
+        v = projected[:, 1].unsqueeze(1) * freqs.unsqueeze(0)      # (B, H)
 
         activations = torch.cat([
-            torch.cos(2 * math.pi * u) * torch.cos(2 * math.pi * v),
-            torch.sin(2 * math.pi * u) + torch.sin(2 * math.pi * v),
-        ], dim=-1)  # (B, num_cells * 2)
+            torch.cos(2 * math.pi * u),
+            torch.sin(2 * math.pi * u),
+            torch.cos(2 * math.pi * v),
+            torch.sin(2 * math.pi * v),
+        ], dim=-1)  # (B, num_harmonics * 4)
 
         return self.proj(activations)  # (B, embed_dim)
 
@@ -96,8 +102,8 @@ class GridCellEncoder(nn.Module):
         self,
         embed_dim: int = 256,
         num_modules: int = 6,
-        base_scale: float = 0.01,
-        scale_factor: float = 3.0,
+        base_scale: float = 1.0,
+        scale_factor: float = 2.0,
         num_cells: int = 64,
     ):
         super().__init__()

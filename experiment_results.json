@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Raw MLP (baseline)",
+    "test_acc": 0.9906250238418579,
+    "train_acc": 0.9908333420753479,
+    "params": 5652,
+    "time_s": 3.7951200008392334
+  },
+  {
+    "name": "Fourier embedding",
+    "test_acc": 1.0,
+    "train_acc": 1.0,
+    "params": 26196,
+    "time_s": 3.3940865993499756
+  },
+  {
+    "name": "Grid cell encoder",
+    "test_acc": 0.08624999970197678,
+    "train_acc": 0.0820000022649765,
+    "params": 92313,
+    "time_s": 16.94340991973877
+  },
+  {
+    "name": "BrainSpatialCortex (full stack)",
+    "test_acc": 0.9856250286102295,
+    "train_acc": 0.984000027179718,
+    "params": 183030,
+    "time_s": 22.987187385559082
+  }
+]

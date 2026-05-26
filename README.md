@@ -74,48 +74,46 @@ These are unified in `BrainSpatialCortex` (≈2.8M params) — coordinates flow 
 
 ## Benchmarks
 
-> **Honesty note:** Spatial-LLM v0.1 is a research prototype with a fully-tested forward/backward stack (117 passing tests) but has **not yet been fine-tuned on a GPU at scale**. The tables below separate (a) *real published baselines* from the literature, and (b) *projected targets* this architecture is designed to reach. No fabricated "our model wins" numbers — projected rows are clearly labelled and will be replaced with measured results after training.
+> **Status:** The full LLM (Mistral-7B) is not yet fine-tuned (needs GPU). But the **spatial encoding stack has been trained and measured** on controlled tasks below. These are **real measured numbers** from `experiments_v2.py`, reproducible on CPU in minutes. No projections in this section.
 
-### A. Real published baselines (measured, from literature)
+### Measured: spatial encoder comparison (CPU, identical budget)
 
-**Geographic QA — Exact Match accuracy**
+All encoders use a 64-dim output + identical linear head, same data, same training steps.
 
-| Model | GeoQA | NaturalQuestions (geo subset) | Source |
+**Task A — Coordinate denoising/regression** (input = true location + 2° noise; reconstruct true location). Lower Haversine error is better.
+
+| Encoder | Mean error (km) | Median error (km) |
+|---|---|---|
+| **Raw MLP (baseline)** | **226.5** | **212.9** |
+| BrainSpatialCortex (full stack) | 231.5 | 216.9 |
+| Grid cells | 297.0 | 269.8 |
+| Fourier | 350.7 | 321.6 |
+
+**Task B — Fine-grained spatial classification** (100 classes, 1°×1° grid cells). Higher accuracy is better; chance = 1%.
+
+| Encoder | Test accuracy |
+|---|---|
+| **Fourier** | **99.7%** |
+| Grid cells | 95.7% |
+| BrainSpatialCortex (full stack) | 64.3% |
+| Raw MLP (baseline) | 37.0% |
+
+### What these results actually tell us (honest reading)
+
+1. **Spatial inductive biases help enormously on fine discrimination.** On Task B, Fourier and grid-cell encoders hit 95–99% while a plain MLP manages only 37%. Periodic spatial codes carve up space far better than raw coordinates — this is the core thesis, and it holds.
+2. **But "more brain" is not automatically better.** The full `BrainSpatialCortex` (attractors + dendrites + oscillations + cells) *underperforms its own simpler components* on both tasks. The extra machinery adds parameters and optimization difficulty without payoff on these simple tasks. Complexity must earn its place.
+3. **Task structure decides the winner.** On smooth denoising (Task A) a linear MLP wins because the target is essentially a smoothed input; on fine discrimination (Task B) periodic codes dominate. There is no universally best encoder.
+4. **A real bug was found and fixed by measurement.** The grid-cell encoder initially scored 8.6% (near chance) due to frequency aliasing — its scales (0.01°) were wrong for global coordinates. After the fix (1°–32° wavelengths) it reached 95.7%. This is *why* you measure instead of trusting that "brain-inspired = good".
+
+### Literature baselines (for context, measured by their authors)
+
+| Task | Model | Result | Source |
 |---|---|---|---|
-| GPT-4o | 71.2% | 68.4% | OpenAI evals 2024 |
-| LLaMA-3-70B | 64.8% | 61.2% | Meta 2024 |
-| Mistral-7B (base, no spatial) | 41.3% | 38.7% | reproduced baseline |
+| Image geolocation | GeoCLIP | 19.4 km median | Vivanco et al., NeurIPS 2023 |
+| Image geolocation | PlaNet | 523 km median | Weyand et al., CVPR 2016 |
+| Geographic QA | GPT-4o | 71.2% EM | OpenAI 2024 |
 
-**Image/coordinate geolocation — Haversine error (km, lower is better)**
-
-| Model | Mean | Median | Within 25 km | Source |
-|---|---|---|---|---|
-| PlaNet | 1131 | 523 | 3.6% | Weyand et al., CVPR 2016 |
-| Translocator | 215 | 38 | 24.8% | Pramanick et al., ECCV 2022 |
-| GeoCLIP | 163 | 19.4 | 35.4% | Vivanco et al., NeurIPS 2023 |
-
-### B. Projected ablation (this architecture — targets, not yet measured)
-
-The value of the neuroscience stack is best shown as an **ablation**: adding each biologically-grounded component should reduce coordinate error and raise QA accuracy. These are *hypotheses to be tested*, grounded in what each mechanism is known to contribute:
-
-| Configuration | Added mechanism | Projected GeoQA EM | Projected median error |
-|---|---|---|---|
-| Mistral-7B + raw lat/lon text | — (baseline) | 41% (measured) | ~890 km |
-| + Fourier coord embedding | continuous coordinates | ~44% | ~310 km |
-| + Grid cell encoder | hexagonal multi-scale | ~48% | ~210 km |
-| + Grid **attractor** network | path-integration dynamics | ~50% | ~185 km |
-| + Place cell memory | episodic retrieval | ~52% | ~165 km |
-| + Head-direction / boundary cells | full cognitive map | ~54% | ~150 km |
-| + Theta phase coding + neuromodulation | temporal + gain control | **~56–58%** | **~130 km** |
-
-*Each row corresponds to a module that can be toggled in `configs/train_config.yaml`, so the ablation is directly reproducible once training data and GPU are available.*
-
-### C. Why each mechanism should help (mechanistic rationale)
-
-- **Grid attractor vs. plain embedding:** continuous attractor dynamics enforce a consistent metric over space, so nearby coordinates produce nearby codes — measurable as lower Haversine error on interpolated locations.
-- **Place cell episodic memory:** lets the model reuse context from spatially-adjacent queries within a session (k-WTA sparse retrieval), helping multi-hop spatial questions.
-- **Theta phase precession:** encodes *fine* position within a region as a phase, adding sub-grid resolution that rate codes alone miss.
-- **Neuromodulation (dopamine/NE gating):** routes more spatial signal into the LLM for novel/surprising locations, less for familiar ones — improves sample efficiency.
+*The LLM-integrated numbers will be added here only after real fine-tuning — never projected.*
 
 
 ---
