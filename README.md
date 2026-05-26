@@ -219,6 +219,7 @@ Spatial-LLM/
 
 | Dataset | Size | Use |
 |---|---|---|
+| [**GeoNames** cities15000](https://www.geonames.org) | ~25,000 real cities | **Wired in** — `python -m src.data.real_datasets` (real coords/population/timezone) |
 | [GeoQA](https://github.com/panyw5/GeoQA) | 4,998 QA pairs | Primary fine-tuning target |
 | [OSM QA](https://osmlab.github.io/osm-qa-tiles/) | ~100k entries | Spatial entity QA |
 | [BigEarthNet](https://bigearth.net/) | 590,326 tiles | Satellite imagery + labels |
