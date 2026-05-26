@@ -105,6 +105,23 @@ All encoders use a 64-dim output + identical linear head, same data, same traini
 3. **Task structure decides the winner.** On smooth denoising (Task A) a linear MLP wins because the target is essentially a smoothed input; on fine discrimination (Task B) periodic codes dominate. There is no universally best encoder.
 4. **A real bug was found and fixed by measurement.** The grid-cell encoder initially scored 8.6% (near chance) due to frequency aliasing — its scales (0.01°) were wrong for global coordinates. After the fix (1°–32° wavelengths) it reached 95.7%. This is *why* you measure instead of trusting that "brain-inspired = good".
 
+
+### Ablation: which modules actually contribute?
+
+Run `python -m src.eval.ablation --mode leave_one_out`. On 100-class fine-grid classification, disabling each module from the full stack:
+
+| Disabled module | Accuracy | Δ vs full (92.7%) | Verdict |
+|---|---|---|---|
+| `grid_attractor` | 1.1% | **−91.6%** | Load-bearing — does nearly all the work |
+| `boundary` | 83.4% | −9.3% | Helps |
+| `cortical_column` | 96.4% | +3.7% | Mildly harmful here |
+| `lateral_inhibition` | 99.8% | +7.1% | Harmful here |
+| `conjunctive` | 99.9% | +7.1% | Harmful (needs movement data — dormant) |
+| `phase` | 99.9% | +7.2% | Harmful (needs movement data — dormant) |
+
+**Synchronization experiment** (`--aux_loss`, each module gets its own coordinate-reconstruction signal): dormant modules *wake up* — `phase`, `boundary`, and `cortical_column` all become load-bearing (removing them now costs −46%, −15%, −53%). But overall accuracy drops (92.7% → 69.7%) because the auxiliary objectives compete with the main task. **Takeaway: synchronizing complexity is achievable but the aux objectives must be aligned and weighted, not merely added.** This is the active research direction, not a solved problem.
+
+
 ### Literature baselines (for context, measured by their authors)
 
 | Task | Model | Result | Source |
