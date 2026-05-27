@@ -11,12 +11,9 @@ from functools import partial
 
 import torch
 import yaml
-from torch.utils.data import DataLoader
 from transformers import (
-    AutoTokenizer,
     Trainer,
     TrainingArguments,
-    DataCollatorWithPadding,
 )
 
 from ..data.loader import SpatialQADataset
@@ -85,6 +82,7 @@ def main(config_path: str):
         lora_alpha=cfg["lora"]["lora_alpha"],
         lora_target_modules=cfg["lora"]["target_modules"],
         lora_dropout=cfg["lora"]["lora_dropout"],
+        load_in_4bit=cfg["model"].get("load_in_4bit", False),
     )
     model.llm.print_trainable_parameters()
 

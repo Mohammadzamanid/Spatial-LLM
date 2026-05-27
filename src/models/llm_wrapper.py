@@ -17,8 +17,8 @@ from typing import Optional
 
 import torch
 import torch.nn as nn
-from peft import LoraConfig, TaskType, get_peft_model
-from transformers import AutoModelForCausalLM
+from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
 from .coord_embedder import CoordinateEmbedderWithTokens
 from .fusion import MultiScaleSpatialFusion
@@ -96,6 +96,7 @@ class SpatialLLM(nn.Module):
         use_place_memory: bool = True,
         use_predictive_coding: bool = True,
         use_neuromodulation: bool = True,
+        load_in_4bit: bool = False,
     ):
         super().__init__()
         self.use_place_memory = use_place_memory
@@ -104,9 +105,24 @@ class SpatialLLM(nn.Module):
 
         # ── LLM backbone + LoRA ────────────────────────────────────────
         logger.info(f"Loading base LLM: {base_llm}")
-        llm_base = AutoModelForCausalLM.from_pretrained(
-            base_llm, torch_dtype=torch.float16
-        )
+        if load_in_4bit:
+            logger.info("Using 4-bit quantization (QLoRA) — fits a T4 GPU")
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+            )
+            llm_base = AutoModelForCausalLM.from_pretrained(
+                base_llm,
+                quantization_config=bnb_config,
+                device_map="auto",
+            )
+            llm_base = prepare_model_for_kbit_training(llm_base)
+        else:
+            llm_base = AutoModelForCausalLM.from_pretrained(
+                base_llm, torch_dtype=torch.float16
+            )
         lora_cfg = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
             r=lora_r,
