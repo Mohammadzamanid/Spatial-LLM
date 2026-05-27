@@ -103,7 +103,7 @@ def main(config_path: str):
         eval_steps=t_cfg["eval_steps"],
         save_steps=t_cfg["save_steps"],
         save_total_limit=t_cfg["save_total_limit"],
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         report_to="wandb" if cfg["wandb"]["project"] else "none",
         run_name=cfg["training"]["output_dir"].split("/")[-1],
     )
