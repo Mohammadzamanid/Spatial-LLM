@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Optional
 
 import geopandas as gpd
-import pandas as pd
 from shapely.geometry import Point
 from torch.utils.data import Dataset
 from PIL import Image
@@ -74,13 +73,14 @@ class SpatialQADataset(Dataset):
         }
 
         if self.use_tiles and self.tile_dir:
-            tile_path = self.tile_dir / rec.get("tile_path", "")
-            if tile_path.exists():
-                img = Image.open(tile_path).convert("RGB")
+            tile_rel = rec.get("tile_path", "")
+            # Guard: skip if tile_path is missing/empty, or resolves to a directory
+            if tile_rel and (self.tile_dir / tile_rel).is_file():
+                img = Image.open(self.tile_dir / tile_rel).convert("RGB")
                 item["pixel_values"] = self.TILE_TRANSFORM(img)
             else:
-                # Return blank tile if missing — log a warning
-                logger.warning(f"Tile not found: {tile_path}")
+                # No tile for this record — use a blank one (silent, this is normal
+                # for text-only datasets like GeoNames that don't have map tiles)
                 item["pixel_values"] = torch.zeros(3, 224, 224)
 
         return item
