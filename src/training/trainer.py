@@ -48,6 +48,11 @@ def collate_fn(batch: list[dict], spatial_tokenizer: SpatialTokenizer) -> dict:
 
 
 def main(config_path: str):
+    # Avoid interactive wandb login prompt in notebooks/Colab.
+    # Training reports to wandb only if a project is set AND WANDB_API_KEY exists.
+    os.environ.setdefault("WANDB_SILENT", "true")
+    if not os.environ.get("WANDB_API_KEY"):
+        os.environ["WANDB_DISABLED"] = "true"
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
@@ -85,6 +90,17 @@ def main(config_path: str):
         load_in_4bit=cfg["model"].get("load_in_4bit", False),
     )
     model.llm.print_trainable_parameters()
+
+    # ── Memory safety for T4: gradient checkpointing on the LLM backbone ──
+    # Re-computes activations during backward instead of storing them all,
+    # cutting peak activation memory by ~60-70%. Essential to avoid OOM spikes.
+    if hasattr(model.llm, "gradient_checkpointing_enable"):
+        model.llm.gradient_checkpointing_enable()
+        if hasattr(model.llm, "enable_input_require_grads"):
+            model.llm.enable_input_require_grads()
+        if hasattr(model.llm, "config"):
+            model.llm.config.use_cache = False   # incompatible with checkpointing
+        logger.info("Gradient checkpointing enabled (T4 memory safety)")
 
     # ── Training args ──────────────────────────────────────────────────
     t_cfg = cfg["training"]

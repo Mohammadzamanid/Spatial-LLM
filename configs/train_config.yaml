@@ -20,7 +20,7 @@ training:
   output_dir: "outputs/run_001"
   num_epochs: 3
   per_device_train_batch_size: 2
-  per_device_eval_batch_size: 4
+  per_device_eval_batch_size: 2
   gradient_accumulation_steps: 8
   learning_rate: 2.0e-4
   lr_scheduler_type: "cosine"
@@ -36,7 +36,7 @@ data:
   train_path: "data/processed/train.jsonl"
   val_path: "data/processed/val.jsonl"
   tile_dir: "data/tiles/"
-  max_text_length: 512
+  max_text_length: 256
   tile_size: 224
   zoom_level: 15                           # OSM zoom level for tile fetching
 
