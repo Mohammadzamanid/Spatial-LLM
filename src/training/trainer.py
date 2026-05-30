@@ -119,6 +119,8 @@ def main(config_path: str):
         eval_steps=t_cfg["eval_steps"],
         save_steps=t_cfg["save_steps"],
         save_total_limit=t_cfg["save_total_limit"],
+        optim=t_cfg.get("optim", "paged_adamw_8bit"),  # 8-bit paged Adam: ~half the
+                                                        # optimizer memory, pages to CPU
         eval_strategy="steps",
         remove_unused_columns=False,
         report_to="wandb" if (cfg["wandb"]["project"] and os.environ.get("WANDB_API_KEY")) else "none",
