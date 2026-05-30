@@ -88,6 +88,9 @@ def main(config_path: str):
         lora_target_modules=cfg["lora"]["target_modules"],
         lora_dropout=cfg["lora"]["lora_dropout"],
         load_in_4bit=cfg["model"].get("load_in_4bit", False),
+        use_place_memory=cfg["model"].get("use_place_memory", True),
+        use_predictive_coding=cfg["model"].get("use_predictive_coding", True),
+        use_neuromodulation=cfg["model"].get("use_neuromodulation", True),
     )
     model.llm.print_trainable_parameters()
 
