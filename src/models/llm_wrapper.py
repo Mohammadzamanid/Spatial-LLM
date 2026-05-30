@@ -36,9 +36,17 @@ def _get_embed_layer(model: nn.Module) -> nn.Embedding:
     Robustly retrieve the token embedding layer across model families.
     Supports Mistral, LLaMA, Falcon, GPT-NeoX, and generic fallback.
     """
+    # Canonical HF method first — works for every architecture including Qwen
+    try:
+        emb = model.get_input_embeddings()
+        if emb is not None:
+            return emb
+    except (AttributeError, NotImplementedError):
+        pass
+
     # Try common attribute paths
     for attr_path in [
-        "model.embed_tokens",           # Mistral, LLaMA
+        "model.embed_tokens",           # Mistral, LLaMA, Qwen2.5
         "transformer.wte",              # GPT-2, Falcon
         "gpt_neox.embed_in",            # GPT-NeoX
         "model.decoder.embed_tokens",   # OPT
