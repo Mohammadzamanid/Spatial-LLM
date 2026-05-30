@@ -128,8 +128,10 @@ class SpatialLLM(nn.Module):
             )
             llm_base = prepare_model_for_kbit_training(llm_base)
         else:
+            # fp32 keeps the LLM dtype uniform with the fp32 spatial modules,
+            # avoiding Half/Float mismatches in fusion. Fine for <=3B on a 16GB GPU.
             llm_base = AutoModelForCausalLM.from_pretrained(
-                base_llm, torch_dtype=torch.float16
+                base_llm, dtype=torch.float32
             )
         lora_cfg = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
@@ -250,6 +252,10 @@ class SpatialLLM(nn.Module):
 
         embed_layer = self._get_embed()
         text_embeds = embed_layer(input_ids)                    # (B, T, D)
+        # The LLM may run in fp16 while the spatial modules are fp32. Align dtypes
+        # so LayerNorm/attention in fusion don't hit "expected Half but found Float".
+        if spatial_tokens.dtype != text_embeds.dtype:
+            spatial_tokens = spatial_tokens.to(text_embeds.dtype)
         fused = self.fusion(text_embeds, spatial_tokens)        # (B, T, D)
 
         outputs = self.llm(
