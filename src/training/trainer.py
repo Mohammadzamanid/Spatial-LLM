@@ -107,7 +107,7 @@ def main(config_path: str):
 
     # ── Training args ──────────────────────────────────────────────────
     t_cfg = cfg["training"]
-    training_args = TrainingArguments(
+    ta_kwargs = dict(
         output_dir=t_cfg["output_dir"],
         num_train_epochs=t_cfg["num_epochs"],
         per_device_train_batch_size=t_cfg["per_device_train_batch_size"],
@@ -121,16 +121,20 @@ def main(config_path: str):
         logging_steps=t_cfg["logging_steps"],
         eval_steps=t_cfg["eval_steps"],
         save_steps=t_cfg["save_steps"],
-        save_safetensors=False,  # Qwen ties embed_tokens<->lm_head; pickle handles
-                                 # shared tensors, safetensors refuses them
         save_total_limit=t_cfg["save_total_limit"],
-        optim=t_cfg.get("optim", "paged_adamw_8bit"),  # 8-bit paged Adam: ~half the
-                                                        # optimizer memory, pages to CPU
+        optim=t_cfg.get("optim", "paged_adamw_8bit"),
         eval_strategy="steps",
         remove_unused_columns=False,
         report_to="wandb" if (cfg["wandb"]["project"] and os.environ.get("WANDB_API_KEY")) else "none",
         run_name=cfg["training"]["output_dir"].split("/")[-1],
     )
+    # save_safetensors only exists in newer transformers. Qwen ties
+    # embed_tokens<->lm_head, which safetensors refuses to serialize, so disable
+    # it when available; older versions default to torch.save anyway.
+    import inspect as _inspect
+    if "save_safetensors" in _inspect.signature(TrainingArguments.__init__).parameters:
+        ta_kwargs["save_safetensors"] = False
+    training_args = TrainingArguments(**ta_kwargs)
 
     if cfg["wandb"]["project"] and os.environ.get("WANDB_API_KEY"):
         os.environ["WANDB_PROJECT"] = cfg["wandb"]["project"]
