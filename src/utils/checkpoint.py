@@ -3,7 +3,6 @@ import json
 import logging
 import shutil
 from pathlib import Path
-from typing import Optional
 
 import torch
 
@@ -45,17 +44,34 @@ class CheckpointManager:
         logger.info(f"Checkpoint saved: {ckpt_dir}")
         return ckpt_dir
 
+    @staticmethod
+    def _load_state_any_format(directory: Path, device: str) -> dict:
+        """Load a state dict from a checkpoint dir regardless of save format.
+        Handles HF Trainer output (pytorch_model.bin / model.safetensors) and
+        the legacy CheckpointManager format (model.pt)."""
+        candidates = ["model.pt", "pytorch_model.bin", "model.safetensors"]
+        for name in candidates:
+            path = directory / name
+            if path.exists():
+                if name.endswith(".safetensors"):
+                    from safetensors.torch import load_file
+                    return load_file(str(path), device=device)
+                return torch.load(path, map_location=device)
+        raise FileNotFoundError(
+            f"No checkpoint file ({' / '.join(candidates)}) found in {directory}"
+        )
+
     def load_best(self, model: torch.nn.Module, device: str = "cpu") -> torch.nn.Module:
         best_dir = self.output_dir / "best"
-        if not best_dir.exists():
-            raise FileNotFoundError(f"No best checkpoint at {best_dir}")
-        state = torch.load(best_dir / "model.pt", map_location=device)
+        # Fall back to the output dir itself (HF save_model writes here directly)
+        target = best_dir if best_dir.exists() else self.output_dir
+        state = self._load_state_any_format(target, device)
         model.load_state_dict(state, strict=False)
-        logger.info(f"Loaded best checkpoint from {best_dir}")
+        logger.info(f"Loaded checkpoint from {target}")
         return model
 
     def load(self, model: torch.nn.Module, checkpoint_path: str, device: str = "cpu"):
-        state = torch.load(Path(checkpoint_path) / "model.pt", map_location=device)
+        state = self._load_state_any_format(Path(checkpoint_path), device)
         model.load_state_dict(state, strict=False)
         logger.info(f"Loaded checkpoint from {checkpoint_path}")
         return model

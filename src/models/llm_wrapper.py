@@ -187,13 +187,16 @@ class SpatialLLM(nn.Module):
             hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2
         )
 
-        # Cache embed layer reference
-        self._embed_layer = None
+        # Cache embed layer reference inside a list so nn.Module does NOT register
+        # it as a submodule. Qwen ties embed_tokens & lm_head (shared memory); if we
+        # also registered the embedding here, the state_dict would contain 3 names
+        # pointing at 1 tensor and safetensors would refuse to save.
+        self._embed_layer_ref = []
 
     def _get_embed(self) -> nn.Module:
-        if self._embed_layer is None:
-            self._embed_layer = _get_embed_layer(self.llm.base_model)
-        return self._embed_layer
+        if not self._embed_layer_ref:
+            self._embed_layer_ref.append(_get_embed_layer(self.llm.base_model))
+        return self._embed_layer_ref[0]
 
     def _encode_spatial(
         self,

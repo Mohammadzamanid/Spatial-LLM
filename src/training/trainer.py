@@ -118,6 +118,8 @@ def main(config_path: str):
         logging_steps=t_cfg["logging_steps"],
         eval_steps=t_cfg["eval_steps"],
         save_steps=t_cfg["save_steps"],
+        save_safetensors=False,  # Qwen ties embed_tokens<->lm_head; pickle handles
+                                 # shared tensors, safetensors refuses them
         save_total_limit=t_cfg["save_total_limit"],
         optim=t_cfg.get("optim", "paged_adamw_8bit"),  # 8-bit paged Adam: ~half the
                                                         # optimizer memory, pages to CPU
