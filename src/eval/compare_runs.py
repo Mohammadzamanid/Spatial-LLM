@@ -14,13 +14,21 @@ from pathlib import Path
 
 
 def _final_eval_loss(run_dir: Path):
-    """Read the lowest eval_loss recorded in a run's trainer_state.json."""
+    """Read the eval_loss for a run. Prefers the clean eval_results.json written
+    at the end of training; falls back to trainer_state.json history."""
+    results_path = run_dir / "eval_results.json"
+    if results_path.exists():
+        metrics = json.loads(results_path.read_text())
+        if "eval_loss" in metrics:
+            return metrics["eval_loss"], [metrics["eval_loss"]]
+
     state_path = run_dir / "trainer_state.json"
     if not state_path.exists():
-        # HF may store it in a checkpoint subdir
         candidates = sorted(run_dir.glob("checkpoint-*/trainer_state.json"))
         if not candidates:
-            raise FileNotFoundError(f"No trainer_state.json under {run_dir}")
+            raise FileNotFoundError(
+                f"No eval_results.json or trainer_state.json under {run_dir}"
+            )
         state_path = candidates[-1]
     state = json.loads(state_path.read_text())
     eval_losses = [

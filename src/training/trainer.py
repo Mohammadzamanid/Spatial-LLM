@@ -5,6 +5,7 @@ Usage: python -m src.training.trainer --config configs/train_config.yaml
 """
 
 import argparse
+import json
 import logging
 import os
 from functools import partial
@@ -19,6 +20,23 @@ from transformers import (
 from ..data.loader import SpatialQADataset
 from ..data.tokenizer import SpatialTokenizer
 from ..models.llm_wrapper import SpatialLLM
+
+
+class SpatialTrainer(Trainer):
+    """Trainer that saves only the trainable params (LoRA + spatial modules) via
+    torch.save. Avoids safetensors' refusal to serialize Qwen's tied
+    embed_tokens<->lm_head weights, and keeps checkpoints tiny (~8MB vs 6GB)
+    since the frozen base model doesn't need re-saving."""
+
+    def _save(self, output_dir=None, state_dict=None):
+        output_dir = output_dir or self.args.output_dir
+        os.makedirs(output_dir, exist_ok=True)
+        trainable_names = {n for n, p in self.model.named_parameters() if p.requires_grad}
+        full = self.model.state_dict()
+        trainable = {k: v for k, v in full.items() if k in trainable_names}
+        torch.save(trainable, os.path.join(output_dir, "model.pt"))
+        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+        logger.info(f"Saved {len(trainable)} trainable tensors to {output_dir}/model.pt")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -142,7 +160,7 @@ def main(config_path: str):
             os.environ["WANDB_ENTITY"] = cfg["wandb"]["entity"]
 
     # ── Trainer ────────────────────────────────────────────────────────
-    trainer = Trainer(
+    trainer = SpatialTrainer(
         model=model,
         args=training_args,
         train_dataset=train_ds,
@@ -153,7 +171,15 @@ def main(config_path: str):
     logger.info("Starting training...")
     trainer.train()
     trainer.save_model()
-    logger.info(f"Model saved to {t_cfg['output_dir']}")
+
+    # Final evaluation + write a clean metrics file for cross-run comparison
+    logger.info("Running final evaluation...")
+    metrics = trainer.evaluate()
+    out_dir = t_cfg["output_dir"]
+    with open(os.path.join(out_dir, "eval_results.json"), "w") as f:
+        json.dump(metrics, f, indent=2)
+    logger.info(f"Final eval metrics: {metrics}")
+    logger.info(f"Model + metrics saved to {out_dir}")
 
 
 if __name__ == "__main__":
