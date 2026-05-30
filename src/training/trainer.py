@@ -121,11 +121,11 @@ def main(config_path: str):
         save_total_limit=t_cfg["save_total_limit"],
         eval_strategy="steps",
         remove_unused_columns=False,
-        report_to="wandb" if cfg["wandb"]["project"] else "none",
+        report_to="wandb" if (cfg["wandb"]["project"] and os.environ.get("WANDB_API_KEY")) else "none",
         run_name=cfg["training"]["output_dir"].split("/")[-1],
     )
 
-    if cfg["wandb"]["project"]:
+    if cfg["wandb"]["project"] and os.environ.get("WANDB_API_KEY"):
         os.environ["WANDB_PROJECT"] = cfg["wandb"]["project"]
         if cfg["wandb"]["entity"]:
             os.environ["WANDB_ENTITY"] = cfg["wandb"]["entity"]
