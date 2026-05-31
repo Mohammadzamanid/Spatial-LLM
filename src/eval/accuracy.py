@@ -80,6 +80,8 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
     per_class = defaultdict(lambda: [0, 0])  # truth -> [correct, total]
     truth_balance = Counter()
     skipped = 0
+    unparseable = 0
+    sample_gens = []
 
     for rec in records:
         truth = _norm_yesno(rec["answer"])
@@ -110,8 +112,15 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
         gen = tok.decode(out_ids[0])
         pred = _norm_yesno(gen)
 
+        # capture the first few raw generations so a parsing/generation failure
+        # surfaces as visible output instead of a fake 0.000 accuracy
+        if len(sample_gens) < 8:
+            sample_gens.append((truth, repr(gen)[:60], pred))
+
         per_class[truth][1] += 1
-        if pred == truth:
+        if pred is None:
+            unparseable += 1
+        elif pred == truth:
             correct += 1
             per_class[truth][0] += 1
 
@@ -119,7 +128,14 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
     overall = correct / total if total else 0.0
 
     print(f"\n=== Accuracy: {Path(checkpoint).name} ===")
-    print(f"  evaluated:        {total} (skipped {skipped} unparseable)")
+    print(f"  sample generations (truth | raw output | parsed):")
+    for tr, raw, pr in sample_gens:
+        print(f"    {tr:3s} | {raw:60s} | {pr}")
+    print(f"  evaluated:        {total} (truth unparseable {skipped})")
+    print(f"  model outputs that were NOT yes/no: {unparseable}/{total}")
+    if unparseable == total and total:
+        print("  ⚠️  EVERY generation failed to parse as yes/no — this is a")
+        print("      generation problem, not a real 0.0 accuracy. See samples above.")
     print(f"  class balance:    {dict(truth_balance)}")
     print(f"  OVERALL accuracy: {overall:.3f}")
     for cls in ("yes", "no"):
