@@ -112,7 +112,7 @@ def _population_bucket(pop: int) -> str:
 
 
 def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None,
-                   task: str = "mixed") -> Iterator[dict]:
+                   task: str = "mixed", elev_threshold: float = 1000.0) -> Iterator[dict]:
     """
     Convert real GeoNames records into spatial QA pairs.
     Each city yields several question types grounded in real attributes.
@@ -148,8 +148,9 @@ def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None,
             # A 2D model (lat,lon only) must memorize; a 3D model sees z directly.
             if elev is None:
                 continue
-            above = elev >= 1000
-            q = f"Is the location at ({lat:.4f}, {lon:.4f}) above 1000 metres elevation?"
+            above = elev >= elev_threshold
+            q = (f"Is the location at ({lat:.4f}, {lon:.4f}) above "
+                 f"{int(elev_threshold)} metres elevation?")
             a = "Yes." if above else "No."
         else:
             q, a = random.choice(templates)
@@ -186,10 +187,25 @@ def build_geonames_dataset(
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
+    # For the elevation task, pick the threshold = median elevation of cities that
+    # have elevation data, so the yes/no split is ~50/50 (not 94/6 like the old
+    # fixed 1000 m). Computed once on all records and shared across train/val so
+    # both use the same decision boundary.
+    elev_threshold = 1000.0
+    if task == "elevation":
+        import statistics
+        elevs = [r["elevation"] for r in all_records
+                 if r.get("elevation") is not None]
+        if elevs:
+            elev_threshold = float(statistics.median(elevs))
+        logger.info(f"Elevation task: median-based threshold = {elev_threshold:.0f} m "
+                    f"(from {len(elevs):,} cities with elevation)")
+
     def write(records, n, path):
         written = 0
         with open(path, "w", encoding="utf-8") as f:
-            for qa in geonames_to_qa(iter(records), max_records=n, task=task):
+            for qa in geonames_to_qa(iter(records), max_records=n, task=task,
+                                     elev_threshold=elev_threshold):
                 f.write(json.dumps(qa, ensure_ascii=False) + "\n")
                 written += 1
         logger.info(f"Wrote {written:,} real QA pairs → {path}")
