@@ -66,6 +66,9 @@ class GridModule(nn.Module):
         # Project onto the hexagonal basis, THEN divide by scale so that
         # `scale` acts as the grid wavelength (in degrees). One spatial period
         # per `scale` degrees — no aliasing as long as scale is sensible.
+        # Grid cells operate on the 2D plane (hexagonal basis), so use only
+        # lat/lon even if coords carries extra dims (e.g. elevation as a 3rd col).
+        coords = coords[:, :2]
         basis = self._hex_basis()                                  # (2, 2)
         projected = torch.mm(coords, basis.t()) / self.scale       # (B, 2)
 

@@ -69,6 +69,8 @@ class PlaceCellLayer(nn.Module):
         """
         sigma = self.log_sigma.exp().clamp(min=0.1)  # (num_cells,)
 
+        # Place fields are 2D (lat/lon); ignore any extra coord dims (e.g. elevation)
+        coords = coords[:, :2]
         # Euclidean distance in degree space (simplified; good enough for local regions)
         diff = coords.unsqueeze(1) - self.centres.unsqueeze(0)  # (B, num_cells, 2)
         dist_sq = (diff ** 2).sum(dim=-1)                        # (B, num_cells)
