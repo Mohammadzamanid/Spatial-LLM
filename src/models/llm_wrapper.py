@@ -93,6 +93,7 @@ class SpatialLLM(nn.Module):
         vit_model_name: str = "google/vit-base-patch16-224",
         coord_embed_dim: int = 256,
         coord_num_freqs: int = 64,
+        coord_input_dim: int = 2,
         grid_num_modules: int = 6,
         num_place_cells: int = 512,
         fusion_num_heads: int = 8,
@@ -148,7 +149,8 @@ class SpatialLLM(nn.Module):
         # ── Spatial encoders ───────────────────────────────────────────
         # 1. Fourier coordinate embedder (baseline)
         self.coord_embedder = CoordinateEmbedderWithTokens(
-            embed_dim=llm_dim, num_freqs=coord_num_freqs, num_tokens=4
+            embed_dim=llm_dim, num_freqs=coord_num_freqs, num_tokens=4,
+            input_dim=coord_input_dim,
         )
 
         # 2. Grid cell encoder (entorhinal cortex)

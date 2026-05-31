@@ -63,7 +63,7 @@ class SpatialQADataset(Dataset):
         rec = self.records[idx]
 
         coords = torch.tensor(
-            [rec["lat"], rec["lon"]], dtype=torch.float32
+            [rec["lat"], rec["lon"], rec.get("elevation", 0.0)], dtype=torch.float32
         )
 
         item = {

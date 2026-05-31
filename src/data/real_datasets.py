@@ -111,8 +111,8 @@ def _population_bucket(pop: int) -> str:
     return "a small city or town (under 100k people)"
 
 
-def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None
-                   ) -> Iterator[dict]:
+def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None,
+                   task: str = "mixed") -> Iterator[dict]:
     """
     Convert real GeoNames records into spatial QA pairs.
     Each city yields several question types grounded in real attributes.
@@ -143,9 +143,19 @@ def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None
                 (f"What is the elevation at ({lat:.4f}, {lon:.4f})?",
                  f"{name} sits at approximately {elev} metres above sea level."))
 
-        q, a = random.choice(templates)
+        if task == "elevation":
+            # Elevation-threshold classification: depends ONLY on real elevation.
+            # A 2D model (lat,lon only) must memorize; a 3D model sees z directly.
+            if elev is None:
+                continue
+            above = elev >= 1000
+            q = f"Is the location at ({lat:.4f}, {lon:.4f}) above 1000 metres elevation?"
+            a = "Yes." if above else "No."
+        else:
+            q, a = random.choice(templates)
         yield {"question": q, "answer": a, "lat": lat, "lon": lon,
-               "city": name, "country": cc, "population": pop}
+               "city": name, "country": cc, "population": pop,
+               "elevation": float(elev) if elev is not None else 0.0}
 
         count += 1
         if max_records and count >= max_records:
@@ -158,6 +168,7 @@ def build_geonames_dataset(
     dataset: str = "cities15000",
     output_dir: str = "data/processed",
     seed: int = 42,
+    task: str = "mixed",
 ):
     """
     End-to-end: download GeoNames, convert to QA, write train/val JSONL.
@@ -178,7 +189,7 @@ def build_geonames_dataset(
     def write(records, n, path):
         written = 0
         with open(path, "w", encoding="utf-8") as f:
-            for qa in geonames_to_qa(iter(records), max_records=n):
+            for qa in geonames_to_qa(iter(records), max_records=n, task=task):
                 f.write(json.dumps(qa, ensure_ascii=False) + "\n")
                 written += 1
         logger.info(f"Wrote {written:,} real QA pairs → {path}")
@@ -208,5 +219,8 @@ if __name__ == "__main__":
     ap.add_argument("--dataset", default="cities15000",
                     choices=["cities500", "cities1000", "cities5000", "cities15000"])
     ap.add_argument("--output_dir", default="data/processed")
+    ap.add_argument("--task", default="mixed", choices=["mixed", "elevation"],
+                    help="'elevation' = elevation-threshold task (tests 3D coords)")
     args = ap.parse_args()
-    build_geonames_dataset(args.n_train, args.n_val, args.dataset, args.output_dir)
+    build_geonames_dataset(args.n_train, args.n_val, args.dataset, args.output_dir,
+                           task=args.task)

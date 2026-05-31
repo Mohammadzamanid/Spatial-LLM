@@ -100,6 +100,7 @@ def main(config_path: str):
         vit_model_name=cfg["model"]["vit_backbone"],
         coord_embed_dim=cfg["model"]["coord_embed_dim"],
         coord_num_freqs=cfg["model"]["coord_num_freqs"],
+        coord_input_dim=cfg["model"].get("coord_input_dim", 2),
         fusion_num_heads=cfg["model"]["fusion_num_heads"],
         lora_r=cfg["lora"]["r"],
         lora_alpha=cfg["lora"]["lora_alpha"],

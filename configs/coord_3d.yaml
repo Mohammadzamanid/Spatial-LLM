@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────
+# Spatial-LLM Training Configuration
+# ─────────────────────────────────────────────
+
+model:
+  base_llm: "Qwen/Qwen2.5-1.5B"            # Apache-2.0, ungated, fast on T4/P100
+  load_in_4bit: false                      # 1.5B fits in fp16 on T4/P100 — faster than 4-bit
+  vit_backbone: "google/vit-base-patch16-224"
+  coord_embed_dim: 256
+  coord_num_freqs: 64
+  coord_input_dim: 3
+  fusion_num_heads: 8
+  use_place_memory: false
+  use_predictive_coding: false
+  use_neuromodulation: false
+
+lora:
+  r: 16
+  lora_alpha: 32
+  target_modules: ["q_proj", "v_proj"]
+  lora_dropout: 0.05
+
+training:
+  output_dir: "outputs/coord_3d"
+  num_epochs: 1
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  weight_decay: 0.01
+  fp16: false
+  logging_steps: 50
+  eval_steps: 90
+  save_steps: 188
+  save_total_limit: 3
+  optim: "paged_adamw_8bit"        # 8-bit paged Adam — essential for T4
+
+data:
+  train_path: "data/processed/train.jsonl"
+  val_path: "data/processed/val.jsonl"
+  tile_dir: "data/tiles/"
+  max_text_length: 384
+  tile_size: 224
+  zoom_level: 15                           # OSM zoom level for tile fetching
+
+wandb:
+  project: "spatial-llm"
+  entity: null                             # set to your wandb username
