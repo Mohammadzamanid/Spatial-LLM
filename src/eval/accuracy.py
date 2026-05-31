@@ -50,16 +50,27 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = SpatialLLM(
-        llm_name=cfg["model"]["llm_name"],
+        base_llm=cfg["model"]["base_llm"],
+        vit_model_name=cfg["model"]["vit_backbone"],
+        coord_embed_dim=cfg["model"]["coord_embed_dim"],
         coord_num_freqs=cfg["model"]["coord_num_freqs"],
         coord_input_dim=cfg["model"].get("coord_input_dim", 2),
+        fusion_num_heads=cfg["model"]["fusion_num_heads"],
+        lora_r=cfg["lora"]["r"],
+        lora_alpha=cfg["lora"]["lora_alpha"],
+        lora_target_modules=cfg["lora"]["target_modules"],
+        lora_dropout=cfg["lora"]["lora_dropout"],
+        load_in_4bit=cfg["model"].get("load_in_4bit", False),
         use_place_memory=cfg["model"].get("use_place_memory", True),
         use_predictive_coding=cfg["model"].get("use_predictive_coding", True),
         use_neuromodulation=cfg["model"].get("use_neuromodulation", True),
     )
     CheckpointManager(cfg["training"]["output_dir"]).load(model, checkpoint, device=device)
     model.to(device).eval()
-    tok = SpatialTokenizer(cfg["model"]["llm_name"])
+    tok = SpatialTokenizer(
+        model_name=cfg["model"]["base_llm"],
+        max_length=cfg["data"]["max_text_length"],
+    )
 
     records = [json.loads(l) for l in open(val_path, encoding="utf-8")]
     if max_examples:
