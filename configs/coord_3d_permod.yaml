@@ -1,5 +1,10 @@
 # ─────────────────────────────────────────────
 # Spatial-LLM Training Configuration
+# Per-module fusion gating ("synchronization") — TREATMENT arm.
+# Identical to coord_3d.yaml except per_module_gates: true, so the only
+# difference vs the baseline is whether each spatial module (coord/elevation,
+# grid cells, place-memory, tile) gets its own fusion gate. A/B these two
+# configs across the same seeds to isolate the effect of per-module gating.
 # ─────────────────────────────────────────────
 
 model:
@@ -8,11 +13,12 @@ model:
   vit_backbone: "google/vit-base-patch16-224"
   coord_embed_dim: 256
   coord_num_freqs: 64
-  coord_input_dim: 2
+  coord_input_dim: 3
   fusion_num_heads: 8
   use_place_memory: false
   use_predictive_coding: false
   use_neuromodulation: false
+  per_module_gates: true                   # one fusion gate per spatial module (treatment arm)
 
 lora:
   r: 16
@@ -21,7 +27,7 @@ lora:
   lora_dropout: 0.05
 
 training:
-  output_dir: "outputs/coord_2d"
+  output_dir: "outputs/coord_3d_permod"
   seed: 42                                 # change per run for multi-seed error bars
   num_epochs: 1
   per_device_train_batch_size: 4

@@ -13,6 +13,7 @@ model:
   use_place_memory: false
   use_predictive_coding: false
   use_neuromodulation: false
+  per_module_gates: false                  # shared fusion gate (baseline arm)
 
 lora:
   r: 16
@@ -22,6 +23,7 @@ lora:
 
 training:
   output_dir: "outputs/coord_3d"
+  seed: 42                                 # change per run for multi-seed error bars
   num_epochs: 1
   per_device_train_batch_size: 4
   per_device_eval_batch_size: 4

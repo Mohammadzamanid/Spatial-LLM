@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **Per-module fusion gating** ("synchronization") — each spatial module (coordinate/elevation, grid cells, place-cell memory, tile) gets its own zero-init tanh gate in `SpatialFusionLayer`, attended and gated independently, so the model learns to weight grid cells vs elevation vs place memory per task and the trained gates read out which module each task relied on. Toggle via `model.per_module_gates`; preserves the zero-init identity that keeps generation coherent, and the shared-gate default leaves existing checkpoints loading unchanged.
+- **`configs/coord_3d_permod.yaml`** — treatment-arm config for A/B-ing per-module vs shared gating (identical to `coord_3d.yaml` except `per_module_gates: true`).
+- **Reproducibility seed knob** — `training.seed` seeds python/numpy/torch and the HuggingFace data sampler up front, enabling honest multi-seed error bars across runs.
+- **Fusion tests** — zero-init identity (shared + per-module), per-module gate count, independent per-module routing, and no-tile / no-`group_sizes` fallbacks.
+
+### Changed
+- `SpatialLLM._encode_spatial` now also returns per-module token spans (`group_sizes`), threaded through `MultiScaleSpatialFusion` for per-module gating.
+
 ## [0.1.0] — 2025-05-25
 
 ### Added

@@ -64,6 +64,7 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
         use_place_memory=cfg["model"].get("use_place_memory", True),
         use_predictive_coding=cfg["model"].get("use_predictive_coding", True),
         use_neuromodulation=cfg["model"].get("use_neuromodulation", True),
+        per_module_gates=cfg["model"].get("per_module_gates", False),
     )
     CheckpointManager(cfg["training"]["output_dir"]).load(model, checkpoint, device=device)
     model.to(device).eval()

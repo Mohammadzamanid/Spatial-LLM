@@ -74,6 +74,15 @@ def main(config_path: str):
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
+    # ── Reproducibility ────────────────────────────────────────────────
+    # Seed python/numpy/torch up front (before LoRA init + data shuffling) so a
+    # run is reproducible and multi-seed sweeps give honest error bars. The same
+    # value is handed to TrainingArguments below to seed the data sampler too.
+    from transformers import set_seed
+    seed = cfg["training"].get("seed", 42)
+    set_seed(seed)
+    logger.info(f"Seed: {seed}")
+
     # ── Tokenizer ──────────────────────────────────────────────────────
     spatial_tok = SpatialTokenizer(
         model_name=cfg["model"]["base_llm"],
@@ -110,6 +119,7 @@ def main(config_path: str):
         use_place_memory=cfg["model"].get("use_place_memory", True),
         use_predictive_coding=cfg["model"].get("use_predictive_coding", True),
         use_neuromodulation=cfg["model"].get("use_neuromodulation", True),
+        per_module_gates=cfg["model"].get("per_module_gates", False),
     )
     model.llm.print_trainable_parameters()
 
@@ -128,6 +138,7 @@ def main(config_path: str):
     t_cfg = cfg["training"]
     ta_kwargs = dict(
         output_dir=t_cfg["output_dir"],
+        seed=seed,
         num_train_epochs=t_cfg["num_epochs"],
         per_device_train_batch_size=t_cfg["per_device_train_batch_size"],
         per_device_eval_batch_size=t_cfg["per_device_eval_batch_size"],

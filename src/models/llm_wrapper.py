@@ -105,12 +105,14 @@ class SpatialLLM(nn.Module):
         use_place_memory: bool = True,
         use_predictive_coding: bool = True,
         use_neuromodulation: bool = True,
+        per_module_gates: bool = False,
         load_in_4bit: bool = False,
     ):
         super().__init__()
         self.use_place_memory = use_place_memory
         self.use_predictive_coding = use_predictive_coding
         self.use_neuromodulation = use_neuromodulation
+        self.per_module_gates = per_module_gates
 
         # ── LLM backbone + LoRA ────────────────────────────────────────
         logger.info(f"Loading base LLM: {base_llm}")
@@ -185,8 +187,15 @@ class SpatialLLM(nn.Module):
             self.pred_error_gate = PredictionErrorGate(llm_dim)
 
         # ── Fusion ────────────────────────────────────────────────────
+        # Spatial tokens are assembled as [coord/elevation, grid cells, modulated/
+        # memory, (tile)] — at most 4 modules. With per_module_gates each module
+        # gets its OWN fusion gate, so the model learns to weight grid cells vs
+        # elevation vs place memory per task (the "synchronization" idea); the
+        # trained gates then read out which module each task relied on. Otherwise a
+        # single shared gate scales the whole spatial blend (original behaviour).
         self.fusion = MultiScaleSpatialFusion(
-            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2
+            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2,
+            num_spatial_groups=4 if per_module_gates else 1,
         )
 
         # Cache embed layer reference inside a list so nn.Module does NOT register
@@ -204,12 +213,14 @@ class SpatialLLM(nn.Module):
         self,
         coords: torch.Tensor,
         pixel_values: Optional[torch.Tensor] = None,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, list[int]]:
         """
         Build spatial token sequence + compute PC loss.
         Returns:
             spatial_tokens: (B, S, D)
             pc_loss: scalar
+            group_sizes: per-module token counts summing to S, in assembly order
+                         [coord/elevation, grid cells, modulated/memory, (tile)]
         """
         pc_loss = torch.tensor(0.0, device=coords.device)
 
@@ -235,15 +246,23 @@ class SpatialLLM(nn.Module):
             spatial_vec = self.pred_error_gate(spatial_vec, pc_loss.expand(coords.shape[0]))
             spatial_vec = self.neuromod(spatial_vec, spatial_vec)
 
-        # Assemble token sequence
+        # Assemble token sequence + record each module's token span so the fusion
+        # layer can gate modules independently. Order is fixed:
+        # [coord/elevation, grid cells, modulated/memory, (tile)].
         modulated_tokens = spatial_vec.unsqueeze(1)            # (B, 1, D)
         token_seq = torch.cat([fourier_tokens, grid_tokens, modulated_tokens], dim=1)
+        group_sizes = [
+            fourier_tokens.shape[1],    # coordinate / elevation (Fourier)
+            grid_tokens.shape[1],       # grid cells (entorhinal)
+            modulated_tokens.shape[1],  # pooled + neuromodulated / place memory
+        ]
 
         if pixel_values is not None:
             tile_tokens = self.tile_encoder(pixel_values)      # (B, 197, D)
             token_seq = torch.cat([token_seq, tile_tokens], dim=1)
+            group_sizes.append(tile_tokens.shape[1])           # ViT tile patches
 
-        return token_seq, pc_loss
+        return token_seq, pc_loss, group_sizes
 
     def forward(
         self,
@@ -253,7 +272,7 @@ class SpatialLLM(nn.Module):
         pixel_values: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
     ):
-        spatial_tokens, pc_loss = self._encode_spatial(coords, pixel_values)
+        spatial_tokens, pc_loss, group_sizes = self._encode_spatial(coords, pixel_values)
 
         embed_layer = self._get_embed()
         text_embeds = embed_layer(input_ids)                    # (B, T, D)
@@ -261,7 +280,10 @@ class SpatialLLM(nn.Module):
         # so LayerNorm/attention in fusion don't hit "expected Half but found Float".
         if spatial_tokens.dtype != text_embeds.dtype:
             spatial_tokens = spatial_tokens.to(text_embeds.dtype)
-        fused = self.fusion(text_embeds, spatial_tokens)        # (B, T, D)
+        fused = self.fusion(                                    # (B, T, D)
+            text_embeds, spatial_tokens,
+            group_sizes=group_sizes if self.per_module_gates else None,
+        )
 
         outputs = self.llm(
             inputs_embeds=fused,
@@ -284,10 +306,13 @@ class SpatialLLM(nn.Module):
         pixel_values: Optional[torch.Tensor] = None,
         max_new_tokens: int = 128,
     ) -> torch.Tensor:
-        spatial_tokens, _ = self._encode_spatial(coords, pixel_values)
+        spatial_tokens, _, group_sizes = self._encode_spatial(coords, pixel_values)
         embed_layer = self._get_embed()
         text_embeds = embed_layer(input_ids)
-        fused = self.fusion(text_embeds, spatial_tokens)
+        fused = self.fusion(
+            text_embeds, spatial_tokens,
+            group_sizes=group_sizes if self.per_module_gates else None,
+        )
 
         return self.llm.generate(
             inputs_embeds=fused,

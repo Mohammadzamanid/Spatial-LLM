@@ -53,6 +53,7 @@ class SpatialLLMInference:
             coord_embed_dim=self.cfg["model"]["coord_embed_dim"],
             coord_num_freqs=self.cfg["model"]["coord_num_freqs"],
             fusion_num_heads=self.cfg["model"]["fusion_num_heads"],
+            per_module_gates=self.cfg["model"].get("per_module_gates", False),
             load_in_4bit=self.cfg["model"].get("load_in_4bit", False),
         )
 

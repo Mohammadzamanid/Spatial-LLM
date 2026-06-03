@@ -34,6 +34,7 @@ def diagnose(config_path, checkpoint, val_path="data/processed/val.jsonl"):
             use_place_memory=cfg["model"].get("use_place_memory", True),
             use_predictive_coding=cfg["model"].get("use_predictive_coding", True),
             use_neuromodulation=cfg["model"].get("use_neuromodulation", True),
+            per_module_gates=cfg["model"].get("per_module_gates", False),
         )
 
     # Build twice: once random (pre-load), once loaded, to see if coord weights changed
@@ -52,11 +53,14 @@ def diagnose(config_path, checkpoint, val_path="data/processed/val.jsonl"):
                           dtype=torch.float32, device=device)
 
     with torch.no_grad():
-        spatial_tokens, _ = model._encode_spatial(coords, None)
+        spatial_tokens, _, group_sizes = model._encode_spatial(coords, None)
         prompt = SPATIAL_PROMPT_TEMPLATE.format(lat=rec["lat"], lon=rec["lon"], question=rec["question"])
         enc = tok.tokenizer(prompt, return_tensors="pt").to(device)
         text_embeds = model._get_embed()(enc["input_ids"])
-        fused = model.fusion(text_embeds, spatial_tokens.to(text_embeds.dtype))
+        fused = model.fusion(
+            text_embeds, spatial_tokens.to(text_embeds.dtype),
+            group_sizes=group_sizes if model.per_module_gates else None,
+        )
 
     def stats(name, t):
         print(f"    {name:16s} shape={tuple(t.shape)} "
