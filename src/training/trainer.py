@@ -65,7 +65,7 @@ def collate_fn(batch: list[dict], spatial_tokenizer: SpatialTokenizer) -> dict:
     return result
 
 
-def main(config_path: str):
+def main(config_path: str, seed: int = None, output_dir: str = None):
     # Avoid interactive wandb login prompt in notebooks/Colab.
     # Training reports to wandb only if a project is set AND WANDB_API_KEY exists.
     os.environ.setdefault("WANDB_SILENT", "true")
@@ -73,6 +73,13 @@ def main(config_path: str):
         os.environ["WANDB_DISABLED"] = "true"
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
+
+    # CLI overrides — handy for multi-seed sweeps from a notebook without editing
+    # YAML (e.g. --seed 43 --output_dir outputs/permod_seed43).
+    if seed is not None:
+        cfg["training"]["seed"] = seed
+    if output_dir is not None:
+        cfg["training"]["output_dir"] = output_dir
 
     # ── Reproducibility ────────────────────────────────────────────────
     # Seed python/numpy/torch up front (before LoRA init + data shuffling) so a
@@ -197,5 +204,9 @@ def main(config_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to train_config.yaml")
+    parser.add_argument("--seed", type=int, default=None,
+                        help="override training.seed (for multi-seed sweeps)")
+    parser.add_argument("--output_dir", default=None,
+                        help="override training.output_dir (keep seeds from clobbering)")
     args = parser.parse_args()
-    main(args.config)
+    main(args.config, seed=args.seed, output_dir=args.output_dir)

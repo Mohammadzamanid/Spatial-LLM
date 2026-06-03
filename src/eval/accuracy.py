@@ -39,9 +39,36 @@ def _norm_yesno(text: str):
     return "yes" if yi < ni else "no"
 
 
+def read_fusion_gates(model):
+    """Per spatial-module fusion gate strengths (tanh of the learned gate), one
+    entry per fusion layer. For a shared-gate model each entry is a single value;
+    with per_module_gates it's {coord/elev, grid, memory, tile} (trimmed to the
+    gates that exist) — a direct read-out of which module each task leaned on."""
+    fusion = getattr(model, "fusion", None)
+    if fusion is None or not hasattr(fusion, "layers"):
+        return None
+    names = ["coord/elev", "grid", "memory", "tile"]
+    attn_by_layer = []
+    for layer in fusion.layers:
+        g = layer.attn_gate.detach().float().tanh().tolist()
+        if len(g) > 1:
+            attn_by_layer.append({names[i]: round(v, 4) for i, v in enumerate(g)})
+        else:
+            attn_by_layer.append({"shared": round(g[0], 4)})
+    return {
+        "per_module": bool(getattr(model, "per_module_gates", False)),
+        "attn_gate_by_layer": attn_by_layer,
+        "ffn_gate_by_layer": [
+            round(l.ffn_gate.detach().float().tanh().item(), 4) for l in fusion.layers
+        ],
+    }
+
+
 @torch.no_grad()
 def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
-                      max_examples: int = None):
+                      max_examples: int = None, dump_gates: bool = False,
+                      results_json: str = None, seed: int = None,
+                      label: str = None):
     from ..models.llm_wrapper import SpatialLLM
     from ..data.tokenizer import SpatialTokenizer, SPATIAL_PROMPT_TEMPLATE
     from ..utils.checkpoint import CheckpointManager
@@ -127,6 +154,10 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
 
     total = sum(t for _, t in per_class.values())
     overall = correct / total if total else 0.0
+    # balanced accuracy = mean of per-class recalls (majority-guessing -> 0.5)
+    recalls = [c / t for c, t in per_class.values() if t]
+    balanced = sum(recalls) / len(recalls) if recalls else None
+    gates = read_fusion_gates(model)
 
     print(f"\n=== Accuracy: {Path(checkpoint).name} ===")
     print(f"  sample generations (truth | raw output | parsed):")
@@ -143,12 +174,41 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
         c, t = per_class[cls]
         if t:
             print(f"    {cls:3s}: {c}/{t} = {c/t:.3f}")
-    # balanced accuracy = mean of per-class recalls (majority-guessing -> 0.5)
-    recalls = [c / t for c, t in per_class.values() if t]
-    if recalls:
-        print(f"  BALANCED accuracy: {sum(recalls)/len(recalls):.3f}  "
-              f"(0.5 = chance / majority-guessing)")
-    return overall
+    if balanced is not None:
+        print(f"  BALANCED accuracy: {balanced:.3f}  (0.5 = chance / majority-guessing)")
+
+    if dump_gates and gates:
+        print(f"  fusion gates (tanh, per layer | which module the task leaned on):")
+        for i, lg in enumerate(gates["attn_gate_by_layer"]):
+            print(f"    layer {i}: {lg}")
+
+    result = {
+        "config": config_path,
+        "checkpoint": str(checkpoint),
+        "seed": seed,
+        "label": label,
+        "evaluated": total,
+        "class_balance": dict(truth_balance),
+        "overall_accuracy": round(overall, 4),
+        "balanced_accuracy": round(balanced, 4) if balanced is not None else None,
+        "per_class_recall": {
+            cls: round(c / t, 4) for cls, (c, t) in per_class.items() if t
+        },
+        "unparseable": unparseable,
+        "gates": gates,
+    }
+
+    if results_json:
+        Path(results_json).parent.mkdir(parents=True, exist_ok=True)
+        Path(results_json).write_text(json.dumps(result, indent=2))
+        print(f"  wrote results → {results_json}")
+
+    # Clearly delimited block so the JSON can be copy-pasted straight back to the
+    # repo (the eval output otherwise dies in the ephemeral Kaggle container).
+    print("\n===RESULT-JSON-START===")
+    print(json.dumps(result))
+    print("===RESULT-JSON-END===")
+    return result
 
 
 def main():
@@ -157,8 +217,17 @@ def main():
     ap.add_argument("--checkpoint", required=True)
     ap.add_argument("--val", default="data/processed/val.jsonl")
     ap.add_argument("--max_examples", type=int, default=None)
+    ap.add_argument("--dump-gates", action="store_true",
+                    help="print per-module fusion gate strengths (which module the task used)")
+    ap.add_argument("--results-json", default=None,
+                    help="also write the structured result dict to this path (tracked under results/)")
+    ap.add_argument("--seed", type=int, default=None, help="record the training seed in the result")
+    ap.add_argument("--label", default=None,
+                    help="record a label (e.g. 'permod_seed42') in the result")
     args = ap.parse_args()
-    evaluate_accuracy(args.config, args.checkpoint, args.val, args.max_examples)
+    evaluate_accuracy(args.config, args.checkpoint, args.val, args.max_examples,
+                      dump_gates=args.dump_gates, results_json=args.results_json,
+                      seed=args.seed, label=args.label)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,25 @@
+{
+  "experiment": "step1_coord_2d_vs_3d",
+  "task": "elevation (median-threshold yes/no classification)",
+  "dataset": "cities15000",
+  "metric": "balanced_accuracy",
+  "source": "kaggle (author-reported)",
+  "reproduced_in_repo": false,
+  "note": "Reported by the author from a Kaggle run at the default single seed (training.seed=42). NOT yet reproduced in-repo with multi-seed error bars. The directional result is mechanistically guaranteed: coord_2d (coord_input_dim=2) never receives elevation, so its accuracy is capped by how well lat/lon alone predict the label; coord_3d (coord_input_dim=3) gets elevation directly. Re-run with seeds 42/43/44 via notebooks/per_module_gating_kaggle.ipynb to add error bars and set reproduced_in_repo=true.",
+  "runs": [
+    {
+      "label": "coord_3d",
+      "config": "configs/coord_3d.yaml",
+      "coord_input_dim": 3,
+      "balanced_accuracy": 0.974,
+      "seeds": [42]
+    },
+    {
+      "label": "coord_2d",
+      "config": "configs/coord_2d.yaml",
+      "coord_input_dim": 2,
+      "balanced_accuracy": 0.717,
+      "seeds": [42]
+    }
+  ]
+}
