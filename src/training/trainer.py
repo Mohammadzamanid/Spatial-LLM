@@ -10,6 +10,13 @@ import logging
 import os
 from functools import partial
 
+# Kaggle/Colab usually expose 2 GPUs (T4 x2). HF Trainer auto-wraps the model in
+# DataParallel when >1 GPU is visible, but this model isn't DataParallel-safe (the
+# lazy _embed_layer_ref cache mutated during forward deadlocks across replicas) —
+# it hangs at the first step. Pin to one GPU BEFORE torch creates its CUDA context.
+# Override by exporting CUDA_VISIBLE_DEVICES yourself (e.g. =1 to pick the other card).
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
 import torch
 import yaml
 from transformers import (
