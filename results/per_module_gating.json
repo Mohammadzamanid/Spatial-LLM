@@ -1,0 +1,50 @@
+{
+  "experiment": "per_module_gating",
+  "task": "elevation (median-threshold yes/no, threshold=122 m)",
+  "dataset": "cities15000",
+  "metric": "balanced_accuracy",
+  "source": "kaggle",
+  "seeds": [42],
+  "reproduced_in_repo": true,
+  "runs": [
+    {
+      "label": "shared_seed42",
+      "config": "configs/coord_3d.yaml",
+      "seed": 42,
+      "evaluated": 699,
+      "class_balance": {"no": 334, "yes": 365},
+      "overall_accuracy": 0.9886,
+      "balanced_accuracy": 0.9887,
+      "per_class_recall": {"no": 0.991, "yes": 0.9863},
+      "gates": {
+        "per_module": false,
+        "attn_gate_by_layer": [{"shared": -0.0018}, {"shared": 0.0017}],
+        "ffn_gate_by_layer": [-0.0016, -0.0016]
+      }
+    },
+    {
+      "label": "permod_seed42",
+      "config": "configs/coord_3d_permod.yaml",
+      "seed": 42,
+      "evaluated": 699,
+      "class_balance": {"no": 334, "yes": 365},
+      "overall_accuracy": 0.9871,
+      "balanced_accuracy": 0.9872,
+      "per_class_recall": {"no": 0.988, "yes": 0.9863},
+      "gates": {
+        "per_module": true,
+        "attn_gate_by_layer": [
+          {"coord/elev": 0.0009, "grid": 0.0009, "memory": 0.0005, "tile": -0.0006},
+          {"coord/elev": -0.0004, "grid": -0.0018, "memory": -0.0007, "tile": 0.0003}
+        ],
+        "ffn_gate_by_layer": [-0.0018, -0.0017]
+      }
+    }
+  ],
+  "analysis": {
+    "headline": "shared 0.9887 vs per-module 0.9872 — statistically identical (1 seed).",
+    "key_finding": "Every fusion gate stayed at ~0 after training (|tanh(gate)| < 0.002 in BOTH arms). The spatial pathway (coord/elevation embedder, grid cells, place memory, fusion) therefore contributed essentially nothing. The task is solved by the LLM reading lat/lon straight from the TEXT: SPATIAL_PROMPT_TEMPLATE injects 'Location: {lat:.6f}, {lon:.6f}', and the elevation question repeats '(lat, lon)' again — plus the model's pretrained world knowledge of where places are.",
+    "implication": "This run neither validates nor refutes per-module gating: with the gates shut, there is nothing for per-module vs shared to differentiate. It also casts doubt on the Step-1 coord_2d-vs-coord_3d gap, since lat/lon leak through the text there too.",
+    "next": "Remove coordinates from the text (coords_in_text=false) so location reaches the model ONLY through the spatial channel. Then the gates MUST open to solve the task, making both 'does the spatial pathway work at all' and 'shared vs per-module gating' genuinely testable. See configs/coord_3d_noleak.yaml and configs/coord_3d_permod_noleak.yaml."
+  }
+}

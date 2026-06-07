@@ -14,6 +14,16 @@ SPATIAL_PROMPT_TEMPLATE = (
     "[ANSWER]"
 )
 
+# No-coords variant: the location is given ONLY through the spatial channel (coord
+# embedder + grid cells via the `coords` tensor), never as text. This forces the
+# model to actually use the spatial pathway — with coords in the text the LLM just
+# reads the numbers off the prompt and the fusion gates never open.
+SPATIAL_PROMPT_TEMPLATE_NOCOORDS = (
+    "[SPATIAL CONTEXT] Location provided via the spatial channel.\n"
+    "[QUESTION] {question}\n"
+    "[ANSWER]"
+)
+
 
 class SpatialTokenizer:
     """
@@ -37,14 +47,21 @@ class SpatialTokenizer:
         lat: float,
         lon: float,
         answer: str | None = None,
+        coords_in_text: bool = True,
     ) -> dict:
         """
         Build a tokenized input with spatial context prepended.
         If answer is provided, it is appended for teacher-forcing during training.
+
+        coords_in_text=False omits lat/lon from the prompt so the location reaches
+        the model only through the spatial channel (forces the fusion gates to open).
         """
-        prompt = SPATIAL_PROMPT_TEMPLATE.format(
-            lat=lat, lon=lon, question=question
-        )
+        if coords_in_text:
+            prompt = SPATIAL_PROMPT_TEMPLATE.format(
+                lat=lat, lon=lon, question=question
+            )
+        else:
+            prompt = SPATIAL_PROMPT_TEMPLATE_NOCOORDS.format(question=question)
         if answer is not None:
             full_text = prompt + " " + answer
         else:

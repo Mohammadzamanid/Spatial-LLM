@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- **`coords_in_text` flag (no-coordinate-leak mode)** — omit lat/lon from the prompt so location reaches the model ONLY through the spatial channel (coord/elevation embedder + grid cells). Without it the LLM just reads coordinates off the text and the fusion gates never open (confirmed: gates stayed ~0, balanced acc ~0.99 from text alone). New configs `coord_3d_noleak.yaml` + `coord_3d_permod_noleak.yaml`; data via `real_datasets.py --no-coords-in-text`.
+- **Committed experiment results** under `results/` — `per_module_gating.json` records the leaky-run finding (per-module ≈ shared because the spatial pathway was unused).
 - **Per-module fusion gating** ("synchronization") — each spatial module (coordinate/elevation, grid cells, place-cell memory, tile) gets its own zero-init tanh gate in `SpatialFusionLayer`, attended and gated independently, so the model learns to weight grid cells vs elevation vs place memory per task and the trained gates read out which module each task relied on. Toggle via `model.per_module_gates`; preserves the zero-init identity that keeps generation coherent, and the shared-gate default leaves existing checkpoints loading unchanged.
 - **`configs/coord_3d_permod.yaml`** — treatment-arm config for A/B-ing per-module vs shared gating (identical to `coord_3d.yaml` except `per_module_gates: true`).
 - **Reproducibility seed knob** — `training.seed` seeds python/numpy/torch and the HuggingFace data sampler up front, enabling honest multi-seed error bars across runs.

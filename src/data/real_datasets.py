@@ -112,7 +112,8 @@ def _population_bucket(pop: int) -> str:
 
 
 def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None,
-                   task: str = "mixed", elev_threshold: float = 1000.0) -> Iterator[dict]:
+                   task: str = "mixed", elev_threshold: float = 1000.0,
+                   coords_in_text: bool = True) -> Iterator[dict]:
     """
     Convert real GeoNames records into spatial QA pairs.
     Each city yields several question types grounded in real attributes.
@@ -149,8 +150,14 @@ def geonames_to_qa(records: Iterator[dict], max_records: Optional[int] = None,
             if elev is None:
                 continue
             above = elev >= elev_threshold
-            q = (f"Is the location at ({lat:.4f}, {lon:.4f}) above "
-                 f"{int(elev_threshold)} metres elevation?")
+            if coords_in_text:
+                q = (f"Is the location at ({lat:.4f}, {lon:.4f}) above "
+                     f"{int(elev_threshold)} metres elevation?")
+            else:
+                # No coords in text — the model must read location from the spatial
+                # channel. Every elevation example then has identical text, so the
+                # answer is decodable only via the coord/elevation pathway.
+                q = f"Is this location above {int(elev_threshold)} metres elevation?"
             a = "Yes." if above else "No."
         else:
             q, a = random.choice(templates)
@@ -170,6 +177,7 @@ def build_geonames_dataset(
     output_dir: str = "data/processed",
     seed: int = 42,
     task: str = "mixed",
+    coords_in_text: bool = True,
 ):
     """
     End-to-end: download GeoNames, convert to QA, write train/val JSONL.
@@ -205,7 +213,8 @@ def build_geonames_dataset(
         written = 0
         with open(path, "w", encoding="utf-8") as f:
             for qa in geonames_to_qa(iter(records), max_records=n, task=task,
-                                     elev_threshold=elev_threshold):
+                                     elev_threshold=elev_threshold,
+                                     coords_in_text=coords_in_text):
                 f.write(json.dumps(qa, ensure_ascii=False) + "\n")
                 written += 1
         logger.info(f"Wrote {written:,} real QA pairs → {path}")
@@ -237,6 +246,9 @@ if __name__ == "__main__":
     ap.add_argument("--output_dir", default="data/processed")
     ap.add_argument("--task", default="mixed", choices=["mixed", "elevation"],
                     help="'elevation' = elevation-threshold task (tests 3D coords)")
+    ap.add_argument("--no-coords-in-text", action="store_true",
+                    help="omit lat/lon from the question text so location reaches the "
+                         "model only via the spatial channel (forces fusion to be used)")
     args = ap.parse_args()
     build_geonames_dataset(args.n_train, args.n_val, args.dataset, args.output_dir,
-                           task=args.task)
+                           task=args.task, coords_in_text=not args.no_coords_in_text)

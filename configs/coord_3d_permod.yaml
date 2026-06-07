@@ -47,6 +47,7 @@ training:
 data:
   train_path: "data/processed/train.jsonl"
   val_path: "data/processed/val.jsonl"
+  coords_in_text: true                     # lat/lon in the prompt text (model can read them directly)
   tile_dir: "data/tiles/"
   max_text_length: 384
   tile_size: 224

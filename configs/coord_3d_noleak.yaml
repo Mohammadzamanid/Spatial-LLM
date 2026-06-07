@@ -1,10 +1,14 @@
 # ─────────────────────────────────────────────
-# Spatial-LLM Training Configuration
+# Spatial-LLM — elevation task, NO coords in text (shared gate).
+# Location is given ONLY through the spatial channel (coord/elevation embedder +
+# grid cells), never in the prompt. This forces the model to actually use the
+# fusion pathway — the real test of whether the spatial stack works at all.
+# Generate matching data with:  --task elevation --no-coords-in-text
 # ─────────────────────────────────────────────
 
 model:
-  base_llm: "Qwen/Qwen2.5-1.5B"            # Apache-2.0, ungated, fast on T4/P100
-  load_in_4bit: false                      # 1.5B fits in fp16 on T4/P100 — faster than 4-bit
+  base_llm: "Qwen/Qwen2.5-1.5B"
+  load_in_4bit: false
   vit_backbone: "google/vit-base-patch16-224"
   coord_embed_dim: 256
   coord_num_freqs: 64
@@ -13,7 +17,7 @@ model:
   use_place_memory: false
   use_predictive_coding: false
   use_neuromodulation: false
-  per_module_gates: false                  # shared fusion gate (baseline arm)
+  per_module_gates: false                   # shared fusion gate (baseline arm)
 
 lora:
   r: 16
@@ -22,8 +26,8 @@ lora:
   lora_dropout: 0.05
 
 training:
-  output_dir: "outputs/coord_3d"
-  seed: 42                                 # change per run for multi-seed error bars
+  output_dir: "outputs/coord_3d_noleak"
+  seed: 42
   num_epochs: 1
   per_device_train_batch_size: 4
   per_device_eval_batch_size: 4
@@ -37,17 +41,17 @@ training:
   eval_steps: 90
   save_steps: 188
   save_total_limit: 3
-  optim: "paged_adamw_8bit"        # 8-bit paged Adam — essential for T4
+  optim: "paged_adamw_8bit"
 
 data:
   train_path: "data/processed/train.jsonl"
   val_path: "data/processed/val.jsonl"
-  coords_in_text: true                     # lat/lon in the prompt text (model can read them directly)
+  coords_in_text: false                     # location reaches the model ONLY via the spatial channel
   tile_dir: "data/tiles/"
   max_text_length: 384
   tile_size: 224
-  zoom_level: 15                           # OSM zoom level for tile fetching
+  zoom_level: 15
 
 wandb:
   project: "spatial-llm"
-  entity: null                             # set to your wandb username
+  entity: null

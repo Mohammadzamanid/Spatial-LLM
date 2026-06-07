@@ -49,7 +49,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def collate_fn(batch: list[dict], spatial_tokenizer: SpatialTokenizer) -> dict:
+def collate_fn(batch: list[dict], spatial_tokenizer: SpatialTokenizer,
+               coords_in_text: bool = True) -> dict:
     """Custom collator: tokenizes text + stacks coords and pixel_values."""
     tokenized = [
         spatial_tokenizer.encode_spatial(
@@ -57,6 +58,7 @@ def collate_fn(batch: list[dict], spatial_tokenizer: SpatialTokenizer) -> dict:
             lat=item["coords"][0].item(),
             lon=item["coords"][1].item(),
             answer=item["answer"],
+            coords_in_text=coords_in_text,
         )
         for item in batch
     ]
@@ -115,7 +117,8 @@ def main(config_path: str, seed: int = None, output_dir: str = None):
         max_text_length=cfg["data"]["max_text_length"],
     )
 
-    collator = partial(collate_fn, spatial_tokenizer=spatial_tok)
+    collator = partial(collate_fn, spatial_tokenizer=spatial_tok,
+                       coords_in_text=cfg["data"].get("coords_in_text", True))
 
     # ── Model ──────────────────────────────────────────────────────────
     model = SpatialLLM(

@@ -70,11 +70,14 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
                       results_json: str = None, seed: int = None,
                       label: str = None):
     from ..models.llm_wrapper import SpatialLLM
-    from ..data.tokenizer import SpatialTokenizer, SPATIAL_PROMPT_TEMPLATE
+    from ..data.tokenizer import (
+        SpatialTokenizer, SPATIAL_PROMPT_TEMPLATE, SPATIAL_PROMPT_TEMPLATE_NOCOORDS,
+    )
     from ..utils.checkpoint import CheckpointManager
 
     cfg = yaml.safe_load(open(config_path))
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    coords_in_text = cfg.get("data", {}).get("coords_in_text", True)
 
     model = SpatialLLM(
         base_llm=cfg["model"]["base_llm"],
@@ -122,9 +125,12 @@ def evaluate_accuracy(config_path: str, checkpoint: str, val_path: str,
         # model generate from a pad token). Elevation is NOT in the text — it only
         # reaches the model via the coordinate channel, so this fairly tests whether
         # the 3D coord pathway conveys elevation.
-        prompt = SPATIAL_PROMPT_TEMPLATE.format(
-            lat=rec["lat"], lon=rec["lon"], question=rec["question"]
-        )
+        if coords_in_text:
+            prompt = SPATIAL_PROMPT_TEMPLATE.format(
+                lat=rec["lat"], lon=rec["lon"], question=rec["question"]
+            )
+        else:
+            prompt = SPATIAL_PROMPT_TEMPLATE_NOCOORDS.format(question=rec["question"])
         enc = tok.tokenizer(prompt, return_tensors="pt")
         input_ids = enc["input_ids"].to(device)
         attention_mask = enc["attention_mask"].to(device)
