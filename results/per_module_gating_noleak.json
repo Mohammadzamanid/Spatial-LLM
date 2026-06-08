@@ -1,0 +1,30 @@
+{
+  "experiment": "per_module_gating_noleak",
+  "task": "elevation (median-threshold yes/no, threshold=122 m)",
+  "dataset": "cities15000",
+  "coords_in_text": false,
+  "metric": "balanced_accuracy",
+  "source": "kaggle",
+  "seeds": [42, 43, 44],
+  "reproduced_in_repo": true,
+  "summary": {
+    "shared":     {"mean": 0.983, "std": 0.005, "values": [0.9761, 0.9847, 0.9874]},
+    "per_module": {"mean": 0.878, "std": 0.139, "values": [0.681, 0.9752, 0.9776],
+                   "note": "seed 42 collapsed (recall yes=0.389); excl. collapse mean=0.976"}
+  },
+  "runs": [
+    {"label": "shared_seed42", "seed": 42, "balanced_accuracy": 0.9761, "per_class_recall": {"no": 0.985, "yes": 0.9671}, "gates_max_abs": 0.0023},
+    {"label": "shared_seed43", "seed": 43, "balanced_accuracy": 0.9847, "per_class_recall": {"no": 0.994, "yes": 0.9753}, "gates_max_abs": 0.0021},
+    {"label": "shared_seed44", "seed": 44, "balanced_accuracy": 0.9874, "per_class_recall": {"no": 0.994, "yes": 0.9808}, "gates_max_abs": 0.0019},
+    {"label": "permod_seed42", "seed": 42, "balanced_accuracy": 0.681,  "per_class_recall": {"no": 0.9731, "yes": 0.389},  "gates_max_abs": 0.0048, "note": "collapsed toward 'no'"},
+    {"label": "permod_seed43", "seed": 43, "balanced_accuracy": 0.9752, "per_class_recall": {"no": 0.9641, "yes": 0.9863}, "gates_max_abs": 0.0029},
+    {"label": "permod_seed44", "seed": 44, "balanced_accuracy": 0.9776, "per_class_recall": {"no": 0.988, "yes": 0.9671}, "gates_max_abs": 0.0041}
+  ],
+  "analysis": {
+    "pathway_works": "With coordinates removed from the text, shared gating reaches 0.983 +/- 0.005 balanced accuracy. Location reaches the model ONLY through the coord channel, so this is clean evidence the spatial pathway conveys usable information to the LLM.",
+    "per_module_verdict": "Per-module gating gives no accuracy benefit over shared and is far less stable: 1 of 3 seeds collapsed to 0.68. Prefer the shared gate. The interpretable per-module gate read-out also did not materialize (gates stayed ~0).",
+    "gate_caveat": "Gates stayed ~0.002 in ALL runs (leaky AND no-leak), yet in the no-leak runs that tiny gate is load-bearing (the text is identical across examples, so the gate is the only path to the answer). Gate MAGNITUDE is therefore NOT a usage readout in this architecture. This corrects the earlier per_module_gating.json reading of '~0 gates => pathway unused'.",
+    "task_caveat": "coord_input_dim=3 feeds elevation directly as the 3rd coordinate, so 'is elevation>122?' reduces to thresholding one input number — the channel passes information, but this is not spatial REASONING (inferring elevation from location).",
+    "next": "coord_2d_noleak: lat/lon only (no elevation input), no text coords. Forces the model to LEARN the lat/lon->elevation map. coord_2d_noleak vs coord_3d_noleak is the proper leak-free redo of Step 1; the gap = how much the model relies on elevation-as-input vs learned geography. See configs/coord_2d_noleak.yaml."
+  }
+}

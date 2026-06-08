@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────
+# Spatial-LLM — elevation task, 2D coords, NO coords in text (shared gate).
+# The REAL spatial-reasoning test: the model gets only lat/lon (no elevation
+# input) and no coordinates in the text, then must answer "is elevation > 122 m?".
+# To succeed it has to LEARN the lat/lon -> elevation map, not just threshold an
+# input number. Compare against coord_3d_noleak.yaml (which is handed elevation
+# directly): the gap = reliance on elevation-as-input vs learned geography.
+# This is the proper leak-free redo of Step 1's 2D-vs-3D comparison.
+# Generate matching data with:  --task elevation --no-coords-in-text
+# ─────────────────────────────────────────────
+
+model:
+  base_llm: "Qwen/Qwen2.5-1.5B"
+  load_in_4bit: false
+  vit_backbone: "google/vit-base-patch16-224"
+  coord_embed_dim: 256
+  coord_num_freqs: 64
+  coord_input_dim: 2                        # lat/lon only — elevation is NOT given to the model
+  fusion_num_heads: 8
+  use_place_memory: false
+  use_predictive_coding: false
+  use_neuromodulation: false
+  per_module_gates: false                   # shared gate (per-module gave no benefit + was unstable)
+
+lora:
+  r: 16
+  lora_alpha: 32
+  target_modules: ["q_proj", "v_proj"]
+  lora_dropout: 0.05
+
+training:
+  output_dir: "outputs/coord_2d_noleak"
+  seed: 42
+  num_epochs: 1
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  weight_decay: 0.01
+  fp16: false
+  logging_steps: 50
+  eval_steps: 90
+  save_steps: 188
+  save_total_limit: 3
+  optim: "paged_adamw_8bit"
+
+data:
+  train_path: "data/processed/train.jsonl"
+  val_path: "data/processed/val.jsonl"
+  coords_in_text: false                     # location reaches the model ONLY via the spatial channel
+  tile_dir: "data/tiles/"
+  max_text_length: 384
+  tile_size: 224
+  zoom_level: 15
+
+wandb:
+  project: "spatial-llm"
+  entity: null
