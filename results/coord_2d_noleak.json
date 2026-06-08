@@ -1,0 +1,30 @@
+{
+  "experiment": "coord_2d_noleak",
+  "task": "elevation (median-threshold yes/no, threshold=122 m)",
+  "dataset": "cities15000",
+  "coords_in_text": false,
+  "metric": "balanced_accuracy",
+  "source": "kaggle",
+  "seeds": [42, 43, 44],
+  "reproduced_in_repo": true,
+  "summary": {"mean": 0.704, "std": 0.019, "values": [0.7169, 0.7194, 0.6769]},
+  "runs": [
+    {"label": "coord2d_seed42", "seed": 42, "balanced_accuracy": 0.7169, "per_class_recall": {"no": 0.8338, "yes": 0.600}, "gates_max_abs": 0.0021},
+    {"label": "coord2d_seed43", "seed": 43, "balanced_accuracy": 0.7194, "per_class_recall": {"no": 0.7988, "yes": 0.640}, "gates_max_abs": 0.0019},
+    {"label": "coord2d_seed44", "seed": 44, "balanced_accuracy": 0.6769, "per_class_recall": {"no": 0.5423, "yes": 0.8114}, "gates_max_abs": 0.0021}
+  ],
+  "comparison_balanced_accuracy": {
+    "coord_3d_noleak (elevation given via channel)": 0.983,
+    "coord_2d_noleak (must infer from lat/lon)": 0.704,
+    "step1_coord_3d (leaky: coords+elev readable in text)": 0.974,
+    "step1_coord_2d (leaky: coords in text)": 0.717,
+    "chance": 0.5
+  },
+  "analysis": {
+    "headline": "Given ONLY lat/lon (no elevation input, no coords in text), the model predicts elevation-above-median at 0.704 +/- 0.019 — well above chance. The spatial encoder learned a real lat/lon -> elevation mapping and generalizes it to held-out cities.",
+    "three_d_vs_two_d": "0.983 (elevation handed in directly) vs 0.704 (must infer from location). The ~0.28 gap is the shortcut of being given elevation as an input coordinate; location alone still carries substantial signal.",
+    "validates_step1": "coord_2d_noleak (0.704) matches the leaky Step-1 coord_2d (0.717) almost exactly, and coord_3d_noleak (0.983) ~ leaky coord_3d (0.974). So Step 1's 2D-vs-3D gap was NOT a text-leak artifact — removing the leak reproduces the same numbers. The original finding holds.",
+    "gates": "Gates stayed ~0.002 yet are load-bearing (no text signal exists), consistent with the earlier no-leak run. Gate magnitude is not a usage readout.",
+    "per_module": "Per-module gating remains dropped (no benefit + 1/3-seed collapse in the earlier run)."
+  }
+}

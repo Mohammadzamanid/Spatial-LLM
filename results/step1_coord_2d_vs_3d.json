@@ -5,6 +5,7 @@
   "metric": "balanced_accuracy",
   "source": "kaggle (author-reported)",
   "reproduced_in_repo": false,
+  "leak_free_validation": "CONFIRMED leak-free (see coord_2d_noleak.json / coord_3d_noleak.json): with coordinates removed from the text, coord_2d reproduces at 0.704 +/- 0.019 (vs 0.717 here) and coord_3d at 0.983 (vs 0.974). The 2D-vs-3D gap is real, not a text-leak artifact — the original Step-1 finding holds.",
   "note": "Reported by the author from a Kaggle run at the default single seed (training.seed=42). NOT yet reproduced in-repo with multi-seed error bars. The directional result is mechanistically guaranteed: coord_2d (coord_input_dim=2) never receives elevation, so its accuracy is capped by how well lat/lon alone predict the label; coord_3d (coord_input_dim=3) gets elevation directly. Re-run with seeds 42/43/44 via notebooks/per_module_gating_kaggle.ipynb to add error bars and set reproduced_in_repo=true.",
   "runs": [
     {
