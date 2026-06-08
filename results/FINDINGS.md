@@ -44,6 +44,51 @@ elevation (122 m)?"* — on real GeoNames cities, evaluated on held-out cities.
    run, yet in the no-leak runs that tiny gate carries the entire signal. Judge by
    accuracy, not gate value.
 
+## Navigation cortex: static vs movement — the "harmful → essential" inversion
+
+The neuroscience modules (grid attractor, conjunctive, boundary, theta-gamma,
+microcircuits) were ablated on TWO tasks. The verdicts **flip with the task** —
+confirming these are a *navigation* system that needs movement and time to be useful.
+
+**Static task** — classify one fixed (lat,lon) into a 100-way grid (`ablation.py`):
+
+| module removed | Δ accuracy | verdict |
+|---|---|---|
+| grid_attractor | −91.6% | load-bearing |
+| boundary | −9.3% | helps |
+| cortical_column | +3.7% | mildly harmful |
+| lateral_inhibition | +7.1% | harmful |
+| conjunctive | +7.1% | **harmful** (no movement → dormant) |
+| phase | +7.2% | **harmful** (no movement → dormant) |
+
+**4D navigation task** — integrate a sequence of moves (heading, speed, vertical
+velocity) over time *t* → final (x,y,z) (`ablation_trajectory.py`; 3 seeds, T=12,
+metric = within-0.15 accuracy, full stack = 95.3%):
+
+| module removed | accuracy | Δ vs full | verdict |
+|---|---|---|---|
+| conjunctive | 0.0% | **−95.3%** | **essential** (was +7.1% harmful!) |
+| lateral_inhibition | 86.5% | −8.8% | helps (was +7.1% harmful!) |
+| grid_attractor | 88.4% | −6.9% | helps |
+| theta_gamma | 95.6% | +0.3% | neutral |
+| cortical_column | 98.7% | +3.4% | mildly harmful |
+
+**The inversion:** `conjunctive` (head-direction × speed = velocity binding) goes from
++7.1% *harmful* on the static task to **−95.3% essential** on the movement task —
+without it the model can't read the moves and fails completely. `lateral_inhibition`
+flips the same way; `grid_attractor` (the path integrator) is load-bearing on both.
+
+**Synchronization helps.** Giving each module its own auxiliary target-prediction
+signal (aux loss) lifts the full stack 95.3% → 97.9% (err 0.092 → 0.075). This is the
+concrete, working form of "synchronize the modules" — each specialises against its own
+objective instead of training as one tangled blob.
+
+**Managing complexity — the empirical rule:** match the module set to the task.
+Movement modules are dead weight (even harmful) on static tasks and essential on
+movement tasks. `theta_gamma` and `cortical_column` aren't needed for *simple* path
+integration — making them load-bearing needs order-dependent / long-horizon tasks
+(recall a past position, detect a self-crossing loop), the next milestone.
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.
