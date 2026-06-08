@@ -1,0 +1,49 @@
+{
+  "task": "path_integration_3d",
+  "T": 8,
+  "seeds": [
+    0
+  ],
+  "aux_loss": false,
+  "mode": "leave_one_out",
+  "tol": 0.5,
+  "full": {
+    "err": 0.8820897340774536,
+    "err_std": 0.0,
+    "acc": 0.17274999618530273,
+    "acc_std": 0.0,
+    "params": 72612
+  },
+  "ablation": [
+    {
+      "module": "conjunctive",
+      "err": 1.6793004274368286,
+      "acc": 0.027249999344348907,
+      "delta_acc": -0.14549999684095383
+    },
+    {
+      "module": "grid_attractor",
+      "err": 1.058074712753296,
+      "acc": 0.1054999977350235,
+      "delta_acc": -0.06724999845027924
+    },
+    {
+      "module": "theta_gamma",
+      "err": 1.6717827320098877,
+      "acc": 0.026750000193715096,
+      "delta_acc": -0.14599999599158764
+    },
+    {
+      "module": "cortical_column",
+      "err": 0.9355728626251221,
+      "acc": 0.1459999978542328,
+      "delta_acc": -0.026749998331069946
+    },
+    {
+      "module": "lateral_inhibition",
+      "err": 0.8860648274421692,
+      "acc": 0.1652500033378601,
+      "delta_acc": -0.007499992847442627
+    }
+  ]
+}
