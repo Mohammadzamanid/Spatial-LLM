@@ -3,18 +3,19 @@ src/models/neuro/trajectory_cortex.py
 
 Recurrent, ablatable spatial cortex for 4D navigation (x, y, z over time t).
 
-Two tasks (the cortex supports both):
-  - "pathint": integrate a sequence of moves -> final (x,y,z). Order-INDEPENDENT
-               (a commutative sum), so it needs only velocity encoding + integration.
-  - "recall":  "where were you at step k?" -> position at a queried timestep. This is
-               order/ history-DEPENDENT: a sum cannot answer it. The model must keep a
-               running per-step position (recurrent integration) and retrieve the k-th,
-               so the recurrent integrator becomes load-bearing.
+Three tasks:
+  - "pathint":   integrate moves -> FINAL (x,y,z). Commutative sum: only needs the
+                 velocity encoder + integration.
+  - "recall":    "where were you at step k?" with FULL-sequence attention. Order-
+                 dependent, so the recurrent integrator (running position) is essential.
+  - "memrecall": same query, but through a fixed-size MEMORY BOTTLENECK — the trajectory
+                 is multiplexed into ONE vector and the answer is read back from that.
+                 This needs an ORDER-preserving memory (theta-gamma, ~7 slots); a mean-
+                 pool bottleneck collapses order and fails. Makes the whole stack
+                 (velocity encoder + integrator + theta-gamma memory) load-bearing.
 
-Modules (head-direction x speed = conjunctive; grid-attractor path integrator;
-theta-gamma sequence memory; cortical microcircuits) can each be toggled (ablation)
-and, with gated=True, each OPTIONAL module gets a learned gate so the network turns
-modules it doesn't need DOWN on its own (task-dependent complexity).
+With gated=True each OPTIONAL module gets a learned gate (+L1) so the network turns
+down modules it doesn't need (task-dependent complexity).
 """
 import math
 
@@ -23,27 +24,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .spatial_cells import ConjunctiveSpatialCells
-from .oscillations import ThetaGammaCoupling
+from .oscillations import ThetaGammaCoupling, ThetaGammaMemory
 from .microcircuits import CorticalColumn, LateralInhibition
 
 
 TRAJ_DEFAULT_CONFIG = {
     "conjunctive": True,        # head-direction x speed -> per-step velocity code (structural)
     "grid_attractor": True,     # recurrent path integrator over the move sequence (structural)
-    "theta_gamma": True,        # theta-gamma ordered sequence memory (gateable add-on)
+    "theta_gamma": True,        # theta-gamma ordered sequence memory
     "cortical_column": True,    # canonical microcircuit (gateable add-on)
     "lateral_inhibition": True, # surround inhibition (gateable add-on)
 }
-# Modules whose usefulness is task-dependent get a learned gate; the two structural
-# ones (velocity encoder + integrator) are the I/O path and are not gated.
 GATEABLE = ("theta_gamma", "cortical_column", "lateral_inhibition")
 
 
 class _AttractorIntegrator(nn.Module):
-    """Recurrent continuous-attractor path integrator. Accumulates per-step velocity
-    embeddings into a bump on a toroidal sheet and reads out the integrated position.
-    With return_sequence=True it returns the running position at EVERY step (needed for
-    recall); otherwise just the final position (path integration)."""
+    """Recurrent continuous-attractor path integrator. With return_sequence=True it
+    returns the running position at every step (needed for recall/memrecall)."""
 
     def __init__(self, embed_dim: int, grid_size: int = 16, settle: int = 2):
         super().__init__()
@@ -64,20 +61,21 @@ class _AttractorIntegrator(nn.Module):
         u = torch.zeros(B, self.N, device=vel_seq.device, dtype=vel_seq.dtype)
         outs = []
         for t in range(T):
-            u = u + self.vel_to_sheet(vel_seq[:, t])          # signed accumulate = integrate
+            u = u + self.vel_to_sheet(vel_seq[:, t])
             for _ in range(self.settle):
-                u = u + 0.1 * F.linear(torch.tanh(u), self.W)  # gentle attractor coupling
+                u = u + 0.1 * F.linear(torch.tanh(u), self.W)
             if return_sequence:
-                outs.append(self.readout(u / T))               # running position at step t
+                outs.append(self.readout(u / T))
         if return_sequence:
-            return torch.stack(outs, dim=1)                    # (B, T, D)
-        return self.readout(u / T)                             # final position (B, D)
+            return torch.stack(outs, dim=1)
+        return self.readout(u / T)
 
 
 class TrajectoryCortex(nn.Module):
     def __init__(self, embed_dim: int = 64, config: dict | None = None,
                  aux_heads: bool = False, dims: int = 3,
-                 task: str = "pathint", gated: bool = False, max_T: int = 64):
+                 task: str = "pathint", gated: bool = False, max_T: int = 64,
+                 mem_slots: int = 8):
         super().__init__()
         self.embed_dim = embed_dim
         self.dims = dims
@@ -93,19 +91,30 @@ class TrajectoryCortex(nn.Module):
             self.integrator = _AttractorIntegrator(embed_dim)
         else:
             self.pool_proj = nn.Linear(embed_dim, embed_dim)
-        if self.cfg["theta_gamma"]:
-            self.theta_gamma = ThetaGammaCoupling(embed_dim, num_slots=7)
+
+        # theta-gamma plays two roles depending on task:
+        #  - pathint/recall: optional additive sequence-summary (ThetaGammaCoupling)
+        #  - memrecall:      the fixed-size ORDERED memory bottleneck (ThetaGammaMemory)
+        self.tg_addon = (ThetaGammaCoupling(embed_dim, num_slots=7)
+                         if self.cfg["theta_gamma"] and task != "memrecall" else None)
+        self.tg_mem = (ThetaGammaMemory(embed_dim, num_slots=mem_slots)
+                       if self.cfg["theta_gamma"] and task == "memrecall" else None)
+
         self.column = CorticalColumn(dim=embed_dim) if self.cfg["cortical_column"] else None
         self.lateral = LateralInhibition(dim=embed_dim) if self.cfg["lateral_inhibition"] else None
 
         if task == "recall":
-            self.step_key = nn.Embedding(max_T, embed_dim)     # shared key/query per timestep
+            self.step_key = nn.Embedding(max_T, embed_dim)   # tied key/query positional retrieval
+        if task == "memrecall":
+            self.q_embed = nn.Embedding(max_T, embed_dim)              # query for the mean-pool fallback
+            self.bottleneck_read = nn.Linear(embed_dim * 2, embed_dim)  # read item k from order-less mem
 
         self.out_norm = nn.LayerNorm(embed_dim)
         self.readout = nn.Linear(embed_dim, dims)
 
-        # learned gates on the optional modules (sigmoid; init ~open at sigmoid(2)=0.88)
-        self.gate_names = [m for m in GATEABLE if self.cfg[m]]
+        # theta_gamma is structural (not gated) on memrecall; gateable add-on otherwise
+        self.gate_names = [m for m in GATEABLE if self.cfg[m]
+                           and not (task == "memrecall" and m == "theta_gamma")]
         if gated and self.gate_names:
             self.gates = nn.Parameter(torch.full((len(self.gate_names),), 2.0))
 
@@ -136,28 +145,28 @@ class TrajectoryCortex(nn.Module):
             step = step + (self.conjunctive(heading.reshape(B * T), speed.reshape(B * T)).view(B, T, -1)
                            + self.vert(vz.reshape(B * T, 1)).view(B, T, -1))
 
-        if self.task == "recall":
-            # need per-step RUNNING positions, then retrieve the queried step k
-            if self.cfg["grid_attractor"]:
-                states = self.integrator(step, return_sequence=True)   # (B,T,D) running positions
-            else:
-                states = step                                          # no integration -> velocities
-            idx = torch.arange(T, device=device)
-            # tied key/query: step k's query IS its own key, so attention is self-similar
-            # and peaks at t=k from the start (then refines).
-            attn = torch.softmax(self.step_key(k) @ self.step_key(idx).t()
-                                 / math.sqrt(self.embed_dim), dim=-1)   # (B,T) peaks at step k
-            position = (attn.unsqueeze(-1) * states).sum(dim=1)         # (B,D) retrieved state
-        else:  # pathint: final position only
-            if self.cfg["grid_attractor"]:
-                position = self.integrator(step)
-            else:
-                position = self.pool_proj(step.mean(dim=1))
+        if self.task == "pathint":
+            position = self.integrator(step) if self.cfg["grid_attractor"] else self.pool_proj(step.mean(1))
+        else:
+            # recall / memrecall need per-step running positions
+            states = self.integrator(step, return_sequence=True) if self.cfg["grid_attractor"] else step
+            if self.task == "recall":
+                idx = torch.arange(T, device=device)
+                attn = torch.softmax(self.step_key(k) @ self.step_key(idx).t()
+                                     / math.sqrt(self.embed_dim), dim=-1)
+                position = (attn.unsqueeze(-1) * states).sum(dim=1)
+            else:  # memrecall — through a fixed-size memory bottleneck
+                if self.tg_mem is not None:
+                    m = self.tg_mem.store(states)                 # ordered multiplex
+                    position = self.tg_mem.retrieve(m, k)         # read slot k
+                else:
+                    m = states.mean(dim=1)                        # order-less bottleneck
+                    position = self.bottleneck_read(torch.cat([m, self.q_embed(k)], dim=-1))
 
         h = position
         tg = None
-        if self.cfg["theta_gamma"]:
-            tg = self.theta_gamma(step)
+        if self.tg_addon is not None:
+            tg = self.tg_addon(step)
             h = h + self._g("theta_gamma") * tg
         if self.column is not None:
             h = h + self._g("cortical_column") * self.column(h)

@@ -161,3 +161,32 @@ class SharpWaveRipple(nn.Module):
             seq = seq[:, idx, :]
         _, h = self.consolidator(seq)                                 # h: (1, B, D)
         return self.out(h.squeeze(0))                                 # (B, D)
+
+
+class ThetaGammaMemory(nn.Module):
+    """Phase-multiplexed working memory (Lisman & Idiart, 1995).
+
+    Binds up to ``num_slots`` ORDERED items into a SINGLE vector via per-slot phase
+    keys, then retrieves an item by its slot index. A fixed-size bottleneck that
+    preserves order AND identity — unlike mean-pooling, which collapses both. Capacity
+    is ~7 items (the classic 7±2 working-memory limit); recall degrades once the
+    sequence exceeds the available slots.
+    """
+
+    def __init__(self, dim: int, num_slots: int = 8):
+        super().__init__()
+        self.num_slots = num_slots
+        self.key = nn.Parameter(torch.randn(num_slots, dim) * 0.3)    # per-slot phase/binding key
+        self.store_proj = nn.Linear(dim, dim)
+        self.retrieve_proj = nn.Linear(dim, dim)
+
+    def store(self, items: torch.Tensor) -> torch.Tensor:
+        """items (B, S, D), S<=num_slots  ->  multiplexed memory (B, D)."""
+        S = min(items.shape[1], self.num_slots)
+        keys = torch.tanh(self.key[:S]).unsqueeze(0)                  # (1, S, D)
+        return (self.store_proj(items[:, :S]) * keys).sum(dim=1)      # bind + multiplex
+
+    def retrieve(self, m: torch.Tensor, k: torch.Tensor) -> torch.Tensor:
+        """Retrieve the item stored in slot k from the multiplexed memory m (B, D)."""
+        keyk = torch.tanh(self.key[k.clamp(max=self.num_slots - 1)])  # (B, D) unbind key
+        return self.retrieve_proj(m * keyk)                           # (B, D)

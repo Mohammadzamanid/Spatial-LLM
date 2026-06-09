@@ -50,7 +50,7 @@ def _moves(n, T, seed, max_speed=1.0):
 
 def make_data(task, n, T, seed, max_speed=1.0):
     heading, speed, vz, disp = _moves(n, T, seed, max_speed)
-    if task == "recall":
+    if task in ("recall", "memrecall"):
         cum = disp.cumsum(dim=1)                                  # (n,T,3) running position
         gk = torch.Generator().manual_seed(seed + 9973)
         k = torch.randint(0, T, (n,), generator=gk)
@@ -69,7 +69,7 @@ def train_eval(task, config, data_tr, data_te, epochs=40, aux_loss=False,
     mse = nn.MSELoss()
 
     def split(batch_idx, data):
-        if task == "recall":
+        if task in ("recall", "memrecall"):
             h, s, v, k, y = data
             return (h[batch_idx], s[batch_idx], v[batch_idx]), {"k": k[batch_idx]}, y[batch_idx]
         h, s, v, y = data
@@ -123,7 +123,7 @@ def _runner(args, device):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--task", choices=["pathint", "recall"], default="pathint")
+    ap.add_argument("--task", choices=["pathint", "recall", "memrecall"], default="pathint")
     ap.add_argument("--mode", choices=["leave_one_out", "add_one_in", "gates"],
                     default="leave_one_out")
     ap.add_argument("--aux_loss", action="store_true")
