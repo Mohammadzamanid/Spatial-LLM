@@ -49,7 +49,8 @@ class TrajectoryLLM(nn.Module):
             llm_base = AutoModelForCausalLM.from_pretrained(base_llm, torch_dtype=torch.float32)
         lora_cfg = LoraConfig(
             task_type=TaskType.CAUSAL_LM, r=lora_r, lora_alpha=lora_alpha,
-            target_modules=lora_target_modules or ["q_proj", "v_proj"],
+            target_modules=lora_target_modules or
+            ["q_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
             lora_dropout=lora_dropout, bias="none",
         )
         self.llm = get_peft_model(llm_base, lora_cfg)

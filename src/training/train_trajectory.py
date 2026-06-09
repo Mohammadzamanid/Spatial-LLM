@@ -77,10 +77,44 @@ def main(a):
     yes_frac = sum(x == "Yes." for x in ava) / len(ava)
     print(f"data: {a.n_train} train / {a.n_val} val (val 'Yes' fraction={yes_frac:.2f})")
 
+    # ---- Pre-train the cortex on path integration, then freeze it ----
+    # Learning path integration purely from a single yes/no token is too weak a
+    # gradient and collapses to the class prior. So first teach the cortex to
+    # integrate (strong MSE regression to the final position), then freeze it; the
+    # LLM then only has to read a CLEAN spatial representation.
+    def _final_pos(H, S, V):
+        return torch.stack([(S * H.cos()).sum(1), (S * H.sin()).sum(1), V.sum(1)], dim=-1)
+
+    if a.pretrain_cortex:
+        fin_tr = _final_pos(Htr, Str, Vtr).to(device)
+        cortex = model.cortex
+        copt = torch.optim.Adam(cortex.parameters(), lr=3e-3)
+        mse = torch.nn.MSELoss()
+        cortex.train()
+        for _ in range(a.cortex_epochs):
+            perm = torch.randperm(a.n_train)
+            for i in range(0, a.n_train, 256):
+                idx = perm[i:i + 256]
+                copt.zero_grad()
+                pred = cortex(Htr[idx].to(device), Str[idx].to(device), Vtr[idx].to(device))
+                copt_loss = mse(pred, fin_tr[idx])
+                copt_loss.backward()
+                copt.step()
+        with torch.no_grad():
+            fin_va = _final_pos(Hva, Sva, Vva).to(device)
+            err = (cortex(Hva.to(device), Sva.to(device), Vva.to(device)) - fin_va).norm(dim=-1).mean().item()
+            base = fin_va.norm(dim=-1).mean().item()
+        print(f"cortex pre-trained on path integration: val final-pos err={err:.3f} "
+              f"(predict-origin baseline ~{base:.2f}) -> frozen", flush=True)
+        for p in cortex.parameters():
+            p.requires_grad_(False)
+
     ds = TrajectoryQADataset(Htr, Str, Vtr, atr)
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=a.lr)
 
     model.train()
+    if a.pretrain_cortex:
+        model.cortex.eval()   # keep the frozen cortex deterministic
     nsteps = (len(ds) + a.bs - 1) // a.bs
     print(f"starting training: {a.epochs} epochs x {nsteps} steps (logging every 25)", flush=True)
     for ep in range(a.epochs):
@@ -118,4 +152,7 @@ if __name__ == "__main__":
     ap.add_argument("--bs", type=int, default=4)   # fp32 1.5B fits a T4 at bs=4 + grad checkpointing
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--pretrain_cortex", type=int, default=1,
+                    help="1 = pre-train+freeze the cortex on path integration before LLM training")
+    ap.add_argument("--cortex_epochs", type=int, default=40)
     main(ap.parse_args())
