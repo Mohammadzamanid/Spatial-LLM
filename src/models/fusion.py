@@ -44,6 +44,7 @@ class SpatialFusionLayer(nn.Module):
         num_heads: int = 8,
         dropout: float = 0.1,
         num_spatial_groups: int = 1,
+        gate_init: float = 0.0,
     ):
         super().__init__()
         self.num_spatial_groups = num_spatial_groups
@@ -56,12 +57,13 @@ class SpatialFusionLayer(nn.Module):
         # Normalize spatial tokens before they enter cross-attention. Without this
         # they arrive ~27x larger than the LLM's input embeddings and bury the text.
         self.norm_spatial = nn.LayerNorm(hidden_dim)
-        # One tanh gate per spatial group (a single shared gate when groups == 1),
-        # zero-initialized so at the start of training the block is an identity
-        # (fused == text), keeping generation coherent. The model learns to "open"
-        # each gate only as far as that module's spatial signal helps.
-        self.attn_gate = nn.Parameter(torch.zeros(num_spatial_groups))
-        self.ffn_gate = nn.Parameter(torch.zeros(1))
+        # One tanh gate per spatial group (a single shared gate when groups == 1).
+        # gate_init=0 -> the block starts as an identity (fused == text), keeping
+        # generation coherent (used by SpatialLLM). gate_init>0 opens the spatial
+        # pathway from step 0 — needed when the answer depends ENTIRELY on the spatial
+        # channel (e.g. TrajectoryLLM), otherwise the zero gate gives no gradient to open.
+        self.attn_gate = nn.Parameter(torch.full((num_spatial_groups,), float(gate_init)))
+        self.ffn_gate = nn.Parameter(torch.full((1,), float(gate_init)))
         self.ffn = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim * 4),
             nn.GELU(),
@@ -154,11 +156,13 @@ class MultiScaleSpatialFusion(nn.Module):
         num_heads: int = 8,
         num_layers: int = 2,
         num_spatial_groups: int = 1,
+        gate_init: float = 0.0,
     ):
         super().__init__()
         self.num_spatial_groups = num_spatial_groups
         self.layers = nn.ModuleList([
-            SpatialFusionLayer(hidden_dim, num_heads, num_spatial_groups=num_spatial_groups)
+            SpatialFusionLayer(hidden_dim, num_heads, num_spatial_groups=num_spatial_groups,
+                               gate_init=gate_init)
             for _ in range(num_layers)
         ])
 

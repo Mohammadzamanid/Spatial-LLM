@@ -35,6 +35,7 @@ class TrajectoryLLM(nn.Module):
         cortex_task: str = "pathint",
         n_spatial_tokens: int = 8,
         fusion_num_heads: int = 8,
+        gate_init: float = 2.0,
         lora_r: int = 16,
         lora_alpha: int = 32,
         lora_target_modules: list[str] | None = None,
@@ -59,8 +60,11 @@ class TrajectoryLLM(nn.Module):
         self.cortex = TrajectoryCortex(embed_dim=cortex_dim, task=cortex_task)
         self.n_tokens = n_spatial_tokens
         self.to_tokens = nn.Linear(cortex_dim, llm_dim * n_spatial_tokens)
+        # gate_init>0 opens the fusion gates from step 0 — the answer depends entirely
+        # on the spatial channel, so a zero gate (SpatialLLM's anti-garbage default)
+        # would give the LLM no spatial signal and no gradient to ever open the gates.
         self.fusion = MultiScaleSpatialFusion(
-            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2
+            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2, gate_init=gate_init
         )
         self._embed_ref = []   # cache embed layer without registering it as a submodule
 
