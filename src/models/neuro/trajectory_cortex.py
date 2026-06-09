@@ -137,7 +137,9 @@ class TrajectoryCortex(nn.Module):
             return torch.tensor(0.0)
         return torch.sigmoid(self.gates).sum()
 
-    def forward(self, heading, speed, vz, k=None, return_aux=False):
+    def _hidden(self, heading, speed, vz, k=None):
+        """Compute the integrated hidden representation h (B, embed_dim) plus the
+        intermediates needed for aux heads. Shared by encode() and forward()."""
         B, T = heading.shape
         device = heading.device
         step = torch.zeros(B, T, self.embed_dim, device=device)
@@ -173,8 +175,16 @@ class TrajectoryCortex(nn.Module):
         if self.lateral is not None:
             h = h + self._g("lateral_inhibition") * self.lateral(h)
         h = self.out_norm(h)
-        pred = self.readout(h)
+        return h, step, position, tg
 
+    def encode(self, heading, speed, vz, k=None):
+        """Integrated trajectory representation (B, embed_dim) — the spatial summary
+        the LLM consumes in Milestone 2 (TrajectoryLLM)."""
+        return self._hidden(heading, speed, vz, k)[0]
+
+    def forward(self, heading, speed, vz, k=None, return_aux=False):
+        h, step, position, tg = self._hidden(heading, speed, vz, k)
+        pred = self.readout(h)
         if return_aux and self.aux_heads:
             aux_out = {}
             if "conjunctive" in self.aux:
