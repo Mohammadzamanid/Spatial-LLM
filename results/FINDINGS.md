@@ -127,6 +127,43 @@ velocity-encoder + integrator always stay on because the task is unsolvable with
 the gates let the model *enforce* it — keep the load-bearing ones, switch off the rest,
 per task. The "harmful module" problem dissolves: a module that doesn't help is gated off.
 
+### Memory-bottleneck recall — theta-gamma earns its keep
+
+The recall task above used attention over the FULL step sequence, so there was no memory
+pressure and theta-gamma stayed neutral. **memrecall** forces the trajectory through a
+fixed-size bottleneck: the whole path is multiplexed into ONE vector and the answer is
+read back from that vector alone (`--task memrecall`; 3 seeds, T=7, full acc = 99.9%).
+
+| module removed | accuracy | Δ vs full | verdict |
+|---|---|---|---|
+| conjunctive | 0.7% | −99.3% | essential |
+| theta_gamma | 7.0% | **−92.9%** | **essential** — ordered memory; mean-pool can't recall by index |
+| grid_attractor | 99.6% | −0.3% | neutral (the memory compensates at short T) |
+| cortical_column / lateral_inhibition | ~99.8% | ~0 | neutral |
+
+Theta-gamma's phase-slot multiplexing (Lisman-Idiart) preserves order + identity through
+the bottleneck; replacing it with a mean-pool collapses both and recall-by-index fails.
+
+**The 7±2 limit emerges.** `ThetaGammaMemory` has ~8 slots. Recall stays near-perfect
+while the trajectory fits, then collapses as it overflows — a capacity limit that falls
+out of the architecture, not a tuned hyperparameter:
+
+| trajectory length T | 4 | 7 | 10 | 14 |
+|---|---|---|---|---|
+| recall accuracy | 99.6% | 99.9% | 70.1% | 30.7% |
+
+### Each module is load-bearing on the task it was built for
+
+| task | what it requires | essential module(s) |
+|---|---|---|
+| static localization | a position code | grid cells |
+| path integration | velocity binding | conjunctive |
+| order-dependent recall | running per-step position | conjunctive + grid attractor |
+| memory-bottleneck recall | ordered working memory | conjunctive + theta-gamma |
+
+The whole stack earns its keep — not all at once, but each module exactly when the task
+demands it; the learned gates switch off the rest.
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.
