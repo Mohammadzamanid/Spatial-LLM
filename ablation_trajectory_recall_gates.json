@@ -1,0 +1,21 @@
+{
+  "task": "recall",
+  "mode": "gates",
+  "T": 12,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "tol": 0.15,
+  "full": {
+    "err": 0.05636170506477356,
+    "acc": 0.9413333336512247
+  },
+  "gates": {
+    "theta_gamma": 0.159,
+    "cortical_column": 0.089,
+    "lateral_inhibition": 0.091
+  },
+  "gate_l1": 0.05
+}

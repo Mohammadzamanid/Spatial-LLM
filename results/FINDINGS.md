@@ -86,8 +86,46 @@ objective instead of training as one tangled blob.
 **Managing complexity — the empirical rule:** match the module set to the task.
 Movement modules are dead weight (even harmful) on static tasks and essential on
 movement tasks. `theta_gamma` and `cortical_column` aren't needed for *simple* path
-integration — making them load-bearing needs order-dependent / long-horizon tasks
-(recall a past position, detect a self-crossing loop), the next milestone.
+integration — making them load-bearing needs order-dependent tasks (see recall, below).
+
+### Order-dependent recall — the integrator earns its keep
+
+Final-position path integration is a commutative sum, so the elaborate modules are
+redundant. The **recall** task — *"where were you at step k?"* — is order/history-
+dependent: a sum can't answer it; the model must keep a RUNNING per-step position
+(`ablation_trajectory.py --task recall`; 3 seeds, T=12, full stack acc = 99.8%).
+
+| module removed | accuracy | Δ vs full | verdict |
+|---|---|---|---|
+| conjunctive | 0.4% | −99.3% | essential |
+| grid_attractor | 3.9% | **−95.8%** | **essential** — flips from *redundant* on path-integration |
+| theta_gamma | 99.8% | +0.1% | neutral |
+| cortical_column | 99.6% | −0.2% | neutral |
+| lateral_inhibition | 99.6% | −0.2% | neutral |
+
+The **grid attractor** (recurrent path integrator) is redundant when only the final
+point matters but **load-bearing** when the task needs the trajectory's history — same
+module, opposite verdict, decided entirely by the task. (`add_one_in`: no single module
+suffices — recall needs the velocity encoder AND the integrator together.)
+
+### Task-dependent complexity — the model prunes itself (learned gates)
+
+Each optional module (theta-gamma, microcircuits) gets a learned gate + L1 cost, so the
+network can switch off what it doesn't need (`--mode gates`, L1=0.05):
+
+| task | full (ungated) | gated acc | learned add-on gates |
+|---|---|---|---|
+| pathint | 95.3% | **97.3%** | all → ~0.1–0.36 (OFF) |
+| recall | 99.8% | 94.1% ±6.9% | all → ~0.1–0.16 (OFF) |
+
+On both tasks the model drives the add-on gates toward 0 — it discovers they aren't
+load-bearing and switches them off (on pathint this *improves* accuracy; on recall the
+aggressive L1 is slightly costly/noisier — gate strength is a knob). The structural
+velocity-encoder + integrator always stay on because the task is unsolvable without them.
+
+**The complexity rule, made mechanical:** ablation reveals which modules a task needs;
+the gates let the model *enforce* it — keep the load-bearing ones, switch off the rest,
+per task. The "harmful module" problem dissolves: a module that doesn't help is gated off.
 
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is

@@ -1,0 +1,21 @@
+{
+  "task": "pathint",
+  "mode": "gates",
+  "T": 12,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "tol": 0.15,
+  "full": {
+    "err": 0.07353876655300458,
+    "acc": 0.9729999899864197
+  },
+  "gates": {
+    "theta_gamma": 0.361,
+    "cortical_column": 0.094,
+    "lateral_inhibition": 0.092
+  },
+  "gate_l1": 0.05
+}
