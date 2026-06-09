@@ -81,10 +81,12 @@ def main(a):
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=a.lr)
 
     model.train()
+    nsteps = (len(ds) + a.bs - 1) // a.bs
+    print(f"starting training: {a.epochs} epochs x {nsteps} steps (logging every 25)", flush=True)
     for ep in range(a.epochs):
         perm = torch.randperm(len(ds))
         tot = 0.0
-        for i in range(0, len(ds), a.bs):
+        for bi, i in enumerate(range(0, len(ds), a.bs)):
             batch = collate([ds[j] for j in perm[i:i + a.bs].tolist()], tok)
             batch = {k: v.to(device) for k, v in batch.items()}
             opt.zero_grad()
@@ -92,8 +94,10 @@ def main(a):
             loss.backward()
             opt.step()
             tot += loss.item()
+            if bi % 25 == 0:
+                print(f"  ep{ep+1} step {bi}/{nsteps}  loss={loss.item():.3f}", flush=True)
         full = evaluate(model, tok, Hva, Sva, Vva, ava, device, ablate=False)
-        print(f"epoch {ep+1}/{a.epochs}  loss={tot/(len(ds)//a.bs):.3f}  val_acc(full)={full:.1%}", flush=True)
+        print(f"epoch {ep+1}/{a.epochs}  loss={tot/nsteps:.3f}  val_acc(full)={full:.1%}", flush=True)
 
     full = evaluate(model, tok, Hva, Sva, Vva, ava, device, ablate=False)
     abl = evaluate(model, tok, Hva, Sva, Vva, ava, device, ablate=True)
