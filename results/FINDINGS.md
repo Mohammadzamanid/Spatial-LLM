@@ -193,6 +193,58 @@ must recover position internally — the way grid codes emerge (Banino 2018; Cue
 2018). A probe confirms "back-at-start" is ~100% readable from that no-label rep, so the
 LLM can use it just as well. (`--cortex_pretrain selfsup`, now the default.)
 
+## Generalization stress-test — does the integrator learn the OPERATION, or memorize the length?
+
+Every result above trains and tests at the SAME trajectory length. The decisive
+question for "did it really learn path integration": train on SHORT walks, then test
+on LONGER, unseen lengths. A model that learned the operation ("sum the per-step
+displacements") extrapolates; one that calibrated to the training length does not.
+
+We isolate the suspect — the `/T` length-normalisation in `_AttractorIntegrator`
+(`readout(u / T)`) — and cross it with the training distribution
+(`src/eval/generalize_trajectory.py`; train T=8, eval T∈{4,8,12,16,24,32}, 3 seeds).
+Read-out is **`mag_ratio = mean‖pred‖ / mean‖true‖`** (1.0 = correctly scaled at that
+length; <1 under-shoots, >1 over-shoots) and **`rel_err`** (flat across T ⇒ length-invariant).
+
+| mode (architecture, training) | T=4 | **T=8 train** | T=12 | T=16 | T=24 | T=32 |
+|---|---|---|---|---|---|---|
+| `shipped` — M2 cortex (`/T` + LayerNorm), fixed T | 2.60 | **1.00** | 0.65 | 0.48 | 0.32 | 0.24 |
+| `norm` — integrator `/T`, fixed T | 1.99 | **0.99** | 0.67 | 0.50 | 0.34 | 0.26 |
+| `free` — integrator scale-free, fixed T | 1.21 | **0.98** | 1.17 | 1.47 | 2.27 | 3.04 |
+| `norm_mixed` — `/T`, MIXED lengths (≤16) | 1.46 | **1.00** | 0.85 | 0.76 | 0.64 | 0.55 |
+| **`free_mixed` — scale-free, MIXED lengths (≤16)** | **0.89** | **0.90** | **0.90** | **0.89** | **0.88** | **0.93** |
+
+*(values are `mag_ratio`, mean over 3 seeds; std ≤0.07 for the `/T` modes.)*
+
+1. **Fixed-length training = length memorization — for EVERY architecture.** `shipped`,
+   `norm`, `free` all nail the train length (mag_ratio≈1.00) and all break away from it,
+   in opposite directions: the `/T` modes **under-shoot with mag_ratio ≈ train_T / test_T**
+   (0.5 at 2×, 0.25 at 4×, 2.0 at ½× — a textbook length-calibration artifact), while the
+   scale-free model **over-shoots** (3× at T=32) because its accumulator's magnitude tracks
+   step *count*, not net displacement. `rel_err` grows monotonically with |T−8| in all three.
+
+2. **Mixed-length training makes the operation generalize — and now the readout matters.**
+   `free_mixed` (scale-free + lengths sampled from {4…16}) is **flat: mag_ratio 0.86–0.93 and
+   rel_err ~0.65 across the whole sweep, including the held-out T=24 and T=32 — 2× beyond its
+   longest training length.** That is genuine extrapolation: error does NOT grow with
+   extrapolation distance. `norm_mixed` helps but still droops to 0.55 at T=32 — the `/T`
+   that *enabled* one-length memorization now mildly *fights* length-invariance.
+
+3. **Verdict.** The Milestone-2 cortex's failure to extrapolate is primarily a
+   **training-distribution artifact (it only ever saw one length), compounded by the `/T`
+   readout** — not a fundamental limit. The path-integration operation is genuinely
+   learnable and length-invariant, given (a) length-diverse training and (b) a scale-free
+   readout. *Recommendation:* if TrajectoryLLM should answer about paths of any length,
+   pre-train the cortex on mixed T with `readout(u)` (no `/T`), not the current fixed-T + `/T`.
+
+4. **The cost of generalizing.** The length-invariant `free_mixed` is *less precise at any
+   single length* than a specialist (rel_err ~0.65 vs 0.08 for the fixed model at its train
+   T) — a clean generalization-vs-specialization tradeoff. Its mag_ratio ~0.9 (slight
+   under-scale) is honest, not pinpoint; the flatness across length, not the absolute value,
+   is the extrapolation evidence, and more training steps would likely tighten it.
+
+See `results/generalize_trajectory.json` for per-seed numbers.
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.
