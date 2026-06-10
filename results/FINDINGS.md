@@ -245,6 +245,36 @@ length; <1 under-shoots, >1 over-shoots) and **`rel_err`** (flat across T ⇒ le
 
 See `results/generalize_trajectory.json` for per-seed numbers.
 
+### Folded back into the real model — TrajectoryLLM answers about LONGER paths
+
+We applied the recommendation to Milestone 2 and re-ran the full TrajectoryLLM
+(Qwen2.5-1.5B + LoRA, frozen self-supervised cortex) on Kaggle (T4). Both models train on
+SHORT paths and answer *"Are you back where you started?"* at T=8, 16, 24 — the longer two
+are held out (`train_trajectory.py --train_lengths … --eval_lengths 8 16 24 [--cortex_scale_free]`).
+
+| recipe | T=8 (train) | T=16 (held-out) | T=24 (held-out, 2× train) |
+|---|---|---|---|
+| baseline — fixed T=8 + `readout(u/T)` | **99.0%** | 83.0% | 69.0% |
+| **fix — mixed {6,8,10,12} + scale-free `readout(u)`** | 96.0% | **89.0%** | **86.0%** |
+| cortex OFF (text-only control) | ~47% | ~56% | ~48% |
+
+- **The fix generalizes; the baseline degrades.** One length + `/T` loses 30 points by T=24
+  (99→69); mixed-length + scale-free loses only 10 (96→86) and beats the baseline by
+  **+17 points at T=24** — answering correctly about paths 2× longer than any it trained on.
+  The cortex-level "back-at-start" probe shows the same trend, cleaner: **1.00 / 0.96 / 0.93**
+  (fix) vs **0.99 / 0.90 / 0.86** (baseline) — the scale-free cortex's rep is the more
+  length-invariant one, exactly as the isolated stress-test predicted.
+- **cortex OFF stays at chance at every length** → the LLM answers THROUGH the cortex, not
+  the text, even when extrapolating.
+- **Honest nuance.** The baseline doesn't *collapse* (69% > chance): the binary return
+  question is more forgiving than raw magnitude regression — the self-supervised place-code
+  (+ LayerNorm) carries a partly length-robust pattern. And the fix isn't perfect (86%, and
+  it concedes ~3 points at the training length — the generalization-vs-specialization
+  tradeoff again). But the operation transfers: the M2 model now reasons about path lengths
+  it never saw, and the recommendation measurably helps on the real LLM, not just the
+  isolated integrator. (`results/m2_lengthgen_baseline.json`, `…_scalefree_mixed.json`;
+  cells in `notebooks/m2_length_generalization_kaggle.py`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

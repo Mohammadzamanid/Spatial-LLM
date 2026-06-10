@@ -1,0 +1,18 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-5 summary. Exact command in notebooks/m2_length_generalization_kaggle.py (cell 4).",
+  "config": {
+    "base_llm": "Qwen/Qwen2.5-1.5B", "cortex_dim": 128,
+    "n_train": 2400, "n_val": 300, "epochs": 3, "cortex_epochs": 80
+  },
+  "train_lengths": [6, 8, 10, 12],
+  "eval_lengths": [8, 16, 24],
+  "cortex_scale_free": true,
+  "cortex_pretrain": "selfsup",
+  "probe_acc_by_len": {"8": 1.0, "16": 0.96, "24": 0.93},
+  "results_by_len": {
+    "8":  {"cortex_on": 0.96, "cortex_off": 0.47, "extrapolation": false},
+    "16": {"cortex_on": 0.89, "cortex_off": 0.56, "extrapolation": true},
+    "24": {"cortex_on": 0.86, "cortex_off": 0.48, "extrapolation": true}
+  },
+  "note": "Fix (mixed-length training + scale-free readout(u)): cortex ON HOLDS on held-out longer paths (96% -> 89% -> 86%), +17 points over baseline at T=24 (2x the longest training length). cortex OFF is the text-only control (~chance)."
+}
