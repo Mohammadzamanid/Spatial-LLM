@@ -18,6 +18,7 @@ os.environ["HF_HUB_DISABLE_XET"] = "1"       # avoid the Xet download stall
 !if [ -d Spatial-LLM ]; then cd Spatial-LLM && git pull origin main; else git clone https://github.com/Mohammadzamanid/Spatial-LLM.git; fi
 %cd Spatial-LLM
 !pip -q install -U "transformers>=4.40" peft accelerate
+!pip -q uninstall -y torchao   # peft's torchao>=0.16 guard trips on Kaggle's old 0.10; we don't use torchao
 print("setup done")
 
 
