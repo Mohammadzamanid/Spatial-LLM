@@ -35,6 +35,7 @@ import argparse
 import json
 import math
 import os
+import random
 
 import torch
 import torch.nn as nn
@@ -112,16 +113,33 @@ def predict(model, mode, heading, speed, vz):
 
 
 # ------------------------------------------------------------------------ train/eval
-def run_mode(mode, train_T, seeds, T_sweep, steps, batch, lr, device):
+# Each test mode = (architecture, training-length policy). The cross of {/T present?}
+# x {fixed vs mixed length} is the whole experiment: it separates an architecture
+# limit from a training-distribution one.
+MODE_SPECS = {
+    "shipped":    {"arch": "shipped", "mixed": False},   # M2 cortex, fixed T  (/T + LayerNorm)
+    "norm":       {"arch": "norm",    "mixed": False},   # integrator /T, fixed T
+    "free":       {"arch": "free",    "mixed": False},   # integrator scale-free, fixed T
+    "norm_mixed": {"arch": "norm",    "mixed": True},    # integrator /T, MIXED lengths
+    "free_mixed": {"arch": "free",    "mixed": True},    # integrator scale-free, MIXED lengths
+}
+
+
+def run_mode(mode, train_T, mixed_lengths, seeds, T_sweep, steps, batch, lr, device):
+    spec = MODE_SPECS[mode]
+    arch, mixed = spec["arch"], spec["mixed"]
+    train_lengths = mixed_lengths if mixed else [train_T]
     per_seed = []
     for seed in seeds:
         torch.manual_seed(seed)
-        model = build_model(mode).to(device)
+        random.seed(seed)
+        model = build_model(arch).to(device)
         opt = torch.optim.Adam(model.parameters(), lr=lr)
         model.train()
         for it in range(steps):
-            heading, speed, vz, target = gen_walk(batch, train_T, device)
-            pred = predict(model, mode, heading, speed, vz)
+            T = random.choice(train_lengths)             # fixed -> always train_T
+            heading, speed, vz, target = gen_walk(batch, T, device)
+            pred = predict(model, arch, heading, speed, vz)
             loss = F.mse_loss(pred, target)
             opt.zero_grad(); loss.backward(); opt.step()
 
@@ -130,7 +148,7 @@ def run_mode(mode, train_T, seeds, T_sweep, steps, batch, lr, device):
         with torch.no_grad():
             for T in T_sweep:
                 heading, speed, vz, target = gen_walk(2048, T, device)
-                pred = predict(model, mode, heading, speed, vz)
+                pred = predict(model, arch, heading, speed, vz)
                 err = (pred - target).norm(dim=-1).mean().item()
                 tgt_mag = target.norm(dim=-1).mean().item()
                 pred_mag = pred.norm(dim=-1).mean().item()
@@ -161,24 +179,28 @@ def run_mode(mode, train_T, seeds, T_sweep, steps, batch, lr, device):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--train_T", type=int, default=8)
+    ap.add_argument("--mixed_lengths", type=int, nargs="+", default=[4, 6, 8, 10, 12, 16],
+                    help="lengths sampled per-batch by the *_mixed modes (max 16 keeps "
+                         "T=24,32 as genuine held-out extrapolation)")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--T_sweep", type=int, nargs="+", default=[4, 8, 12, 16, 24, 32])
     ap.add_argument("--steps", type=int, default=800)
     ap.add_argument("--batch", type=int, default=128)
     ap.add_argument("--lr", type=float, default=1e-3)
-    ap.add_argument("--modes", type=str, nargs="+", default=["shipped", "norm", "free"])
+    ap.add_argument("--modes", type=str, nargs="+",
+                    default=["shipped", "norm", "free", "norm_mixed", "free_mixed"])
     ap.add_argument("--out", type=str, default="results/generalize_trajectory.json")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"device={device}  train_T={args.train_T}  sweep={args.T_sweep}  "
-          f"steps={args.steps}  seeds={args.seeds}", flush=True)
+    print(f"device={device}  train_T={args.train_T}  mixed={args.mixed_lengths}  "
+          f"sweep={args.T_sweep}  steps={args.steps}  seeds={args.seeds}", flush=True)
 
     results = {}
     for mode in args.modes:
         print(f"\n===== mode={mode} =====", flush=True)
-        results[mode] = run_mode(mode, args.train_T, args.seeds, args.T_sweep,
-                                  args.steps, args.batch, args.lr, device)
+        results[mode] = run_mode(mode, args.train_T, args.mixed_lengths, args.seeds,
+                                  args.T_sweep, args.steps, args.batch, args.lr, device)
 
     out = {
         "config": vars(args),
