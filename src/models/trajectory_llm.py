@@ -33,6 +33,7 @@ class TrajectoryLLM(nn.Module):
         base_llm: str = "Qwen/Qwen2.5-1.5B",
         cortex_dim: int = 128,
         cortex_task: str = "pathint",
+        cortex_length_norm: bool = True,
         n_spatial_tokens: int = 8,
         fusion_num_heads: int = 8,
         gate_init: float = 2.0,
@@ -57,8 +58,12 @@ class TrajectoryLLM(nn.Module):
         self.llm.print_trainable_parameters()
         llm_dim = llm_base.config.hidden_size
 
-        # Spatial pathway: recurrent cortex over the move sequence -> spatial tokens
-        self.cortex = TrajectoryCortex(embed_dim=cortex_dim, task=cortex_task)
+        # Spatial pathway: recurrent cortex over the move sequence -> spatial tokens.
+        # cortex_length_norm=False (scale-free readout) + mixed-length pre-training is
+        # what lets the cortex generalize to path lengths it never trained on
+        # (see src/eval/generalize_trajectory.py and the FINDINGS stress-test).
+        self.cortex = TrajectoryCortex(embed_dim=cortex_dim, task=cortex_task,
+                                       length_norm=cortex_length_norm)
         self.n_tokens = n_spatial_tokens
         self.to_tokens = nn.Linear(cortex_dim, llm_dim * n_spatial_tokens)
         # gate_init>0 opens the fusion gates from step 0 — the answer depends entirely

@@ -40,12 +40,23 @@ GATEABLE = ("theta_gamma", "cortical_column", "lateral_inhibition")
 
 class _AttractorIntegrator(nn.Module):
     """Recurrent continuous-attractor path integrator. With return_sequence=True it
-    returns the running position at every step (needed for recall/memrecall)."""
+    returns the running position at every step (needed for recall/memrecall).
 
-    def __init__(self, embed_dim: int, grid_size: int = 16, settle: int = 2):
+    ``length_norm`` controls how the accumulated sheet ``u`` is read out:
+      - True  (default): ``readout(u / T)`` — the original behaviour. Calibrates the
+        readout to the training length; the generalization stress-test
+        (``src/eval/generalize_trajectory.py``) showed this LOCKS the model to that
+        length (predictions scale by train_T/test_T on unseen lengths).
+      - False (scale-free): ``readout(u)`` — accumulation is read out directly. Paired
+        with MIXED-length training this is what extrapolates to unseen path lengths.
+    """
+
+    def __init__(self, embed_dim: int, grid_size: int = 16, settle: int = 2,
+                 length_norm: bool = True):
         super().__init__()
         self.N = grid_size * grid_size
         self.settle = settle
+        self.length_norm = length_norm
         self.vel_to_sheet = nn.Linear(embed_dim, self.N)
         g = grid_size
         cells = torch.stack(torch.meshgrid(
@@ -65,17 +76,17 @@ class _AttractorIntegrator(nn.Module):
             for _ in range(self.settle):
                 u = u + 0.1 * F.linear(torch.tanh(u), self.W)
             if return_sequence:
-                outs.append(self.readout(u / T))
+                outs.append(self.readout(u / T if self.length_norm else u))
         if return_sequence:
             return torch.stack(outs, dim=1)
-        return self.readout(u / T)
+        return self.readout(u / T if self.length_norm else u)
 
 
 class TrajectoryCortex(nn.Module):
     def __init__(self, embed_dim: int = 64, config: dict | None = None,
                  aux_heads: bool = False, dims: int = 3,
                  task: str = "pathint", gated: bool = False, max_T: int = 64,
-                 mem_slots: int = 8):
+                 mem_slots: int = 8, length_norm: bool = True):
         super().__init__()
         self.embed_dim = embed_dim
         self.dims = dims
@@ -88,7 +99,7 @@ class TrajectoryCortex(nn.Module):
             self.conjunctive = ConjunctiveSpatialCells(embed_dim=embed_dim)
             self.vert = nn.Linear(1, embed_dim)
         if self.cfg["grid_attractor"]:
-            self.integrator = _AttractorIntegrator(embed_dim)
+            self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm)
         else:
             self.pool_proj = nn.Linear(embed_dim, embed_dim)
 
