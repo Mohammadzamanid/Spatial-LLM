@@ -164,6 +164,32 @@ out of the architecture, not a tuned hyperparameter:
 The whole stack earns its keep — not all at once, but each module exactly when the task
 demands it; the learned gates switch off the rest.
 
+## Milestone 2 — the LLM answers trajectory questions in language
+
+The path (a sequence of moves) is encoded by the recurrent cortex into spatial tokens
+and fused into a LoRA-adapted Qwen2.5-1.5B; the prompt holds ONLY the question
+("Are you back where you started?"), so the moves reach the model *solely* through the
+cortex. Training the whole stack end-to-end from the single yes/no token collapses to
+the class prior, so the cortex is pre-trained on path integration first, then frozen,
+and the LLM learns to read it (`src/training/train_trajectory.py`).
+
+| cortex pre-training | cortex ON | cortex OFF (control) | contributes |
+|---|---|---|---|
+| supervised (regress final x,y,z) | **99.8%** | 51.3% (chance) | **+48.5%** |
+| self-supervised (place-cell prediction, no coords) | *(pending GPU run)* | — | — |
+
+cortex-OFF at chance confirms the LLM answers *through* the spatial cortex, not the text.
+
+**Caveat (honest).** The cortex is trained before the LLM, not end-to-end. This is
+defensible developmentally — the brain's grid/place/head-direction system is largely
+innate and present in pups before much experience (Langston 2010; Wills 2010), and the
+sensorimotor stage precedes language. The genuinely unrealistic part of the *supervised*
+run is the position LABELS. The **self-supervised** protocol removes them: the cortex
+predicts the place-cell code of where it ends up (a sensory function of position) and
+must recover position internally — the way grid codes emerge (Banino 2018; Cueva & Wei
+2018). A probe confirms "back-at-start" is ~100% readable from that no-label rep, so the
+LLM can use it just as well. (`--cortex_pretrain selfsup`, now the default.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

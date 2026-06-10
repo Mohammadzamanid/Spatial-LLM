@@ -17,8 +17,8 @@ os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 import torch
 from transformers import AutoTokenizer, set_seed
 
-from ..data.trajectory_qa import (PROMPT, QUESTION, TrajectoryQADataset, collate,
-                                   make_trajectory_qa)
+from ..data.trajectory_qa import (PROMPT, QUESTION, RETURN_TOL, TrajectoryQADataset,
+                                   collate, make_trajectory_qa)
 from ..models.trajectory_llm import TrajectoryLLM
 
 
@@ -77,43 +77,76 @@ def main(a):
     yes_frac = sum(x == "Yes." for x in ava) / len(ava)
     print(f"data: {a.n_train} train / {a.n_val} val (val 'Yes' fraction={yes_frac:.2f})")
 
-    # ---- Pre-train the cortex on path integration, then freeze it ----
-    # Learning path integration purely from a single yes/no token is too weak a
-    # gradient and collapses to the class prior. So first teach the cortex to
-    # integrate (strong MSE regression to the final position), then freeze it; the
-    # LLM then only has to read a CLEAN spatial representation.
+    # ---- Pre-train + freeze the cortex (the LLM then reads a CLEAN spatial rep) ----
+    # Learning path integration from a single yes/no token collapses to the class prior,
+    # so we teach the cortex to integrate FIRST, then freeze it. Two protocols:
+    #   selfsup    : predict the place-cell code of the DESTINATION (a fixed sensory
+    #                function of position). NO coordinates are ever given — the model
+    #                must recover position internally. Biologically faithful, the way
+    #                grid/place codes emerge (Banino et al. 2018; Cueva & Wei 2018).
+    #   supervised : regress directly to the ground-truth final (x,y,z). A scaffold that
+    #                uses position labels the brain never receives (kept as a baseline).
     def _final_pos(H, S, V):
         return torch.stack([(S * H.cos()).sum(1), (S * H.sin()).sum(1), V.sum(1)], dim=-1)
 
-    if a.pretrain_cortex:
-        fin_tr = _final_pos(Htr, Str, Vtr).to(device)
+    def _place_code(pos, centers, sigma=0.9):
+        d2 = ((pos.unsqueeze(1) - centers.unsqueeze(0)) ** 2).sum(-1)
+        return torch.exp(-d2 / (2 * sigma ** 2))
+
+    if a.cortex_pretrain != "none":
         cortex = model.cortex
-        copt = torch.optim.Adam(cortex.parameters(), lr=3e-3)
+        fin_tr = _final_pos(Htr, Str, Vtr).to(device)
+        fin_va = _final_pos(Hva, Sva, Vva).to(device)
         mse = torch.nn.MSELoss()
+        if a.cortex_pretrain == "selfsup":
+            K, cg = 128, torch.Generator().manual_seed(0)
+            centers = (torch.rand(K, 3, generator=cg) * 5 - 2.5).to(device)   # fixed environment
+            place_head = torch.nn.Linear(a.cortex_dim, K).to(device)
+            params = list(cortex.parameters()) + list(place_head.parameters())
+        else:
+            params = list(cortex.parameters())
+        copt = torch.optim.Adam(params, lr=3e-3)
         cortex.train()
         for _ in range(a.cortex_epochs):
             perm = torch.randperm(a.n_train)
             for i in range(0, a.n_train, 256):
                 idx = perm[i:i + 256]
                 copt.zero_grad()
-                pred = cortex(Htr[idx].to(device), Str[idx].to(device), Vtr[idx].to(device))
-                copt_loss = mse(pred, fin_tr[idx])
-                copt_loss.backward()
+                h = cortex.encode(Htr[idx].to(device), Str[idx].to(device), Vtr[idx].to(device))
+                if a.cortex_pretrain == "selfsup":
+                    loss = mse(place_head(h), _place_code(fin_tr[idx], centers))
+                else:
+                    loss = mse(cortex.readout(h), fin_tr[idx])
+                loss.backward()
                 copt.step()
-        with torch.no_grad():
-            fin_va = _final_pos(Hva, Sva, Vva).to(device)
-            err = (cortex(Hva.to(device), Sva.to(device), Vva.to(device)) - fin_va).norm(dim=-1).mean().item()
-            base = fin_va.norm(dim=-1).mean().item()
-        print(f"cortex pre-trained on path integration: val final-pos err={err:.3f} "
-              f"(predict-origin baseline ~{base:.2f}) -> frozen", flush=True)
         for p in cortex.parameters():
             p.requires_grad_(False)
+        # Probe (diagnostic): is the ANSWER readable from the FROZEN rep? For selfsup this
+        # is the key evidence the cortex learned navigation WITHOUT coordinate labels.
+        # (A linear position probe would mislead — place-cell codes encode position
+        # nonlinearly — so we probe the actual target with a small MLP.)
+        with torch.no_grad():
+            htr_f = cortex.encode(Htr.to(device), Str.to(device), Vtr.to(device))
+            hva_f = cortex.encode(Hva.to(device), Sva.to(device), Vva.to(device))
+        ytr_b = (fin_tr.norm(dim=-1) < RETURN_TOL).float()
+        yva_b = (fin_va.norm(dim=-1) < RETURN_TOL).float()
+        probe = torch.nn.Sequential(torch.nn.Linear(a.cortex_dim, 64), torch.nn.ReLU(),
+                                    torch.nn.Linear(64, 1)).to(device)
+        popt = torch.optim.Adam(probe.parameters(), lr=1e-2)
+        bce = torch.nn.BCEWithLogitsLoss()
+        for _ in range(300):
+            popt.zero_grad(); bce(probe(htr_f).squeeze(-1), ytr_b).backward(); popt.step()
+        with torch.no_grad():
+            pacc = ((probe(hva_f).squeeze(-1) > 0).float() == yva_b).float().mean().item()
+        print(f"cortex pre-trained [{a.cortex_pretrain}] -> frozen; 'back-at-start' readable "
+              f"from rep: probe acc={pacc:.1%} (chance ~{max(yva_b.mean().item(), 1-yva_b.mean().item()):.0%})",
+              flush=True)
 
     ds = TrajectoryQADataset(Htr, Str, Vtr, atr)
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=a.lr)
 
     model.train()
-    if a.pretrain_cortex:
+    if a.cortex_pretrain != "none":
         model.cortex.eval()   # keep the frozen cortex deterministic
     nsteps = (len(ds) + a.bs - 1) // a.bs
     print(f"starting training: {a.epochs} epochs x {nsteps} steps (logging every 25)", flush=True)
@@ -152,7 +185,8 @@ if __name__ == "__main__":
     ap.add_argument("--bs", type=int, default=4)   # fp32 1.5B fits a T4 at bs=4 + grad checkpointing
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--pretrain_cortex", type=int, default=1,
-                    help="1 = pre-train+freeze the cortex on path integration before LLM training")
-    ap.add_argument("--cortex_epochs", type=int, default=40)
+    ap.add_argument("--cortex_pretrain", choices=["selfsup", "supervised", "none"], default="selfsup",
+                    help="selfsup = place-cell prediction (no coordinate labels, biologically "
+                         "faithful); supervised = regress final (x,y,z); none = end-to-end")
+    ap.add_argument("--cortex_epochs", type=int, default=80)
     main(ap.parse_args())
