@@ -33,7 +33,7 @@ class TrajectoryLLM(nn.Module):
         base_llm: str = "Qwen/Qwen2.5-1.5B",
         cortex_dim: int = 128,
         cortex_task: str = "pathint",
-        cortex_length_norm: bool = True,
+        cortex_length_norm: bool = False,   # default: scale-free readout (generalizes across path lengths)
         n_spatial_tokens: int = 8,
         fusion_num_heads: int = 8,
         gate_init: float = 2.0,

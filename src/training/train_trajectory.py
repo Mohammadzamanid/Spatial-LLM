@@ -6,20 +6,20 @@ path reaches the model only through the trajectory cortex. Reports yes/no accura
 the cortex ON vs ABLATED (zeroed) — the ablated run is the control: if the LLM could
 answer from the (question-only) text alone it would still score high; it shouldn't.
 
-Length generalization
-----------------------
-``--train_lengths`` and ``--eval_lengths`` let the model train on a MIX of (short) path
-lengths and be evaluated on LONGER, held-out ones. Paired with ``--cortex_scale_free``
-(readout(u) instead of readout(u/T)) this is the recommendation from the generalization
+Length generalization (the DEFAULT recipe)
+-------------------------------------------
+By default the model now trains on a MIX of short path lengths (6,8,10,12) with a
+scale-free cortex readout (readout(u), not readout(u/T)) and is evaluated on LONGER,
+held-out lengths (8,16,24). This is the recommendation proven by the generalization
 stress-test (``src/eval/generalize_trajectory.py``): a cortex trained on one fixed length
-locks to it, but a scale-free cortex trained on mixed lengths extrapolates. The eval then
+locks to it, but a scale-free cortex trained on mixed lengths extrapolates. The eval
 prints accuracy per length and flags any length beyond the training range as EXTRAPOLATION.
 
-    # original single-length run (reproduces prior results)
-    python -m src.training.train_trajectory --T 8 --epochs 3
-    # length-generalization run: train short+mixed, test longer
-    python -m src.training.train_trajectory --train_lengths 6 8 10 12 \
-        --eval_lengths 8 16 24 --cortex_scale_free --epochs 3
+    # default = the generalizing recipe (train on 6,8,10,12; test 8,16,24)
+    python -m src.training.train_trajectory --epochs 3
+    # reproduce the old length-LOCKED baseline (single length + readout(u/T))
+    python -m src.training.train_trajectory --train_lengths 8 --eval_lengths 8 16 24 \
+        --no-cortex_scale_free --epochs 3
 """
 import argparse
 import json
@@ -263,15 +263,17 @@ if __name__ == "__main__":
     ap.add_argument("--n_train", type=int, default=4000)
     ap.add_argument("--n_val", type=int, default=600)
     ap.add_argument("--T", type=int, default=8, help="single-length fallback when "
-                    "--train_lengths/--eval_lengths are not given")
-    ap.add_argument("--train_lengths", type=int, nargs="+", default=None,
-                    help="path lengths to TRAIN on (mixed). Defaults to [--T].")
-    ap.add_argument("--eval_lengths", type=int, nargs="+", default=None,
+                    "--train_lengths/--eval_lengths are explicitly set to []")
+    ap.add_argument("--train_lengths", type=int, nargs="+", default=[6, 8, 10, 12],
+                    help="path lengths to TRAIN on. DEFAULT is mixed (the generalizing "
+                         "recipe); pass a single value (e.g. --train_lengths 8) for the "
+                         "length-locked baseline.")
+    ap.add_argument("--eval_lengths", type=int, nargs="+", default=[8, 16, 24],
                     help="path lengths to EVALUATE on; any beyond max(train_lengths) is "
-                         "held-out EXTRAPOLATION. Defaults to [--T].")
-    ap.add_argument("--cortex_scale_free", action="store_true",
-                    help="use readout(u) instead of readout(u/T) — needed for length "
-                         "generalization (see generalize_trajectory.py)")
+                         "held-out EXTRAPOLATION.")
+    ap.add_argument("--cortex_scale_free", action=argparse.BooleanOptionalAction, default=True,
+                    help="readout(u) (DEFAULT) vs --no-cortex_scale_free for readout(u/T); "
+                         "scale-free + mixed lengths is what generalizes (generalize_trajectory.py)")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--bs", type=int, default=4)   # fp32 1.5B fits a T4 at bs=4 + grad checkpointing
     ap.add_argument("--lr", type=float, default=2e-4)

@@ -29,12 +29,13 @@ print("model cached")
 
 # %% [cell 3] RUN A — baseline: fixed length (T=8) + readout(u/T)  [the old M2 recipe]
 # Expectation: strong at T=8, degrades at the longer held-out lengths (length-locked).
-!python -u -m src.training.train_trajectory --train_lengths 8 --eval_lengths 8 16 24 --cortex_pretrain selfsup --n_train 2400 --n_val 300 --epochs 3 --out results/m2_lengthgen_baseline.json
+# (scale-free is now the DEFAULT, so the baseline must opt out with --no-cortex_scale_free)
+!python -u -m src.training.train_trajectory --train_lengths 8 --eval_lengths 8 16 24 --no-cortex_scale_free --cortex_pretrain selfsup --n_train 2400 --n_val 300 --epochs 3 --out results/m2_lengthgen_baseline.json
 
 
-# %% [cell 4] RUN B — fix: mixed lengths (6,8,10,12) + scale-free readout(u)
-# Expectation: accuracy HOLDS at the held-out longer lengths (16, 24) — the cortex
-# learned the length-invariant integration operation, not one length.
+# %% [cell 4] RUN B — the DEFAULT (shipped) recipe: mixed lengths + scale-free readout(u)
+# Expectation: accuracy HOLDS at the held-out longer lengths (16, 24). These flags are now
+# the defaults, so a bare `python -m src.training.train_trajectory` gives the same recipe.
 !python -u -m src.training.train_trajectory --train_lengths 6 8 10 12 --eval_lengths 8 16 24 --cortex_scale_free --cortex_pretrain selfsup --n_train 2400 --n_val 300 --epochs 3 --out results/m2_lengthgen_scalefree_mixed.json
 
 
