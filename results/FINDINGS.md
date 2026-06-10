@@ -175,10 +175,13 @@ and the LLM learns to read it (`src/training/train_trajectory.py`).
 
 | cortex pre-training | cortex ON | cortex OFF (control) | contributes |
 |---|---|---|---|
-| supervised (regress final x,y,z) | **99.8%** | 51.3% (chance) | **+48.5%** |
-| self-supervised (place-cell prediction, no coords) | *(pending GPU run)* | — | — |
+| supervised (regress final x,y,z) | 99.8% | 51.3% (chance) | +48.5% |
+| **self-supervised (place-cell prediction, no coords)** | **99.7%** | 51.3% (chance) | **+48.3%** |
 
 cortex-OFF at chance confirms the LLM answers *through* the spatial cortex, not the text.
+**The self-supervised version matches the supervised one (99.7% vs 99.8%) with zero
+coordinate labels** — the cortex learned navigation from its own movement + sensory
+landmarks, and language then read it. That is the biologically faithful result.
 
 **Caveat (honest).** The cortex is trained before the LLM, not end-to-end. This is
 defensible developmentally — the brain's grid/place/head-direction system is largely

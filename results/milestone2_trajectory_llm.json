@@ -11,8 +11,8 @@
       "note": "cortex pre-trained by regressing the ground-truth final (x,y,z) — a scaffold that uses position labels the brain never receives."
     },
     "selfsup_pretrain": {
-      "status": "pending user GPU run",
-      "note": "cortex pre-trained by predicting the place-cell code of the destination (a fixed sensory function of position); NO coordinate labels. CPU probe: 'back-at-start' is ~100% readable from the no-label representation, so the LLM should read it as well as the supervised version."
+      "cortex_on": 0.997, "cortex_off": 0.513, "contributes": 0.483, "epochs": 4,
+      "note": "cortex pre-trained by predicting the place-cell code of the destination (a fixed sensory function of position); NO coordinate labels (Banino 2018; Cueva & Wei 2018). Matches the supervised result (99.7% vs 99.8%) without ever being handed a coordinate — the biologically faithful version."
     }
   },
   "caveat": "The cortex is pre-trained before the LLM, not learned end-to-end (end-to-end from one yes/no token collapses to the class prior). This is defensible: (1) the brain's grid/place/head-direction system is largely innate/developmentally scaffolded and present in pups before extensive experience (Langston et al. 2010; Wills et al. 2010); (2) the sensorimotor stage precedes language in development. The unrealistic part of the SUPERVISED run is the position LABELS; the SELF-SUPERVISED protocol removes them (predict a sensory function of position, recover position internally — Banino et al. 2018; Cueva & Wei 2018)."
