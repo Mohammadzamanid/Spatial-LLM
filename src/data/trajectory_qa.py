@@ -3,14 +3,19 @@ src/data/trajectory_qa.py
 
 Trajectory question-answering data for Milestone 2.
 
-Each example is a PATH (a sequence of moves) + a natural-language yes/no question
-("Are you back where you started?") + answer. The moves are NEVER written in the text —
-they reach the model only through the trajectory cortex — so the LLM must use the
-cortex's path integration to answer.
+Each example is a PATH (a sequence of moves) + a natural-language question + answer. The
+moves are NEVER written in the text — they reach the model only through the trajectory
+cortex — so the LLM must use the cortex's path integration to answer.
 
-Balanced by construction: ~half the paths are loops (out-and-back, return near start ->
-"Yes."), half are open walks (end far -> "No."). The label is the ground truth from the
-actual final displacement, so it's always correct even if a random walk happens to close.
+Three question types (``task=``), in increasing difficulty:
+  - "return"   : "Are you back where you started?"     -> Yes./No.   (binary; forgiving)
+  - "distance" : "How far are you from where you started?" -> a quantized bucket 0..5
+                 (multi-class MAGNITUDE — must read |displacement|, not just near-origin)
+  - "bearing"  : "Which direction is the start from here?"  -> an 8-way compass word
+                 (DIRECTION; scale-invariant, so the cleanest length-extrapolation probe)
+
+distance/bearing are much harder than the binary return question: the model must decode the
+actual displacement VECTOR (how far / which way), which stresses the integrator far more.
 """
 import math
 import random
@@ -18,12 +23,22 @@ import random
 import torch
 from torch.utils.data import Dataset
 
-QUESTION = "Are you back where you started?"
+QUESTIONS = {
+    "return":   "Are you back where you started?",
+    "distance": "How far are you from where you started?",
+    "bearing":  "Which direction is the start from here?",
+}
+QUESTION = QUESTIONS["return"]                 # backward-compatible default
 PROMPT = "[NAVIGATION] You walked a path through space.\n[QUESTION] {q}\n[ANSWER]"
-RETURN_TOL = 0.5   # final displacement below this counts as "back at start"
+RETURN_TOL = 0.5      # final displacement below this counts as "back at start"
+DIST_MAX_BUCKET = 5   # distance bucket saturates at "5" (= 5 or more)
+# 8 compass points, in increasing angle from +x (East) CCW. Index = sector.
+COMPASS = ["east", "northeast", "north", "northwest",
+           "west", "southwest", "south", "southeast"]
 
 
 def _gen_moves(T, rng, loop):
+    """Out-and-back loop (returns home) or open walk. Used by the 'return' task."""
     heading = [rng.uniform(0, 2 * math.pi) for _ in range(T)]
     speed = [rng.uniform(0.3, 1.0) for _ in range(T)]
     vz = [rng.uniform(-0.5, 0.5) for _ in range(T)]
@@ -37,16 +52,104 @@ def _gen_moves(T, rng, loop):
     return torch.tensor(heading), torch.tensor(speed), torch.tensor(vz)
 
 
-def make_trajectory_qa(n, T=8, seed=0):
-    """Returns heading,speed,vz (n,T) tensors and a list of "Yes."/"No." answers."""
+def _walk(T, rng):
+    """Plain random walk with modest step size, so endpoints stay within a bounded
+    region (keeps the self-supervised place-cell environment from saturating on the
+    magnitude tasks). Random heading per step -> distance grows ~sqrt(T), bearing uniform."""
+    heading = [rng.uniform(0, 2 * math.pi) for _ in range(T)]
+    speed = [rng.uniform(0.2, 0.8) for _ in range(T)]
+    vz = [rng.uniform(-0.4, 0.4) for _ in range(T)]
+    return torch.tensor(heading), torch.tensor(speed), torch.tensor(vz)
+
+
+def _final_xyz(h, s, v):
+    return (s * h.cos()).sum().item(), (s * h.sin()).sum().item(), v.sum().item()
+
+
+def answer_for(task, dx, dy, dz):
+    """Ground-truth language answer for a path ending at displacement (dx, dy, dz)."""
+    dist = math.sqrt(dx * dx + dy * dy + dz * dz)
+    if task == "return":
+        return "Yes." if dist < RETURN_TOL else "No."
+    if task == "distance":
+        return str(min(int(round(dist)), DIST_MAX_BUCKET))
+    if task == "bearing":
+        ang = math.atan2(-dy, -dx)                  # direction from here BACK to the start (xy)
+        sector = int(round(ang / (math.pi / 4))) % 8
+        return COMPASS[sector]
+    raise ValueError(task)
+
+
+def parse_answer(task, text):
+    """Extract the predicted answer from generated text (None if unparseable)."""
+    t = text.strip().lower()
+    if task == "return":
+        yi, ni = t.find("yes"), t.find("no")
+        if yi == -1 and ni == -1:
+            return None
+        if yi == -1:
+            return "no"
+        if ni == -1:
+            return "yes"
+        return "yes" if yi < ni else "no"
+    if task == "distance":
+        for ch in t:
+            if ch in "012345":
+                return ch
+        return None
+    if task == "bearing":
+        for w in ("northeast", "northwest", "southeast", "southwest"):  # compounds first
+            if w in t:
+                return w
+        for w in ("north", "south", "east", "west"):
+            if w in t:
+                return w
+        return None
+    raise ValueError(task)
+
+
+def answer_index(task, parsed):
+    """Integer index of a parsed answer, for exact / within-1 scoring (None if unparseable)."""
+    if parsed is None:
+        return None
+    if task == "return":
+        return {"yes": 1, "no": 0}.get(parsed)
+    if task == "distance":
+        return int(parsed)
+    if task == "bearing":
+        return COMPASS.index(parsed)
+    raise ValueError(task)
+
+
+def num_classes(task):
+    return {"return": 2, "distance": DIST_MAX_BUCKET + 1, "bearing": 8}[task]
+
+
+def is_circular(task):
+    return task == "bearing"
+
+
+def make_trajectory_qa(n, T=8, seed=0, task="return"):
+    """Returns heading,speed,vz (n,T) tensors and a list of language answers for ``task``."""
     rng = random.Random(seed)
     H, S, V, ans = [], [], [], []
     for _ in range(n):
-        h, s, v = _gen_moves(T, rng, loop=rng.random() < 0.5)
-        dx = (s * h.cos()).sum(); dy = (s * h.sin()).sum(); dz = v.sum()
-        dist = torch.sqrt(dx * dx + dy * dy + dz * dz).item()
+        if task == "return":
+            h, s, v = _gen_moves(T, rng, loop=rng.random() < 0.5)
+        elif task == "distance":
+            # ~30% loops (bucket 0) + random walks (spread the magnitude across buckets)
+            h, s, v = _gen_moves(T, rng, loop=True) if rng.random() < 0.3 else _walk(T, rng)
+        elif task == "bearing":
+            while True:                              # need a well-defined heading-home
+                h, s, v = _walk(T, rng)
+                dx, dy, _ = _final_xyz(h, s, v)
+                if dx * dx + dy * dy > 0.64:         # |xy displacement| > 0.8
+                    break
+        else:
+            raise ValueError(task)
+        dx, dy, dz = _final_xyz(h, s, v)
         H.append(h); S.append(s); V.append(v)
-        ans.append("Yes." if dist < RETURN_TOL else "No.")
+        ans.append(answer_for(task, dx, dy, dz))
     return torch.stack(H), torch.stack(S), torch.stack(V), ans
 
 
@@ -61,12 +164,12 @@ class TrajectoryQADataset(Dataset):
         return {"heading": self.H[i], "speed": self.S[i], "vz": self.V[i], "answer": self.ans[i]}
 
 
-def collate(batch, tokenizer, max_length: int = 64):
+def collate(batch, tokenizer, question: str = QUESTION, max_length: int = 64):
     """Tokenize question(+answer) with answer-only label masking; stack the moves."""
     H = torch.stack([b["heading"] for b in batch])
     S = torch.stack([b["speed"] for b in batch])
     V = torch.stack([b["vz"] for b in batch])
-    prompt = PROMPT.format(q=QUESTION)
+    prompt = PROMPT.format(q=question)
     fulls = [prompt + " " + b["answer"] for b in batch]
     enc = tokenizer(fulls, max_length=max_length, padding="max_length",
                     truncation=True, return_tensors="pt")
