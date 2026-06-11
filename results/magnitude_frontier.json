@@ -58,6 +58,18 @@
         "24": 0.368
       }
     },
+    "gridcode_LN": {
+      "target": "gridcode",
+      "out_norm": true,
+      "speed_hi": 0.8,
+      "env_half": 4.0,
+      "cap": 5,
+      "acc_by_len": {
+        "8": 0.928,
+        "16": 0.815,
+        "24": 0.598
+      }
+    },
     "position_LN": {
       "target": "position",
       "out_norm": true,

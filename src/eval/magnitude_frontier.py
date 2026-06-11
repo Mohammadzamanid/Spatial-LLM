@@ -80,11 +80,19 @@ def run_config(name, target, out_norm, speed_hi, env_half, sigma, cap,
             head = nn.Linear(64, 512).to(device)
             params = list(cx.parameters()) + list(head.parameters())
         elif target == "multiscale":
-            # biologically-faithful idea: FINE (local) + COARSE (long-range) place codes,
-            # like the multi-scale grid system, to cover a larger magnitude range self-sup
+            # FINE (local) + COARSE (long-range) Gaussian place codes
             cf = (torch.rand(384, 3, generator=cg) * (2 * env_half) - env_half).to(device)
             cc = (torch.rand(128, 3, generator=cg) * (6 * env_half) - 3 * env_half).to(device)
             head = nn.Linear(64, 512).to(device)
+            params = list(cx.parameters()) + list(head.parameters())
+        elif target == "gridcode":
+            # periodic multi-scale GRID code (sin/cos of position at log-spaced spatial
+            # scales) — modular, unbounded, extrapolates magnitude beyond the trained arena
+            m = 256
+            periods = torch.exp(torch.rand(m, generator=cg) * (math.log(40) - math.log(0.8)) + math.log(0.8))
+            d = torch.randn(m, 3, generator=cg); d = d / d.norm(dim=1, keepdim=True)
+            freqs = (d * (2 * math.pi / periods).unsqueeze(1)).to(device)
+            head = nn.Linear(64, 2 * m).to(device)
             params = list(cx.parameters()) + list(head.parameters())
         else:  # "position" — supervised scale-free target
             params = list(cx.parameters())
@@ -101,6 +109,9 @@ def run_config(name, target, out_norm, speed_hi, env_half, sigma, cap,
                 elif target == "multiscale":
                     tgt = torch.cat([_place(pos, cf, sigma), _place(pos, cc, 3 * sigma)], -1)
                     loss = mse(head(h), tgt)
+                elif target == "gridcode":
+                    proj = pos @ freqs.t()
+                    loss = mse(head(h), torch.cat([proj.sin(), proj.cos()], -1))
                 else:
                     loss = mse(cx.readout(h), pos)
                 loss.backward(); opt.step()
@@ -143,11 +154,12 @@ def main():
     common = dict(train_L=a.train_L, eval_L=a.eval_L, seeds=a.seeds,
                   epochs=a.epochs, n_per=a.n_per, device=device)
     results = {}
-    results["placecode_LN"]   = run_config("placecode + LayerNorm (M2 selfsup)", "placecode",  True,  0.8, 4.0, 1.2, 5, **common)
-    results["placecode_noLN"] = run_config("placecode + no-LayerNorm",           "placecode",  False, 0.8, 4.0, 1.2, 5, **common)
-    results["multiscale_LN"]  = run_config("multiscale placecode (selfsup)",     "multiscale", True,  0.8, 4.0, 1.2, 5, **common)
-    results["position_LN"]    = run_config("position-regress (supervised)",      "position",   True,  0.8, 4.0, 1.2, 5, **common)
-    results["position_noLN"]  = run_config("position-regress + no-LayerNorm",    "position",   False, 0.8, 4.0, 1.2, 5, **common)
+    results["placecode_LN"]   = run_config("placecode (selfsup, M2 default)",   "placecode",  True,  0.8, 4.0, 1.2, 5, **common)
+    results["placecode_noLN"] = run_config("placecode + no-LayerNorm",          "placecode",  False, 0.8, 4.0, 1.2, 5, **common)
+    results["multiscale_LN"]  = run_config("multiscale placecode (selfsup)",    "multiscale", True,  0.8, 4.0, 1.2, 5, **common)
+    results["gridcode_LN"]    = run_config("GRID code (selfsup, faithful fix)", "gridcode",   True,  0.8, 4.0, 1.2, 5, **common)
+    results["position_LN"]    = run_config("position-regress (supervised ref)", "position",   True,  0.8, 4.0, 1.2, 5, **common)
+    results["position_noLN"]  = run_config("position-regress + no-LayerNorm",   "position",   False, 0.8, 4.0, 1.2, 5, **common)
 
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w") as f:

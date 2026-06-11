@@ -51,15 +51,23 @@ for f in ["results/m2_distance.json", "results/m2_bearing.json"]:
               f"   (chance~{r['chance']:.0%})")
 
 
-# %% [cell 6] OPTIONAL — the magnitude FIX: distance with a scale-free SUPERVISED cortex
-# The CPU sweep (src/eval/magnitude_frontier.py) found the bounded self-sup place-code is the
-# magnitude bottleneck; a scale-free position-regression target recovers most of it at the
-# cortex level (T=24 distance probe 44%->67%). This confirms it on the full LLM. Trades
-# self-supervision for coordinate labels (hence "optional / less biologically pure").
-!python -u -m src.training.train_trajectory --task distance --cortex_pretrain supervised --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_supervised.json
-import json
-d = json.load(open("results/m2_distance_supervised.json"))
-print("distance (SUPERVISED cortex) probe acc by length:", d["probe_acc_by_len"])
-for T, r in d["results_by_len"].items():
-    print(f"  T={T:>2}  exact ON={r['cortex_on_exact']:.1%} OFF={r['cortex_off_exact']:.1%}"
-          f"   within1 ON={r['cortex_on_within1']:.1%}   (chance~{r['chance']:.0%})")
+# %% [cell 6] CAPSTONE — the magnitude FIX, biologically faithful: distance with a
+# self-supervised GRID-CELL cortex (NO coordinate labels). The CPU sweep
+# (src/eval/magnitude_frontier.py) found bounded PLACE cells are the magnitude bottleneck,
+# while the periodic multi-scale GRID code extrapolates magnitude (cortex probe 93/83/64% vs
+# place 91/72/45%). This confirms the faithful fix on the full LLM. ~1.5 h on a T4.
+!python -u -m src.training.train_trajectory --task distance --code grid --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_grid.json
+
+
+# %% [cell 7] compare PLACE (cell 3) vs GRID (cell 6) for distance — paste this back
+import json, os
+print("distance: PLACE-cell vs GRID-cell self-supervised cortex (exact / within-1, by length)")
+for label, f in [("place", "results/m2_distance.json"), ("grid ", "results/m2_distance_grid.json")]:
+    if not os.path.exists(f):
+        print(f"  {label}: (missing {f})"); continue
+    d = json.load(open(f))
+    print(f"  {label}  probe={d['probe_acc_by_len']}")
+    for T, r in d["results_by_len"].items():
+        tag = "EXTRAP" if r["extrapolation"] else "train "
+        print(f"    T={T:>2} [{tag}]  exact ON={r['cortex_on_exact']:.0%} OFF={r['cortex_off_exact']:.0%}"
+              f"   within1 ON={r['cortex_on_within1']:.0%}   (chance~{r['chance']:.0%})")
