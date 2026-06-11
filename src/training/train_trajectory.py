@@ -34,6 +34,7 @@ training range as EXTRAPOLATION.
 """
 import argparse
 import json
+import math
 import os
 import random
 from collections import Counter
@@ -62,6 +63,26 @@ def _place_code(pos, centers, sigma=0.9):
     training on it across lengths teaches length-invariance."""
     d2 = ((pos.unsqueeze(1) - centers.unsqueeze(0)) ** 2).sum(-1)
     return torch.exp(-d2 / (2 * sigma ** 2))
+
+
+def _grid_freqs(m, period_min, period_max, device, seed=0):
+    """m frequency vectors at log-spaced spatial scales (random orientations)."""
+    gg = torch.Generator().manual_seed(seed)
+    periods = torch.exp(torch.rand(m, generator=gg) * (math.log(period_max) - math.log(period_min))
+                        + math.log(period_min))
+    dirs = torch.randn(m, 3, generator=gg)
+    dirs = dirs / dirs.norm(dim=1, keepdim=True)
+    return (dirs * (2 * math.pi / periods).unsqueeze(1)).to(device)
+
+
+def _grid_code(pos, freqs):
+    """Periodic multi-scale GRID-cell code: [sin(pos·B), cos(pos·B)] over frequency vectors B.
+    Unlike bounded place fields, the periodic MODULAR code represents a metric over a large
+    range and extrapolates beyond the trained arena — the property that lets it carry MAGNITUDE
+    for long paths (Banino 2018; Fiete modular grid coding). Still self-supervised: no
+    coordinate labels, just a fixed sensory function of the integrated position."""
+    proj = pos @ freqs.t()
+    return torch.cat([proj.sin(), proj.cos()], dim=-1)
 
 
 def _len_minibatches(by_len, bs):
@@ -160,25 +181,35 @@ def main(a):
     # ---- Pre-train + freeze the cortex (the LLM then reads a CLEAN spatial rep) ----
     # Learning integration from the answer token alone collapses to the class prior, so we
     # teach the cortex to integrate FIRST, then freeze it.
-    #   selfsup    : predict the place-cell code of the DESTINATION (no coordinates). Target
-    #                is length-invariant, so mixed-length training teaches any-length
-    #                integration (Banino 2018; Cueva 2018). Environment is enlarged for the
-    #                magnitude/direction tasks so far endpoints stay in-range.
-    #   supervised : regress final (x,y,z) directly (baseline scaffold; no env limit).
+    #   selfsup    : predict a self-supervised code of the DESTINATION (NO coordinates). The
+    #                target is length-invariant, so mixed-length training teaches any-length
+    #                integration (Banino 2018; Cueva 2018). Two biologically-faithful codes:
+    #                  --code place : bounded Gaussian PLACE cells (good for direction/binary,
+    #                                 but can't represent positions outside its arena).
+    #                  --code grid  : periodic multi-scale GRID cells (extrapolate MAGNITUDE
+    #                                 beyond the trained arena — the faithful fix for distance).
+    #   supervised : regress final (x,y,z) directly (uses coordinate labels; baseline scaffold).
     if a.cortex_pretrain != "none":
         cortex = model.cortex
         mse = nn.MSELoss()
         if a.cortex_pretrain == "selfsup":
-            env_half = a.env_half if a.env_half is not None else (4.0 if task != "return" else 2.5)
-            K = a.n_centers if a.n_centers is not None else (512 if task != "return" else 128)
-            # bumps must OVERLAP (spacing ~ sigma) or the place code is near-zero everywhere
-            # and carries no position signal; magnitude/direction tasks need the denser code.
-            sigma = a.place_sigma if a.place_sigma is not None else (1.2 if task != "return" else 0.9)
-            cg = torch.Generator().manual_seed(0)
-            centers = (torch.rand(K, 3, generator=cg) * (2 * env_half) - env_half).to(device)
-            place_head = nn.Linear(a.cortex_dim, K).to(device)
-            params = list(cortex.parameters()) + list(place_head.parameters())
-            print(f"selfsup environment: env_half={env_half}  n_centers={K}  sigma={sigma}", flush=True)
+            if a.code == "grid":
+                m = a.n_centers if a.n_centers is not None else 256
+                freqs = _grid_freqs(m, a.grid_period_min, a.grid_period_max, device)
+                sup_head = nn.Linear(a.cortex_dim, 2 * m).to(device)
+                selfsup_target = lambda pos: _grid_code(pos, freqs)
+                print(f"selfsup GRID code: {m} freqs, periods [{a.grid_period_min},{a.grid_period_max}]", flush=True)
+            else:
+                env_half = a.env_half if a.env_half is not None else (4.0 if task != "return" else 2.5)
+                K = a.n_centers if a.n_centers is not None else (512 if task != "return" else 128)
+                # bumps must OVERLAP (spacing ~ sigma) or the place code is near-zero everywhere.
+                sigma = a.place_sigma if a.place_sigma is not None else (1.2 if task != "return" else 0.9)
+                cg = torch.Generator().manual_seed(0)
+                centers = (torch.rand(K, 3, generator=cg) * (2 * env_half) - env_half).to(device)
+                sup_head = nn.Linear(a.cortex_dim, K).to(device)
+                selfsup_target = lambda pos: _place_code(pos, centers, sigma)
+                print(f"selfsup PLACE code: env_half={env_half}  n_centers={K}  sigma={sigma}", flush=True)
+            params = list(cortex.parameters()) + list(sup_head.parameters())
         else:
             params = list(cortex.parameters())
         copt = torch.optim.Adam(params, lr=3e-3)
@@ -192,7 +223,7 @@ def main(a):
                 h = cortex.encode(H, S, V)
                 target = _final_pos(H, S, V)
                 if a.cortex_pretrain == "selfsup":
-                    loss = mse(place_head(h), _place_code(target, centers, sigma))
+                    loss = mse(sup_head(h), selfsup_target(target))
                 else:
                     loss = mse(cortex.readout(h), target)
                 loss.backward()
@@ -317,7 +348,8 @@ if __name__ == "__main__":
                     help="half-width of the selfsup place-cell environment (default 2.5 for "
                          "return, 4.0 for distance/bearing)")
     ap.add_argument("--n_centers", type=int, default=None,
-                    help="number of selfsup place cells (default 128 / 512)")
+                    help="number of selfsup cells: place centers (default 128 return / 512 else) "
+                         "or grid frequencies (default 256)")
     ap.add_argument("--place_sigma", type=float, default=None,
                     help="place-cell width; bumps should overlap (default 0.9 return / 1.2 else)")
     ap.add_argument("--epochs", type=int, default=3)
@@ -325,8 +357,14 @@ if __name__ == "__main__":
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--cortex_pretrain", choices=["selfsup", "supervised", "none"], default="selfsup",
-                    help="selfsup = place-cell prediction (no coordinate labels, biologically "
-                         "faithful); supervised = regress final (x,y,z); none = end-to-end")
+                    help="selfsup = self-supervised cell-code prediction (no coordinate labels, "
+                         "biologically faithful); supervised = regress final (x,y,z); none = end-to-end")
+    ap.add_argument("--code", choices=["place", "grid"], default="place",
+                    help="self-supervised target cell type: place = bounded Gaussian place cells "
+                         "(default; great for direction/binary); grid = periodic multi-scale "
+                         "GRID cells (extrapolate MAGNITUDE — recommended for --task distance)")
+    ap.add_argument("--grid_period_min", type=float, default=0.8)
+    ap.add_argument("--grid_period_max", type=float, default=40.0)
     ap.add_argument("--cortex_epochs", type=int, default=80)
     ap.add_argument("--out", type=str, default=None, help="optional path to write results JSON")
     main(ap.parse_args())
