@@ -275,6 +275,45 @@ are held out (`train_trajectory.py --train_lengths … --eval_lengths 8 16 24 [-
   isolated integrator. (`results/m2_lengthgen_baseline.json`, `…_scalefree_mixed.json`;
   cells in `notebooks/m2_length_generalization_kaggle.py`.)
 
+### Harder questions — magnitude vs direction (the integrator's frontier)
+
+The binary "are you back where you started?" is forgiving. We raised the bar with two
+*multi-class* questions answered in language through the SAME frozen self-supervised cortex
+(generalizing recipe; train on 6–12, test 8/16/24; `--task distance|bearing`):
+
+  - **distance** — "How far are you from where you started?" → quantized bucket 0–5 (MAGNITUDE)
+  - **bearing**  — "Which direction is the start from here?" → 8-way compass word (DIRECTION)
+
+| task | metric | T=8 (train) | T=16 (held-out) | T=24 (held-out) |
+|---|---|---|---|---|
+| **bearing** (8-way) | exact ON / OFF | **71% / 17%** | **78% / 18%** | **73% / 12%** |
+| | within-1 ON / OFF | 91% / 42% | 92% / 36% | 90% / 35% |
+| | chance | 17% | 18% | 15% |
+| **distance** (6 buckets) | exact ON / OFF | **62% / 26%** | 46% / 17% | 40% / 14% |
+| | within-1 ON / OFF | 94% / 87% | 78% / 74% | 81% / 71% |
+| | chance | 38% | 29% | 33% |
+
+**Direction generalizes; magnitude is the frontier — and that split is mechanistically exactly right.**
+- **Bearing is the clean win.** 71–78% exact (≥90% within one compass point) on an 8-way
+  question — and it does NOT degrade with length (T=16 even edges T=8). The cortex probe
+  agrees: 94/96/91%, flat. Because direction-home is SCALE-INVARIANT, a length-invariant
+  cortex reads it off at any path length. cortex-OFF sits at chance (12–18%), so the LLM
+  answers ~4× above chance purely through the spatial channel — even 3× beyond training length.
+- **Distance is solid in-distribution but decays out of it.** 62% exact / 94% within-1 at
+  the trained scale, falling to 40% exact at T=24 (probe 85→37%). Magnitude is the one
+  quantity whose SCALE must extrapolate, and the place-code position rep (magnitude-normalised
+  by the cortex LayerNorm) loses precision at distances it saw less of. Still, exact ON beats
+  the text-only control at every length (+26/+29/+26) and beats chance in-range — the cortex
+  genuinely supplies "how far", just imperfectly when the scale itself is novel. (within-1 is
+  weakly discriminating here — the distribution is concentrated, so OFF also scores high;
+  exact is the real signal for distance, whereas for bearing within-1 IS discriminating.)
+
+**The takeaway:** these harder questions separate what the spatial code carries *robustly*
+(DIRECTION, scale-free → generalizes flat) from what it carries only *near the trained scale*
+(MAGNITUDE → degrades with length). The binary task hid this; asking for the displacement
+vector exposes it. Both still ride entirely on the cortex (OFF ≈ chance).
+(`results/m2_distance.json`, `results/m2_bearing.json`; `notebooks/m2_harder_tasks_kaggle.py`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

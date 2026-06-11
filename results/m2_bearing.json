@@ -1,0 +1,21 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-5 summary. Command in notebooks/m2_harder_tasks_kaggle.py (cell 4).",
+  "config": {
+    "base_llm": "Qwen/Qwen2.5-1.5B", "cortex_dim": 128,
+    "n_train": 2400, "n_val": 300, "epochs": 3, "cortex_epochs": 80,
+    "env_half": 4.0, "n_centers": 512, "place_sigma": 1.2
+  },
+  "task": "bearing",
+  "question": "Which direction is the start from here?",
+  "train_lengths": [6, 8, 10, 12],
+  "eval_lengths": [8, 16, 24],
+  "cortex_scale_free": true,
+  "cortex_pretrain": "selfsup",
+  "probe_acc_by_len": {"8": 0.94, "16": 0.96, "24": 0.91},
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.71, "cortex_off_exact": 0.17, "cortex_on_within1": 0.91, "cortex_off_within1": 0.42, "chance": 0.17, "extrapolation": false},
+    "16": {"cortex_on_exact": 0.78, "cortex_off_exact": 0.18, "cortex_on_within1": 0.92, "cortex_off_within1": 0.36, "chance": 0.18, "extrapolation": true},
+    "24": {"cortex_on_exact": 0.73, "cortex_off_exact": 0.12, "cortex_on_within1": 0.90, "cortex_off_within1": 0.35, "chance": 0.15, "extrapolation": true}
+  },
+  "note": "DIRECTION question (8-way compass home). exact ON 71-78% (within-1 ~90%) is HIGH and FLAT across length incl. 3x extrapolation — direction-home is scale-invariant, so a length-invariant cortex reads it at any path length. cortex OFF at chance (12-18%) => the LLM answers ~4x above chance purely through the spatial channel."
+}

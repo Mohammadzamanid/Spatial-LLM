@@ -1,0 +1,21 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-5 summary. Command in notebooks/m2_harder_tasks_kaggle.py (cell 3).",
+  "config": {
+    "base_llm": "Qwen/Qwen2.5-1.5B", "cortex_dim": 128,
+    "n_train": 2400, "n_val": 300, "epochs": 3, "cortex_epochs": 80,
+    "env_half": 4.0, "n_centers": 512, "place_sigma": 1.2
+  },
+  "task": "distance",
+  "question": "How far are you from where you started?",
+  "train_lengths": [6, 8, 10, 12],
+  "eval_lengths": [8, 16, 24],
+  "cortex_scale_free": true,
+  "cortex_pretrain": "selfsup",
+  "probe_acc_by_len": {"8": 0.85, "16": 0.66, "24": 0.37},
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.62, "cortex_off_exact": 0.26, "cortex_on_within1": 0.94, "cortex_off_within1": 0.87, "chance": 0.38, "extrapolation": false},
+    "16": {"cortex_on_exact": 0.46, "cortex_off_exact": 0.17, "cortex_on_within1": 0.78, "cortex_off_within1": 0.74, "chance": 0.29, "extrapolation": true},
+    "24": {"cortex_on_exact": 0.40, "cortex_off_exact": 0.14, "cortex_on_within1": 0.81, "cortex_off_within1": 0.71, "chance": 0.33, "extrapolation": true}
+  },
+  "note": "MAGNITUDE question (bucket 0-5). exact ON beats the text-only control (OFF) at every length (+26/+29/+26) but degrades with length (62%->40%) — magnitude is the quantity whose SCALE must extrapolate. within-1 is weakly discriminating here (concentrated distribution); exact is the real signal."
+}
