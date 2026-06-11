@@ -86,7 +86,7 @@ class TrajectoryCortex(nn.Module):
     def __init__(self, embed_dim: int = 64, config: dict | None = None,
                  aux_heads: bool = False, dims: int = 3,
                  task: str = "pathint", gated: bool = False, max_T: int = 64,
-                 mem_slots: int = 8, length_norm: bool = True):
+                 mem_slots: int = 8, length_norm: bool = True, out_norm: bool = True):
         super().__init__()
         self.embed_dim = embed_dim
         self.dims = dims
@@ -120,7 +120,11 @@ class TrajectoryCortex(nn.Module):
             self.q_embed = nn.Embedding(max_T, embed_dim)              # query for the mean-pool fallback
             self.bottleneck_read = nn.Linear(embed_dim * 2, embed_dim)  # read item k from order-less mem
 
-        self.out_norm = nn.LayerNorm(embed_dim)
+        # out_norm=False bypasses the final LayerNorm. The LayerNorm stabilises training
+        # but normalises away the rep's MAGNITUDE — fine for direction/binary tasks, but it
+        # discards the scale a magnitude question ("how far?") needs. Bypassing lets the
+        # scale-free integrator's growing activity survive into the readout.
+        self.out_norm = nn.LayerNorm(embed_dim) if out_norm else nn.Identity()
         self.readout = nn.Linear(embed_dim, dims)
 
         # theta_gamma is structural (not gated) on memrecall; gateable add-on otherwise
