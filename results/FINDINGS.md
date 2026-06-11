@@ -351,8 +351,24 @@ the cortex's distance probe (CPU, no LLM; train on 6–12, read distance at 8/16
 Direction (bearing) generalised for free because it is scale-invariant; magnitude needed the
 right spatial *code* — and switching place→**grid cells** (still self-supervised, no labels)
 recovers most of it, leaving only a residual long-horizon integration drift. The neuroscience
-made the prediction (grid cells are the entorhinal metric/path integrator) and it held. To
-confirm on the LLM: `--task distance --code grid`. (`results/magnitude_frontier.json`.)
+made the prediction (grid cells are the entorhinal metric/path integrator) and it held.
+
+**Confirmed on the full LLM.** Re-running distance with the grid-cell cortex (`--task distance
+--code grid`, still self-supervised, NO labels) reproduces the fix end-to-end:
+
+| distance (cortex ON) | T=8 | T=16 (held-out) | T=24 (held-out) |
+|---|---|---|---|
+| place-cell cortex — exact | 62% | 46% | 40% |
+| **grid-cell cortex — exact** | **79%** | **83%** | **63%** |
+| **grid-cell cortex — within-1** | **100%** | **99%** | **94%** |
+| grid cortex probe | 99% | 88% | 83% |
+
+Exact jumps +17/+37/+23 over place cells, and at T=16 it is *higher* than at T=8 — near-flat
+across the extrapolation range. **within-1 is 100/99/94%**: the answer is off by at most one
+bucket essentially always, even at 3× the training length. cortex-OFF sits at chance (~23–28%),
+so the magnitude reasoning rides entirely on the (label-free) grid code. The one question that
+didn't generalise now does — through the brain's own path-integration code.
+(`results/m2_distance_grid.json`.)
 
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is

@@ -1,0 +1,22 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-7 summary. Command in notebooks/m2_harder_tasks_kaggle.py (cell 6).",
+  "config": {
+    "base_llm": "Qwen/Qwen2.5-1.5B", "cortex_dim": 128,
+    "n_train": 2400, "n_val": 300, "epochs": 3, "cortex_epochs": 80,
+    "code": "grid", "n_grid_freqs": 256, "grid_period_min": 0.8, "grid_period_max": 40.0
+  },
+  "task": "distance",
+  "question": "How far are you from where you started?",
+  "train_lengths": [6, 8, 10, 12],
+  "eval_lengths": [8, 16, 24],
+  "cortex_scale_free": true,
+  "cortex_pretrain": "selfsup",
+  "code": "grid",
+  "probe_acc_by_len": {"8": 0.99, "16": 0.88, "24": 0.83},
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.79, "cortex_off_exact": 0.23, "cortex_on_within1": 1.00, "chance": 0.38, "extrapolation": false},
+    "16": {"cortex_on_exact": 0.83, "cortex_off_exact": 0.28, "cortex_on_within1": 0.99, "chance": 0.29, "extrapolation": true},
+    "24": {"cortex_on_exact": 0.63, "cortex_off_exact": 0.24, "cortex_on_within1": 0.94, "chance": 0.33, "extrapolation": true}
+  },
+  "note": "GRID-cell self-supervised cortex (no coordinate labels) — the biologically-faithful magnitude fix. vs the place-cell baseline (results/m2_distance.json: exact 62/46/40, probe 85/66/37), grid gives exact 79/83/63 and within-1 100/99/94 across T=8/16/24, with the cortex probe 99/88/83. exact at T16 >= T8 (near-flat across extrapolation); within-1 ~perfect even at 3x training length. cortex OFF ~chance => magnitude reasoning rides entirely on the grid code."
+}
