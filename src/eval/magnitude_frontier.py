@@ -74,13 +74,19 @@ def run_config(name, target, out_norm, speed_hi, env_half, sigma, cap,
                               length_norm=False, out_norm=out_norm).to(device)
         tr = {T: gen(n_per, T, 1000 + T + 7 * seed, speed_hi, 0.3, cap) for T in train_L}
         va = {T: gen(400, T, 2000 + T + 7 * seed, speed_hi, 0.3, cap) for T in eval_L}
+        cg = torch.Generator().manual_seed(0)
         if target == "placecode":
-            K = 512
-            cg = torch.Generator().manual_seed(0)
-            centers = (torch.rand(K, 3, generator=cg) * (2 * env_half) - env_half).to(device)
-            head = nn.Linear(64, K).to(device)
+            centers = (torch.rand(512, 3, generator=cg) * (2 * env_half) - env_half).to(device)
+            head = nn.Linear(64, 512).to(device)
             params = list(cx.parameters()) + list(head.parameters())
-        else:
+        elif target == "multiscale":
+            # biologically-faithful idea: FINE (local) + COARSE (long-range) place codes,
+            # like the multi-scale grid system, to cover a larger magnitude range self-sup
+            cf = (torch.rand(384, 3, generator=cg) * (2 * env_half) - env_half).to(device)
+            cc = (torch.rand(128, 3, generator=cg) * (6 * env_half) - 3 * env_half).to(device)
+            head = nn.Linear(64, 512).to(device)
+            params = list(cx.parameters()) + list(head.parameters())
+        else:  # "position" — supervised scale-free target
             params = list(cx.parameters())
         opt = torch.optim.Adam(params, lr=3e-3); mse = nn.MSELoss(); cx.train()
         order = [(T, i) for T in train_L for i in range(0, n_per, 256)]
@@ -90,8 +96,13 @@ def run_config(name, target, out_norm, speed_hi, env_half, sigma, cap,
                 H = tr[T][0][i:i + 256].to(device); S = tr[T][1][i:i + 256].to(device)
                 Vv = tr[T][2][i:i + 256].to(device)
                 opt.zero_grad(); h = cx.encode(H, S, Vv); pos = _final_pos(H, S, Vv)
-                loss = mse(head(h), _place(pos, centers, sigma)) if target == "placecode" \
-                    else mse(cx.readout(h), pos)
+                if target == "placecode":
+                    loss = mse(head(h), _place(pos, centers, sigma))
+                elif target == "multiscale":
+                    tgt = torch.cat([_place(pos, cf, sigma), _place(pos, cc, 3 * sigma)], -1)
+                    loss = mse(head(h), tgt)
+                else:
+                    loss = mse(cx.readout(h), pos)
                 loss.backward(); opt.step()
         for p in cx.parameters():
             p.requires_grad_(False)
@@ -119,27 +130,24 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--train_L", type=int, nargs="+", default=[6, 8, 10, 12])
     ap.add_argument("--eval_L", type=int, nargs="+", default=[8, 16, 24])
-    ap.add_argument("--epochs", type=int, default=60)
-    ap.add_argument("--n_per", type=int, default=600)
+    ap.add_argument("--epochs", type=int, default=70)
+    ap.add_argument("--n_per", type=int, default=800)
     ap.add_argument("--out", default="results/magnitude_frontier.json")
     a = ap.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"device={device}  train_L={a.train_L}  eval_L={a.eval_L}  seeds={a.seeds}\n"
           f"distance-probe accuracy by length (flat = magnitude code is length-invariant):", flush=True)
 
+    # All configs share the real selfsup environment (env_half=4, sigma=1.2) and standard
+    # distance data (speed_hi=0.8, cap=5); the only variables are the TARGET and out_norm.
     common = dict(train_L=a.train_L, eval_L=a.eval_L, seeds=a.seeds,
                   epochs=a.epochs, n_per=a.n_per, device=device)
     results = {}
-    # --- ARCHITECTURE 2x2 on FIXED standard data (speed_hi=0.8, cap=5, env=6) ---
-    print(" architecture (fixed standard data: speed_hi=0.8, cap=5):", flush=True)
-    results["placecode_LN"]  = run_config("placecode + LayerNorm (M2)", "placecode", True,  0.8, 6.0, 1.2, 5, **common)
-    results["placecode_noLN"] = run_config("placecode + no-LayerNorm",   "placecode", False, 0.8, 6.0, 1.2, 5, **common)
-    results["position_LN"]   = run_config("position-regress + LayerNorm", "position", True,  0.8, 6.0, 1.2, 5, **common)
-    results["position_noLN"] = run_config("position-regress + no-LN",     "position", False, 0.8, 6.0, 1.2, 5, **common)
-    # --- DISTRIBUTION: widen distances into-distribution (speed_hi=1.4, cap=8, env=10) ---
-    print(" distribution (wider distances in-dist: speed_hi=1.4, cap=8):", flush=True)
-    results["cover_placecode_LN"] = run_config("cover: placecode + LayerNorm", "placecode", True,  1.4, 10.0, 1.8, 8, **common)
-    results["cover_position_noLN"] = run_config("cover: position + no-LN",     "position", False, 1.4, 10.0, 1.8, 8, **common)
+    results["placecode_LN"]   = run_config("placecode + LayerNorm (M2 selfsup)", "placecode",  True,  0.8, 4.0, 1.2, 5, **common)
+    results["placecode_noLN"] = run_config("placecode + no-LayerNorm",           "placecode",  False, 0.8, 4.0, 1.2, 5, **common)
+    results["multiscale_LN"]  = run_config("multiscale placecode (selfsup)",     "multiscale", True,  0.8, 4.0, 1.2, 5, **common)
+    results["position_LN"]    = run_config("position-regress (supervised)",      "position",   True,  0.8, 4.0, 1.2, 5, **common)
+    results["position_noLN"]  = run_config("position-regress + no-LayerNorm",    "position",   False, 0.8, 4.0, 1.2, 5, **common)
 
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w") as f:
