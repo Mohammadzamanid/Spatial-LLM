@@ -1,30 +1,42 @@
 """
 src/training/train_trajectory.py  —  Milestone 2 trainer/eval.
 
-Trains TrajectoryLLM to answer "Are you back where you started?" in language, where the
-path reaches the model only through the trajectory cortex. Reports yes/no accuracy with
-the cortex ON vs ABLATED (zeroed) — the ablated run is the control: if the LLM could
-answer from the (question-only) text alone it would still score high; it shouldn't.
+Trains TrajectoryLLM to answer a navigation question in language, where the path reaches
+the model ONLY through the trajectory cortex. Reports accuracy with the cortex ON vs
+ABLATED (zeroed) — the ablated run is the control: if the LLM could answer from the
+(question-only) text alone it would still score high; it shouldn't.
+
+Questions (``--task``), increasing difficulty:
+  - return   : "Are you back where you started?"        -> Yes./No.   (binary; forgiving)
+  - distance : "How far are you from where you started?" -> bucket 0..5 (MAGNITUDE)
+  - bearing  : "Which direction is the start from here?" -> compass word (DIRECTION)
+distance/bearing force the model to read the actual displacement vector, far harder than
+the binary return question. For these we report EXACT and WITHIN-1 accuracy (within-1 is
+circular for bearing) and enlarge the self-supervised place-cell environment.
 
 Length generalization (the DEFAULT recipe)
 -------------------------------------------
-By default the model now trains on a MIX of short path lengths (6,8,10,12) with a
-scale-free cortex readout (readout(u), not readout(u/T)) and is evaluated on LONGER,
-held-out lengths (8,16,24). This is the recommendation proven by the generalization
-stress-test (``src/eval/generalize_trajectory.py``): a cortex trained on one fixed length
-locks to it, but a scale-free cortex trained on mixed lengths extrapolates. The eval
-prints accuracy per length and flags any length beyond the training range as EXTRAPOLATION.
+By default the model trains on a MIX of short path lengths (6,8,10,12) with a scale-free
+cortex readout (readout(u), not readout(u/T)) and is evaluated on LONGER, held-out lengths
+(8,16,24). This is the recommendation proven by the generalization stress-test
+(``src/eval/generalize_trajectory.py``): a fixed-length cortex locks to its length, but a
+scale-free cortex trained on mixed lengths extrapolates. Eval flags lengths beyond the
+training range as EXTRAPOLATION.
 
-    # default = the generalizing recipe (train on 6,8,10,12; test 8,16,24)
+    # default generalizing recipe, binary return question
     python -m src.training.train_trajectory --epochs 3
-    # reproduce the old length-LOCKED baseline (single length + readout(u/T))
-    python -m src.training.train_trajectory --train_lengths 8 --eval_lengths 8 16 24 \
-        --no-cortex_scale_free --epochs 3
+    # harder magnitude question
+    python -m src.training.train_trajectory --task distance --epochs 3
+    # harder direction question (scale-invariant -> the cleanest extrapolation test)
+    python -m src.training.train_trajectory --task bearing --epochs 3
+    # old length-LOCKED baseline
+    python -m src.training.train_trajectory --train_lengths 8 --no-cortex_scale_free --epochs 3
 """
 import argparse
 import json
 import os
 import random
+from collections import Counter
 
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")   # single GPU, before torch inits CUDA
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
@@ -33,8 +45,9 @@ import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, set_seed
 
-from ..data.trajectory_qa import (PROMPT, QUESTION, RETURN_TOL, TrajectoryQADataset,
-                                   collate, make_trajectory_qa)
+from ..data.trajectory_qa import (PROMPT, QUESTIONS, TrajectoryQADataset, answer_index,
+                                   collate, is_circular, make_trajectory_qa, num_classes,
+                                   parse_answer)
 from ..models.trajectory_llm import TrajectoryLLM
 
 
@@ -44,16 +57,16 @@ def _final_pos(H, S, V):
 
 
 def _place_code(pos, centers, sigma=0.9):
-    """Place-cell code of a position: Gaussian bumps over a fixed set of centers. A
-    sensory function of WHERE you ended up — identical for short and long paths that end
-    at the same point, so training on it across lengths teaches length-invariance."""
+    """Place-cell code of a position: Gaussian bumps over fixed centers. A sensory function
+    of WHERE you ended up — identical for short and long paths ending at the same point, so
+    training on it across lengths teaches length-invariance."""
     d2 = ((pos.unsqueeze(1) - centers.unsqueeze(0)) ** 2).sum(-1)
     return torch.exp(-d2 / (2 * sigma ** 2))
 
 
 def _len_minibatches(by_len, bs):
-    """Yield (T, idx) batches that are HOMOGENEOUS in length (the cortex loops over T,
-    so a batch must share one T), shuffled across lengths."""
+    """Yield (T, idx) batches HOMOGENEOUS in length (the cortex loops over T, so a batch
+    must share one T), shuffled across lengths."""
     batches = []
     for T in by_len:
         n = by_len[T][0].shape[0]
@@ -64,24 +77,27 @@ def _len_minibatches(by_len, bs):
     return batches
 
 
-def _yesno(text):
-    t = text.strip().lower()
-    yi, ni = t.find("yes"), t.find("no")
-    if yi == -1 and ni == -1:
-        return None
-    if yi == -1:
-        return "no"
-    if ni == -1:
-        return "yes"
-    return "yes" if yi < ni else "no"
+def _labels(task, ans, device):
+    """Ground-truth class index per example (long tensor)."""
+    return torch.tensor([answer_index(task, parse_answer(task, x)) for x in ans],
+                        dtype=torch.long, device=device)
+
+
+def _chance(task, ans):
+    """Most-common-class frequency (the trivial prior-best accuracy)."""
+    c = Counter(answer_index(task, parse_answer(task, x)) for x in ans)
+    return max(c.values()) / len(ans)
 
 
 @torch.no_grad()
-def evaluate(model, tok, H, S, V, ans, device, ablate, bs=16, max_length=64):
+def evaluate(model, tok, H, S, V, ans, device, ablate, task, question, bs=16):
+    """Exact and within-1 accuracy (within-1 is circular for bearing; == exact for return)."""
     model.eval()
-    prompt = PROMPT.format(q=QUESTION)
+    prompt = PROMPT.format(q=question)
     enc = tok(prompt, return_tensors="pt")
-    correct = total = 0
+    ncls = num_classes(task)
+    max_new = 6 if task == "bearing" else 4
+    exact = within1 = total = 0
     for i in range(0, len(ans), bs):
         n = min(bs, len(ans) - i)
         input_ids = enc["input_ids"].repeat(n, 1).to(device)
@@ -89,14 +105,24 @@ def evaluate(model, tok, H, S, V, ans, device, ablate, bs=16, max_length=64):
         out = model.generate_answer(
             input_ids, attn,
             H[i:i + n].to(device), S[i:i + n].to(device), V[i:i + n].to(device),
-            ablate_cortex=ablate, max_new_tokens=4,
+            ablate_cortex=ablate, max_new_tokens=max_new,
         )
         for j in range(n):
-            pred = _yesno(tok.decode(out[j], skip_special_tokens=True))
-            truth = _yesno(ans[i + j])
+            pi = answer_index(task, parse_answer(task, tok.decode(out[j], skip_special_tokens=True)))
+            ti = answer_index(task, parse_answer(task, ans[i + j]))
             total += 1
-            correct += int(pred == truth)
-    return correct / max(total, 1)
+            if pi is None:
+                continue
+            if pi == ti:
+                exact += 1
+                within1 += 1
+            elif task != "return":
+                d = abs(pi - ti)
+                if is_circular(task):
+                    d = min(d, ncls - d)
+                if d <= 1:
+                    within1 += 1
+    return {"exact": exact / max(total, 1), "within1": within1 / max(total, 1)}
 
 
 def main(a):
@@ -106,7 +132,9 @@ def main(a):
     train_lengths = a.train_lengths or [a.T]
     eval_lengths = a.eval_lengths or [a.T]
     scale_free = a.cortex_scale_free
-    print(f"device={device}  base_llm={a.base_llm}", flush=True)
+    task = a.task
+    question = QUESTIONS[task]
+    print(f"device={device}  base_llm={a.base_llm}  task={task}  Q={question!r}", flush=True)
     print(f"train_lengths={train_lengths}  eval_lengths={eval_lengths}  "
           f"cortex_scale_free={scale_free}  cortex_pretrain={a.cortex_pretrain}", flush=True)
 
@@ -121,30 +149,36 @@ def main(a):
         model.llm.enable_input_require_grads()
         model.llm.config.use_cache = False
 
-    # ---- data: one balanced QA set per length (moves never enter the text) ----
+    # ---- data: one QA set per length (moves never enter the text) ----
     n_per = max(a.bs, a.n_train // len(train_lengths))
     nval_per = max(16, a.n_val // len(eval_lengths))
-    train_by_len = {T: make_trajectory_qa(n_per, T=T, seed=1000 + T) for T in train_lengths}
-    val_by_len = {T: make_trajectory_qa(nval_per, T=T, seed=2000 + T) for T in eval_lengths}
+    train_by_len = {T: make_trajectory_qa(n_per, T=T, seed=1000 + T, task=task) for T in train_lengths}
+    val_by_len = {T: make_trajectory_qa(nval_per, T=T, seed=2000 + T, task=task) for T in eval_lengths}
     print(f"data: {n_per}/length train ({len(train_lengths)} lengths), "
           f"{nval_per}/length val ({len(eval_lengths)} lengths)", flush=True)
 
     # ---- Pre-train + freeze the cortex (the LLM then reads a CLEAN spatial rep) ----
-    # Learning path integration from a single yes/no token collapses to the class prior,
-    # so we teach the cortex to integrate FIRST, then freeze it. Two protocols:
-    #   selfsup    : predict the place-cell code of the DESTINATION (a fixed sensory
-    #                function of position). NO coordinates are ever given. The target is
-    #                length-invariant by construction, so training across mixed lengths
-    #                teaches the cortex to integrate ANY length (Banino 2018; Cueva 2018).
-    #   supervised : regress directly to the ground-truth final (x,y,z) (baseline scaffold).
+    # Learning integration from the answer token alone collapses to the class prior, so we
+    # teach the cortex to integrate FIRST, then freeze it.
+    #   selfsup    : predict the place-cell code of the DESTINATION (no coordinates). Target
+    #                is length-invariant, so mixed-length training teaches any-length
+    #                integration (Banino 2018; Cueva 2018). Environment is enlarged for the
+    #                magnitude/direction tasks so far endpoints stay in-range.
+    #   supervised : regress final (x,y,z) directly (baseline scaffold; no env limit).
     if a.cortex_pretrain != "none":
         cortex = model.cortex
         mse = nn.MSELoss()
         if a.cortex_pretrain == "selfsup":
-            K, cg = 128, torch.Generator().manual_seed(0)
-            centers = (torch.rand(K, 3, generator=cg) * 5 - 2.5).to(device)   # fixed environment
+            env_half = a.env_half if a.env_half is not None else (4.0 if task != "return" else 2.5)
+            K = a.n_centers if a.n_centers is not None else (512 if task != "return" else 128)
+            # bumps must OVERLAP (spacing ~ sigma) or the place code is near-zero everywhere
+            # and carries no position signal; magnitude/direction tasks need the denser code.
+            sigma = a.place_sigma if a.place_sigma is not None else (1.2 if task != "return" else 0.9)
+            cg = torch.Generator().manual_seed(0)
+            centers = (torch.rand(K, 3, generator=cg) * (2 * env_half) - env_half).to(device)
             place_head = nn.Linear(a.cortex_dim, K).to(device)
             params = list(cortex.parameters()) + list(place_head.parameters())
+            print(f"selfsup environment: env_half={env_half}  n_centers={K}  sigma={sigma}", flush=True)
         else:
             params = list(cortex.parameters())
         copt = torch.optim.Adam(params, lr=3e-3)
@@ -158,7 +192,7 @@ def main(a):
                 h = cortex.encode(H, S, V)
                 target = _final_pos(H, S, V)
                 if a.cortex_pretrain == "selfsup":
-                    loss = mse(place_head(h), _place_code(target, centers))
+                    loss = mse(place_head(h), _place_code(target, centers, sigma))
                 else:
                     loss = mse(cortex.readout(h), target)
                 loss.backward()
@@ -167,34 +201,32 @@ def main(a):
             p.requires_grad_(False)
         cortex.eval()
 
-        # Probe (diagnostic): is "back-at-start" readable from the FROZEN rep — at each
-        # eval length? A flat probe acc across lengths (incl. those longer than training)
-        # is the cortex-level signature of a length-invariant code, previewed before the
-        # (slow) LLM eval. Small MLP, since place-cell codes encode position nonlinearly.
+        # Probe (diagnostic): is the ANSWER decodable from the FROZEN rep — at each eval
+        # length? A flat probe acc across lengths (incl. beyond training) is the cortex-level
+        # signature of a length-invariant code, previewed before the (slow) LLM eval. Small
+        # MLP classifier over the task's classes.
         @torch.no_grad()
         def _enc(by_len, lengths):
-            hs, ys = [], []
-            for T in lengths:
-                H, S, V, _ = by_len[T]
-                hs.append(cortex.encode(H.to(device), S.to(device), V.to(device)))
-                ys.append((_final_pos(H, S, V).norm(dim=-1) < RETURN_TOL).float().to(device))
-            return hs, ys
+            return {T: cortex.encode(by_len[T][0].to(device), by_len[T][1].to(device),
+                                     by_len[T][2].to(device)) for T in lengths}
 
-        htr_list, ytr_list = _enc(train_by_len, train_lengths)
-        htr_f, ytr_b = torch.cat(htr_list), torch.cat(ytr_list)
-        probe = nn.Sequential(nn.Linear(a.cortex_dim, 64), nn.ReLU(), nn.Linear(64, 1)).to(device)
+        htr = _enc(train_by_len, train_lengths)
+        htr_f = torch.cat([htr[T] for T in train_lengths])
+        ytr = torch.cat([_labels(task, train_by_len[T][3], device) for T in train_lengths])
+        ncls = num_classes(task)
+        probe = nn.Sequential(nn.Linear(a.cortex_dim, 64), nn.ReLU(), nn.Linear(64, ncls)).to(device)
         popt = torch.optim.Adam(probe.parameters(), lr=1e-2)
-        bce = nn.BCEWithLogitsLoss()
-        for _ in range(300):
-            popt.zero_grad(); bce(probe(htr_f).squeeze(-1), ytr_b).backward(); popt.step()
+        ce = nn.CrossEntropyLoss()
+        for _ in range(400):
+            popt.zero_grad(); ce(probe(htr_f), ytr).backward(); popt.step()
         probe_acc = {}
         with torch.no_grad():
             for T in eval_lengths:
-                H, S, V, _ = val_by_len[T]
-                h = cortex.encode(H.to(device), S.to(device), V.to(device))
-                y = (_final_pos(H, S, V).norm(dim=-1) < RETURN_TOL).float().to(device)
-                probe_acc[T] = round(((probe(h).squeeze(-1) > 0).float() == y).float().mean().item(), 4)
-        print("cortex frozen. 'back-at-start' probe acc by length: "
+                h = cortex.encode(val_by_len[T][0].to(device), val_by_len[T][1].to(device),
+                                  val_by_len[T][2].to(device))
+                y = _labels(task, val_by_len[T][3], device)
+                probe_acc[T] = round((probe(h).argmax(-1) == y).float().mean().item(), 4)
+        print(f"cortex frozen. '{task}' probe acc by length: "
               + "  ".join(f"T{T}:{probe_acc[T]:.1%}" for T in eval_lengths), flush=True)
     else:
         probe_acc = {}
@@ -211,7 +243,7 @@ def main(a):
         tot = 0.0
         for bi, (T, idx) in enumerate(batches):
             ds = train_sets[T]
-            batch = collate([ds[j] for j in idx.tolist()], tok)
+            batch = collate([ds[j] for j in idx.tolist()], tok, question=question)
             batch = {k: v.to(device) for k, v in batch.items()}
             opt.zero_grad()
             loss = model(**batch).loss
@@ -221,9 +253,10 @@ def main(a):
             if bi % 25 == 0:
                 print(f"  ep{ep+1} step {bi}/{len(batches)} (T={T})  loss={loss.item():.3f}", flush=True)
         Tq = min(eval_lengths)
-        q = evaluate(model, tok, *val_by_len[Tq][:3], val_by_len[Tq][3], device, ablate=False)
+        q = evaluate(model, tok, *val_by_len[Tq][:3], val_by_len[Tq][3], device,
+                     ablate=False, task=task, question=question)
         print(f"epoch {ep+1}/{a.epochs}  loss={tot/max(len(batches),1):.3f}  "
-              f"val_acc(full,T={Tq})={q:.1%}", flush=True)
+              f"val(full,T={Tq}) exact={q['exact']:.1%} within1={q['within1']:.1%}", flush=True)
 
     # ---- per-length eval: cortex ON vs OFF, flag extrapolation lengths ----
     max_train = max(train_lengths)
@@ -231,27 +264,31 @@ def main(a):
     results_by_len = {}
     for T in eval_lengths:
         H, S, V, ans = val_by_len[T]
-        full = evaluate(model, tok, H, S, V, ans, device, ablate=False)
-        abl = evaluate(model, tok, H, S, V, ans, device, ablate=True)
-        yes_frac = sum(x == "Yes." for x in ans) / len(ans)
-        chance = max(yes_frac, 1 - yes_frac)
+        on = evaluate(model, tok, H, S, V, ans, device, False, task, question)
+        off = evaluate(model, tok, H, S, V, ans, device, True, task, question)
+        chance = _chance(task, ans)
         tag = "train-range " if T <= max_train else "EXTRAPOLATION"
-        results_by_len[T] = {"cortex_on": round(full, 4), "cortex_off": round(abl, 4),
-                             "yes_frac": round(yes_frac, 4), "extrapolation": T > max_train}
-        print(f"  T={T:2d} [{tag}]  cortex ON={full:.1%}  OFF={abl:.1%}  "
-              f"(chance~{chance:.0%})  => contributes {full-abl:+.1%}", flush=True)
+        results_by_len[T] = {
+            "cortex_on_exact": round(on["exact"], 4), "cortex_on_within1": round(on["within1"], 4),
+            "cortex_off_exact": round(off["exact"], 4), "cortex_off_within1": round(off["within1"], 4),
+            "chance": round(chance, 4), "extrapolation": T > max_train,
+        }
+        w1 = "" if task == "return" else f" | within1 ON={on['within1']:.1%} OFF={off['within1']:.1%}"
+        print(f"  T={T:2d} [{tag}]  exact ON={on['exact']:.1%} OFF={off['exact']:.1%} "
+              f"(chance~{chance:.0%}){w1}", flush=True)
 
     if a.out:
-        os.makedirs(os.path.dirname(a.out), exist_ok=True)
+        os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         with open(a.out, "w") as f:
             json.dump({
                 "config": {k: v for k, v in vars(a).items()},
+                "task": task, "question": question,
                 "train_lengths": train_lengths, "eval_lengths": eval_lengths,
                 "cortex_scale_free": scale_free, "cortex_pretrain": a.cortex_pretrain,
                 "probe_acc_by_len": probe_acc, "results_by_len": results_by_len,
                 "note": ("cortex ON should hold at EXTRAPOLATION lengths (> max train length) "
                          "when scale_free + mixed train_lengths; OFF is the text-only control "
-                         "(should sit near chance)."),
+                         "(~chance). distance/bearing also report within-1 accuracy."),
             }, f, indent=2)
         print(f"\nwrote {a.out}", flush=True)
 
@@ -259,21 +296,30 @@ def main(a):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--base_llm", default="Qwen/Qwen2.5-1.5B")
+    ap.add_argument("--task", choices=["return", "distance", "bearing"], default="return",
+                    help="return=yes/no (default); distance=bucket 0-5 (magnitude); "
+                         "bearing=8-way compass home direction")
     ap.add_argument("--cortex_dim", type=int, default=128)
     ap.add_argument("--n_train", type=int, default=4000)
     ap.add_argument("--n_val", type=int, default=600)
     ap.add_argument("--T", type=int, default=8, help="single-length fallback when "
                     "--train_lengths/--eval_lengths are explicitly set to []")
     ap.add_argument("--train_lengths", type=int, nargs="+", default=[6, 8, 10, 12],
-                    help="path lengths to TRAIN on. DEFAULT is mixed (the generalizing "
-                         "recipe); pass a single value (e.g. --train_lengths 8) for the "
-                         "length-locked baseline.")
+                    help="path lengths to TRAIN on. DEFAULT is mixed (generalizing recipe); "
+                         "pass a single value for the length-locked baseline.")
     ap.add_argument("--eval_lengths", type=int, nargs="+", default=[8, 16, 24],
                     help="path lengths to EVALUATE on; any beyond max(train_lengths) is "
                          "held-out EXTRAPOLATION.")
     ap.add_argument("--cortex_scale_free", action=argparse.BooleanOptionalAction, default=True,
                     help="readout(u) (DEFAULT) vs --no-cortex_scale_free for readout(u/T); "
                          "scale-free + mixed lengths is what generalizes (generalize_trajectory.py)")
+    ap.add_argument("--env_half", type=float, default=None,
+                    help="half-width of the selfsup place-cell environment (default 2.5 for "
+                         "return, 4.0 for distance/bearing)")
+    ap.add_argument("--n_centers", type=int, default=None,
+                    help="number of selfsup place cells (default 128 / 512)")
+    ap.add_argument("--place_sigma", type=float, default=None,
+                    help="place-cell width; bumps should overlap (default 0.9 return / 1.2 else)")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--bs", type=int, default=4)   # fp32 1.5B fits a T4 at bs=4 + grad checkpointing
     ap.add_argument("--lr", type=float, default=2e-4)
