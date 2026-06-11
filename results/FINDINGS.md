@@ -314,6 +314,40 @@ The binary "are you back where you started?" is forgiving. We raised the bar wit
 vector exposes it. Both still ride entirely on the cortex (OFF ≈ chance).
 (`results/m2_distance.json`, `results/m2_bearing.json`; `notebooks/m2_harder_tasks_kaggle.py`.)
 
+### Attacking the magnitude frontier — fixable, but only partly
+
+distance was the one question that degraded with length. We isolated the candidate levers on
+the cortex's distance probe (CPU, no LLM; train on 6–12, read distance at 8/16/24; 3 seeds;
+`src/eval/magnitude_frontier.py`):
+
+| cortex pre-training target | out LayerNorm | T=8 | T=16 | T=24 |
+|---|---|---|---|---|
+| self-sup place-code (M2 default) | on | 91% | 69% | 44% |
+| self-sup place-code | **off** | 61% | 28% | 17% |
+| self-sup **multi-scale** place-code | on | 89% | 67% | 37% |
+| **supervised position (scale-free)** | on | **95%** | **89%** | **67%** |
+| supervised position | off | 84% | 41% | 22% |
+
+1. **The decisive lever is the TARGET, not the LayerNorm.** Swapping the BOUNDED
+   self-supervised place-code for a SCALE-FREE position-regression target lifts T=16 69→89%
+   and T=24 44→67% — most of the gap. The place-code's finite box (no cell ⇒ no code for far
+   positions) was the real magnitude bottleneck.
+2. **Bypassing the LayerNorm HURTS, everywhere** (supervised T=24 67→22%). Magnitude lives in
+   the rep's PATTERN, not its scalar norm; the LayerNorm stabilises the scale-free integrator's
+   growing activity across lengths, and removing it exposes that instability. (Our initial
+   "LayerNorm normalises magnitude away" guess was wrong — the sweep refuted it.)
+3. **A multi-scale self-supervised code didn't help** (≈ single-scale) — adding coarse,
+   long-range place cells alongside fine ones didn't recover what the bounded code loses.
+4. **A residual length-degradation persists even with the ideal target** (95→67% from T=8 to
+   T=24): recurrent path-integration error ACCUMULATES over more steps, independent of readout.
+
+**Verdict: the magnitude frontier is PARTIALLY fixable, not fundamental.** A scale-free position
+target recovers a large share (cortex-level T=24 +23 points) — but it trades self-supervision
+for coordinate labels, and a smaller residual remains from long-horizon integration drift.
+Direction generalised for free (scale-invariant); magnitude needs either supervision or a better
+scale-free self-supervised signal, and even then long paths cost accuracy. To confirm on the LLM:
+`--task distance --cortex_pretrain supervised`. (`results/magnitude_frontier.json`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

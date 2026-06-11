@@ -49,3 +49,17 @@ for f in ["results/m2_distance.json", "results/m2_bearing.json"]:
         print(f"  T={T:>2} [{tag}]  exact ON={r['cortex_on_exact']:.1%} OFF={r['cortex_off_exact']:.1%}"
               f"   within1 ON={r['cortex_on_within1']:.1%} OFF={r['cortex_off_within1']:.1%}"
               f"   (chance~{r['chance']:.0%})")
+
+
+# %% [cell 6] OPTIONAL — the magnitude FIX: distance with a scale-free SUPERVISED cortex
+# The CPU sweep (src/eval/magnitude_frontier.py) found the bounded self-sup place-code is the
+# magnitude bottleneck; a scale-free position-regression target recovers most of it at the
+# cortex level (T=24 distance probe 44%->67%). This confirms it on the full LLM. Trades
+# self-supervision for coordinate labels (hence "optional / less biologically pure").
+!python -u -m src.training.train_trajectory --task distance --cortex_pretrain supervised --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_supervised.json
+import json
+d = json.load(open("results/m2_distance_supervised.json"))
+print("distance (SUPERVISED cortex) probe acc by length:", d["probe_acc_by_len"])
+for T, r in d["results_by_len"].items():
+    print(f"  T={T:>2}  exact ON={r['cortex_on_exact']:.1%} OFF={r['cortex_off_exact']:.1%}"
+          f"   within1 ON={r['cortex_on_within1']:.1%}   (chance~{r['chance']:.0%})")
