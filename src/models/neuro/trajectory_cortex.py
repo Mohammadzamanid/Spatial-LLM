@@ -23,7 +23,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .spatial_cells import ConjunctiveSpatialCells
+from .spatial_cells import ConjunctiveSpatialCells, BoundaryVectorCells
 from .oscillations import ThetaGammaCoupling, ThetaGammaMemory
 from .microcircuits import CorticalColumn, LateralInhibition
 
@@ -111,7 +111,8 @@ class _HexGridModules(nn.Module):
 
     def __init__(self, embed_dim: int, n_modules: int = 4, side: int = 8,
                  base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0,
-                 z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6):
+                 z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6,
+                 noise_std: float = 0.0, boundary_anchor: bool = False):
         super().__init__()
         self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
         ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
@@ -126,6 +127,15 @@ class _HexGridModules(nn.Module):
         self.z_sigma = z_sigma
         self.register_buffer("z_centers", torch.linspace(-z_range, z_range, z_cells))
         self.readout = nn.Linear(self.K * self.M + z_cells, embed_dim)
+        # integration noise (real path integration is noisy -> drift) and BOUNDARY anchoring:
+        # boundary cells provide an allothetic position fix that gated-resets the grid phase
+        # (Hardcastle, Ganguli & Giocomo 2015 — boundaries correct accumulated grid error).
+        self.noise_std = noise_std
+        self.boundary_anchor = boundary_anchor
+        if boundary_anchor:
+            self.bvc = BoundaryVectorCells(num_cells=24, embed_dim=32, max_distance=3.0)
+            self.bvc_to_pos = nn.Linear(32, 2)                 # boundary obs -> position estimate
+            self.bvc_gate = nn.Linear(32, 1)                   # how much to trust it (high near walls)
 
     def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
         K, B, _ = phi.shape
@@ -140,16 +150,26 @@ class _HexGridModules(nn.Module):
     def _z_code(self, z):                            # z (B,) -> (B, z_cells)
         return torch.exp(-((z.unsqueeze(1) - self.z_centers.unsqueeze(0)) ** 2) / (2 * self.z_sigma ** 2))
 
-    def forward(self, v3d, return_sequence: bool = False, return_cells: bool = False):
-        """v3d (B,T,3) = (vx, vy, vz). Returns the integrated rep; return_cells also yields the
-        GRID-cell population (B, K*M) for analysis (the 2D grid code, excluding the z place code)."""
+    def forward(self, v3d, boundary_obs=None, return_sequence: bool = False, return_cells: bool = False):
+        """v3d (B,T,3) = (vx, vy, vz). boundary_obs (B,T,2) = (dist, bearing) to nearest wall, used
+        for boundary anchoring. Returns the integrated rep; return_cells also yields the GRID-cell
+        population (B, K*M) (the 2D grid code, excluding the z place code)."""
         B, T, _ = v3d.shape
         phi = torch.zeros(self.K, B, 2, device=v3d.device, dtype=v3d.dtype)
         z = torch.zeros(B, device=v3d.device, dtype=v3d.dtype)
         outs, last_grid, last_full = [], None, None
         for t in range(T):
-            phi = phi + self.gains.view(self.K, 1, 1) * v3d[:, t, :2].unsqueeze(0)   # integrate xy velocity
+            vxy = v3d[:, t, :2]
+            if self.noise_std > 0:                                                   # noisy path integration -> drift
+                vxy = vxy + torch.randn_like(vxy) * self.noise_std
+            phi = phi + self.gains.view(self.K, 1, 1) * vxy.unsqueeze(0)             # integrate xy velocity
             z = z + v3d[:, t, 2]                                                     # integrate height
+            if self.boundary_anchor and boundary_obs is not None:                    # gated phase reset at walls
+                emb = self.bvc(boundary_obs[:, t, 0], boundary_obs[:, t, 1])         # (B,32) boundary cells
+                p_hat = self.bvc_to_pos(emb)                                         # (B,2) position estimate
+                gate = torch.sigmoid(self.bvc_gate(emb))                             # (B,1) trust (≈0 in open field)
+                target = self.gains.view(self.K, 1, 1) * p_hat.unsqueeze(0)          # (K,B,2) boundary-implied phase
+                phi = (1 - gate) * phi + gate * target                              # correct accumulated drift
             last_grid = self._grid_code(phi)
             last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
             if return_sequence:
