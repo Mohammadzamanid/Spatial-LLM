@@ -59,10 +59,20 @@ for f in ["results/m2_distance.json", "results/m2_bearing.json"]:
 !python -u -m src.training.train_trajectory --task distance --code grid --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_grid.json
 
 
-# %% [cell 7] compare PLACE (cell 3) vs GRID (cell 6) for distance — paste this back
+# %% [cell 7] CAPSTONE+ — distance through the velocity-driven GRID-CELL CORTEX (the emergent,
+# metrically-accurate, length-invariant hex grid modules). Same self-supervised place-code target
+# as cell 3, so this isolates the CORTEX upgrade (square attractor -> hex grid modules). CPU probe
+# predicts a real gain, biggest at the long held-out lengths. ~1.5 h on a T4.
+!python -u -m src.training.train_trajectory --task distance --constrained_velocity --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_gridcortex.json
+
+
+# %% [cell 8] three-way compare for distance — paste this back
 import json, os
-print("distance: PLACE-cell vs GRID-cell self-supervised cortex (exact / within-1, by length)")
-for label, f in [("place", "results/m2_distance.json"), ("grid ", "results/m2_distance_grid.json")]:
+print("distance — cortex comparison (exact / within-1 by length):")
+runs = [("place attractor      ", "results/m2_distance.json"),
+        ("grid-code target      ", "results/m2_distance_grid.json"),
+        ("GRID-CELL cortex (hex)", "results/m2_distance_gridcortex.json")]
+for label, f in runs:
     if not os.path.exists(f):
         print(f"  {label}: (missing {f})"); continue
     d = json.load(open(f))
