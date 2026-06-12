@@ -110,7 +110,8 @@ class _HexGridModules(nn.Module):
     """
 
     def __init__(self, embed_dim: int, n_modules: int = 4, side: int = 8,
-                 base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0):
+                 base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0,
+                 z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6):
         super().__init__()
         self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
         ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
@@ -121,7 +122,10 @@ class _HexGridModules(nn.Module):
                                                     for m in (-1, 0, 1) for n in (-1, 0, 1)]))     # (9,2)
         spacings = base_spacing * (ratio ** torch.arange(n_modules).float())
         self.register_buffer("gains", side / spacings)                                            # (K,) FIXED
-        self.readout = nn.Linear(self.K * self.M, embed_dim)
+        # vertical height is NOT grid-coded in cortex — a simple 1D place code over integrated z
+        self.z_sigma = z_sigma
+        self.register_buffer("z_centers", torch.linspace(-z_range, z_range, z_cells))
+        self.readout = nn.Linear(self.K * self.M + z_cells, embed_dim)
 
     def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
         K, B, _ = phi.shape
@@ -133,20 +137,28 @@ class _HexGridModules(nn.Module):
         bump = torch.exp(-best / (2 * self.sigma ** 2))                        # (K,B,M)
         return bump.permute(1, 0, 2).reshape(B, self.K * self.M)
 
-    def forward(self, v2d, return_sequence: bool = False, return_cells: bool = False):
-        B, T, _ = v2d.shape
-        phi = torch.zeros(self.K, B, 2, device=v2d.device, dtype=v2d.dtype)
-        outs, last = [], None
+    def _z_code(self, z):                            # z (B,) -> (B, z_cells)
+        return torch.exp(-((z.unsqueeze(1) - self.z_centers.unsqueeze(0)) ** 2) / (2 * self.z_sigma ** 2))
+
+    def forward(self, v3d, return_sequence: bool = False, return_cells: bool = False):
+        """v3d (B,T,3) = (vx, vy, vz). Returns the integrated rep; return_cells also yields the
+        GRID-cell population (B, K*M) for analysis (the 2D grid code, excluding the z place code)."""
+        B, T, _ = v3d.shape
+        phi = torch.zeros(self.K, B, 2, device=v3d.device, dtype=v3d.dtype)
+        z = torch.zeros(B, device=v3d.device, dtype=v3d.dtype)
+        outs, last_grid, last_full = [], None, None
         for t in range(T):
-            phi = phi + self.gains.view(self.K, 1, 1) * v2d[:, t].unsqueeze(0)  # integrate velocity
-            last = self._grid_code(phi)
+            phi = phi + self.gains.view(self.K, 1, 1) * v3d[:, t, :2].unsqueeze(0)   # integrate xy velocity
+            z = z + v3d[:, t, 2]                                                     # integrate height
+            last_grid = self._grid_code(phi)
+            last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
             if return_sequence:
-                outs.append(self.readout(last))
+                outs.append(self.readout(last_full))
         if return_sequence:
             seq = torch.stack(outs, dim=1)
-            return (seq, last) if return_cells else seq
-        out = self.readout(last)
-        return (out, last) if return_cells else out
+            return (seq, last_grid) if return_cells else seq
+        out = self.readout(last_full)
+        return (out, last_grid) if return_cells else out
 
 
 class TrajectoryCortex(nn.Module):
@@ -235,14 +247,14 @@ class TrajectoryCortex(nn.Module):
         if self.cfg["conjunctive"]:
             step = step + (self.conjunctive(heading.reshape(B * T), speed.reshape(B * T)).view(B, T, -1)
                            + self.vert(vz.reshape(B * T, 1)).view(B, T, -1))
-        # constrained mode: the grid modules integrate the RAW 2D self-motion velocity (the
-        # signal the conjunctive head-direction×speed cells encode), not the learned embedding.
-        v2d = (torch.stack([speed * heading.cos(), speed * heading.sin()], dim=-1)
+        # constrained mode: the grid modules integrate the RAW self-motion velocity (the signal
+        # the conjunctive head-direction×speed cells encode), not the learned embedding.
+        v3d = (torch.stack([speed * heading.cos(), speed * heading.sin(), vz], dim=-1)
                if self.constrained else None)
 
         if self.task == "pathint":
             if self.constrained:
-                position = self.integrator(v2d)
+                position = self.integrator(v3d)
             elif self.cfg["grid_attractor"]:
                 position = self.integrator(step)
             else:
@@ -250,7 +262,7 @@ class TrajectoryCortex(nn.Module):
         else:
             # recall / memrecall need per-step running positions
             if self.constrained:
-                states = self.integrator(v2d, return_sequence=True)
+                states = self.integrator(v3d, return_sequence=True)
             elif self.cfg["grid_attractor"]:
                 states = self.integrator(step, return_sequence=True)
             else:

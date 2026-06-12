@@ -34,6 +34,7 @@ class TrajectoryLLM(nn.Module):
         cortex_dim: int = 128,
         cortex_task: str = "pathint",
         cortex_length_norm: bool = False,   # default: scale-free readout (generalizes across path lengths)
+        cortex_constrained_velocity: bool = False,  # velocity-driven hex grid modules (faithful, metric)
         n_spatial_tokens: int = 8,
         fusion_num_heads: int = 8,
         gate_init: float = 2.0,
@@ -62,8 +63,11 @@ class TrajectoryLLM(nn.Module):
         # cortex_length_norm=False (scale-free readout) + mixed-length pre-training is
         # what lets the cortex generalize to path lengths it never trained on
         # (see src/eval/generalize_trajectory.py and the FINDINGS stress-test).
+        # cortex_constrained_velocity=True swaps in velocity-driven hexagonal grid modules
+        # (metrically accurate, length-invariant; the emergent grid-cell construction).
         self.cortex = TrajectoryCortex(embed_dim=cortex_dim, task=cortex_task,
-                                       length_norm=cortex_length_norm)
+                                       length_norm=cortex_length_norm,
+                                       constrained_velocity=cortex_constrained_velocity)
         self.n_tokens = n_spatial_tokens
         self.to_tokens = nn.Linear(cortex_dim, llm_dim * n_spatial_tokens)
         # gate_init>0 opens the fusion gates from step 0 — the answer depends entirely

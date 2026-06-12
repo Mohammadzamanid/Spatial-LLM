@@ -164,7 +164,8 @@ def main(a):
         tok.pad_token = tok.eos_token
 
     model = TrajectoryLLM(base_llm=a.base_llm, cortex_dim=a.cortex_dim,
-                          cortex_length_norm=not scale_free).to(device)
+                          cortex_length_norm=not scale_free,
+                          cortex_constrained_velocity=a.constrained_velocity).to(device)
     if hasattr(model.llm, "gradient_checkpointing_enable"):
         model.llm.gradient_checkpointing_enable()
         model.llm.enable_input_require_grads()
@@ -344,6 +345,9 @@ if __name__ == "__main__":
     ap.add_argument("--cortex_scale_free", action=argparse.BooleanOptionalAction, default=True,
                     help="readout(u) (DEFAULT) vs --no-cortex_scale_free for readout(u/T); "
                          "scale-free + mixed lengths is what generalizes (generalize_trajectory.py)")
+    ap.add_argument("--constrained_velocity", action="store_true",
+                    help="route the cortex through velocity-driven HEXAGONAL grid modules "
+                         "(metrically accurate + length-invariant; the emergent grid-cell construction)")
     ap.add_argument("--env_half", type=float, default=None,
                     help="half-width of the selfsup place-cell environment (default 2.5 for "
                          "return, 4.0 for distance/bearing)")

@@ -75,8 +75,8 @@ def train_cortex(epochs=100, dim=64, seed=0, topology="square", constrained=Fals
 def capture(cx, H, S, V):
     if getattr(cx, "constrained", False):
         # the grid-cell population IS the per-module bump activity (B, K*M)
-        v2d = torch.stack([S * H.cos(), S * H.sin()], dim=-1)
-        _, cells = cx.integrator(v2d, return_cells=True)
+        v3d = torch.stack([S * H.cos(), S * H.sin(), V], dim=-1)
+        _, cells = cx.integrator(v3d, return_cells=True)
         return cells, cx.encode(H, S, V), None
     B, T = H.shape
     step = (cx.conjunctive(H.reshape(B * T), S.reshape(B * T)).view(B, T, -1)
