@@ -370,6 +370,33 @@ so the magnitude reasoning rides entirely on the (label-free) grid code. The one
 didn't generalise now does — through the brain's own path-integration code.
 (`results/m2_distance_grid.json`.)
 
+## Emergent neuroscience signatures — measured, not designed
+
+Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
+from the trained cortex when probed directly (`src/eval/emergence.py`; cortex pre-trained ONLY on
+self-supervised bounded PLACE-cell prediction — no periodic structure imposed as a target):
+
+1. **Grid cells.** Spatial rate maps of the path-integrating units are PERIODIC and MULTI-FIELD —
+   **100% of units have ≥3 firing fields, ~13 fields/unit on average** — not only in the attractor
+   sheet but also in the learned 64-d summary `h`, which was trained on NON-periodic place cells (the
+   Banino 2018 / Cueva–Wei 2018 emergence). The lattice is **square (4-fold), not hexagonal**: the
+   biological hexagon needs a *twisted* torus (Guanella 2007), while our integrator uses a square
+   toroidal sheet — so periodic grids emerge with the symmetry of the attractor's topology. (Concrete
+   next step: twist the torus → expect hexagonal grids.) See `results/emergence_gridcells.svg`.
+2. **Path-integration drift & distance compression.** Decoding position from the frozen rep (corr
+   0.71) shows the cortex systematically UNDER-estimates distance — decoded ≈ **0.5× true** — and
+   error grows monotonically with distance (0.56 → 1.54 across the arena). Both are documented
+   biological PI biases (homing-vector underestimation; error accumulation with travel) — and the
+   same integration drift that caps the distance task at long T (the magnitude-frontier residual).
+3. **Head-direction cells.** 88% of conjunctive units are directionally tuned (mean vector strength
+   0.49) — a ring-attractor head-direction code (Taube 1990).
+4. **7±2 working memory** (above) — recall stays near-perfect until the trajectory overflows
+   theta-gamma's ~8 slots, then collapses (99.6% → 30.7% as T goes 4 → 14).
+
+None of these were fitted as objectives; they fall out of a network assembled from grid / place /
+head-direction / theta-gamma primitives and trained only to navigate. The architecture reproduces
+the *phenomenology* of the spatial brain, not just its parts. (`results/emergence.json`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.
