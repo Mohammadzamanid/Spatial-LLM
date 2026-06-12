@@ -4,8 +4,9 @@
     "n_periodic": 256,
     "n_multifield": 256,
     "mean_fields": 13.4,
-    "n_square_lattice": 256,
+    "n_square_lattice": 0,
     "n_hex_lattice": 0,
+    "mean_gridness": -0.457,
     "top_gridness": -0.209
   },
   "gridcell_svg": "results/emergence_gridcells.svg",
@@ -14,8 +15,9 @@
     "n_periodic": 63,
     "n_multifield": 64,
     "mean_fields": 13.5,
-    "n_square_lattice": 63,
+    "n_square_lattice": 0,
     "n_hex_lattice": 0,
+    "mean_gridness": -0.458,
     "top_gridness": -0.358
   },
   "pi_drift": {
@@ -52,5 +54,6 @@
   "head_direction": {
     "mean_vector_strength": 0.487,
     "frac_tuned(>0.4)": 0.875
-  }
+  },
+  "topology": "square"
 }

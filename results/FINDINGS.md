@@ -381,8 +381,22 @@ self-supervised bounded PLACE-cell prediction — no periodic structure imposed 
    sheet but also in the learned 64-d summary `h`, which was trained on NON-periodic place cells (the
    Banino 2018 / Cueva–Wei 2018 emergence). The lattice is **square (4-fold), not hexagonal**: the
    biological hexagon needs a *twisted* torus (Guanella 2007), while our integrator uses a square
-   toroidal sheet — so periodic grids emerge with the symmetry of the attractor's topology. (Concrete
-   next step: twist the torus → expect hexagonal grids.) See `results/emergence_gridcells.svg`.
+   toroidal sheet — so periodic grids emerge with the symmetry of the attractor's topology.
+   See `results/emergence_gridcells.svg`.
+
+   **We tested the twisted-torus prediction directly** (`--topology hex`: a rhombic 60° sheet wrapped
+   on hexagonal lattice vectors). The gridness metric is validated on synthetic maps (clean square →
+   −1.08, clean hexagon → **+1.09**), so it would detect a hexagon. Outcome: the twist measurably
+   IMPROVES the code — position decode 0.71 → **0.87**, distance compression eases 0.50 → **0.69×**,
+   denser fields (13 → 19 per unit) — **but the emergent real-space firing did NOT flip to regular
+   hexagonal** (mean gridness ≈ −0.46; 0/256 units pass gridness>0). A clean *falsification*, and an
+   instructive one: unlike hand-built attractors (Guanella; Burak–Fiete) where the velocity→sheet map
+   is *constructed* to preserve the lattice metric, here `vel_to_sheet` is **learned** (to predict
+   place cells) and is free to map real space onto the sheet with arbitrary shear/orientation — so
+   connectivity topology alone does not dictate real-space grid symmetry. The hexagonal substrate is
+   nonetheless a *better metric* (the decode/compression gains), hinting at why biology prefers it.
+   Constructive next step: constrain `vel_to_sheet` toward an isometry onto the hex sheet, or add a
+   hexagonal-symmetry objective. (`results/emergence_hex.json`, `results/emergence_gridcells_hex.svg`.)
 2. **Path-integration drift & distance compression.** Decoding position from the frozen rep (corr
    0.71) shows the cortex systematically UNDER-estimates distance — decoded ≈ **0.5× true** — and
    error grows monotonically with distance (0.56 → 1.54 across the arena). Both are documented

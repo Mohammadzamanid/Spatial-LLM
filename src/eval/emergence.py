@@ -138,9 +138,11 @@ def grid_stats(rm):
     annulus = (rad > rmax * 0.18) & (rad < rmax * 0.95)
     base = ac[annulus]
     cor = {d: _pearson(base, _rotate(ac, d)[annulus]).item() for d in (30, 60, 90, 120, 150, 180)}
+    # standard gridness: hexagonal if 60°/120° symmetry beats 30°/90°/150°.
+    # (NB: never use 180° — an autocorrelogram is centrally symmetric, so c180≈1 for ANY map.)
     gridness = min(cor[60], cor[120]) - max(cor[30], cor[90], cor[150])
-    sym6 = (cor[60] + cor[120]) / 2
-    sym4 = (cor[90] + cor[180]) / 2
+    sym6 = (cor[60] + cor[120]) / 2          # 6-fold (hexagonal) score
+    sym4 = cor[90]                            # 4-fold (square) score
     periodicity = ac[annulus].max().item()
     return gridness, sym4, sym6, periodicity, _npeaks(rm), ac
 
@@ -177,11 +179,10 @@ def _heat_svg(x, y, arr, cell):
 def grid_svg(top, out="results/emergence_gridcells.svg", topology="square"):
     cols = len(top); cw, pad = 200, 20
     W = pad + cols * cw; Hh = 372
-    lat = "hexagonal" if topology == "hex" else "square"
     e = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Hh}" font-family="Segoe UI, Arial">',
          f'<rect width="{W}" height="{Hh}" fill="#ffffff"/>']
     e.append(f'<text x="20" y="28" font-size="18" font-weight="800" fill="#0b1324">'
-             f'Emergent periodic GRID fields ({lat} lattice · {topology} torus)</text>')
+             f'Emergent periodic GRID fields — {topology} torus (measured symmetry per unit below)</text>')
     e.append('<text x="20" y="48" font-size="12" fill="#5b6b8c">hidden units of a cortex trained '
              'only to predict bounded PLACE cells — multi-peak periodic fields emerged on their own.</text>')
     for i, (uid, gr, s4, s6, per, npk, rm, ac) in enumerate(top):
@@ -229,19 +230,21 @@ def main():
                 continue
             gr, s4, s6, per, npk, ac = grid_stats(rms[ui])
             stats.append((ui, gr, s4, s6, per, npk, rms[ui], ac))
-        stats.sort(key=lambda z: z[4], reverse=True)               # most periodic first
+        stats.sort(key=lambda z: z[1], reverse=True)               # highest gridness first
         n = len(stats)
         n_periodic = sum(1 for z in stats if z[4] > 0.30)
         n_multi = sum(1 for z in stats if z[5] >= 3)
-        n_sq = sum(1 for z in stats if z[2] > z[3] and z[4] > 0.30)
-        n_hex = sum(1 for z in stats if z[3] > z[2] and z[4] > 0.30 and z[1] > 0)
+        n_hex = sum(1 for z in stats if z[1] > 0 and z[4] > 0.30)            # gridness>0 = hexagonal
+        n_sq = sum(1 for z in stats if z[1] <= 0 and z[2] > z[3] and z[4] > 0.30)
         mean_fields = round(sum(z[5] for z in stats) / max(n, 1), 1)
+        mean_grid = round(sum(z[1] for z in stats) / max(n, 1), 3)
         out[name] = {"n_units": n, "n_periodic": n_periodic, "n_multifield": n_multi,
                      "mean_fields": mean_fields, "n_square_lattice": n_sq, "n_hex_lattice": n_hex,
+                     "mean_gridness": mean_grid,
                      "top_gridness": round(max((z[1] for z in stats), default=0), 3)}
-        print(f"[{name}] units={n}  multi-field(≥3 peaks)={n_multi} ({100*n_multi//max(n,1)}%)  "
-              f"mean fields/unit={mean_fields}  periodic={n_periodic}  "
-              f"lattice: square={n_sq} hex={n_hex}", flush=True)
+        print(f"[{name}] units={n}  multi-field(≥3)={n_multi} ({100*n_multi//max(n,1)}%)  "
+              f"mean fields/unit={mean_fields}  mean gridness={mean_grid}  "
+              f"HEX(gridness>0)={n_hex}  square={n_sq}", flush=True)
         if name == "sheet":
             top = [(z[0], z[1], z[2], z[3], z[4], z[5], z[6], z[7]) for z in stats[:6]]
             out["gridcell_svg"] = grid_svg(top, out=f"results/emergence_gridcells{suf}.svg",
