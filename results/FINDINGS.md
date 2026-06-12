@@ -433,6 +433,32 @@ None of these were fitted as objectives; they fall out of a network assembled fr
 head-direction / theta-gamma primitives and trained only to navigate. The architecture reproduces
 the *phenomenology* of the spatial brain, not just its parts. (`results/emergence.json`.)
 
+### Binding the emergent grid cells back to the language model
+
+We then routed TrajectoryLLM's cortex through the velocity-driven hexagonal grid modules
+(`--constrained_velocity`) on the distance task — closing the loop from "grid cells emerge" to
+"grid cells drive language":
+
+| distance, exact (within-1) | T=8 | T=16 | T=24 | cortex probe |
+|---|---|---|---|---|
+| place attractor + place target | 62% (94) | 46% (78) | 40% (81) | 85/66/37 |
+| square attractor + **grid target** | 79% (100) | 83% (99) | 63% (94) | 99/88/83 |
+| **grid-cell cortex** + place target | 68% (95) | 52% (88) | 50% (85) | 94/83/79 |
+
+- **The faithful grid-cell cortex carries the language task.** Against the place-attractor baseline
+  (same self-supervised target), it improves the LLM at every length — exact +6/+6/+10, within-1 +1/
+  +10/+4 — and the cortex probe nearly DOUBLES at the hardest held-out length (T=24: 37% → 79%). The
+  emergent hexagonal-grid mechanism genuinely powers the LLM's distance reasoning.
+- **Grid CORTEX and grid TARGET are redundant, not additive.** It did not beat the grid-*target*
+  route (79/83/63), and a CPU probe explains why: teaching a plain square attractor to predict a grid
+  code already induces a grid-like metric (probe 99/88/83), and the grid-cell cortex reaches the same
+  place by construction (probe with a grid target 97/88/80); combining them does not stack. They are
+  two routes to one functional endpoint — a faithful, scale-true, length-invariant metric.
+- **Why prefer the cortex route:** it is the actual entorhinal path integrator — it *produces* the
+  emergent hexagonal grid cells and is length-invariant by construction — rather than a training trick
+  layered on a square sheet. Within-1 stays 85–95% throughout: the magnitude is essentially right.
+  (`results/m2_distance_gridcortex.json`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

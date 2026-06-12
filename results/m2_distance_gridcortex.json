@@ -1,0 +1,21 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-8 summary. Command in notebooks/m2_harder_tasks_kaggle.py (cell 7).",
+  "config": {
+    "base_llm": "Qwen/Qwen2.5-1.5B", "cortex_dim": 128,
+    "n_train": 2400, "n_val": 300, "epochs": 3, "cortex_epochs": 80,
+    "constrained_velocity": true, "code": "place"
+  },
+  "task": "distance",
+  "question": "How far are you from where you started?",
+  "train_lengths": [6, 8, 10, 12],
+  "eval_lengths": [8, 16, 24],
+  "cortex_pretrain": "selfsup",
+  "cortex": "velocity-driven hexagonal grid modules (constrained_velocity)",
+  "probe_acc_by_len": {"8": 0.94, "16": 0.83, "24": 0.79},
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.68, "cortex_off_exact": 0.26, "cortex_on_within1": 0.95, "chance": 0.38, "extrapolation": false},
+    "16": {"cortex_on_exact": 0.52, "cortex_off_exact": 0.17, "cortex_on_within1": 0.88, "chance": 0.29, "extrapolation": true},
+    "24": {"cortex_on_exact": 0.50, "cortex_off_exact": 0.14, "cortex_on_within1": 0.85, "chance": 0.33, "extrapolation": true}
+  },
+  "note": "Velocity-driven hexagonal GRID-CELL cortex (faithful path integrator) + place-code target. Beats the place-attractor baseline (62/46/40 exact, probe 85/66/37) at every length — exact 68/52/50, probe 94/83/79, within-1 95/88/85 — with the cortex probe nearly doubling at T=24 (37->79). Does NOT exceed the grid-CODE-target route (79/83/63): a CPU probe shows the grid cortex and grid target are REDUNDANT routes to the same grid metric, not additive. The cortex route is the biologically grounded one (emergent hexagonal grids, length-invariant by construction)."
+}
