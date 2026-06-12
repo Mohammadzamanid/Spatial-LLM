@@ -97,12 +97,64 @@ class _AttractorIntegrator(nn.Module):
         return self.readout(u / T if self.length_norm else u)
 
 
+class _HexGridModules(nn.Module):
+    """Biologically-CONSTRAINED velocity-driven grid modules (Burak & Fiete 2009; Guanella 2007).
+
+    Self-motion velocity drives a PHASE that is integrated and wrapped on a hexagonal (twisted)
+    torus, so each module's cells fire on a HEXAGONAL lattice in real space — grid cells by
+    construction. Several modules at geometric scale ratios (the real entorhinal organisation;
+    Stensola 2012) make the population code unambiguous. Only the velocity GAINS are fixed
+    (faithful); the readout is LEARNED (grid code -> downstream), mirroring entorhinal->hippocampal
+    flow. The phase depends on the FINAL position, not the path length -> path integration is
+    length-invariant by construction.
+    """
+
+    def __init__(self, embed_dim: int, n_modules: int = 4, side: int = 8,
+                 base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0):
+        super().__init__()
+        self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
+        ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
+        ii = ii.reshape(-1).float(); jj = jj.reshape(-1).float()
+        self.register_buffer("cell_pos", torch.stack([ii + 0.5 * jj, jj * (math.sqrt(3) / 2)], -1))  # (M,2)
+        a1 = torch.tensor([float(side), 0.0]); a2 = torch.tensor([side * 0.5, side * math.sqrt(3) / 2])
+        self.register_buffer("shifts", torch.stack([m * a1 + n * a2
+                                                    for m in (-1, 0, 1) for n in (-1, 0, 1)]))     # (9,2)
+        spacings = base_spacing * (ratio ** torch.arange(n_modules).float())
+        self.register_buffer("gains", side / spacings)                                            # (K,) FIXED
+        self.readout = nn.Linear(self.K * self.M, embed_dim)
+
+    def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
+        K, B, _ = phi.shape
+        d0 = self.cell_pos.view(1, 1, self.M, 2) - phi.view(K, B, 1, 2)        # (K,B,M,2)
+        best = None
+        for s in self.shifts:                        # min-image distance on the hex lattice
+            ds = ((d0 - s) ** 2).sum(-1)             # (K,B,M)
+            best = ds if best is None else torch.minimum(best, ds)
+        bump = torch.exp(-best / (2 * self.sigma ** 2))                        # (K,B,M)
+        return bump.permute(1, 0, 2).reshape(B, self.K * self.M)
+
+    def forward(self, v2d, return_sequence: bool = False, return_cells: bool = False):
+        B, T, _ = v2d.shape
+        phi = torch.zeros(self.K, B, 2, device=v2d.device, dtype=v2d.dtype)
+        outs, last = [], None
+        for t in range(T):
+            phi = phi + self.gains.view(self.K, 1, 1) * v2d[:, t].unsqueeze(0)  # integrate velocity
+            last = self._grid_code(phi)
+            if return_sequence:
+                outs.append(self.readout(last))
+        if return_sequence:
+            seq = torch.stack(outs, dim=1)
+            return (seq, last) if return_cells else seq
+        out = self.readout(last)
+        return (out, last) if return_cells else out
+
+
 class TrajectoryCortex(nn.Module):
     def __init__(self, embed_dim: int = 64, config: dict | None = None,
                  aux_heads: bool = False, dims: int = 3,
                  task: str = "pathint", gated: bool = False, max_T: int = 64,
                  mem_slots: int = 8, length_norm: bool = True, out_norm: bool = True,
-                 topology: str = "square"):
+                 topology: str = "square", constrained_velocity: bool = False):
         super().__init__()
         self.embed_dim = embed_dim
         self.dims = dims
@@ -115,10 +167,15 @@ class TrajectoryCortex(nn.Module):
             self.conjunctive = ConjunctiveSpatialCells(embed_dim=embed_dim)
             self.vert = nn.Linear(1, embed_dim)
         if self.cfg["grid_attractor"]:
-            self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm,
-                                                   topology=topology)
+            if constrained_velocity:
+                # velocity-driven hexagonal grid modules (fixed gains, learned readout)
+                self.integrator = _HexGridModules(embed_dim)
+            else:
+                self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm,
+                                                       topology=topology)
         else:
             self.pool_proj = nn.Linear(embed_dim, embed_dim)
+        self.constrained = constrained_velocity
 
         # theta-gamma plays two roles depending on task:
         #  - pathint/recall: optional additive sequence-summary (ThetaGammaCoupling)
@@ -178,12 +235,26 @@ class TrajectoryCortex(nn.Module):
         if self.cfg["conjunctive"]:
             step = step + (self.conjunctive(heading.reshape(B * T), speed.reshape(B * T)).view(B, T, -1)
                            + self.vert(vz.reshape(B * T, 1)).view(B, T, -1))
+        # constrained mode: the grid modules integrate the RAW 2D self-motion velocity (the
+        # signal the conjunctive head-direction×speed cells encode), not the learned embedding.
+        v2d = (torch.stack([speed * heading.cos(), speed * heading.sin()], dim=-1)
+               if self.constrained else None)
 
         if self.task == "pathint":
-            position = self.integrator(step) if self.cfg["grid_attractor"] else self.pool_proj(step.mean(1))
+            if self.constrained:
+                position = self.integrator(v2d)
+            elif self.cfg["grid_attractor"]:
+                position = self.integrator(step)
+            else:
+                position = self.pool_proj(step.mean(1))
         else:
             # recall / memrecall need per-step running positions
-            states = self.integrator(step, return_sequence=True) if self.cfg["grid_attractor"] else step
+            if self.constrained:
+                states = self.integrator(v2d, return_sequence=True)
+            elif self.cfg["grid_attractor"]:
+                states = self.integrator(step, return_sequence=True)
+            else:
+                states = step
             if self.task == "recall":
                 idx = torch.arange(T, device=device)
                 attn = torch.softmax(self.step_key(k) @ self.step_key(idx).t()

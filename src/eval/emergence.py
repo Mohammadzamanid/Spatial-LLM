@@ -51,9 +51,10 @@ def _corr(a, b):
 
 
 # ------------------------------------------------------------------- train + capture
-def train_cortex(epochs=100, dim=64, seed=0, topology="square"):
+def train_cortex(epochs=100, dim=64, seed=0, topology="square", constrained=False):
     torch.manual_seed(seed)
-    cx = TrajectoryCortex(embed_dim=dim, task="pathint", length_norm=False, topology=topology)
+    cx = TrajectoryCortex(embed_dim=dim, task="pathint", length_norm=False, topology=topology,
+                          constrained_velocity=constrained)
     cg = torch.Generator().manual_seed(0)
     centers = torch.rand(128, 3, generator=cg) * 8 - 4               # bounded place cells, env ±4
     head = nn.Linear(dim, 128)
@@ -72,6 +73,11 @@ def train_cortex(epochs=100, dim=64, seed=0, topology="square"):
 
 @torch.no_grad()
 def capture(cx, H, S, V):
+    if getattr(cx, "constrained", False):
+        # the grid-cell population IS the per-module bump activity (B, K*M)
+        v2d = torch.stack([S * H.cos(), S * H.sin()], dim=-1)
+        _, cells = cx.integrator(v2d, return_cells=True)
+        return cells, cx.encode(H, S, V), None
     B, T = H.shape
     step = (cx.conjunctive(H.reshape(B * T), S.reshape(B * T)).view(B, T, -1)
             + cx.vert(V.reshape(B * T, 1)).view(B, T, -1))
@@ -181,8 +187,9 @@ def grid_svg(top, out="results/emergence_gridcells.svg", topology="square"):
     W = pad + cols * cw; Hh = 372
     e = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Hh}" font-family="Segoe UI, Arial">',
          f'<rect width="{W}" height="{Hh}" fill="#ffffff"/>']
+    desc = ("velocity-driven hex grid modules" if topology == "hexvel" else f"{topology} torus")
     e.append(f'<text x="20" y="28" font-size="18" font-weight="800" fill="#0b1324">'
-             f'Emergent periodic GRID fields — {topology} torus (measured symmetry per unit below)</text>')
+             f'Emergent periodic GRID fields — {desc} (measured symmetry per unit below)</text>')
     e.append('<text x="20" y="48" font-size="12" fill="#5b6b8c">hidden units of a cortex trained '
              'only to predict bounded PLACE cells — multi-peak periodic fields emerged on their own.</text>')
     for i, (uid, gr, s4, s6, per, npk, rm, ac) in enumerate(top):
@@ -210,11 +217,14 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--topology", choices=["square", "hex"], default="square",
                     help="attractor torus: square (default) or hex/twisted (Guanella 2007)")
+    ap.add_argument("--constrained", action="store_true",
+                    help="velocity-driven hexagonal grid MODULES (fixed gains, learned readout) — "
+                         "the Burak-Fiete/Guanella construction; predicts true hexagonal grids")
     a = ap.parse_args()
-    suf = "" if a.topology == "square" else f"_{a.topology}"
+    suf = "_hexvel" if a.constrained else ("" if a.topology == "square" else f"_{a.topology}")
     print(f"training cortex (self-supervised PLACE-cell path integration, {a.epochs} ep, "
-          f"topology={a.topology})...", flush=True)
-    cx = train_cortex(a.epochs, seed=a.seed, topology=a.topology)
+          f"topology={a.topology}, constrained_velocity={a.constrained})...", flush=True)
+    cx = train_cortex(a.epochs, seed=a.seed, topology=a.topology, constrained=a.constrained)
 
     H, S, V, xy = walks_2d(20000, 9, 7)
     u, h, step = capture(cx, H, S, V)
@@ -248,7 +258,7 @@ def main():
         if name == "sheet":
             top = [(z[0], z[1], z[2], z[3], z[4], z[5], z[6], z[7]) for z in stats[:6]]
             out["gridcell_svg"] = grid_svg(top, out=f"results/emergence_gridcells{suf}.svg",
-                                           topology=a.topology)
+                                           topology=("hexvel" if a.constrained else a.topology))
             print(f"  wrote {out['gridcell_svg']}", flush=True)
 
     # ---- 2. path-integration drift: distance compression + Weber's law ----
