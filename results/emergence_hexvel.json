@@ -12,48 +12,48 @@
   "gridcell_svg": "results/emergence_gridcells_hexvel.svg",
   "summary_h": {
     "n_units": 64,
-    "n_periodic": 63,
-    "n_multifield": 63,
-    "mean_fields": 10.1,
+    "n_periodic": 64,
+    "n_multifield": 64,
+    "mean_fields": 10.2,
     "n_square_lattice": 0,
-    "n_hex_lattice": 5,
-    "mean_gridness": -0.384,
-    "top_gridness": 0.761
+    "n_hex_lattice": 2,
+    "mean_gridness": -0.418,
+    "top_gridness": 0.287
   },
   "pi_drift": {
-    "decode_corr": 0.969,
-    "distance_compression_k": 0.951,
+    "decode_corr": 0.967,
+    "distance_compression_k": 0.942,
     "weber_bins": [
       {
         "dist": 0.38,
-        "error": 0.166,
-        "error/dist": 0.438
+        "error": 0.164,
+        "error/dist": 0.432
       },
       {
         "dist": 0.86,
-        "error": 0.167,
-        "error/dist": 0.195
+        "error": 0.165,
+        "error/dist": 0.193
       },
       {
         "dist": 1.39,
-        "error": 0.242,
-        "error/dist": 0.174
+        "error": 0.256,
+        "error/dist": 0.184
       },
       {
         "dist": 1.92,
-        "error": 0.389,
-        "error/dist": 0.203
+        "error": 0.41,
+        "error/dist": 0.214
       },
       {
         "dist": 2.44,
-        "error": 0.526,
-        "error/dist": 0.215
+        "error": 0.551,
+        "error/dist": 0.226
       }
     ]
   },
   "head_direction": {
-    "mean_vector_strength": 0.484,
-    "frac_tuned(>0.4)": 0.766
+    "mean_vector_strength": 0.479,
+    "frac_tuned(>0.4)": 0.828
   },
   "topology": "square"
 }
