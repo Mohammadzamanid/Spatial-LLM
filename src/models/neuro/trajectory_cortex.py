@@ -52,18 +52,33 @@ class _AttractorIntegrator(nn.Module):
     """
 
     def __init__(self, embed_dim: int, grid_size: int = 16, settle: int = 2,
-                 length_norm: bool = True):
+                 length_norm: bool = True, topology: str = "square"):
         super().__init__()
         self.N = grid_size * grid_size
         self.settle = settle
         self.length_norm = length_norm
         self.vel_to_sheet = nn.Linear(embed_dim, self.N)
         g = grid_size
-        cells = torch.stack(torch.meshgrid(
-            torch.arange(g), torch.arange(g), indexing="ij"), dim=-1).reshape(-1, 2).float()
-        d = cells.unsqueeze(0) - cells.unsqueeze(1)
-        d = torch.minimum(d.abs(), g - d.abs())
-        dist_sq = (d ** 2).sum(-1)
+        ii, jj = torch.meshgrid(torch.arange(g), torch.arange(g), indexing="ij")
+        ii = ii.reshape(-1).float(); jj = jj.reshape(-1).float()
+        if topology == "hex":
+            # TWISTED (rhombic 60°) torus -> hexagonal grid fields (Guanella et al. 2007).
+            # Shear the sheet to a 60° lattice and wrap on its two lattice vectors; the bump's
+            # periodic images then tile hexagonally instead of in a square.
+            cells = torch.stack([ii + 0.5 * jj, jj * (math.sqrt(3) / 2.0)], dim=-1)
+            a1 = torch.tensor([float(g), 0.0]); a2 = torch.tensor([g * 0.5, g * math.sqrt(3) / 2.0])
+            d = cells.unsqueeze(0) - cells.unsqueeze(1)
+            dist_sq = None
+            for m in (-1, 0, 1):
+                for n in (-1, 0, 1):                    # min-image over the rhombic lattice
+                    ds = ((d - (m * a1 + n * a2)) ** 2).sum(-1)
+                    dist_sq = ds if dist_sq is None else torch.minimum(dist_sq, ds)
+        else:
+            # SQUARE torus (default; original behaviour) — independent per-axis wrap.
+            cells = torch.stack([ii, jj], dim=-1)
+            d = cells.unsqueeze(0) - cells.unsqueeze(1)
+            d = torch.minimum(d.abs(), g - d.abs())
+            dist_sq = (d ** 2).sum(-1)
         self.register_buffer("W", torch.exp(-dist_sq / 8.0) - 0.6 * torch.exp(-dist_sq / 72.0))
         self.readout = nn.Linear(self.N, embed_dim)
 
@@ -86,7 +101,8 @@ class TrajectoryCortex(nn.Module):
     def __init__(self, embed_dim: int = 64, config: dict | None = None,
                  aux_heads: bool = False, dims: int = 3,
                  task: str = "pathint", gated: bool = False, max_T: int = 64,
-                 mem_slots: int = 8, length_norm: bool = True, out_norm: bool = True):
+                 mem_slots: int = 8, length_norm: bool = True, out_norm: bool = True,
+                 topology: str = "square"):
         super().__init__()
         self.embed_dim = embed_dim
         self.dims = dims
@@ -99,7 +115,8 @@ class TrajectoryCortex(nn.Module):
             self.conjunctive = ConjunctiveSpatialCells(embed_dim=embed_dim)
             self.vert = nn.Linear(1, embed_dim)
         if self.cfg["grid_attractor"]:
-            self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm)
+            self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm,
+                                                   topology=topology)
         else:
             self.pool_proj = nn.Linear(embed_dim, embed_dim)
 
