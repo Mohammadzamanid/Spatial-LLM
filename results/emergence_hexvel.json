@@ -1,0 +1,59 @@
+{
+  "sheet": {
+    "n_units": 256,
+    "n_periodic": 255,
+    "n_multifield": 256,
+    "mean_fields": 8.0,
+    "n_square_lattice": 0,
+    "n_hex_lattice": 255,
+    "mean_gridness": 0.871,
+    "top_gridness": 1.194
+  },
+  "gridcell_svg": "results/emergence_gridcells_hexvel.svg",
+  "summary_h": {
+    "n_units": 64,
+    "n_periodic": 63,
+    "n_multifield": 63,
+    "mean_fields": 10.1,
+    "n_square_lattice": 0,
+    "n_hex_lattice": 5,
+    "mean_gridness": -0.384,
+    "top_gridness": 0.761
+  },
+  "pi_drift": {
+    "decode_corr": 0.969,
+    "distance_compression_k": 0.951,
+    "weber_bins": [
+      {
+        "dist": 0.38,
+        "error": 0.166,
+        "error/dist": 0.438
+      },
+      {
+        "dist": 0.86,
+        "error": 0.167,
+        "error/dist": 0.195
+      },
+      {
+        "dist": 1.39,
+        "error": 0.242,
+        "error/dist": 0.174
+      },
+      {
+        "dist": 1.92,
+        "error": 0.389,
+        "error/dist": 0.203
+      },
+      {
+        "dist": 2.44,
+        "error": 0.526,
+        "error/dist": 0.215
+      }
+    ]
+  },
+  "head_direction": {
+    "mean_vector_strength": 0.484,
+    "frac_tuned(>0.4)": 0.766
+  },
+  "topology": "square"
+}

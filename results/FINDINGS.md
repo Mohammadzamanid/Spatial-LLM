@@ -397,6 +397,28 @@ self-supervised bounded PLACE-cell prediction — no periodic structure imposed 
    nonetheless a *better metric* (the decode/compression gains), hinting at why biology prefers it.
    Constructive next step: constrain `vel_to_sheet` toward an isometry onto the hex sheet, or add a
    hexagonal-symmetry objective. (`results/emergence_hex.json`, `results/emergence_gridcells_hex.svg`.)
+
+   **Resolved — the lever is the VELOCITY mapping, not the connectivity.** Adding the faithful
+   continuous-attractor construction (`--constrained`: self-motion velocity drives a phase integrated
+   and wrapped on a hexagonal torus; K=4 modules at geometric scale ratios à la Stensola 2012; gains
+   FIXED, readout LEARNED — the entorhinal→hippocampal flow) flips the result decisively:
+
+   | torus / mechanism | mean gridness | units gridness>0 | position decode | distance compression |
+   |---|---|---|---|---|
+   | square torus | −0.46 | 0/256 | 0.71 | 0.50× |
+   | hex torus (connectivity only) | −0.46 | 0/256 | 0.87 | 0.69× |
+   | **constrained velocity (hex modules)** | **+0.87** | **255/256** | **0.97** | **0.95×** |
+
+   The emergent grid cells are now **HEXAGONAL** (gridness +0.87 vs +1.09 for a textbook synthetic
+   hexagon — 255/256 module cells pass). And it is not only the lattice: the multi-scale velocity-driven
+   code gives **near-perfect position decoding (0.71→0.97)** and **all but eliminates the distance-
+   compression bias (0.50×→0.95×)** — faithful path integration. (The learned readout `h` mixes modules
+   into a place-like code — only 5/64 of *its* units are hexagonal — exactly the grid→place transform
+   the hippocampus performs.) So the falsification was correct and instructive: grid hexagonality is set
+   by *how velocity drives the phase* (the path-integration mechanism), not by sheet connectivity alone;
+   build that mechanism in and a hexagonal grid — plus a near-perfect, length-invariant metric — emerges.
+   Each step is *more* brain-like: conjunctive velocity cells → multi-scale grid modules → learned place
+   readout. (`results/emergence_hexvel.json`, `results/emergence_gridcells_hexvel.svg`.)
 2. **Path-integration drift & distance compression.** Decoding position from the frozen rep (corr
    0.71) shows the cortex systematically UNDER-estimates distance — decoded ≈ **0.5× true** — and
    error grows monotonically with distance (0.56 → 1.54 across the arena). Both are documented
