@@ -57,28 +57,30 @@ def run(cond, R=3.0, epochs=70, n=4000, Ttr=(8, 12, 16, 20), Tev=(6, 12, 18, 24,
     noise_std = 0.0 if cond == "exact" else noise
     anchor = (cond == "anchored")
     torch.manual_seed(seed)
-    cx = _HexGridModules(embed_dim=64, noise_std=noise_std, boundary_anchor=anchor)
-    pos_head = nn.Linear(64, 2)
-    opt = torch.optim.Adam(list(cx.parameters()) + list(pos_head.parameters()), lr=3e-3)
+    # more modules + coarser base spacing -> the population code is unique over the arena;
+    # a nonlinear decoder is needed to invert the periodic (residue) grid code.
+    cx = _HexGridModules(embed_dim=64, n_modules=5, base_spacing=1.5,
+                         noise_std=noise_std, boundary_anchor=anchor)
+    decoder = nn.Sequential(nn.Linear(cx.K * cx.M, 256), nn.ReLU(), nn.Linear(256, 2))
+    opt = torch.optim.Adam(list(cx.parameters()) + list(decoder.parameters()), lr=3e-3)
     mse = nn.MSELoss()
     cx.train()
     for ep in range(epochs):
         T = Ttr[ep % len(Ttr)]
         v3d, bobs, pos = bounded_walks(n, T, R, seed=1000 + ep)
         opt.zero_grad()
-        rep = cx(v3d, boundary_obs=bobs if anchor else None)
-        mse(pos_head(rep), pos).backward()
+        _, gc = cx(v3d, boundary_obs=bobs if anchor else None, return_cells=True)
+        mse(decoder(gc), pos).backward()
         opt.step()
     cx.eval()
     out = {}
     with torch.no_grad():
         for T in Tev:
             v3d, bobs, pos = bounded_walks(3000, T, R, seed=5000 + T)
-            # average error over a few noise draws (integration noise is stochastic)
             errs = []
-            for r in range(3):
-                rep = cx(v3d, boundary_obs=bobs if anchor else None)
-                errs.append((pos_head(rep) - pos).norm(dim=1).mean().item())
+            for r in range(3):                                 # average over noise draws
+                _, gc = cx(v3d, boundary_obs=bobs if anchor else None, return_cells=True)
+                errs.append((decoder(gc) - pos).norm(dim=1).mean().item())
             out[T] = round(sum(errs) / len(errs), 4)
     return out
 

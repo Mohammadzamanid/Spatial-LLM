@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" font-family="Segoe UI, Arial">
+<rect width="640" height="420" fill="#ffffff"/>
+<text x="40" y="30" font-size="17" font-weight="800" fill="#0b1324">Boundary anchoring corrects path-integration drift</text>
+<text x="40" y="50" font-size="12" fill="#5b6b8c">position-decode error vs path length T — noisy grid integration, with/without boundary phase-reset</text>
+<line x1="60" y1="360" x2="580" y2="360" stroke="#33415c"/><line x1="60" y1="60" x2="60" y2="360" stroke="#33415c"/>
+<text x="320.0" y="402" font-size="12" fill="#28324a" text-anchor="middle">path length T (steps)</text>
+<text x="20" y="210.0" font-size="12" fill="#28324a" transform="rotate(-90 20 210.0)" text-anchor="middle">mean position error</text>
+<text x="60.0" y="376" font-size="10" fill="#5b6b8c" text-anchor="middle">6</text>
+<text x="190.0" y="376" font-size="10" fill="#5b6b8c" text-anchor="middle">12</text>
+<text x="320.0" y="376" font-size="10" fill="#5b6b8c" text-anchor="middle">18</text>
+<text x="450.0" y="376" font-size="10" fill="#5b6b8c" text-anchor="middle">24</text>
+<text x="580.0" y="376" font-size="10" fill="#5b6b8c" text-anchor="middle">30</text>
+<polyline points="60.0,346.2 190.0,338.2 320.0,329.7 450.0,320.0 580.0,315.7" fill="none" stroke="#2ca25f" stroke-width="2.5"/>
+<circle cx="60.0" cy="346.2" r="3" fill="#2ca25f"/>
+<circle cx="190.0" cy="338.2" r="3" fill="#2ca25f"/>
+<circle cx="320.0" cy="329.7" r="3" fill="#2ca25f"/>
+<circle cx="450.0" cy="320.0" r="3" fill="#2ca25f"/>
+<circle cx="580.0" cy="315.7" r="3" fill="#2ca25f"/>
+<polyline points="60.0,246.6 190.0,195.1 320.0,154.8 450.0,116.2 580.0,87.3" fill="none" stroke="#de2d26" stroke-width="2.5"/>
+<circle cx="60.0" cy="246.6" r="3" fill="#de2d26"/>
+<circle cx="190.0" cy="195.1" r="3" fill="#de2d26"/>
+<circle cx="320.0" cy="154.8" r="3" fill="#de2d26"/>
+<circle cx="450.0" cy="116.2" r="3" fill="#de2d26"/>
+<circle cx="580.0" cy="87.3" r="3" fill="#de2d26"/>
+<polyline points="60.0,258.3 190.0,234.0 320.0,220.6 450.0,208.7 580.0,204.1" fill="none" stroke="#3b528b" stroke-width="2.5"/>
+<circle cx="60.0" cy="258.3" r="3" fill="#3b528b"/>
+<circle cx="190.0" cy="234.0" r="3" fill="#3b528b"/>
+<circle cx="320.0" cy="220.6" r="3" fill="#3b528b"/>
+<circle cx="450.0" cy="208.7" r="3" fill="#3b528b"/>
+<circle cx="580.0" cy="204.1" r="3" fill="#3b528b"/>
+<rect x="430" y="66" width="14" height="4" fill="#2ca25f"/>
+<text x="450" y="72" font-size="12" fill="#28324a">exact</text>
+<rect x="430" y="86" width="14" height="4" fill="#de2d26"/>
+<text x="450" y="92" font-size="12" fill="#28324a">drift</text>
+<rect x="430" y="106" width="14" height="4" fill="#3b528b"/>
+<text x="450" y="112" font-size="12" fill="#28324a">anchored</text>
+</svg>

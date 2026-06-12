@@ -459,6 +459,29 @@ We then routed TrajectoryLLM's cortex through the velocity-driven hexagonal grid
   layered on a square sheet. Within-1 stays 85–95% throughout: the magnitude is essentially right.
   (`results/m2_distance_gridcortex.json`.)
 
+### Toward the real brain — boundaries correct path-integration drift
+
+The limitation we kept hitting is integration DRIFT: noisy path integration accumulates error with
+distance travelled. The brain's fix is not a better integrator — it is SENSORY ANCHORING:
+environmental boundaries reset accumulated grid error (Hardcastle, Ganguli & Giocomo 2015). We added
+exactly this — `BoundaryVectorCells` read the (distance, bearing) to the nearest wall and gate-reset
+the grid phase toward the boundary-implied coordinate (the perpendicular axis only) — and tested it
+with NOISY integration in a walled arena (`src/eval/boundary_anchoring.py`; position-decode error vs
+path length T, 3 conditions):
+
+| condition | T=6 | T=12 | T=18 | T=24 | T=30 |
+|---|---|---|---|---|---|
+| exact (no integration noise) | 0.04 | 0.07 | 0.10 | 0.13 | 0.14 |
+| drift (noisy, no anchor) | 0.35 | 0.52 | 0.64 | 0.76 | **0.85** |
+| **anchored (noisy + boundaries)** | 0.32 | 0.39 | 0.44 | 0.47 | **0.49** |
+
+Without boundaries the error grows steadily with distance (drift ∝ √T); **boundary anchoring cuts it
+43% at T=30 and flattens its growth** (accumulation rate −66%) — the grid phase is re-pinned whenever
+the agent passes a wall, so error can't accumulate without bound. That is the Hardcastle-2015
+mechanism reproduced: the brain does not beat drift with a perfect integrator, it CORRECTS it with
+sensory landmarks. The missing pillar (allothetic anchoring) made concrete, attacking the one
+limitation we knew was real. (`results/boundary_anchoring.json`, `results/boundary_anchoring.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

@@ -132,10 +132,12 @@ class _HexGridModules(nn.Module):
         # (Hardcastle, Ganguli & Giocomo 2015 — boundaries correct accumulated grid error).
         self.noise_std = noise_std
         self.boundary_anchor = boundary_anchor
+        self.arena_R = 3.0
+        self.anchor_scale = 0.8                     # boundary correction acts within ~1 unit of a wall
         if boundary_anchor:
             self.bvc = BoundaryVectorCells(num_cells=24, embed_dim=32, max_distance=3.0)
-            self.bvc_to_pos = nn.Linear(32, 2)                 # boundary obs -> position estimate
-            self.bvc_gate = nn.Linear(32, 1)                   # how much to trust it (high near walls)
+            self.bvc_gate = nn.Linear(32, 2)        # PER-AXIS learned trust (a wall fixes only the
+            nn.init.constant_(self.bvc_gate.bias, 2.0)   # perpendicular axis); start with anchoring ON
 
     def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
         K, B, _ = phi.shape
@@ -164,12 +166,17 @@ class _HexGridModules(nn.Module):
                 vxy = vxy + torch.randn_like(vxy) * self.noise_std
             phi = phi + self.gains.view(self.K, 1, 1) * vxy.unsqueeze(0)             # integrate xy velocity
             z = z + v3d[:, t, 2]                                                     # integrate height
-            if self.boundary_anchor and boundary_obs is not None:                    # gated phase reset at walls
-                emb = self.bvc(boundary_obs[:, t, 0], boundary_obs[:, t, 1])         # (B,32) boundary cells
-                p_hat = self.bvc_to_pos(emb)                                         # (B,2) position estimate
-                gate = torch.sigmoid(self.bvc_gate(emb))                             # (B,1) trust (≈0 in open field)
-                target = self.gains.view(self.K, 1, 1) * p_hat.unsqueeze(0)          # (K,B,2) boundary-implied phase
-                phi = (1 - gate) * phi + gate * target                              # correct accumulated drift
+            if self.boundary_anchor and boundary_obs is not None:                    # phase reset at walls
+                dist = boundary_obs[:, t, 0]; bearing = boundary_obs[:, t, 1]
+                g = torch.sigmoid(self.bvc_gate(self.bvc(dist, bearing)))            # (B,2) learned per-axis trust
+                prox = torch.exp(-dist / self.anchor_scale)                          # strong only near a wall
+                # boundary-implied coordinate: you're at (R - dist) along the wall's normal
+                coord = torch.stack([bearing.cos() * (self.arena_R - dist),
+                                     bearing.sin() * (self.arena_R - dist)], dim=-1)  # (B,2)
+                w = (torch.stack([bearing.cos().abs(), bearing.sin().abs()], -1)      # constrained axis only
+                     * prox.unsqueeze(1) * g).unsqueeze(0)                            # (1,B,2)
+                target = self.gains.view(self.K, 1, 1) * coord.unsqueeze(0)          # (K,B,2) boundary phase
+                phi = (1 - w) * phi + w * target                                     # correct perpendicular drift
             last_grid = self._grid_code(phi)
             last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
             if return_sequence:
