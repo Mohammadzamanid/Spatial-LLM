@@ -474,7 +474,8 @@ path length T):
 | exact (no integration noise) | 0.04 | 0.07 | 0.10 | 0.13 | 0.14 | floor |
 | drift (noisy, no anchor) | 0.35 | 0.52 | 0.64 | 0.76 | **0.85** | — |
 | anchored — geometric fix (hard-coded R−dist) | 0.32 | 0.39 | 0.44 | 0.47 | **0.49** | **−43%** |
-| **anchored — LEARNED localization (no geometry)** | 0.33 | 0.41 | 0.47 | 0.52 | **0.56** | **−34%** |
+| anchored — LEARNED loc. (supervised by true pos) | 0.33 | 0.41 | 0.47 | 0.52 | **0.56** | **−34%** |
+| **anchored — BOOTSTRAP (learned from the agent's OWN PI, no labels)** | 0.33 | 0.41 | 0.47 | 0.53 | **0.58** | **−32%** |
 
 Without boundaries the error grows steadily with distance (drift ∝ √T); **boundary anchoring cuts it
 ~43% at T=30 and flattens its growth** (accumulation rate −66%) — the grid phase is re-pinned whenever
@@ -482,16 +483,21 @@ the agent passes a wall, so error can't accumulate without bound. That is the Ha
 mechanism reproduced: the brain does not beat drift with a perfect integrator, it CORRECTS it with
 sensory landmarks.
 
-**Learned, not hand-coded.** The first version computed the boundary-implied coordinate from arena
-geometry (you're at R−dist along the wall normal). We then removed that scaffold: boundary-vector
-cells feed a LEARNED head that decodes position, calibrated by an experiential localization signal
-(predict the coordinate a wall constrains; trust it near walls) and then frozen — *development before
-use*, since training it jointly lets the decoder suppress the gate whenever localization is briefly
-wrong. Learned localization (RMSE 0.09 near walls) still bounds the drift **−34%** — nearly the
-hand-coded fix's −43%, with **no arena geometry built in**. The small gap is the learned localizer's
-residual imprecision and a soft per-axis gate (vs the exact geometric one). The allothetic-anchoring
-pillar is now genuinely learned from experience. (`results/boundary_anchoring.json`,
-`results/boundary_anchoring.svg`.)
+**Removing the scaffolds, one at a time.** v1 computed the boundary-implied coordinate from arena
+geometry (R−dist). v2 *learned* it (boundary-vector cells → a learned position head), calibrated then
+frozen — *development before use* (training it jointly lets the decoder suppress the gate whenever
+localization is briefly wrong). v3 removes the **last** scaffold — the position label: the localizer
+is trained ONLY against the agent's OWN path-integration estimate (dead-reckoning = integrated
+self-motion + proprioceptive noise), never the true position.
+
+**The bootstrap denoises its own teacher.** That PI teacher drifts badly (RMSE 0.41 near walls), yet
+the localizer trained on it reaches **RMSE 0.076 vs true** — 5× better than its teacher — because the
+wall→position mapping is consistent across visits while the drift is zero-mean and averages out. It
+then bounds the path-integration drift **−32%**, essentially matching the label-supervised version
+(−34%). So boundary localization is learned from *only* self-motion and boundary sensing — no position
+labels, no arena geometry. This is the consistency/bootstrap learning that grounds the cognitive map:
+path integration provides a noisy teacher, boundary cells learn to predict (and thereby denoise) it,
+then correct it. (`results/boundary_anchoring.json`, `results/boundary_anchoring.svg`.)
 
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is

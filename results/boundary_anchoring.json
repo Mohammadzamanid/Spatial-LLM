@@ -28,10 +28,18 @@
       "18": 0.4687,
       "24": 0.5204,
       "30": 0.5596
+    },
+    "anchored_bootstrap": {
+      "6": 0.3293,
+      "12": 0.4132,
+      "18": 0.4668,
+      "24": 0.5332,
+      "30": 0.5809
     }
   },
   "drift_reduction_pct_at_Tmax": {
     "anchored": 42.9,
-    "anchored_learned": 34.4
+    "anchored_learned": 34.4,
+    "anchored_bootstrap": 31.9
   }
 }

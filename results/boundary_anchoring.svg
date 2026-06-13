@@ -34,6 +34,12 @@
 <circle cx="320.0" cy="210.1" r="3" fill="#8856a7"/>
 <circle cx="450.0" cy="193.6" r="3" fill="#8856a7"/>
 <circle cx="580.0" cy="181.0" r="3" fill="#8856a7"/>
+<polyline points="60.0,254.7 190.0,227.8 320.0,210.7 450.0,189.5 580.0,174.2" fill="none" stroke="#e6550d" stroke-width="2.5"/>
+<circle cx="60.0" cy="254.7" r="3" fill="#e6550d"/>
+<circle cx="190.0" cy="227.8" r="3" fill="#e6550d"/>
+<circle cx="320.0" cy="210.7" r="3" fill="#e6550d"/>
+<circle cx="450.0" cy="189.5" r="3" fill="#e6550d"/>
+<circle cx="580.0" cy="174.2" r="3" fill="#e6550d"/>
 <rect x="400" y="66" width="14" height="4" fill="#2ca25f"/>
 <text x="420" y="72" font-size="12" fill="#28324a">exact</text>
 <rect x="400" y="86" width="14" height="4" fill="#de2d26"/>
@@ -42,4 +48,6 @@
 <text x="420" y="112" font-size="12" fill="#28324a">anchored</text>
 <rect x="400" y="126" width="14" height="4" fill="#8856a7"/>
 <text x="420" y="132" font-size="12" fill="#28324a">anchored_learned</text>
+<rect x="400" y="146" width="14" height="4" fill="#e6550d"/>
+<text x="420" y="152" font-size="12" fill="#28324a">anchored_bootstrap</text>
 </svg>
