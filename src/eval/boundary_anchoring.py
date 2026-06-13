@@ -37,6 +37,7 @@ def bounded_walks(n, T, R=3.0, speed=(0.2, 0.8), seed=0):
     g = torch.Generator().manual_seed(seed)
     pos = torch.zeros(n, 2)
     v3d = torch.zeros(n, T, 3); bobs = torch.zeros(n, T, 2)
+    tpos = torch.zeros(n, T, 2); amask = torch.zeros(n, T, 2)     # true position + constrained-axis mask
     wall_bearing = torch.tensor([0.0, math.pi, math.pi / 2, -math.pi / 2])   # right,left,top,bottom
     for t in range(T):
         heading = torch.rand(n, generator=g) * 2 * math.pi
@@ -49,34 +50,52 @@ def bounded_walks(n, T, R=3.0, speed=(0.2, 0.8), seed=0):
         dmin, which = dists.min(-1)
         bobs[:, t, 0] = dmin
         bobs[:, t, 1] = wall_bearing[which]
-    return v3d, bobs, pos
+        tpos[:, t] = pos
+        amask[:, t, 0] = (which < 2).float()                # left/right wall -> constrains x
+        amask[:, t, 1] = (which >= 2).float()               # top/bottom wall -> constrains y
+    return v3d, bobs, pos, tpos, amask
 
 
 def run(cond, R=3.0, epochs=70, n=4000, Ttr=(8, 12, 16, 20), Tev=(6, 12, 18, 24, 30),
         noise=0.12, seed=0):
     noise_std = 0.0 if cond == "exact" else noise
-    anchor = (cond == "anchored")
+    anchor = cond in ("anchored", "anchored_learned")
+    learned = (cond == "anchored_learned")
     torch.manual_seed(seed)
     # more modules + coarser base spacing -> the population code is unique over the arena;
     # a nonlinear decoder is needed to invert the periodic (residue) grid code.
     cx = _HexGridModules(embed_dim=64, n_modules=5, base_spacing=1.5,
-                         noise_std=noise_std, boundary_anchor=anchor)
+                         noise_std=noise_std, boundary_anchor=anchor, learned_loc=learned)
     decoder = nn.Sequential(nn.Linear(cx.K * cx.M, 256), nn.ReLU(), nn.Linear(256, 2))
     opt = torch.optim.Adam(list(cx.parameters()) + list(decoder.parameters()), lr=3e-3)
     mse = nn.MSELoss()
     cx.train()
     for ep in range(epochs):
         T = Ttr[ep % len(Ttr)]
-        v3d, bobs, pos = bounded_walks(n, T, R, seed=1000 + ep)
+        v3d, bobs, pos, tpos, amask = bounded_walks(n, T, R, seed=1000 + ep)
         opt.zero_grad()
         _, gc = cx(v3d, boundary_obs=bobs if anchor else None, return_cells=True)
-        mse(decoder(gc), pos).backward()
+        loss = mse(decoder(gc), pos)
+        if learned:
+            # EXPERIENTIAL supervision: learn to localize from boundary cells (no arena geometry).
+            # The boundary head predicts the position it can sense (constrained axis) and learns to
+            # TRUST it near walls — replacing the hard-coded R-dist fix.
+            B2, T2 = v3d.shape[0], v3d.shape[1]
+            dist = bobs[:, :, 0].reshape(-1); bearing = bobs[:, :, 1].reshape(-1)
+            emb = cx.bvc(dist, bearing)
+            p_hat = cx.bvc_to_pos(emb).view(B2, T2, 2)
+            gate = torch.sigmoid(cx.bvc_gate(emb)).view(B2, T2, 2)
+            prox = torch.exp(-bobs[:, :, 0:1] / cx.anchor_scale)            # (B,T,1)
+            aux = (((p_hat - tpos) ** 2) * amask).sum() / (amask.sum() + 1e-6)     # localize constrained axis
+            aux = aux + ((gate - amask * prox) ** 2).mean()                # trust high near walls
+            loss = loss + 0.5 * aux
+        loss.backward()
         opt.step()
     cx.eval()
     out = {}
     with torch.no_grad():
         for T in Tev:
-            v3d, bobs, pos = bounded_walks(3000, T, R, seed=5000 + T)
+            v3d, bobs, pos, tpos, amask = bounded_walks(3000, T, R, seed=5000 + T)
             errs = []
             for r in range(3):                                 # average over noise draws
                 _, gc = cx(v3d, boundary_obs=bobs if anchor else None, return_cells=True)
@@ -91,7 +110,8 @@ def plot_svg(curves, Tev, out="results/boundary_anchoring.svg"):
     xmax = max(Tev); ymax = max(max(c.values()) for c in curves.values()) * 1.1 + 1e-6
     def X(t): return pad + (t - min(Tev)) / (xmax - min(Tev)) * (W - 2 * pad)
     def Y(v): return H - pad - v / ymax * (H - 2 * pad)
-    col = {"exact": "#2ca25f", "drift": "#de2d26", "anchored": "#3b528b"}
+    col = {"exact": "#2ca25f", "drift": "#de2d26", "anchored": "#3b528b",
+           "anchored_learned": "#8856a7"}
     e = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" font-family="Segoe UI, Arial">',
          f'<rect width="{W}" height="{H}" fill="#ffffff"/>']
     e.append('<text x="40" y="30" font-size="17" font-weight="800" fill="#0b1324">'
@@ -110,9 +130,9 @@ def plot_svg(curves, Tev, out="results/boundary_anchoring.svg"):
         for t in Tev:
             e.append(f'<circle cx="{X(t):.1f}" cy="{Y(c[t]):.1f}" r="3" fill="{col[name]}"/>')
     ly = pad + 6
-    for name in ("exact", "drift", "anchored"):
-        e.append(f'<rect x="{W-pad-150}" y="{ly}" width="14" height="4" fill="{col[name]}"/>')
-        e.append(f'<text x="{W-pad-130}" y="{ly+6}" font-size="12" fill="#28324a">{name}</text>')
+    for name in curves:
+        e.append(f'<rect x="{W-pad-180}" y="{ly}" width="14" height="4" fill="{col[name]}"/>')
+        e.append(f'<text x="{W-pad-160}" y="{ly+6}" font-size="12" fill="#28324a">{name}</text>')
         ly += 20
     e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
@@ -127,19 +147,22 @@ def main():
     a = ap.parse_args()
     Tev = (6, 12, 18, 24, 30)
     curves = {}
-    for cond in ("exact", "drift", "anchored"):
+    for cond in ("exact", "drift", "anchored", "anchored_learned"):
         curves[cond] = run(cond, noise=a.noise, epochs=a.epochs, Tev=Tev)
         flat = "  ".join(f"T{t}:{curves[cond][t]:.3f}" for t in Tev)
-        print(f"[{cond:9}] position error by length:  {flat}", flush=True)
+        print(f"[{cond:16}] position error by length:  {flat}", flush=True)
     svg = plot_svg(curves, Tev)
-    drift_end = curves["drift"][max(Tev)]; anch_end = curves["anchored"][max(Tev)]
-    reduction = round(100 * (drift_end - anch_end) / max(drift_end, 1e-9), 1)
-    print(f"\nat T={max(Tev)}: drift={drift_end:.3f}  anchored={anch_end:.3f}  "
-          f"-> boundary anchoring cuts drift by {reduction}%", flush=True)
+    tm = max(Tev); drift_end = curves["drift"][tm]
+    def red(name):
+        return round(100 * (drift_end - curves[name][tm]) / max(drift_end, 1e-9), 1)
+    print(f"\nat T={tm}: drift={drift_end:.3f}  "
+          f"anchored(geometric)={curves['anchored'][tm]:.3f} (-{red('anchored')}%)  "
+          f"anchored(LEARNED)={curves['anchored_learned'][tm]:.3f} (-{red('anchored_learned')}%)", flush=True)
     with open("results/boundary_anchoring.json", "w") as f:
-        json.dump({"noise": a.noise, "curves": {k: {str(t): v for t, v in c.items()}
-                                                for k, c in curves.items()},
-                   "drift_reduction_pct_at_Tmax": reduction}, f, indent=2)
+        json.dump({"noise": a.noise,
+                   "curves": {k: {str(t): v for t, v in c.items()} for k, c in curves.items()},
+                   "drift_reduction_pct_at_Tmax": {n: red(n) for n in ("anchored", "anchored_learned")}},
+                  f, indent=2)
     print(f"wrote results/boundary_anchoring.json and {svg}", flush=True)
 
 

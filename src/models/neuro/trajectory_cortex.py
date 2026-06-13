@@ -112,7 +112,7 @@ class _HexGridModules(nn.Module):
     def __init__(self, embed_dim: int, n_modules: int = 4, side: int = 8,
                  base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0,
                  z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6,
-                 noise_std: float = 0.0, boundary_anchor: bool = False):
+                 noise_std: float = 0.0, boundary_anchor: bool = False, learned_loc: bool = False):
         super().__init__()
         self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
         ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
@@ -132,12 +132,18 @@ class _HexGridModules(nn.Module):
         # (Hardcastle, Ganguli & Giocomo 2015 — boundaries correct accumulated grid error).
         self.noise_std = noise_std
         self.boundary_anchor = boundary_anchor
+        self.learned_loc = learned_loc
         self.arena_R = 3.0
         self.anchor_scale = 0.8                     # boundary correction acts within ~1 unit of a wall
         if boundary_anchor:
             self.bvc = BoundaryVectorCells(num_cells=24, embed_dim=32, max_distance=3.0)
             self.bvc_gate = nn.Linear(32, 2)        # PER-AXIS learned trust (a wall fixes only the
-            nn.init.constant_(self.bvc_gate.bias, 2.0)   # perpendicular axis); start with anchoring ON
+            if learned_loc:                         # perpendicular axis)
+                # LEARN to localize from boundary cells (no hard-coded arena geometry); trained
+                # by an auxiliary experiential signal in src/eval/boundary_anchoring.py
+                self.bvc_to_pos = nn.Sequential(nn.Linear(32, 32), nn.ReLU(), nn.Linear(32, 2))
+            else:
+                nn.init.constant_(self.bvc_gate.bias, 2.0)   # geometric fix: start with anchoring ON
 
     def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
         K, B, _ = phi.shape
@@ -168,14 +174,19 @@ class _HexGridModules(nn.Module):
             z = z + v3d[:, t, 2]                                                     # integrate height
             if self.boundary_anchor and boundary_obs is not None:                    # phase reset at walls
                 dist = boundary_obs[:, t, 0]; bearing = boundary_obs[:, t, 1]
-                g = torch.sigmoid(self.bvc_gate(self.bvc(dist, bearing)))            # (B,2) learned per-axis trust
-                prox = torch.exp(-dist / self.anchor_scale)                          # strong only near a wall
-                # boundary-implied coordinate: you're at (R - dist) along the wall's normal
-                coord = torch.stack([bearing.cos() * (self.arena_R - dist),
-                                     bearing.sin() * (self.arena_R - dist)], dim=-1)  # (B,2)
-                w = (torch.stack([bearing.cos().abs(), bearing.sin().abs()], -1)      # constrained axis only
-                     * prox.unsqueeze(1) * g).unsqueeze(0)                            # (1,B,2)
-                target = self.gains.view(self.K, 1, 1) * coord.unsqueeze(0)          # (K,B,2) boundary phase
+                emb = self.bvc(dist, bearing)                                        # boundary-vector cells
+                g = torch.sigmoid(self.bvc_gate(emb))                                # (B,2) learned per-axis trust
+                if self.learned_loc:
+                    p_hat = self.bvc_to_pos(emb)                                     # (B,2) LEARNED localization
+                    w = g.unsqueeze(0)                                               # gate already encodes proximity/axis
+                else:
+                    prox = torch.exp(-dist / self.anchor_scale)                      # strong only near a wall
+                    # boundary-implied coordinate: you're at (R - dist) along the wall's normal
+                    p_hat = torch.stack([bearing.cos() * (self.arena_R - dist),
+                                         bearing.sin() * (self.arena_R - dist)], dim=-1)
+                    w = (torch.stack([bearing.cos().abs(), bearing.sin().abs()], -1)  # constrained axis only
+                         * prox.unsqueeze(1) * g).unsqueeze(0)                        # (1,B,2)
+                target = self.gains.view(self.K, 1, 1) * p_hat.unsqueeze(0)          # (K,B,2) boundary phase
                 phi = (1 - w) * phi + w * target                                     # correct perpendicular drift
             last_grid = self._grid_code(phi)
             last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
