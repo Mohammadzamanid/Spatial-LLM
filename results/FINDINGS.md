@@ -499,6 +499,34 @@ labels, no arena geometry. This is the consistency/bootstrap learning that groun
 path integration provides a noisy teacher, boundary cells learn to predict (and thereby denoise) it,
 then correct it. (`results/boundary_anchoring.json`, `results/boundary_anchoring.svg`.)
 
+### Three more pillars — remapping, replay, local plasticity
+
+Three further hallmarks of the spatial brain fall out of (or wire cleanly onto) the velocity-driven
+grid cortex (`src/eval/pillars.py`, CPU):
+
+- **Remapping & grid reuse** (Fyhn 2007; Leutgeb 2005). The grid code is a UNIVERSAL metric: a single
+  position decoder trained in environment A works in a new environment B unchanged (0-shot, err
+  0.012 = 0.012). Yet PLACE codes REMAP — for the same locations, two environments' place population
+  vectors are decorrelated (cos **0.08**) while the grid population is identical (cos **1.00**). And a
+  new environment's place map is learned FEW-SHOT on the ready grid metric (place MSE 0.045 → 0.002 in
+  tens of steps). Grids = reusable metric; place cells = the per-environment, remappable readout.
+- **Replay / consolidation** (sharp-wave ripples). Hippocampal replay is experience replay: from only
+  40 real trajectories, using each once decodes poorly (err **0.89**); REPLAYING that small buffer
+  offline consolidates a near-ceiling map (err **0.073** vs the 4000-trajectory ceiling 0.017). Offline
+  rehearsal turns a little real navigation into a good map.
+- **Local (Hebbian) plasticity — place cells without backprop.** Place fields EMERGE from the grid
+  code via competitive Hebbian learning (winner-take-all + move-toward-input, a LOCAL rule): the units
+  become compact single-field place cells (mean field area 6% of the arena, **100% compact**), tiling
+  space — the classic grid→place transform (Rolls & Treves), formed by local plasticity. See
+  `results/pillars_hebbian.svg`.
+
+*Honest caveats.* Grid "reuse" is partly by construction (our grids are position-driven and
+environment-independent; we don't model grid realignment between rooms) — the substantive parts are
+place remapping (cos 0.08) and few-shot map formation. Replay here is experience replay (offline
+rehearsal of a stored buffer), faithful in spirit but without modelling compressed/reverse SWR
+dynamics or a separate consolidated cortical store. And Hebbian plasticity is shown to FORM the
+place readout locally; the rest of the pipeline still trains by backprop. (`results/pillars.json`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

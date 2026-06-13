@@ -1,0 +1,27 @@
+{
+  "remapping": {
+    "decode_err_envA": 0.012,
+    "decode_err_envB_0shot": 0.012,
+    "grid_popvec_corr_AvsB": 1.0,
+    "place_popvec_corr_AvsB": 0.077,
+    "fewshot_placeB_mse_by_step": {
+      "1": 0.045,
+      "3": 0.0183,
+      "5": 0.0159,
+      "10": 0.0093,
+      "20": 0.0039,
+      "40": 0.0019
+    }
+  },
+  "replay": {
+    "n_real_trajectories": 40,
+    "err_no_replay": 0.887,
+    "err_with_replay": 0.073,
+    "err_big_data_ceiling": 0.017
+  },
+  "hebbian": {
+    "n_units": 64,
+    "mean_active_fraction": 0.055,
+    "frac_place_like(<0.15 area)": 1.0
+  }
+}

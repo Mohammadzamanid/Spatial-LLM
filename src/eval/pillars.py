@@ -57,8 +57,8 @@ def remapping(R=3.0, seed=0):
         opt.zero_grad(); F.mse_loss(dec(gcA), posA).backward(); opt.step()
     with torch.no_grad():
         pa = rand_pos(3000, R, 11); pb = rand_pos(3000, R, 22)
-        err_A = (dec(grid_code(cx, pa)) - pa).norm(-1).mean().item()
-        err_B = (dec(grid_code(cx, pb)) - pb).norm(-1).mean().item()   # 0-shot transfer
+        err_A = (dec(grid_code(cx, pa)) - pa).norm(dim=-1).mean().item()
+        err_B = (dec(grid_code(cx, pb)) - pb).norm(dim=-1).mean().item()   # 0-shot transfer
 
     # place remapping: the SAME locations -> decorrelated place populations across envs;
     # the grid population is identical (reused)
@@ -114,7 +114,7 @@ def replay(R=3.0, seed=0):
             xb, yb = sampler()
             opt.zero_grad(); F.mse_loss(dec(xb), yb).backward(); opt.step()
         with torch.no_grad():
-            return (dec(Xte) - Yte).norm(-1).mean().item()
+            return (dec(Xte) - Yte).norm(dim=-1).mean().item()
 
     bs = 256
     def buf_sampler():                                  # replay: rehearse the stored buffer
