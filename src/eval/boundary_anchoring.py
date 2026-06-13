@@ -66,8 +66,32 @@ def run(cond, R=3.0, epochs=70, n=4000, Ttr=(8, 12, 16, 20), Tev=(6, 12, 18, 24,
     # a nonlinear decoder is needed to invert the periodic (residue) grid code.
     cx = _HexGridModules(embed_dim=64, n_modules=5, base_spacing=1.5,
                          noise_std=noise_std, boundary_anchor=anchor, learned_loc=learned)
+
+    # Phase 1 (learned only): boundary cells CALIBRATE to localize from experience, then freeze —
+    # development before use. (Doing this jointly with the task lets the decoder suppress the gate
+    # whenever localization is briefly wrong, so the anchor never gets learned.)
+    if learned:
+        bp = (list(cx.bvc.parameters()) + list(cx.bvc_to_pos.parameters())
+              + list(cx.bvc_gate.parameters()))
+        bopt = torch.optim.Adam(bp, lr=3e-3)
+        for ep in range(400):
+            v3d, bobs, pos, tpos, amask = bounded_walks(2000, 16, R, seed=7000 + ep)
+            d = bobs[:, :, 0].reshape(-1); b = bobs[:, :, 1].reshape(-1)
+            emb = cx.bvc(d, b)
+            p_hat = cx.bvc_to_pos(emb).view(2000, 16, 2)
+            gate = torch.sigmoid(cx.bvc_gate(emb)).view(2000, 16, 2)
+            prox = torch.exp(-bobs[:, :, 0:1] / cx.anchor_scale)
+            tgt = amask * prox; wt = 1 + 8 * prox
+            aux = (((p_hat - tpos) ** 2) * amask).sum() / (amask.sum() + 1e-6)       # localize constrained axis
+            aux = aux + (wt * (gate - tgt) ** 2).mean()                             # gate: high near (constrained)
+            aux = aux + 4.0 * ((1 - amask) * prox * gate ** 2).mean()               # HARD-zero unconstrained near walls
+            bopt.zero_grad(); aux.backward(); bopt.step()
+        for p in bp:
+            p.requires_grad_(False)                          # freeze calibrated boundary cells
+
+    # Phase 2: train the position decoder (and grid readout) with anchoring ON.
     decoder = nn.Sequential(nn.Linear(cx.K * cx.M, 256), nn.ReLU(), nn.Linear(256, 2))
-    opt = torch.optim.Adam(list(cx.parameters()) + list(decoder.parameters()), lr=3e-3)
+    opt = torch.optim.Adam([p for p in cx.parameters() if p.requires_grad] + list(decoder.parameters()), lr=3e-3)
     mse = nn.MSELoss()
     cx.train()
     for ep in range(epochs):
@@ -75,21 +99,7 @@ def run(cond, R=3.0, epochs=70, n=4000, Ttr=(8, 12, 16, 20), Tev=(6, 12, 18, 24,
         v3d, bobs, pos, tpos, amask = bounded_walks(n, T, R, seed=1000 + ep)
         opt.zero_grad()
         _, gc = cx(v3d, boundary_obs=bobs if anchor else None, return_cells=True)
-        loss = mse(decoder(gc), pos)
-        if learned:
-            # EXPERIENTIAL supervision: learn to localize from boundary cells (no arena geometry).
-            # The boundary head predicts the position it can sense (constrained axis) and learns to
-            # TRUST it near walls — replacing the hard-coded R-dist fix.
-            B2, T2 = v3d.shape[0], v3d.shape[1]
-            dist = bobs[:, :, 0].reshape(-1); bearing = bobs[:, :, 1].reshape(-1)
-            emb = cx.bvc(dist, bearing)
-            p_hat = cx.bvc_to_pos(emb).view(B2, T2, 2)
-            gate = torch.sigmoid(cx.bvc_gate(emb)).view(B2, T2, 2)
-            prox = torch.exp(-bobs[:, :, 0:1] / cx.anchor_scale)            # (B,T,1)
-            aux = (((p_hat - tpos) ** 2) * amask).sum() / (amask.sum() + 1e-6)     # localize constrained axis
-            aux = aux + ((gate - amask * prox) ** 2).mean()                # trust high near walls
-            loss = loss + 0.5 * aux
-        loss.backward()
+        mse(decoder(gc), pos).backward()
         opt.step()
     cx.eval()
     out = {}

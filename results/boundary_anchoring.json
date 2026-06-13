@@ -21,7 +21,17 @@
       "18": 0.4358,
       "24": 0.4731,
       "30": 0.4873
+    },
+    "anchored_learned": {
+      "6": 0.3283,
+      "12": 0.4126,
+      "18": 0.4687,
+      "24": 0.5204,
+      "30": 0.5596
     }
   },
-  "drift_reduction_pct_at_Tmax": 42.9
+  "drift_reduction_pct_at_Tmax": {
+    "anchored": 42.9,
+    "anchored_learned": 34.4
+  }
 }
