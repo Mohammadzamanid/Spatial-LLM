@@ -1,0 +1,45 @@
+{
+  "n_seeds": 8,
+  "results": {
+    "planning": {
+      "shortcut_dir_error_deg": {
+        "mean": 0.344,
+        "ci95": 0.044
+      },
+      "navigable_frac": {
+        "mean": 1.0,
+        "ci95": 0.0
+      }
+    },
+    "relational": {
+      "transitive_inference_acc": {
+        "mean": 0.836,
+        "ci95": 0.008
+      },
+      "sde_distance_acc_correlation": {
+        "mean": 0.957,
+        "ci95": 0.009
+      }
+    },
+    "continual": {
+      "hebbian_recall": {
+        "mean": 0.942,
+        "ci95": 0.023
+      },
+      "gradient_recall": {
+        "mean": 0.282,
+        "ci95": 0.045
+      }
+    },
+    "goal_navigation": {
+      "value_nav_success": {
+        "mean": 0.954,
+        "ci95": 0.049
+      },
+      "random_nav_success": {
+        "mean": 0.285,
+        "ci95": 0.026
+      }
+    }
+  }
+}

@@ -678,6 +678,32 @@ front-end (not pixels through a CNN); translation-only (no rotation); the front-
 against efference copy (the agent's own motor signal), as optic flow is in development.
 (`results/embodiment.json`, `results/embodiment.svg`.)
 
+## Statistical robustness — multi-seed (mean ± 95% CI)
+
+Single runs are not evidence. To move each flagship CPU result from "it worked once" to "it
+works, with error bars", `src/eval/stats.py` re-implements the core measurement of each eval inside
+a seed loop and reports **mean ± 95% CI over n = 8 seeds** (`results/stats.json`):
+
+| capability | metric | mean ± 95% CI (n=8) | baseline (same code) |
+|---|---|---|---|
+| Planning (Tolman shortcut) | shortcut direction error | **0.344° ± 0.044°** | — |
+| Planning | fraction navigable (<15°) | **1.000 ± 0.000** | — |
+| Relational (TEM) | transitive inference acc | **0.836 ± 0.008** | chance 0.50 |
+| Relational | symbolic-distance-effect correlation | **0.957 ± 0.009** | 0 if no analog code |
+| Continual (CLS) | one-shot Hebbian recall | **0.942 ± 0.023** | gradient **0.282 ± 0.045** |
+| Goal navigation (dopamine) | value-guided success | **0.954 ± 0.049** | random **0.285 ± 0.026** |
+
+Every metric is tight across seeds, and the two head-to-head dissociations have **non-overlapping
+95% CIs** — one-shot Hebbian recall (0.942 ± 0.023) vs gradient forgetting (0.282 ± 0.045), and
+value-guided navigation (0.954 ± 0.049) vs a random walker (0.285 ± 0.026). The goal-navigation
+seed loop also **randomizes the reward location per seed**, so the CI reflects robustness to *where*
+the goal is, not just to initialization. These are not lucky runs.
+
+*Remaining rigor gap (honest):* this harness covers the CPU cognitive-map results. The **language**
+results (§4) are still single-seed Kaggle runs; bringing them to the same bar — grid vs place vs
+MLP vs raw-coord baselines, multiple seeds, accuracy-vs-length with error bands — is the next step
+toward a publishable central claim.
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.
