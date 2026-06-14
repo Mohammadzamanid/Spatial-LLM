@@ -458,7 +458,50 @@ answering *why* the grid code extrapolates — and what it is **not**:
    (82% ±8 at T=24); the fixed grid code holds at 93% ±1 — non-overlapping CIs. Length generalization in
    sequence models is a known-hard problem; the grid code has the needed inductive bias intrinsically.
    *(Caveat: this Transformer uses learned absolute positions; the fairer sinusoidal / NoPE-plus-sum
-   variants are tested separately in `seq_baselines.py` below.)*
+   variants are tested in `seq_baselines.py` next — and they change the conclusion in an honest way.)*
+
+### Fair sequence-model baselines — what *actually* makes extrapolation work (and a result against us)
+
+The "why not a Transformer" answer must not rest on a strawman. We gave the Transformer its best shot
+at length generalization (`src/eval/seq_baselines.py`, n=5, 95% CI): sinusoidal positions (defined at
+*every* length) and a **NoPE + sum-pool** variant — no positional encoding (permutation-invariant,
+which is *correct* for a commutative path sum) and additive pooling (built to integrate).
+
+![fair sequence baselines](seq_baselines.svg)
+
+| distance exact-acc | T=8 | T=16 | T=24 (3×) | T=48 (4×) |
+|---|---|---|---|---|
+| **grid code (ours)** | 99% ±0 | 97% ±1 | 93% ±1 | 75% ±1 |
+| Transformer, learned pos + mean-pool (naive default) | 95% ±1 | 48% ±4 | 16% ±1 | 2% ±0 |
+| Transformer, sinusoidal pos + mean-pool | 95% ±1 | 69% ±3 | 38% ±3 | 21% ±2 |
+| **Transformer, NoPE + sum-pool** | 96% ±2 | 94% ±3 | **92% ±4** | **88% ±6** |
+| GRU | 97% ±3 | 92% ±6 | 82% ±8 | 53% ±8 |
+
+**The honest conclusion — and it sharpens the claim rather than inflating it:**
+
+1. **It is not "Transformers can't extrapolate."** A NoPE + sum-pool Transformer extrapolates *as well
+   as the grid code at 3× and BETTER at 4×* (88% vs 75%). We report this result, which runs against the
+   simplest version of our story, prominently.
+2. **What actually matters is the INDUCTIVE BIAS: additive, scale-free, order-invariant integration.**
+   The *default* sequence model (learned absolute positions + mean-pool) lacks it and collapses (16% at
+   3×); sinusoidal positions only partly help (38%); you recover extrapolation exactly when you build
+   the integration prior in (NoPE + sum-pool). The grid code has this bias *by construction*
+   (phase = gain·∫v, periodic) — that is the real content of §2–§3.
+3. **For pure displacement decoding at extreme range, a non-periodic additive integrator can exceed the
+   grid code** (NoPE-sum 88% vs grid 75% at 4×), because the grid's periodic code has a finite
+   unambiguous range while a linear sum does not. The grid code is *not* the best possible
+   path-integrator; its distinctive value (below) is being a single biological code that *also* yields a
+   periodic metric and place readout serving planning, value, and relational inference — a NoPE-sum
+   integrator gives you displacement and nothing else.
+4. **GRUs are mediocre and seed-unreliable** (82% ±8 at 3×): a learned recurrent integrator generalizes
+   inconsistently, unlike the fixed grid code (±1).
+
+So the defensible contribution is not "grid cells beat all baselines at path integration" — they do not.
+It is: (i) we *identify* the inductive bias that makes spatial reasoning extrapolate and show the
+conventional *defaults* lack it; (ii) the grid code embodies that bias *and* is a multi-purpose,
+self-supervised, biological substrate (the same code does planning/value/relational cognition); and
+(iii) that fixed code transfers length-generalizing spatial reasoning into a frozen LLM.
+(`results/seq_baselines.json`, `results/seq_baselines.svg`.)
 
 ## Emergent neuroscience signatures — measured, not designed
 

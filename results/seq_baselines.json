@@ -1,0 +1,307 @@
+{
+  "n_seeds": 5,
+  "train_lengths": [
+    6,
+    8,
+    10,
+    12
+  ],
+  "test_lengths": [
+    8,
+    16,
+    24,
+    48
+  ],
+  "results": {
+    "grid code (ours)": {
+      "8": {
+        "distance_exact_acc": {
+          "mean": 0.9878,
+          "ci95": 0.0017
+        },
+        "pos_decode_error": {
+          "mean": 0.0179,
+          "ci95": 0.006
+        },
+        "bearing_acc": {
+          "mean": 0.9842,
+          "ci95": 0.005
+        }
+      },
+      "16": {
+        "distance_exact_acc": {
+          "mean": 0.9707,
+          "ci95": 0.0079
+        },
+        "pos_decode_error": {
+          "mean": 0.048,
+          "ci95": 0.0104
+        },
+        "bearing_acc": {
+          "mean": 0.9858,
+          "ci95": 0.0048
+        }
+      },
+      "24": {
+        "distance_exact_acc": {
+          "mean": 0.9287,
+          "ci95": 0.0074
+        },
+        "pos_decode_error": {
+          "mean": 0.1697,
+          "ci95": 0.0239
+        },
+        "bearing_acc": {
+          "mean": 0.9746,
+          "ci95": 0.0065
+        }
+      },
+      "48": {
+        "distance_exact_acc": {
+          "mean": 0.7533,
+          "ci95": 0.0071
+        },
+        "pos_decode_error": {
+          "mean": 1.0375,
+          "ci95": 0.0308
+        },
+        "bearing_acc": {
+          "mean": 0.875,
+          "ci95": 0.005
+        }
+      }
+    },
+    "xf-learned (mean)": {
+      "8": {
+        "distance_exact_acc": {
+          "mean": 0.9538,
+          "ci95": 0.0107
+        },
+        "pos_decode_error": {
+          "mean": 0.056,
+          "ci95": 0.014
+        },
+        "bearing_acc": {
+          "mean": 0.9649,
+          "ci95": 0.0111
+        }
+      },
+      "16": {
+        "distance_exact_acc": {
+          "mean": 0.479,
+          "ci95": 0.0382
+        },
+        "pos_decode_error": {
+          "mean": 0.5372,
+          "ci95": 0.0418
+        },
+        "bearing_acc": {
+          "mean": 0.9614,
+          "ci95": 0.0092
+        }
+      },
+      "24": {
+        "distance_exact_acc": {
+          "mean": 0.1556,
+          "ci95": 0.0075
+        },
+        "pos_decode_error": {
+          "mean": 1.2585,
+          "ci95": 0.036
+        },
+        "bearing_acc": {
+          "mean": 0.9394,
+          "ci95": 0.0137
+        }
+      },
+      "48": {
+        "distance_exact_acc": {
+          "mean": 0.0185,
+          "ci95": 0.0013
+        },
+        "pos_decode_error": {
+          "mean": 2.5611,
+          "ci95": 0.0344
+        },
+        "bearing_acc": {
+          "mean": 0.8956,
+          "ci95": 0.0328
+        }
+      }
+    },
+    "xf-sinusoid (mean)": {
+      "8": {
+        "distance_exact_acc": {
+          "mean": 0.9549,
+          "ci95": 0.012
+        },
+        "pos_decode_error": {
+          "mean": 0.0731,
+          "ci95": 0.0246
+        },
+        "bearing_acc": {
+          "mean": 0.936,
+          "ci95": 0.0241
+        }
+      },
+      "16": {
+        "distance_exact_acc": {
+          "mean": 0.691,
+          "ci95": 0.0331
+        },
+        "pos_decode_error": {
+          "mean": 0.4655,
+          "ci95": 0.0636
+        },
+        "bearing_acc": {
+          "mean": 0.7233,
+          "ci95": 0.0423
+        }
+      },
+      "24": {
+        "distance_exact_acc": {
+          "mean": 0.3761,
+          "ci95": 0.0338
+        },
+        "pos_decode_error": {
+          "mean": 1.4031,
+          "ci95": 0.2671
+        },
+        "bearing_acc": {
+          "mean": 0.3813,
+          "ci95": 0.1099
+        }
+      },
+      "48": {
+        "distance_exact_acc": {
+          "mean": 0.2117,
+          "ci95": 0.0188
+        },
+        "pos_decode_error": {
+          "mean": 2.8005,
+          "ci95": 0.4482
+        },
+        "bearing_acc": {
+          "mean": 0.2244,
+          "ci95": 0.0774
+        }
+      }
+    },
+    "xf-NoPE (sum)": {
+      "8": {
+        "distance_exact_acc": {
+          "mean": 0.96,
+          "ci95": 0.0188
+        },
+        "pos_decode_error": {
+          "mean": 0.0529,
+          "ci95": 0.0228
+        },
+        "bearing_acc": {
+          "mean": 0.9628,
+          "ci95": 0.0167
+        }
+      },
+      "16": {
+        "distance_exact_acc": {
+          "mean": 0.9405,
+          "ci95": 0.0292
+        },
+        "pos_decode_error": {
+          "mean": 0.0848,
+          "ci95": 0.0419
+        },
+        "bearing_acc": {
+          "mean": 0.9524,
+          "ci95": 0.023
+        }
+      },
+      "24": {
+        "distance_exact_acc": {
+          "mean": 0.9193,
+          "ci95": 0.0448
+        },
+        "pos_decode_error": {
+          "mean": 0.1186,
+          "ci95": 0.0592
+        },
+        "bearing_acc": {
+          "mean": 0.9441,
+          "ci95": 0.0291
+        }
+      },
+      "48": {
+        "distance_exact_acc": {
+          "mean": 0.8774,
+          "ci95": 0.0562
+        },
+        "pos_decode_error": {
+          "mean": 0.2269,
+          "ci95": 0.1115
+        },
+        "bearing_acc": {
+          "mean": 0.9224,
+          "ci95": 0.0355
+        }
+      }
+    },
+    "GRU": {
+      "8": {
+        "distance_exact_acc": {
+          "mean": 0.9655,
+          "ci95": 0.0253
+        },
+        "pos_decode_error": {
+          "mean": 0.056,
+          "ci95": 0.0463
+        },
+        "bearing_acc": {
+          "mean": 0.9476,
+          "ci95": 0.0489
+        }
+      },
+      "16": {
+        "distance_exact_acc": {
+          "mean": 0.9163,
+          "ci95": 0.0613
+        },
+        "pos_decode_error": {
+          "mean": 0.1212,
+          "ci95": 0.1
+        },
+        "bearing_acc": {
+          "mean": 0.9321,
+          "ci95": 0.0688
+        }
+      },
+      "24": {
+        "distance_exact_acc": {
+          "mean": 0.823,
+          "ci95": 0.0817
+        },
+        "pos_decode_error": {
+          "mean": 0.2447,
+          "ci95": 0.1436
+        },
+        "bearing_acc": {
+          "mean": 0.9056,
+          "ci95": 0.0823
+        }
+      },
+      "48": {
+        "distance_exact_acc": {
+          "mean": 0.5322,
+          "ci95": 0.0801
+        },
+        "pos_decode_error": {
+          "mean": 0.8159,
+          "ci95": 0.2286
+        },
+        "bearing_acc": {
+          "mean": 0.8239,
+          "ci95": 0.0986
+        }
+      }
+    }
+  }
+}
