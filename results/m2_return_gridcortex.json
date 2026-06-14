@@ -1,0 +1,11 @@
+{
+  "source": "Kaggle T4 run; transcribed from cell-6 summary (ON/OFF exact). Command: train_trajectory --task return --constrained_velocity.",
+  "task": "return", "cortex": "velocity-driven hexagonal grid modules (6 modules, constrained_velocity)",
+  "train_lengths": [6, 8, 10, 12], "eval_lengths": [8, 16, 24],
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.99, "cortex_off_exact": 0.47, "extrapolation": false},
+    "16": {"cortex_on_exact": 0.99, "cortex_off_exact": 0.56, "extrapolation": true},
+    "24": {"cortex_on_exact": 0.99, "cortex_off_exact": 0.48, "extrapolation": true}
+  },
+  "note": "Grid-cell cortex: return is near-perfect AND FLAT across length (99/99/99) vs the place/default cortex 96/89/86 (which degrades). OFF at chance => answered through the cortex."
+}
