@@ -583,6 +583,30 @@ this vector navigation falls out of the *same* grid metric that path-integrates,
 length, and drives the language tasks — one map, used to record, generalise, answer, and now plan.
 (`results/planning.json`, `results/planning.svg`.)
 
+### Value & goal-directed navigation — the map serves a goal (dopamine)
+
+Until now the map was reward-agnostic. We made it value-laden: the agent explores and gets SPARSE
+reward at an unknown goal (never told where); a value head V(grid-code) is trained by a dopamine-like
+TD error δ = r + γV(s′) − V(s), with the goal terminal (reward consumed) (`src/eval/goal_navigation.py`):
+
+- **It localizes the unseen goal.** The peak of the learned value map sits **0.33** from the true goal
+  (arena half-width 3.0) — recovered purely from sparse reward, no goal label. Value concentrates on the
+  reward location (the overrepresentation of goals in the map; Hollup 2001).
+- **It navigates there, goal-directed.** Climbing the value gradient through the map (evaluating V at
+  candidate next steps — a forward-model lookahead), the agent reaches the goal from random starts
+  **95% of the time in a median 6 steps**, vs a random walker's **29% (14 steps)**. The cognitive map
+  now drives behaviour toward a goal.
+- **Dopamine prediction-error shrinks as the world is learned.** Mean |δ| falls **0.057 → 0.034** over
+  training — the reward-prediction-error decreasing as the value model converges (dopamine-as-RPE;
+  Schultz 1997). (A continuing, non-terminal reward instead *inflates* value and the error grows — the
+  shrink requires the goal to be consumed, which is also the more realistic case.)
+
+So value is learned over the same grid map by a dopamine-like signal, and the map is no longer just a
+spatial record — it is a motivated, goal-seeking controller. *Honest scope:* value sits on the frozen
+grid map (the map isn't re-shaped by reward), the reward is a fixed location, and the policy is greedy
+value-ascent (lookahead), not a learned motor policy — a standard RL abstraction of the dopamine
+system. (`results/goal_navigation.json`, `results/goal_navigation.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

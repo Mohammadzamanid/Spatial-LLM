@@ -1,0 +1,13 @@
+{
+  "goal": [
+    1.5,
+    -1.0
+  ],
+  "goal_localization_error": 0.329,
+  "value_nav_success": 0.947,
+  "value_nav_median_steps": 6.0,
+  "random_nav_success": 0.29,
+  "random_nav_median_steps": 14.0,
+  "da_rpe_start": 0.0573,
+  "da_rpe_end": 0.0335
+}

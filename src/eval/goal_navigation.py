@@ -66,15 +66,14 @@ def main():
     for ep in range(a.epochs):
         traj = explore(512, 40, R, 1 + ep)
         p0 = traj[:, :-1].reshape(-1, 2); p1 = traj[:, 1:].reshape(-1, 2)
-        r1 = reward(p1)
+        r0 = reward(p0)                                            # reward at the current state
         v0 = V(grid_code(cx, p0)).squeeze(-1)
         with torch.no_grad():
             v1 = V(grid_code(cx, p1)).squeeze(-1)
-        target = r1 + gamma * v1
+        target = r0 + gamma * v1 * (1 - r0)                        # goal is TERMINAL (reward consumed)
         delta = target - v0                                        # dopamine reward-prediction-error
         (delta ** 2).mean().backward(); opt.step(); opt.zero_grad()
-        if r1.sum() > 0:
-            rpe_curve.append(round(delta[r1 > 0].abs().mean().item(), 4))   # |DA| at reward
+        rpe_curve.append(delta.abs().mean().item())                # mean DA prediction-error this epoch
 
     # ---- (1) value map localizes the unseen goal ----
     Gn = 40; xs = torch.linspace(-R, R, Gn)
@@ -110,15 +109,15 @@ def main():
     out = {"goal": G.tolist(), "goal_localization_error": round(goal_loc_err, 3),
            "value_nav_success": round(succ_v, 3), "value_nav_median_steps": med_v,
            "random_nav_success": round(succ_r, 3), "random_nav_median_steps": med_r,
-           "da_rpe_at_reward_start": rpe_curve[0] if rpe_curve else None,
-           "da_rpe_at_reward_end": rpe_curve[-1] if rpe_curve else None}
+           "da_rpe_start": round(sum(rpe_curve[:20]) / 20, 4),
+           "da_rpe_end": round(sum(rpe_curve[-20:]) / 20, 4)}
     print("VALUE & GOAL-DIRECTED NAVIGATION (dopamine-learned value on the grid map):", flush=True)
     print(f"  goal localized from sparse reward: peak of value map is {goal_loc_err:.2f} from the true "
           f"goal (arena half-width {R})", flush=True)
     print(f"  navigation success: value-guided {100*succ_v:.0f}% (median {med_v:.0f} steps) vs "
           f"random walker {100*succ_r:.0f}% ({med_r:.0f} steps)", flush=True)
-    print(f"  dopamine RPE at reward: {out['da_rpe_at_reward_start']} -> {out['da_rpe_at_reward_end']} "
-          f"(shrinks as reward becomes predicted — the classic DA shift)", flush=True)
+    print(f"  dopamine prediction-error (mean |delta|): {out['da_rpe_start']} -> {out['da_rpe_end']} "
+          f"(shrinks as the value map is learned — the world becomes predicted)", flush=True)
 
     svg_goal(vmap.reshape(Gn, Gn), G, R, navigate, starts, "results/goal_navigation.svg")
     os.makedirs("results", exist_ok=True)
