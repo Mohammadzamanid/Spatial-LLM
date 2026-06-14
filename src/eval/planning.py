@@ -65,10 +65,10 @@ def main():
 
     cos = F.cosine_similarity(planned, true, dim=1).clamp(-1, 1)
     dir_err = torch.rad2deg(torch.acos(cos))
-    dist_err = (planned.norm(-1) - true.norm(-1)).abs() / (true.norm(-1) + 1e-6)
+    dist_err = (planned.norm(dim=-1) - true.norm(dim=-1)).abs() / (true.norm(dim=-1) + 1e-6)
     navigable = (dir_err < 15).float().mean().item()
     # Tolman: the shortcut |A-B| vs RETRACING known routes via home (|A|+|B|)
-    short = true.norm(-1); detour = A.norm(-1) + B.norm(-1)
+    short = true.norm(dim=-1); detour = A.norm(dim=-1) + B.norm(dim=-1)
     savings = (1 - short / (detour + 1e-6)).clamp(min=0).mean().item()
 
     # forward replay (preplay): sweep the grid phase A->B, decode each -> the imagined path; how far
@@ -78,9 +78,9 @@ def main():
         for t in torch.linspace(0, 1, 11):
             p = Ahat + t * (Bhat - Ahat)                             # imagined position along the plan
             d = dec(grid_code(cx, p))                                # decode the swept grid code
-            seg = (Bhat - Ahat); segn = seg / (seg.norm(-1, keepdim=True) + 1e-6)
+            seg = (Bhat - Ahat); segn = seg / (seg.norm(dim=-1, keepdim=True) + 1e-6)
             perp = (d - Ahat) - ((d - Ahat) * segn).sum(-1, keepdim=True) * segn
-            devs.append(perp.norm(-1))
+            devs.append(perp.norm(dim=-1))
         replay_dev = torch.stack(devs).mean().item()
 
     out = {"n_pairs": A.shape[0], "shortcut_dir_error_deg_mean": round(dir_err.mean().item(), 2),
@@ -99,7 +99,7 @@ def main():
     print(f"  the shortcut is {100*savings:.0f}% shorter than retracing the known routes via home", flush=True)
 
     # SVG: home, two winding experienced paths, and the planned straight shortcut (a few examples)
-    sep = true.norm(-1); idx = sep.argsort(descending=True)[:3]
+    sep = true.norm(dim=-1); idx = sep.argsort(descending=True)[:3]
     svg_plan([(pathA[i], pathB[i], A[i], B[i]) for i in idx.tolist()], R, "results/planning.svg")
     os.makedirs("results", exist_ok=True)
     with open("results/planning.json", "w") as f:

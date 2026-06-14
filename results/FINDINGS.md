@@ -559,6 +559,30 @@ bearing 85, distance 95 exact), beating the place attractor on each and staying 
 training length.
 (`results/m2_return_gridcortex.json`, `results/m2_bearing_gridcortex.json`, `results/m2_distance_gridcortex.json`.)
 
+### Planning — the map as a PLANNER, not a recorder (Tolman shortcut)
+
+The final step makes the cognitive map prospective: can the agent PLAN a route it never walked? Because
+the grid code is a linear metric (phase ∝ position), the displacement between any two remembered places
+is just the difference of their grid codes — a vector the agent reads off directly (vector navigation:
+Bush 2015; Banino 2018) and can FORWARD-REPLAY before moving (preplay: Pfeiffer & Foster 2013). The
+agent reaches A and B by two SEPARATE winding walks from home (never travelling A→B), then plans the
+direct A→B shortcut from the map (`src/eval/planning.py`):
+
+| metric | result |
+|---|---|
+| planned A→B shortcut direction error | **0.33° mean (0.23° median)** |
+| distance relative error | 0.7% |
+| shortcuts navigable (<15° off) | **100%** |
+| forward-replay sweep deviation from the straight line | 0.078 |
+| shortcut shorter than retracing via home | **29%** |
+
+The agent computes a near-perfect straight-line shortcut to a goal it reached only by a winding detour
+— the classic Tolman cognitive-map result — and forward-replays the imagined path coherently to the
+goal. The map is no longer just a recorder of where it has been; it is a PLANNER of where to go. And
+this vector navigation falls out of the *same* grid metric that path-integrates, generalises across
+length, and drives the language tasks — one map, used to record, generalise, answer, and now plan.
+(`results/planning.json`, `results/planning.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="664" height="256" font-family="Segoe UI, Arial">
+<rect width="664" height="256" fill="#ffffff"/>
+<text x="16" y="26" font-size="16" font-weight="800" fill="#0b1324">Planning a NOVEL shortcut from the cognitive map (Tolman test)</text>
+<rect x="16" y="44" width="200" height="200" fill="#f4f7fb" stroke="#33415c"/>
+<polyline points="116.0,144.0 108.5,167.9 130.9,167.6 143.0,179.7 152.9,181.4 155.0,174.6 153.1,190.9 175.4,196.0 196.7,199.2 185.4,181.3 190.9,189.6 183.0,212.3 165.8,215.9 185.1,200.9 210.1,206.5" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<polyline points="116.0,144.0 93.0,135.7 89.2,157.6 91.2,142.2 67.3,140.8 82.5,123.0 73.4,112.3 59.8,105.5 51.2,100.3 54.0,117.7 70.8,101.9 57.1,91.2 41.8,80.2 17.5,85.7 16.0,80.2" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<line x1="210.1" y1="206.5" x2="16.0" y2="80.2" stroke="#e6550d" stroke-width="2.6" stroke-dasharray="5,3"/>
+<circle cx="116.0" cy="144.0" r="4" fill="#2ca25f"/>
+<circle cx="210.1" cy="206.5" r="4" fill="#3b528b"/>
+<text x="216.1" y="200.5" font-size="12" fill="#28324a">A</text>
+<circle cx="16.0" cy="80.2" r="4" fill="#3b528b"/>
+<text x="22.0" y="74.2" font-size="12" fill="#28324a">B</text>
+<rect x="232" y="44" width="200" height="200" fill="#f4f7fb" stroke="#33415c"/>
+<polyline points="332.0,144.0 332.5,162.7 329.9,181.4 342.8,189.9 346.3,198.0 365.6,205.3 352.6,201.9 373.3,207.8 374.0,195.0 388.9,204.5 388.3,195.7 390.3,210.7 387.8,220.3 413.4,223.3 418.4,242.1" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<polyline points="332.0,144.0 325.8,160.0 343.4,144.2 322.6,132.0 309.9,126.0 311.8,111.3 297.4,106.5 301.3,81.2 295.0,87.1 301.8,95.0 300.5,76.9 293.2,63.8 298.3,48.8 289.1,44.0 301.9,51.4" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<line x1="418.4" y1="242.1" x2="301.9" y2="51.4" stroke="#e6550d" stroke-width="2.6" stroke-dasharray="5,3"/>
+<circle cx="332.0" cy="144.0" r="4" fill="#2ca25f"/>
+<circle cx="418.4" cy="242.1" r="4" fill="#3b528b"/>
+<text x="424.4" y="236.1" font-size="12" fill="#28324a">A</text>
+<circle cx="301.9" cy="51.4" r="4" fill="#3b528b"/>
+<text x="307.9" y="45.4" font-size="12" fill="#28324a">B</text>
+<rect x="448" y="44" width="200" height="200" fill="#f4f7fb" stroke="#33415c"/>
+<polyline points="548.0,144.0 565.6,140.9 577.4,143.9 583.3,121.4 594.7,99.7 601.6,76.4 615.0,96.0 620.0,101.1 620.2,93.8 628.6,76.5 643.4,87.2 636.2,84.5 626.1,74.1 643.6,54.1 648.0,44.0" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<polyline points="548.0,144.0 546.4,157.0 566.9,155.4 553.9,175.5 538.2,185.1 552.6,205.7 532.6,221.6 541.4,235.9 542.7,244.0 559.4,244.0 583.2,244.0 573.5,244.0 562.5,244.0 566.8,244.0 555.9,234.3" fill="none" stroke="#9aa5b8" stroke-width="1.6"/>
+<line x1="648.0" y1="44.0" x2="555.9" y2="234.3" stroke="#e6550d" stroke-width="2.6" stroke-dasharray="5,3"/>
+<circle cx="548.0" cy="144.0" r="4" fill="#2ca25f"/>
+<circle cx="648.0" cy="44.0" r="4" fill="#3b528b"/>
+<text x="654.0" y="38.0" font-size="12" fill="#28324a">A</text>
+<circle cx="555.9" cy="234.3" r="4" fill="#3b528b"/>
+<text x="561.9" y="228.3" font-size="12" fill="#28324a">B</text>
+<text x="16" y="250" font-size="11" fill="#5b6b8c">grey = winding routes actually walked (home→A, home→B); orange dashed = planned A→B shortcut, never travelled; green = home</text>

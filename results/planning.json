@@ -1,0 +1,9 @@
+{
+  "n_pairs": 3000,
+  "shortcut_dir_error_deg_mean": 0.33,
+  "shortcut_dir_error_deg_median": 0.23,
+  "shortcut_dist_rel_error": 0.007,
+  "frac_navigable(<15deg)": 1.0,
+  "forward_replay_line_deviation": 0.078,
+  "detour_savings_vs_retrace_home": 0.287
+}
