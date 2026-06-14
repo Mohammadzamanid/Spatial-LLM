@@ -130,6 +130,7 @@ def svg_plan(examples, R, out):
             e.append(f'<text x="{X(P[0].item(),off)+6:.1f}" y="{Y(P[1].item())-6:.1f}" font-size="12" fill="#28324a">{lab}</text>')
     e.append(f'<text x="16" y="{H-6}" font-size="11" fill="#5b6b8c">grey = winding routes actually '
              f'walked (home→A, home→B); orange dashed = planned A→B shortcut, never travelled; green = home</text>')
+    e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     open(out, "w").write("\n".join(e))
 
