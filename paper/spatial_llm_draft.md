@@ -8,25 +8,24 @@ by a script in `src/eval/` or a notebook in `notebooks/`; raw values in `results
 
 ## Abstract ✎
 
-Large language models reason poorly about space, and what spatial competence they have does not
-*extrapolate*: trained on short trajectories, they fail on longer ones. The mammalian brain solves
-navigation with a specific representational scheme — velocity-driven **grid cells** that path-integrate
-self-motion into a periodic, multi-scale metric, read out by **place cells**. We show that endowing a
-frozen language model with this representation, learned self-supervised and with no coordinate labels,
-transfers a spatial competence that **generalizes to trajectories several times longer than training**,
-where the representations a conventional model would use *by default* — bounded place codes, standard
-Transformers, length-normalized accumulators — collapse. With multi-seed, error-barred controls we trace
-this to a specific **inductive bias** — additive, scale-free, order-invariant integration — that the
-defaults lack and the grid code has *by construction* (its phase is a linear, un-normalized function of
-integrated velocity, on a periodic multi-module lattice giving large metric range). We report honestly
-that a sequence model *hand-built* with that same bias (a no-positional, sum-pooling Transformer)
-extrapolates too — so the contribution is not that grid cells are the best path-integrator, but that they
-*identify and embody* the right bias while being a single self-supervised biological code that
-simultaneously serves higher cognition. The same code,
-with no retraining of its metric, additionally supports vector-based **planning**, dopamine-like
-**value** learning and goal navigation, and **relational/transitive inference** — evidence that a single
-brain-faithful representation is a general substrate for spatial and relational cognition in a language
-model.
+A cognitive map is more than a metric, and that distinction is where a brain-faithful representation
+earns its keep. We first establish, with multi-seed error-barred controls, an honest negative result that
+sets up the claim: **path integration alone is not unique to grid cells.** A representation that is
+scale-free, additive, and order-invariant extrapolates path length, and a sequence model *hand-built*
+with that bias (a no-positional, sum-pooling Transformer) matches a velocity-driven grid code — while the
+*default* representations a model would reach for (bounded place codes, standard Transformers,
+length-normalized accumulators) collapse. The contribution is what comes next: a cognitive map
+additionally requires a **high-capacity, remappable population code**, and *this* an additive integrator
+provably cannot supply. Because the same trajectory yields the same displacement in every environment,
+any deterministic function of displacement produces identical codes across environments and
+catastrophically interferes when several maps are stored together (retrieval ~1/M); grid and place cells
+**remap**, holding ~90% retrieval across 16 maps where the additive code falls to 4% — and an ablation
+that switches remapping off reproduces the additive collapse, isolating remapping as the necessary
+ingredient. The grid/place code, learned self-supervised with no coordinate labels, supplies both
+capacity and remapping, transfers length-generalizing spatial reasoning into a **frozen language model**,
+and — with its metric unchanged — also carries vector-based **planning**, dopamine-like **value** and goal
+navigation, and **relational/transitive inference**: a single substrate for the map, not merely the
+metric.
 
 ---
 
@@ -89,11 +88,40 @@ Single-variable ablations, each multi-seed (`src/eval/ablations.py`, `seq_baseli
    extrapolation is not impossible for sequence models, it requires the *additive, scale-free,
    order-invariant integration bias* — which the conventional **defaults lack** and the grid code has by
    construction. (And a non-periodic additive integrator can exceed the finite-range grid code at extreme
-   range; the grid code is not the best pure path-integrator — see §5 for what it uniquely provides.)
+   range; the grid code is not the best pure path-integrator — see §4 for what it uniquely provides.)
 
 (Figures: `results/ablations.svg`, `results/seq_baselines.svg`.)
 
-## 4. The advantage transfers to language ⏳
+## 4. Where the code is NECESSARY — capacity and remapping ✅
+
+If an additive integrator ties the grid code on path integration, why have a population code at all?
+Because a cognitive **map** is more than a metric. Two tests of what a deterministic function of
+displacement *cannot* do, however well it integrates (`src/eval/code_necessity.py`, n = 5, 95% CI):
+
+**Capacity.** Binding K locations one-shot (Hebbian) and recalling each from a noisy probe, the
+integrator's raw 2-D output cannot pattern-separate — recall collapses to 25% at K=200 — whereas a
+high-dimensional population code holds 75%. A *periodic* lift (random Fourier features) matches the grid
+code; a smooth lift lags: to recover capacity you must build a grid-like code.
+
+**Multi-map storage (remapping) — the decisive necessity.** The same trajectory gives the same
+displacement in every environment, so any deterministic function of displacement yields identical codes
+across environments and collides when several maps are stored together. Storing M maps over recurring
+locations, retrieval (mean ± 95% CI, n=5):
+
+| retrieval acc | M=1 | M=4 | M=16 maps |
+|---|---|---|---|
+| place + remap | 93% | 93% | **92% ±3** |
+| grid + remap | 93% | 91% | **79% ±2** |
+| grid, remapping OFF (ablation) | 93% | 23% | **6% ±0** |
+| additive (raw 2-D) | 65% | 16% | **4% ±0** |
+
+Remapping codes hold ~90% across 16 maps; the additive code falls to 4% (~1/M, chance among colliding
+maps) — non-overlapping CIs. Switching remapping **off** in the grid code reproduces the additive
+collapse (6%), proving the necessary ingredient is **remapping itself** — an environment-specific
+population code that no metric integrator possesses. This, not path integration, is where the
+brain-faithful code is irreplaceable. (Figure 3: `results/code_necessity.svg`.)
+
+## 5. The advantage transfers to language ⏳
 
 A LoRA-adapted Qwen2.5-1.5B answers navigation questions *through the frozen cortex* (the prompt holds
 only the question; the moves reach the model only through the spatial code). Single-seed, the
@@ -109,9 +137,9 @@ while cortex-OFF sits at chance (`src/training/train_trajectory.py`):
 ⏳ **In progress:** the multi-seed version of this table (grid vs place × {distance,bearing} × seeds,
 with 95% CI and the OFF control) is running on Kaggle T4
 (`notebooks/m2_extrapolation_multiseed_kaggle.py`) and is the language-level counterpart to Figure 1.
-This is the result that elevates §4 from illustrative to publication-grade.
+This is the result that elevates §5 from illustrative to publication-grade.
 
-## 5. The same code is a general cognitive substrate ✅
+## 6. The same code is a general cognitive substrate ✅
 
 With its metric fixed, the grid code supports — multi-seed, mean ± 95% CI (`src/eval/stats.py`):
 
@@ -125,7 +153,7 @@ With its metric fixed, the grid code supports — multi-seed, mean ± 95% CI (`s
 These are not the central claim, but they are strong evidence that the representation is *general* — one
 brain-faithful code, many cognitive functions — which is the broader significance for AI.
 
-## 6. Related work ✎
+## 7. Related work ✎
 
 Grid cells and path integration (Hafting 2005; Burak & Fiete 2009); grid codes emerging in trained
 path-integrators (Banino 2018; Cueva & Wei 2018); modular/periodic coding for range (Fiete; Stensola
@@ -135,18 +163,18 @@ sequence models (a known-hard problem motivating positional-encoding research). 
 (i) show the representational advantage *causally* with fair, multi-seed, error-barred controls, and
 (ii) transfer it into a frozen LLM as length-generalizing spatial reasoning.
 
-## 7. Limitations (honest) ✎
+## 8. Limitations (honest) ✎
 
 - The representation-level task is 2-D and uses an unbiased random walk; magnitude grows only ~√T, so
   "3× longer path" is ~1.7× larger displacement — the regime is modest and we say so.
 - The grid code's range is finite (75% at 4×); we claim graceful, large-range extrapolation, not
   unbounded.
 - The language results are at 1.5B parameters, LoRA, single-T4 scale; the multi-seed/​baseline version
-  (§4 ⏳) is required before strong claims.
+  (§5 ⏳) is required before strong claims.
 - Embodiment uses a simplified panoramic landmark world and a learned MLP front-end, not pixels.
 - Boundary anchoring, replay, and remapping pillars are demonstrations, not the central claim.
 
-## 8. Methods (brief) ✎
+## 9. Methods (brief) ✎
 
 Velocity-driven hexagonal grid modules (`_HexGridModules`): fixed velocity gains at geometric scale
 ratios integrate self-motion into a phase wrapped on a hexagonal torus; a learned linear readout maps
@@ -157,8 +185,8 @@ cross-attention from the cortex into a frozen Qwen2.5-1.5B + LoRA. Full configs 
 ---
 
 ### Path to submission
-- ⏳ §4 multi-seed LLM table + language-level figure (Kaggle, running).
-- ✅ §2 Figure 1 (representation extrapolation), §3 ablations + fair sequence baselines, §5 stats — all
+- ⏳ §5 multi-seed LLM table + language-level figure (Kaggle, running).
+- ✅ §2 Figure 1, §3 ablations + fair sequence baselines, §4 capacity/remapping necessity, §6 stats — all
   multi-seed, committed.
 - ✎ tighten abstract/intro/related-work; assemble figures; write Methods/Extended Data.
 - Honest framing locked in §3.4 / abstract: the result is *which inductive bias matters* + the grid code

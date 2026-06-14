@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="836" height="334" font-family="Segoe UI, Arial">
+<rect width="836" height="334" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">Where the population code is NECESSARY (an additive integrator cannot follow)</text>
+<text x="26" y="43" font-size="10.5" fill="#5b6b8c">a code that ties the grid code on path integration still fails at memory capacity and multi-map storage &#183; mean &#177; 95% CI</text>
+<text x="52" y="55" font-size="12" font-weight="700" fill="#0b1324">A &#183; one-shot memory capacity</text>
+<line x1="52" y1="274" x2="372" y2="274" stroke="#33415c"/><line x1="52" y1="64" x2="52" y2="274" stroke="#33415c"/>
+<line x1="52" y1="274.0" x2="372" y2="274.0" stroke="#eef2f8"/>
+<text x="46" y="278.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="52" y1="169.0" x2="372" y2="169.0" stroke="#eef2f8"/>
+<text x="46" y="173.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="52" y1="64.0" x2="372" y2="64.0" stroke="#eef2f8"/>
+<text x="46" y="68.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="52.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">5</text>
+<text x="112.1" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">10</text>
+<text x="191.6" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">25</text>
+<text x="251.7" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">50</text>
+<text x="311.9" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">100</text>
+<text x="372.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">200</text>
+<text x="212" y="304" font-size="9.5" fill="#28324a" text-anchor="middle"># stored locations K</text>
+<polygon points="52.0,64.0 112.1,66.3 191.6,65.4 251.7,74.9 311.9,87.0 372.0,114.6 372.0,117.5 311.9,97.3 251.7,84.0 191.6,76.5 112.1,75.3 52.0,64.0" fill="#e6550d" opacity="0.12"/>
+<polyline points="52.0,64.0 112.1,70.8 191.6,70.9 251.7,79.4 311.9,92.1 372.0,116.1" fill="none" stroke="#e6550d" stroke-width="2.2"/>
+<circle cx="52.0" cy="64.0" r="2.6" fill="#e6550d"/>
+<circle cx="112.1" cy="70.8" r="2.6" fill="#e6550d"/>
+<circle cx="191.6" cy="70.9" r="2.6" fill="#e6550d"/>
+<circle cx="251.7" cy="79.4" r="2.6" fill="#e6550d"/>
+<circle cx="311.9" cy="92.1" r="2.6" fill="#e6550d"/>
+<circle cx="372.0" cy="116.1" r="2.6" fill="#e6550d"/>
+<polygon points="52.0,63.0 112.1,64.9 191.6,64.3 251.7,73.6 311.9,89.3 372.0,114.9 372.0,119.4 311.9,98.9 251.7,82.4 191.6,78.0 112.1,84.1 52.0,67.1" fill="#756bb1" opacity="0.12"/>
+<polyline points="52.0,65.1 112.1,74.5 191.6,71.1 251.7,78.0 311.9,94.1 372.0,117.2" fill="none" stroke="#756bb1" stroke-width="2.2"/>
+<circle cx="52.0" cy="65.1" r="2.6" fill="#756bb1"/>
+<circle cx="112.1" cy="74.5" r="2.6" fill="#756bb1"/>
+<circle cx="191.6" cy="71.1" r="2.6" fill="#756bb1"/>
+<circle cx="251.7" cy="78.0" r="2.6" fill="#756bb1"/>
+<circle cx="311.9" cy="94.1" r="2.6" fill="#756bb1"/>
+<circle cx="372.0" cy="117.2" r="2.6" fill="#756bb1"/>
+<polygon points="52.0,64.0 112.1,66.3 191.6,66.6 251.7,73.3 311.9,90.2 372.0,111.5 372.0,120.7 311.9,97.7 251.7,82.0 191.6,74.0 112.1,79.6 52.0,64.0" fill="#21908c" opacity="0.12"/>
+<polyline points="52.0,64.0 112.1,72.9 191.6,70.3 251.7,77.6 311.9,93.9 372.0,116.1" fill="none" stroke="#21908c" stroke-width="2.2"/>
+<circle cx="52.0" cy="64.0" r="2.6" fill="#21908c"/>
+<circle cx="112.1" cy="72.9" r="2.6" fill="#21908c"/>
+<circle cx="191.6" cy="70.3" r="2.6" fill="#21908c"/>
+<circle cx="251.7" cy="77.6" r="2.6" fill="#21908c"/>
+<circle cx="311.9" cy="93.9" r="2.6" fill="#21908c"/>
+<circle cx="372.0" cy="116.1" r="2.6" fill="#21908c"/>
+<polygon points="52.0,62.0 112.1,65.0 191.6,69.4 251.7,78.6 311.9,98.8 372.0,125.1 372.0,130.2 311.9,106.4 251.7,88.3 191.6,79.6 112.1,82.9 52.0,70.2" fill="#9aa5b8" opacity="0.12"/>
+<polyline points="52.0,66.1 112.1,74.0 191.6,74.5 251.7,83.4 311.9,102.6 372.0,127.6" fill="none" stroke="#9aa5b8" stroke-width="2.2"/>
+<circle cx="52.0" cy="66.1" r="2.6" fill="#9aa5b8"/>
+<circle cx="112.1" cy="74.0" r="2.6" fill="#9aa5b8"/>
+<circle cx="191.6" cy="74.5" r="2.6" fill="#9aa5b8"/>
+<circle cx="251.7" cy="83.4" r="2.6" fill="#9aa5b8"/>
+<circle cx="311.9" cy="102.6" r="2.6" fill="#9aa5b8"/>
+<circle cx="372.0" cy="127.6" r="2.6" fill="#9aa5b8"/>
+<polygon points="52.0,63.2 112.1,80.8 191.6,107.0 251.7,137.8 311.9,181.7 372.0,218.4 372.0,222.7 311.9,188.8 251.7,152.6 191.6,118.4 112.1,109.1 52.0,73.2" fill="#3b528b" opacity="0.12"/>
+<polyline points="52.0,68.2 112.1,95.0 191.6,112.7 251.7,145.2 311.9,185.2 372.0,220.5" fill="none" stroke="#3b528b" stroke-width="2.2"/>
+<circle cx="52.0" cy="68.2" r="2.6" fill="#3b528b"/>
+<circle cx="112.1" cy="95.0" r="2.6" fill="#3b528b"/>
+<circle cx="191.6" cy="112.7" r="2.6" fill="#3b528b"/>
+<circle cx="251.7" cy="145.2" r="2.6" fill="#3b528b"/>
+<circle cx="311.9" cy="185.2" r="2.6" fill="#3b528b"/>
+<circle cx="372.0" cy="220.5" r="2.6" fill="#3b528b"/>
+<rect x="222" y="68" width="12" height="4" fill="#e6550d"/>
+<text x="237" y="73" font-size="8.5" fill="#28324a">grid (population)</text>
+<rect x="222" y="80" width="12" height="4" fill="#756bb1"/>
+<text x="237" y="85" font-size="8.5" fill="#28324a">place (population)</text>
+<rect x="222" y="92" width="12" height="4" fill="#21908c"/>
+<text x="237" y="97" font-size="8.5" fill="#28324a">additive + RFF lift</text>
+<rect x="222" y="104" width="12" height="4" fill="#9aa5b8"/>
+<text x="237" y="109" font-size="8.5" fill="#28324a">additive + smooth MLP lift</text>
+<rect x="222" y="116" width="12" height="4" fill="#3b528b"/>
+<text x="237" y="121" font-size="8.5" fill="#28324a">additive (raw 2-D)</text>
+<text x="464" y="55" font-size="12" font-weight="700" fill="#0b1324">B &#183; multi-map storage (remapping)</text>
+<line x1="464" y1="274" x2="784" y2="274" stroke="#33415c"/><line x1="464" y1="64" x2="464" y2="274" stroke="#33415c"/>
+<line x1="464" y1="274.0" x2="784" y2="274.0" stroke="#eef2f8"/>
+<text x="458" y="278.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="464" y1="169.0" x2="784" y2="169.0" stroke="#eef2f8"/>
+<text x="458" y="173.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="464" y1="64.0" x2="784" y2="64.0" stroke="#eef2f8"/>
+<text x="458" y="68.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="464.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">1</text>
+<text x="544.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">2</text>
+<text x="624.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">4</text>
+<text x="704.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">8</text>
+<text x="784.0" y="287.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">16</text>
+<text x="624" y="304" font-size="9.5" fill="#28324a" text-anchor="middle"># maps M</text>
+<polygon points="464.0,71.7 544.0,72.5 624.0,77.0 704.0,86.1 784.0,103.8 784.0,110.8 704.0,98.5 624.0,89.6 544.0,87.7 464.0,86.0" fill="#e6550d" opacity="0.12"/>
+<polyline points="464.0,78.8 544.0,80.1 624.0,83.3 704.0,92.3 784.0,107.3" fill="none" stroke="#e6550d" stroke-width="2.2"/>
+<circle cx="464.0" cy="78.8" r="2.6" fill="#e6550d"/>
+<circle cx="544.0" cy="80.1" r="2.6" fill="#e6550d"/>
+<circle cx="624.0" cy="83.3" r="2.6" fill="#e6550d"/>
+<circle cx="704.0" cy="92.3" r="2.6" fill="#e6550d"/>
+<circle cx="784.0" cy="107.3" r="2.6" fill="#e6550d"/>
+<polygon points="464.0,71.3 544.0,71.2 624.0,73.3 704.0,72.4 784.0,73.1 784.0,86.8 704.0,86.3 624.0,86.1 544.0,87.2 464.0,85.3" fill="#756bb1" opacity="0.12"/>
+<polyline points="464.0,78.3 544.0,79.2 624.0,79.7 704.0,79.3 784.0,79.9" fill="none" stroke="#756bb1" stroke-width="2.2"/>
+<circle cx="464.0" cy="78.3" r="2.6" fill="#756bb1"/>
+<circle cx="544.0" cy="79.2" r="2.6" fill="#756bb1"/>
+<circle cx="624.0" cy="79.7" r="2.6" fill="#756bb1"/>
+<circle cx="704.0" cy="79.3" r="2.6" fill="#756bb1"/>
+<circle cx="784.0" cy="79.9" r="2.6" fill="#756bb1"/>
+<polygon points="464.0,73.1 544.0,173.1 624.0,223.9 704.0,248.5 784.0,261.3 784.0,262.2 704.0,250.6 624.0,228.7 544.0,180.0 464.0,83.8" fill="#21908c" opacity="0.12"/>
+<polyline points="464.0,78.4 544.0,176.5 624.0,226.3 704.0,249.6 784.0,261.8" fill="none" stroke="#21908c" stroke-width="2.2"/>
+<circle cx="464.0" cy="78.4" r="2.6" fill="#21908c"/>
+<circle cx="544.0" cy="176.5" r="2.6" fill="#21908c"/>
+<circle cx="624.0" cy="226.3" r="2.6" fill="#21908c"/>
+<circle cx="704.0" cy="249.6" r="2.6" fill="#21908c"/>
+<circle cx="784.0" cy="261.8" r="2.6" fill="#21908c"/>
+<polygon points="464.0,129.1 544.0,204.0 624.0,238.3 704.0,256.6 784.0,265.2 784.0,266.3 704.0,258.1 624.0,242.3 544.0,210.5 464.0,147.7" fill="#9aa5b8" opacity="0.12"/>
+<polyline points="464.0,138.4 544.0,207.3 624.0,240.3 704.0,257.4 784.0,265.7" fill="none" stroke="#9aa5b8" stroke-width="2.2"/>
+<circle cx="464.0" cy="138.4" r="2.6" fill="#9aa5b8"/>
+<circle cx="544.0" cy="207.3" r="2.6" fill="#9aa5b8"/>
+<circle cx="624.0" cy="240.3" r="2.6" fill="#9aa5b8"/>
+<circle cx="704.0" cy="257.4" r="2.6" fill="#9aa5b8"/>
+<circle cx="784.0" cy="265.7" r="2.6" fill="#9aa5b8"/>
+<rect x="634" y="68" width="12" height="4" fill="#e6550d"/>
+<text x="649" y="73" font-size="8.5" fill="#28324a">grid + remap</text>
+<rect x="634" y="80" width="12" height="4" fill="#756bb1"/>
+<text x="649" y="85" font-size="8.5" fill="#28324a">place + remap</text>
+<rect x="634" y="92" width="12" height="4" fill="#21908c"/>
+<text x="649" y="97" font-size="8.5" fill="#28324a">grid, NO remap</text>
+<rect x="634" y="104" width="12" height="4" fill="#9aa5b8"/>
+<text x="649" y="109" font-size="8.5" fill="#28324a">additive (raw 2-D)</text>
+</svg>

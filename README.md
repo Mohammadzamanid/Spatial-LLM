@@ -40,6 +40,10 @@ Isolating the representation (no LLM, **mean ± 95% CI, n=8**, `extrapolation.py
 
 <img src="results/extrapolation.svg" width="820" alt="Length extrapolation: grid code vs place / GRU / oracle, multi-seed"/>
 
+**…but path integration alone isn't unique to grid cells — and that's the point.** A Transformer with the right inductive bias (no positions + sum-pooling) extrapolates just as well (`seq_baselines.py`). Where the **population code is *necessary*** is what a metric integrator *can't* do (`code_necessity.py`, n=5): **one-shot memory capacity** (a raw 2-D code collapses to 25% at 200 locations; a population code holds 75%) and, decisively, **storing many maps**. The same trajectory gives the same displacement in every room, so any deterministic metric code collides across environments — **4%** retrieval over 16 maps. Grid/place cells **remap** and hold **79–92%**; switching remapping *off* in the grid code reproduces the additive collapse (6%). The cognitive map's value is **capacity + remapping**, not the metric — exactly what the brain-faithful code supplies.
+
+<img src="results/code_necessity.svg" width="820" alt="Where the population code is necessary: capacity and remapping vs an additive integrator"/>
+
 ### 3 · It corrects its own drift with boundaries — learned, self-supervised
 
 Noisy path integration drifts (error ∝ √T). **Boundary cells re-anchor the grid phase** (Hardcastle 2015), cutting drift ~43%. We then removed every scaffold: the boundary localizer **learns from the agent's own dead-reckoning** (no labels), even *denoising* that teacher 5× — and still bounds the drift (−32%).

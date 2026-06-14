@@ -503,6 +503,52 @@ self-supervised, biological substrate (the same code does planning/value/relatio
 (iii) that fixed code transfers length-generalizing spatial reasoning into a frozen LLM.
 (`results/seq_baselines.json`, `results/seq_baselines.svg`.)
 
+### Where the population code is NECESSARY — capacity and remapping (the sharp claim)
+
+The honest baseline above showed an additive integrator *ties* the grid code on path integration. So the
+defensible claim is not about path integration at all — it is that a cognitive **map** needs more than a
+metric: a high-capacity, **remappable** population code. We test two things a deterministic function of
+displacement *cannot* do, however well it integrates (`src/eval/code_necessity.py`, n=5, 95% CI):
+
+![code necessity](code_necessity.svg)
+
+**A — one-shot memory capacity** (bind K locations Hebbian; recall from a noisy probe):
+
+| recall acc | K=5 | K=25 | K=100 | K=200 |
+|---|---|---|---|---|
+| grid / place / RFF (population codes) | 100% | 97% | ~87% | **75%** |
+| additive + smooth MLP lift | 99% | 95% | 82% | 70% |
+| **additive (raw 2-D displacement)** | 98% | 77% | 42% | **25%** |
+
+The integrator's *raw* output (a 2-D displacement) cannot pattern-separate — capacity collapses to 25%
+at K=200. You need a high-dimensional population code; a **periodic** lift (RFF ≈ grid) is best — i.e. to
+match grid cells' capacity you end up *building a grid-like code*.
+
+**B — multi-map storage (remapping) — the decisive, information-theoretic necessity:**
+
+| retrieval acc | M=1 | M=2 | M=4 | M=8 | M=16 maps |
+|---|---|---|---|---|---|
+| **place + remap** | 93% | 93% | 93% | 93% | **92% ±3** |
+| **grid + remap** | 93% | 92% | 91% | 87% | **79% ±2** |
+| grid, remapping OFF (ablation) | 93% | 46% | 23% | 12% | **6% ±0** |
+| **additive (raw 2-D)** | 65% | 32% | 16% | 8% | **4% ±0** |
+
+The **same** trajectory yields the **same** displacement in every environment, so *any* deterministic
+function of displacement (raw, RFF, MLP-lift, a NoPE-sum hidden) produces identical codes across
+environments and collides when several maps are stored together — retrieval falls to ~1/M (4% at 16
+maps). Grid/place cells **remap** (an environment-specific phase offset / field reassignment), keeping
+the same location's codes orthogonal across rooms — **79–92%** at 16 maps, *non-overlapping CIs* vs the
+additive code. Switching remapping **off** in the grid code reproduces the additive collapse (6%),
+proving the necessary ingredient is **remapping itself** — a property of the biological population code
+that no metric integrator possesses.
+
+**This is the contribution, stated honestly.** Path integration is necessary but not sufficient and is
+*not* unique to grid cells; a cognitive map additionally requires high-capacity, remappable population
+coding, which additive integrators provably lack (4% vs ~90% across 16 maps). Grid/place cells supply
+it, learned self-supervised, and the same code carries planning, value, and relational inference (above)
+— a single substrate for the map, not just the metric. (`results/code_necessity.json`,
+`results/code_necessity.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
