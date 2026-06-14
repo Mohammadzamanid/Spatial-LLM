@@ -633,6 +633,27 @@ transitive-inference + distance-effect + transfer *signatures*, not a full TEM w
 structure/content factorisation. But the core claim — relations represented as space, enabling inference
 never trained on — holds. (`results/relational.json`, `results/relational.svg`.)
 
+### One-shot & continual learning — instant place fields, no catastrophic forgetting (CLS)
+
+The cortex above was pre-trained then frozen; the brain instead encodes a place in ONE visit and
+accumulates memories without overwriting them. We bind each visited location, in a single local write,
+to a place cell w = grid-code(L) (`src/eval/continual.py`):
+
+- **One-shot place field**: a single visit produces a localized place field (area **0.06** of the arena)
+  — formed in one write, not many gradient steps (behavioural-timescale plasticity; Bittner & Magee 2017).
+- **Continual, no catastrophic forgetting**: visiting K=20 places sequentially (one-shot each), ALL are
+  still recalled afterwards — recall by learning-age is FLAT (oldest→newest quartile **96/96/91/100%**,
+  mean ~96%). A single shared classifier trained the SAME sequence by gradient CATASTROPHICALLY FORGETS:
+  the oldest quartile collapses to **0%** (mean ~30%, quartiles 0/51/29/40%).
+
+This is Complementary Learning Systems made concrete (McClelland, McNaughton & O'Reilly 1995): fast,
+pattern-separated, one-shot hippocampal storage retains everything, where a slow distributed gradient
+learner interferes and forgets. The grid code supplies the pattern separation (distinct places →
+distinct codes), so each one-shot memory is independent. *Honest scope:* this is the *fast* hippocampal
+store (expandable place cells bound to the frozen grid metric); a complete system pairs it with *slow*
+neocortical consolidation (our replay pillar) interleaving these memories into shared weights — which is
+exactly the CLS division of labour. (`results/continual.json`, `results/continual.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

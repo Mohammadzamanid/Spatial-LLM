@@ -1,0 +1,18 @@
+{
+  "K": 20,
+  "hebbian_recall_mean": 0.959,
+  "sgd_recall_mean": 0.3,
+  "hebbian_recall_by_age_quartile_oldest_to_newest": [
+    0.962,
+    0.962,
+    0.913,
+    1.0
+  ],
+  "sgd_recall_by_age_quartile_oldest_to_newest": [
+    0.0,
+    0.512,
+    0.287,
+    0.4
+  ],
+  "oneshot_place_field_area": 0.057
+}
