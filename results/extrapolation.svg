@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="802" height="366" font-family="Segoe UI, Arial">
+<rect width="802" height="366" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Length extrapolation: the grid code holds where a bounded place code cliffs</text>
+<text x="28" y="43" font-size="11" fill="#5b6b8c">trained on mixed short paths (&#8804;12); place cells tile only the trained region &#183; mean &#177; 95% CI</text>
+<text x="56" y="70" font-size="12" font-weight="700" fill="#0b1324">position-decode error (lower = better)</text>
+<line x1="56" y1="300" x2="356" y2="300" stroke="#33415c"/><line x1="56" y1="80" x2="56" y2="300" stroke="#33415c"/>
+<line x1="56" y1="300.0" x2="356" y2="300.0" stroke="#eef2f8"/>
+<text x="49" y="304.0" font-size="9" fill="#5b6b8c" text-anchor="end">0</text>
+<line x1="56" y1="212.0" x2="356" y2="212.0" stroke="#eef2f8"/>
+<text x="49" y="216.0" font-size="9" fill="#5b6b8c" text-anchor="end">1</text>
+<line x1="56" y1="124.0" x2="356" y2="124.0" stroke="#eef2f8"/>
+<text x="49" y="128.0" font-size="9" fill="#5b6b8c" text-anchor="end">2</text>
+<line x1="256.0" y1="80" x2="256.0" y2="300" stroke="#c9341a" stroke-dasharray="4,3" stroke-width="1"/>
+<text x="260.0" y="92" font-size="8" fill="#c9341a">3&#215; (LLM regime)</text>
+<text x="56.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="156.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="256.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="356.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polygon points="56.0,298.2 156.0,295.1 256.0,283.4 356.0,205.4 356.0,211.3 256.0,286.0 156.0,296.3 56.0,298.8" fill="#e6550d" opacity="0.13"/>
+<polyline points="56.0,298.5 156.0,295.7 256.0,284.7 356.0,208.4" fill="none" stroke="#e6550d" stroke-width="2.4"/>
+<circle cx="56.0" cy="298.5" r="3" fill="#e6550d"/>
+<circle cx="156.0" cy="295.7" r="3" fill="#e6550d"/>
+<circle cx="256.0" cy="284.7" r="3" fill="#e6550d"/>
+<circle cx="356.0" cy="208.4" r="3" fill="#e6550d"/>
+<polygon points="56.0,295.4 156.0,278.8 256.0,246.2 356.0,139.9 356.0,145.6 256.0,249.3 156.0,280.6 56.0,296.3" fill="#3b528b" opacity="0.13"/>
+<polyline points="56.0,295.9 156.0,279.7 256.0,247.7 356.0,142.7" fill="none" stroke="#3b528b" stroke-width="2.4"/>
+<circle cx="56.0" cy="295.9" r="3" fill="#3b528b"/>
+<circle cx="156.0" cy="279.7" r="3" fill="#3b528b"/>
+<circle cx="256.0" cy="247.7" r="3" fill="#3b528b"/>
+<circle cx="356.0" cy="142.7" r="3" fill="#3b528b"/>
+<polygon points="56.0,293.4 156.0,285.5 256.0,273.2 356.0,220.4 356.0,247.0 256.0,289.2 156.0,296.6 56.0,298.6" fill="#21908c" opacity="0.13"/>
+<polyline points="56.0,296.0 156.0,291.1 256.0,281.2 356.0,233.7" fill="none" stroke="#21908c" stroke-width="2.4"/>
+<circle cx="56.0" cy="296.0" r="3" fill="#21908c"/>
+<circle cx="156.0" cy="291.1" r="3" fill="#21908c"/>
+<circle cx="256.0" cy="281.2" r="3" fill="#21908c"/>
+<circle cx="356.0" cy="233.7" r="3" fill="#21908c"/>
+<polygon points="56.0,299.2 156.0,299.0 256.0,298.7 356.0,297.8 356.0,298.2 256.0,299.0 156.0,299.2 56.0,299.3" fill="#9aa5b8" opacity="0.13"/>
+<polyline points="56.0,299.3 156.0,299.1 256.0,298.8 356.0,298.0" fill="none" stroke="#9aa5b8" stroke-width="2.4"/>
+<circle cx="56.0" cy="299.3" r="3" fill="#9aa5b8"/>
+<circle cx="156.0" cy="299.1" r="3" fill="#9aa5b8"/>
+<circle cx="256.0" cy="298.8" r="3" fill="#9aa5b8"/>
+<circle cx="356.0" cy="298.0" r="3" fill="#9aa5b8"/>
+<text x="446" y="70" font-size="12" font-weight="700" fill="#0b1324">distance exact-bucket accuracy</text>
+<line x1="446" y1="300" x2="746" y2="300" stroke="#33415c"/><line x1="446" y1="80" x2="446" y2="300" stroke="#33415c"/>
+<line x1="446" y1="300.0" x2="746" y2="300.0" stroke="#eef2f8"/>
+<text x="439" y="304.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="446" y1="245.0" x2="746" y2="245.0" stroke="#eef2f8"/>
+<text x="439" y="249.0" font-size="9" fill="#5b6b8c" text-anchor="end">25%</text>
+<line x1="446" y1="190.0" x2="746" y2="190.0" stroke="#eef2f8"/>
+<text x="439" y="194.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="446" y1="135.0" x2="746" y2="135.0" stroke="#eef2f8"/>
+<text x="439" y="139.0" font-size="9" fill="#5b6b8c" text-anchor="end">75%</text>
+<line x1="446" y1="80.0" x2="746" y2="80.0" stroke="#eef2f8"/>
+<text x="439" y="84.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<line x1="646.0" y1="80" x2="646.0" y2="300" stroke="#c9341a" stroke-dasharray="4,3" stroke-width="1"/>
+<text x="650.0" y="92" font-size="8" fill="#c9341a">3&#215; (LLM regime)</text>
+<text x="446.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="546.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="646.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="746.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polygon points="446.0,82.4 546.0,85.3 646.0,94.8 746.0,133.1 746.0,135.2 646.0,96.8 546.0,87.5 446.0,83.1" fill="#e6550d" opacity="0.13"/>
+<polyline points="446.0,82.8 546.0,86.4 646.0,95.8 746.0,134.2" fill="none" stroke="#e6550d" stroke-width="2.4"/>
+<circle cx="446.0" cy="82.8" r="3" fill="#e6550d"/>
+<circle cx="546.0" cy="86.4" r="3" fill="#e6550d"/>
+<circle cx="646.0" cy="95.8" r="3" fill="#e6550d"/>
+<circle cx="746.0" cy="134.2" r="3" fill="#e6550d"/>
+<polygon points="446.0,86.0 546.0,101.1 646.0,121.7 746.0,172.1 746.0,175.5 646.0,124.9 546.0,103.3 446.0,87.8" fill="#3b528b" opacity="0.13"/>
+<polyline points="446.0,86.9 546.0,102.2 646.0,123.3 746.0,173.8" fill="none" stroke="#3b528b" stroke-width="2.4"/>
+<circle cx="446.0" cy="86.9" r="3" fill="#3b528b"/>
+<circle cx="546.0" cy="102.2" r="3" fill="#3b528b"/>
+<circle cx="646.0" cy="123.3" r="3" fill="#3b528b"/>
+<circle cx="746.0" cy="173.8" r="3" fill="#3b528b"/>
+<polygon points="446.0,83.0 546.0,87.1 646.0,103.5 746.0,164.3 746.0,189.6 646.0,126.5 546.0,104.2 446.0,90.0" fill="#21908c" opacity="0.13"/>
+<polyline points="446.0,86.5 546.0,95.7 646.0,115.0 746.0,176.9" fill="none" stroke="#21908c" stroke-width="2.4"/>
+<circle cx="446.0" cy="86.5" r="3" fill="#21908c"/>
+<circle cx="546.0" cy="95.7" r="3" fill="#21908c"/>
+<circle cx="646.0" cy="115.0" r="3" fill="#21908c"/>
+<circle cx="746.0" cy="176.9" r="3" fill="#21908c"/>
+<polygon points="446.0,80.9 546.0,81.2 646.0,81.4 746.0,81.4 746.0,82.0 646.0,81.8 546.0,81.6 446.0,81.6" fill="#9aa5b8" opacity="0.13"/>
+<polyline points="446.0,81.3 546.0,81.4 646.0,81.6 746.0,81.7" fill="none" stroke="#9aa5b8" stroke-width="2.4"/>
+<circle cx="446.0" cy="81.3" r="3" fill="#9aa5b8"/>
+<circle cx="546.0" cy="81.4" r="3" fill="#9aa5b8"/>
+<circle cx="646.0" cy="81.6" r="3" fill="#9aa5b8"/>
+<circle cx="746.0" cy="81.7" r="3" fill="#9aa5b8"/>
+<rect x="56" y="325" width="16" height="5" fill="#e6550d"/>
+<text x="77" y="330" font-size="10.5" fill="#28324a">grid code (ours)</text>
+<rect x="191" y="325" width="16" height="5" fill="#3b528b"/>
+<text x="212" y="330" font-size="10.5" fill="#28324a">place tiling (trained region)</text>
+<rect x="412" y="325" width="16" height="5" fill="#21908c"/>
+<text x="433" y="330" font-size="10.5" fill="#28324a">learned GRU integrator</text>
+<rect x="587" y="325" width="16" height="5" fill="#9aa5b8"/>
+<text x="608" y="330" font-size="10.5" fill="#28324a">exact-integration oracle</text>
+</svg>

@@ -36,6 +36,10 @@ Trained only to predict bounded place cells, the path-integrating units develop 
 
 A fixed-length, `/T`-normalized integrator *memorizes* its training length; a **scale-free readout trained on mixed lengths extrapolates** to paths 2–3× longer (`generalize_trajectory.py`). And the grid code is a **universal metric**: one decoder transfers across environments 0-shot while place cells **remap** (cos 0.08) and a new map forms few-shot — plus **replay** consolidates a good map from 40 trajectories (`pillars.py`).
 
+Isolating the representation (no LLM, **mean ± 95% CI, n=8**, `extrapolation.py`): trained on short paths and tested out to 4× longer against a **fair** place baseline (cells tiled exactly to the trained region), the grid code wins at every length with non-overlapping CIs — at the 3× LLM regime, **93% vs 80%** distance accuracy — and is *more reliable* than a learned GRU integrator (±0% vs ±5%). A bounded place code *cliffs* past its trained box; the grid code degrades *gracefully* (its phase = gain·∫v is both scale-free **and** periodic — length-invariance *and* metric range). An exact-integration oracle stays flat, so the gap is the **code**, not the task.
+
+<img src="results/extrapolation.svg" width="820" alt="Length extrapolation: grid code vs place / GRU / oracle, multi-seed"/>
+
 ### 3 · It corrects its own drift with boundaries — learned, self-supervised
 
 Noisy path integration drifts (error ∝ √T). **Boundary cells re-anchor the grid phase** (Hardcastle 2015), cutting drift ~43%. We then removed every scaffold: the boundary localizer **learns from the agent's own dead-reckoning** (no labels), even *denoising* that teacher 5× — and still bounds the drift (−32%).
