@@ -418,6 +418,48 @@ answer about longer paths: its phase = gain·∫v is **scale-free** *and* **peri
 length-invariance and metric range — the two properties the conventional codes each lack.
 (`results/extrapolation.json`, `results/extrapolation.svg`.)
 
+### Ablations — the mechanism dissected (multi-seed, the four reviewer questions)
+
+`src/eval/ablations.py` changes ONE thing at a time on the same faithful task (n=5 seeds, 95% CI),
+answering *why* the grid code extrapolates — and what it is **not**:
+
+![ablations](ablations.svg)
+
+| (distance exact-acc) | T=8 | T=16 | T=24 | T=48 (4×) |
+|---|---|---|---|---|
+| **1 — range needs MODULES** (grid, n_modules) | | | | |
+| 1 module | 33% | 27% | 22% | 14% |
+| 2 / 4 / 6 / 8 modules | 91 / 97 / 99 / 98% | 78 / 95 / 97 / 98% | 67 / 89 / 93 / 95% | 45 / 70 / 75 / 82% |
+| **2 — scale-invariance is necessary** | | | | |
+| sum (scale-free) | 99% | 99% | 99% | 99% |
+| sum **/ T** (length-norm) | 87% | 29% | 11% | 2% |
+| **3 — training distribution (grid)** | | | | |
+| fixed T=8 / fixed T=12 / mixed 6–12 | 99 / 98 / 99% | 96 / 97 / 97% | 90 / 93 / 93% | 69 / 77 / 75% |
+| **4 — vs sequence models fed the moves** | | | | |
+| **grid code (ours)** | **99% ±0** | **97% ±1** | **93% ±1** | **75% ±1** |
+| plain Transformer (learned pos) | 95% ±1 | 48% ±4 | 16% ±1 | 2% ±0 |
+| GRU integrator | 97% ±3 | 92% ±6 | 82% ±8 | 53% ±8 |
+
+1. **Range is modular coding.** A *single* periodic module aliases almost immediately (22% at the 3×
+   LLM regime); adding modules at geometric scales extends the unambiguous metric range monotonically
+   (Fiete; Stensola 2012) — 1→8 modules lifts 4× accuracy 14%→82%. This is *why* the grid code, unlike
+   a place tiling, covers a large range with a fixed cell budget.
+2. **Scale-invariance is necessary.** A scale-free cumulative-sum readout is flat at 99% across all
+   lengths; dividing the same sum by path length T — the `/T` length-normalization the M2 cortex once
+   used — *discards the magnitude* and collapses to 2% at 4×. The grid code has scale-invariance for
+   free (phase = gain·∫v).
+3. **The grid code's extrapolation is in the CODE, not the training mix.** Trained on a *single* length
+   it still extrapolates (fixed T=8 → 69%, fixed T=12 → 77% at 4×); mixed-length training adds little.
+   This is a notable contrast to the *accumulator*, which **needed** mixed lengths to generalize (the
+   `/T` stress-test) — the periodic grid code is length-invariant by construction, so it is robust to
+   the training-length distribution.
+4. **A plain Transformer fed the moves does NOT extrapolate.** With the same data and budget, a standard
+   Transformer collapses (95%→16% by T=24, 2% at 4×) and a GRU degrades and is *seed-unreliable*
+   (82% ±8 at T=24); the fixed grid code holds at 93% ±1 — non-overlapping CIs. Length generalization in
+   sequence models is a known-hard problem; the grid code has the needed inductive bias intrinsically.
+   *(Caveat: this Transformer uses learned absolute positions; the fairer sinusoidal / NoPE-plus-sum
+   variants are tested separately in `seq_baselines.py` below.)*
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

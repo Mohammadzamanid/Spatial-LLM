@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="795" height="540" font-family="Segoe UI, Arial">
+<rect width="795" height="540" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">Ablations: why the grid code extrapolates (distance exact-acc vs path length)</text>
+<text x="26" y="43" font-size="10.5" fill="#5b6b8c">trained on mixed short paths (&#8804;12), tested to 4&#215; longer &#183; mean over seeds</text>
+<text x="50" y="55" font-size="11.5" font-weight="700" fill="#0b1324">1 &#183; range needs MODULES</text>
+<line x1="50" y1="239" x2="350" y2="239" stroke="#33415c"/><line x1="50" y1="64" x2="50" y2="239" stroke="#33415c"/>
+<line x1="50" y1="239.0" x2="350" y2="239.0" stroke="#eef2f8"/>
+<text x="44" y="243.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="50" y1="151.5" x2="350" y2="151.5" stroke="#eef2f8"/>
+<text x="44" y="155.5" font-size="8.5" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="50" y1="64.0" x2="350" y2="64.0" stroke="#eef2f8"/>
+<text x="44" y="68.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="50.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="150.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="250.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="350.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polyline points="50.0,180.9 150.0,192.0 250.0,200.1 350.0,214.8" fill="none" stroke="#e6550d" stroke-width="2.1"/>
+<circle cx="50.0" cy="180.9" r="2.6" fill="#e6550d"/>
+<circle cx="150.0" cy="192.0" r="2.6" fill="#e6550d"/>
+<circle cx="250.0" cy="200.1" r="2.6" fill="#e6550d"/>
+<circle cx="350.0" cy="214.8" r="2.6" fill="#e6550d"/>
+<polyline points="50.0,79.2 150.0,101.9 250.0,121.9 350.0,160.4" fill="none" stroke="#3b528b" stroke-width="2.1"/>
+<circle cx="50.0" cy="79.2" r="2.6" fill="#3b528b"/>
+<circle cx="150.0" cy="101.9" r="2.6" fill="#3b528b"/>
+<circle cx="250.0" cy="121.9" r="2.6" fill="#3b528b"/>
+<circle cx="350.0" cy="160.4" r="2.6" fill="#3b528b"/>
+<polyline points="50.0,71.0 150.0,80.8 250.0,95.6 350.0,133.3" fill="none" stroke="#21908c" stroke-width="2.1"/>
+<circle cx="50.0" cy="71.0" r="2.6" fill="#21908c"/>
+<circle cx="150.0" cy="80.8" r="2.6" fill="#21908c"/>
+<circle cx="250.0" cy="95.6" r="2.6" fill="#21908c"/>
+<circle cx="350.0" cy="133.3" r="2.6" fill="#21908c"/>
+<polyline points="50.0,69.1 150.0,73.2 250.0,82.7 350.0,116.9" fill="none" stroke="#9aa5b8" stroke-width="2.1"/>
+<circle cx="50.0" cy="69.1" r="2.6" fill="#9aa5b8"/>
+<circle cx="150.0" cy="73.2" r="2.6" fill="#9aa5b8"/>
+<circle cx="250.0" cy="82.7" r="2.6" fill="#9aa5b8"/>
+<circle cx="350.0" cy="116.9" r="2.6" fill="#9aa5b8"/>
+<polyline points="50.0,66.1 150.0,69.1 250.0,76.5 350.0,107.2" fill="none" stroke="#756bb1" stroke-width="2.1"/>
+<circle cx="50.0" cy="66.1" r="2.6" fill="#756bb1"/>
+<circle cx="150.0" cy="69.1" r="2.6" fill="#756bb1"/>
+<circle cx="250.0" cy="76.5" r="2.6" fill="#756bb1"/>
+<circle cx="350.0" cy="107.2" r="2.6" fill="#756bb1"/>
+<polyline points="50.0,67.1 150.0,67.9 250.0,72.5 350.0,94.8" fill="none" stroke="#c9341a" stroke-width="2.1"/>
+<circle cx="50.0" cy="67.1" r="2.6" fill="#c9341a"/>
+<circle cx="150.0" cy="67.9" r="2.6" fill="#c9341a"/>
+<circle cx="250.0" cy="72.5" r="2.6" fill="#c9341a"/>
+<circle cx="350.0" cy="94.8" r="2.6" fill="#c9341a"/>
+<rect x="222" y="68" width="11" height="4" fill="#e6550d"/>
+<text x="236" y="73" font-size="8.5" fill="#28324a">1-module grid</text>
+<rect x="222" y="81" width="11" height="4" fill="#3b528b"/>
+<text x="236" y="86" font-size="8.5" fill="#28324a">2-module grid</text>
+<rect x="222" y="94" width="11" height="4" fill="#21908c"/>
+<text x="236" y="99" font-size="8.5" fill="#28324a">3-module grid</text>
+<rect x="222" y="107" width="11" height="4" fill="#9aa5b8"/>
+<text x="236" y="112" font-size="8.5" fill="#28324a">4-module grid</text>
+<rect x="222" y="120" width="11" height="4" fill="#756bb1"/>
+<text x="236" y="125" font-size="8.5" fill="#28324a">6-module grid</text>
+<rect x="222" y="133" width="11" height="4" fill="#c9341a"/>
+<text x="236" y="138" font-size="8.5" fill="#28324a">8-module grid</text>
+<text x="445" y="55" font-size="11.5" font-weight="700" fill="#0b1324">2 &#183; scale-free vs /T</text>
+<line x1="445" y1="239" x2="745" y2="239" stroke="#33415c"/><line x1="445" y1="64" x2="445" y2="239" stroke="#33415c"/>
+<line x1="445" y1="239.0" x2="745" y2="239.0" stroke="#eef2f8"/>
+<text x="439" y="243.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="445" y1="151.5" x2="745" y2="151.5" stroke="#eef2f8"/>
+<text x="439" y="155.5" font-size="8.5" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="445" y1="64.0" x2="745" y2="64.0" stroke="#eef2f8"/>
+<text x="439" y="68.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="445.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="545.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="645.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="745.0" y="252.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polyline points="445.0,64.9 545.0,65.1 645.0,65.2 745.0,65.3" fill="none" stroke="#e6550d" stroke-width="2.1"/>
+<circle cx="445.0" cy="64.9" r="2.6" fill="#e6550d"/>
+<circle cx="545.0" cy="65.1" r="2.6" fill="#e6550d"/>
+<circle cx="645.0" cy="65.2" r="2.6" fill="#e6550d"/>
+<circle cx="745.0" cy="65.3" r="2.6" fill="#e6550d"/>
+<polyline points="445.0,87.1 545.0,187.4 645.0,220.5 745.0,235.8" fill="none" stroke="#3b528b" stroke-width="2.1"/>
+<circle cx="445.0" cy="87.1" r="2.6" fill="#3b528b"/>
+<circle cx="545.0" cy="187.4" r="2.6" fill="#3b528b"/>
+<circle cx="645.0" cy="220.5" r="2.6" fill="#3b528b"/>
+<circle cx="745.0" cy="235.8" r="2.6" fill="#3b528b"/>
+<rect x="617" y="68" width="11" height="4" fill="#e6550d"/>
+<text x="631" y="73" font-size="8.5" fill="#28324a">sum (scale-free)</text>
+<rect x="617" y="81" width="11" height="4" fill="#3b528b"/>
+<text x="631" y="86" font-size="8.5" fill="#28324a">sum / T (length-norm)</text>
+<text x="50" y="316" font-size="11.5" font-weight="700" fill="#0b1324">3 &#183; mixed vs fixed-length training</text>
+<line x1="50" y1="500" x2="350" y2="500" stroke="#33415c"/><line x1="50" y1="325" x2="50" y2="500" stroke="#33415c"/>
+<line x1="50" y1="500.0" x2="350" y2="500.0" stroke="#eef2f8"/>
+<text x="44" y="504.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="50" y1="412.5" x2="350" y2="412.5" stroke="#eef2f8"/>
+<text x="44" y="416.5" font-size="8.5" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="50" y1="325.0" x2="350" y2="325.0" stroke="#eef2f8"/>
+<text x="44" y="329.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="50.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="150.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="250.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="350.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polyline points="50.0,326.8 150.0,331.6 250.0,343.0 350.0,378.6" fill="none" stroke="#e6550d" stroke-width="2.1"/>
+<circle cx="50.0" cy="326.8" r="2.6" fill="#e6550d"/>
+<circle cx="150.0" cy="331.6" r="2.6" fill="#e6550d"/>
+<circle cx="250.0" cy="343.0" r="2.6" fill="#e6550d"/>
+<circle cx="350.0" cy="378.6" r="2.6" fill="#e6550d"/>
+<polyline points="50.0,327.8 150.0,329.9 250.0,336.4 350.0,365.0" fill="none" stroke="#3b528b" stroke-width="2.1"/>
+<circle cx="50.0" cy="327.8" r="2.6" fill="#3b528b"/>
+<circle cx="150.0" cy="329.9" r="2.6" fill="#3b528b"/>
+<circle cx="250.0" cy="336.4" r="2.6" fill="#3b528b"/>
+<circle cx="350.0" cy="365.0" r="2.6" fill="#3b528b"/>
+<polyline points="50.0,327.1 150.0,330.1 250.0,337.5 350.0,368.2" fill="none" stroke="#21908c" stroke-width="2.1"/>
+<circle cx="50.0" cy="327.1" r="2.6" fill="#21908c"/>
+<circle cx="150.0" cy="330.1" r="2.6" fill="#21908c"/>
+<circle cx="250.0" cy="337.5" r="2.6" fill="#21908c"/>
+<circle cx="350.0" cy="368.2" r="2.6" fill="#21908c"/>
+<rect x="222" y="329" width="11" height="4" fill="#e6550d"/>
+<text x="236" y="334" font-size="8.5" fill="#28324a">grid, fixed T=8</text>
+<rect x="222" y="342" width="11" height="4" fill="#3b528b"/>
+<text x="236" y="347" font-size="8.5" fill="#28324a">grid, fixed T=12</text>
+<rect x="222" y="355" width="11" height="4" fill="#21908c"/>
+<text x="236" y="360" font-size="8.5" fill="#28324a">grid, mixed 6-12</text>
+<text x="445" y="316" font-size="11.5" font-weight="700" fill="#0b1324">4 &#183; vs Transformer / GRU</text>
+<line x1="445" y1="500" x2="745" y2="500" stroke="#33415c"/><line x1="445" y1="325" x2="445" y2="500" stroke="#33415c"/>
+<line x1="445" y1="500.0" x2="745" y2="500.0" stroke="#eef2f8"/>
+<text x="439" y="504.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="445" y1="412.5" x2="745" y2="412.5" stroke="#eef2f8"/>
+<text x="439" y="416.5" font-size="8.5" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="445" y1="325.0" x2="745" y2="325.0" stroke="#eef2f8"/>
+<text x="439" y="329.0" font-size="8.5" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="445.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="545.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="645.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="745.0" y="513.0" font-size="8.5" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polyline points="445.0,327.1 545.0,330.1 645.0,337.5 745.0,368.2" fill="none" stroke="#e6550d" stroke-width="2.1"/>
+<circle cx="445.0" cy="327.1" r="2.6" fill="#e6550d"/>
+<circle cx="545.0" cy="330.1" r="2.6" fill="#e6550d"/>
+<circle cx="645.0" cy="337.5" r="2.6" fill="#e6550d"/>
+<circle cx="745.0" cy="368.2" r="2.6" fill="#e6550d"/>
+<polyline points="445.0,333.1 545.0,416.2 645.0,472.8 745.0,496.8" fill="none" stroke="#3b528b" stroke-width="2.1"/>
+<circle cx="445.0" cy="333.1" r="2.6" fill="#3b528b"/>
+<circle cx="545.0" cy="416.2" r="2.6" fill="#3b528b"/>
+<circle cx="645.0" cy="472.8" r="2.6" fill="#3b528b"/>
+<circle cx="745.0" cy="496.8" r="2.6" fill="#3b528b"/>
+<polyline points="445.0,331.0 545.0,339.6 645.0,356.0 745.0,406.9" fill="none" stroke="#21908c" stroke-width="2.1"/>
+<circle cx="445.0" cy="331.0" r="2.6" fill="#21908c"/>
+<circle cx="545.0" cy="339.6" r="2.6" fill="#21908c"/>
+<circle cx="645.0" cy="356.0" r="2.6" fill="#21908c"/>
+<circle cx="745.0" cy="406.9" r="2.6" fill="#21908c"/>
+<rect x="617" y="329" width="11" height="4" fill="#e6550d"/>
+<text x="631" y="334" font-size="8.5" fill="#28324a">grid code (ours)</text>
+<rect x="617" y="342" width="11" height="4" fill="#3b528b"/>
+<text x="631" y="347" font-size="8.5" fill="#28324a">Transformer</text>
+<rect x="617" y="355" width="11" height="4" fill="#21908c"/>
+<text x="631" y="360" font-size="8.5" fill="#28324a">GRU</text>
+</svg>
