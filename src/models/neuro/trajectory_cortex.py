@@ -218,8 +218,10 @@ class TrajectoryCortex(nn.Module):
             self.vert = nn.Linear(1, embed_dim)
         if self.cfg["grid_attractor"]:
             if constrained_velocity:
-                # velocity-driven hexagonal grid modules (fixed gains, learned readout)
-                self.integrator = _HexGridModules(embed_dim)
+                # velocity-driven hexagonal grid modules (fixed gains, learned readout).
+                # 6 modules over a wide scale range so the residue code stays UNAMBIGUOUS over the
+                # task's displacement range (too few/narrow modules alias on long paths -> bearing errors).
+                self.integrator = _HexGridModules(embed_dim, n_modules=6, base_spacing=1.6)
             else:
                 self.integrator = _AttractorIntegrator(embed_dim, length_norm=length_norm,
                                                        topology=topology)
