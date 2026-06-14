@@ -654,6 +654,30 @@ store (expandable place cells bound to the frozen grid metric); a complete syste
 neocortical consolidation (our replay pillar) interleaving these memories into shared weights — which is
 exactly the CLS division of labour. (`results/continual.json`, `results/continual.svg`.)
 
+### Embodiment — the map grounded in vision (optic-flow self-motion)
+
+The cortex was handed (heading, speed). The brain instead SEES the world and infers self-motion from
+optic flow. We gave the agent a visual world (16 landmarks), a retinal PANORAMA at each position, and a
+learned visual front-end that estimates velocity from how the panorama shifts between frames; that
+vision-derived velocity drives the SAME grid cortex (`src/eval/embodiment.py`):
+
+- **Vision recovers self-motion**: the optic-flow front-end estimates the agent's velocity at direction
+  cosine **0.97** (error 0.13 vs a ~0.5 step) — no hand-given heading/speed.
+- **The grid map path-integrates from vision**: decoding position from the grid code built on
+  VISION-derived velocity, the agent localizes with error **0.48 → 1.33** over path length T=6→24
+  (arena half-width 3) — it knows where it is from what it SEES.
+- **The gap to the true-velocity ceiling (0.01–0.02) is accumulated optic-flow noise**: visual path
+  integration DRIFTS — exactly the error that, in the brain and in our boundary pillar, is corrected by
+  re-anchoring to landmarks/boundaries. Embodiment introduces the very drift the boundary mechanism
+  fixes; the two pillars meet.
+
+So the pipeline is now grounded end-to-end in perception: world → retinal panorama → optic-flow
+egomotion → grid path integration → place / value / relational readout. The agent is no longer told how
+it moved; it perceives it. *Honest scope:* a simplified panoramic landmark world and a learned MLP
+front-end (not pixels through a CNN); translation-only (no rotation); the front-end is calibrated
+against efference copy (the agent's own motor signal), as optic flow is in development.
+(`results/embodiment.json`, `results/embodiment.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

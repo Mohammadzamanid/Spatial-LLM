@@ -45,9 +45,11 @@ def view(pos, landmarks, sa=0.25):
     return resp.sum(1)                                              # (n, B_BINS)
 
 
-def walks(n, T, R, seed):
+def walks(n, T, R, seed, origin=False):
     g = torch.Generator().manual_seed(seed)
-    pos = (torch.rand(n, 2, generator=g) * 2 - 1) * R
+    # origin=True: start at home (phase 0) so integrated displacement == absolute position (path
+    # integration). origin=False: random starts, to sample diverse views for the visual front-end.
+    pos = torch.zeros(n, 2) if origin else (torch.rand(n, 2, generator=g) * 2 - 1) * R
     traj = [pos.clone()]
     for _ in range(T):
         h = torch.rand(n, generator=g) * 2 * math.pi; s = torch.rand(n, generator=g) * 0.6 + 0.2
@@ -88,7 +90,7 @@ def main():
     dec = nn.Sequential(nn.Linear(cx.K * cx.M, 256), nn.ReLU(), nn.Linear(256, 2))
     dopt = torch.optim.Adam(dec.parameters(), lr=3e-3)
     for ep in range(400):
-        tr = walks(256, 10, R, 5000 + ep)
+        tr = walks(256, 10, R, 5000 + ep, origin=True)
         vel = tr[:, 1:] - tr[:, :-1]
         with torch.no_grad():
             gc = integrate(vel)
@@ -97,7 +99,7 @@ def main():
     # ---- (2) path-integrate the VISION-derived velocity through the grid map; localize ----
     @torch.no_grad()
     def pi_error(T, use_vision):
-        tr = walks(2000, T, R, 20000 + T)
+        tr = walks(2000, T, R, 20000 + T, origin=True)
         if use_vision:                                             # estimate each step's velocity from optic flow
             vest = []
             for t in range(T):
@@ -123,7 +125,7 @@ def main():
     # SVG: world + one true path vs the path reconstructed purely from vision
     @torch.no_grad()
     def vis_traj(seed):
-        tr = walks(1, 26, R, seed)[0]                              # (T+1,2)
+        tr = walks(1, 26, R, seed, origin=True)[0]                              # (T+1,2)
         v = [eye(torch.cat([view(tr[t:t + 1], landmarks), view(tr[t + 1:t + 2], landmarks)], -1))[0] for t in range(26)]
         rec = torch.cumsum(torch.stack([torch.zeros(2)] + v), 0) + tr[0]   # visually dead-reckoned path
         return tr, rec

@@ -1,0 +1,17 @@
+{
+  "landmarks": 16,
+  "egomotion_error": 0.1281,
+  "egomotion_cos": 0.97,
+  "vision_pi_error_by_len": {
+    "6": 0.484,
+    "12": 0.821,
+    "18": 1.073,
+    "24": 1.334
+  },
+  "true_velocity_pi_error_by_len": {
+    "6": 0.01,
+    "12": 0.012,
+    "18": 0.017,
+    "24": 0.022
+  }
+}
