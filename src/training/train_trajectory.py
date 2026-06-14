@@ -270,6 +270,7 @@ def main(a):
     if a.cortex_pretrain != "none":
         model.cortex.eval()   # keep the frozen cortex deterministic
 
+    best_q, best_state = -1.0, None   # early stopping: keep the best-val epoch (training can wobble)
     for ep in range(a.epochs):
         batches = _len_minibatches(train_by_len, a.bs)
         tot = 0.0
@@ -289,6 +290,16 @@ def main(a):
                      ablate=False, task=task, question=question)
         print(f"epoch {ep+1}/{a.epochs}  loss={tot/max(len(batches),1):.3f}  "
               f"val(full,T={Tq}) exact={q['exact']:.1%} within1={q['within1']:.1%}", flush=True)
+        if a.early_stop and q["exact"] >= best_q:   # snapshot the trainable params at the best epoch
+            best_q = q["exact"]
+            best_state = {n: p.detach().cpu().clone() for n, p in model.named_parameters() if p.requires_grad}
+
+    if a.early_stop and best_state is not None:      # restore best-val weights before the final eval
+        with torch.no_grad():
+            for n, p in model.named_parameters():
+                if n in best_state:
+                    p.copy_(best_state[n].to(device))
+        print(f"early stopping: restored best-val epoch (val exact={best_q:.1%})", flush=True)
 
     # ---- per-length eval: cortex ON vs OFF, flag extrapolation lengths ----
     max_train = max(train_lengths)
@@ -357,6 +368,9 @@ if __name__ == "__main__":
     ap.add_argument("--place_sigma", type=float, default=None,
                     help="place-cell width; bumps should overlap (default 0.9 return / 1.2 else)")
     ap.add_argument("--epochs", type=int, default=3)
+    ap.add_argument("--early_stop", action=argparse.BooleanOptionalAction, default=True,
+                    help="restore the best-val epoch before the final eval (training can wobble, "
+                         "esp. the 6-class distance task); --no-early_stop to disable")
     ap.add_argument("--bs", type=int, default=4)   # fp32 1.5B fits a T4 at bs=4 + grad checkpointing
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--seed", type=int, default=42)
