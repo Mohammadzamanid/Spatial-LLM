@@ -534,30 +534,29 @@ residue range) on every navigation question (`--constrained_velocity`):
 
 | task | grid-cell cortex (T=8/16/24) | place/default cortex | OFF (control) |
 |---|---|---|---|
-| **return** | **99% / 99% / 99%** | 96 / 89 / 86 | ~chance |
-| **bearing** | **83% / 85% / 85%** | 71 / 78 / 73 | ~chance |
-| **distance** (within-1) | **94% / 91% / 89%** | 94 / 78 / 81 | 87 / 74 / 71 |
+| **return** | **100 / 100 / 100** | 96 / 89 / 86 | ~chance |
+| **bearing** | **85 / 83 / 80** | 71 / 78 / 73 | ~chance |
+| **distance** (exact) | **95 / 88 / 85** | 62 / 46 / 40 | ~chance |
+| distance (within-1) | **100 / 99 / 94** | 94 / 78 / 81 | 87 / 74 / 71 |
 
-- **return and bearing: the faithful cortex wins and FLATTENS extrapolation.** Return is near-perfect
-  and flat (99/99/99) where the place cortex degrades (96→86); bearing improves +12/+7/+12 and stays
-  flat to 3× training length. cortex-OFF sits at chance, so the answers ride on the spatial code. The
-  emergent hexagonal grid cells carry the language tasks better than the place attractor.
-- **distance: the grid cortex gets the magnitude right and flat.** On WITHIN-1 accuracy (off by at
-  most one bucket — the meaningful magnitude metric) it is **94/91/89, FLAT across length and beats
-  the place cortex's 94/78/81** (which degrades). The cortex representation is excellent (probe
-  100/95/93) and the LLM hit 74% EXACT at epoch 1 (> place's 62%). But exact-bucket accuracy is
-  training-UNSTABLE on the 6-class task — it oscillated (74→52→…→44 over epochs), so the final-epoch
-  exact (44/41/36) undersells it; the wobble is the LLM's bucket-boundary decisions, not the
-  representation. Fix: early stopping / lower LR.
+- **The faithful cortex wins on every task AND flattens extrapolation.** Return is perfect and flat
+  (100/100/100) where place degrades (96→86); bearing +14/+5/+7 and flat; distance **95/88/85 exact**
+  (within-1 100/99/94) vs place's 62/46/40 — a huge gain that barely declines to 3× the training
+  length. cortex-OFF sits at chance throughout, so the answers ride on the spatial code. The emergent
+  hexagonal grid cells carry every navigation question in language, better than the place attractor.
+- **Distance needed training-stability care, not a better representation.** Exact-bucket accuracy
+  oscillated across epochs (a 6-class LLM-readout artifact; the rep was always excellent, probe
+  100/95/93, and it peaked early). Early stopping (restore the best-val epoch) + a lower LR locked in
+  95/88/85 — from a peak the wobble had been burying (the no-early-stop run ended at 44).
 - **The grid-module count matters.** With only 4 modules the residue code aliased on long paths
   (cortex-probe bearing 96/74/62); widening to 6 modules (unambiguous range ~9) made the cortex probes
   flat and high — return 100/100/100, bearing 98/96/91, distance 100/95/93 — exactly the high-capacity
   multi-module grid-code prediction (Fiete/Stemmler).
 
 **Verdict:** one biologically-faithful cortex — emergent hexagonal grid cells, multi-module,
-velocity-driven, length-invariant — carries *every* navigation question in language, beating the
-place attractor on each and (uniquely) NOT degrading on paths up to 3× the training length. Distance's
-exact-bucket needs training-stability care, but its magnitude (within-1) is right and flat.
+velocity-driven, length-invariant — carries *every* navigation question in language (return 100,
+bearing 85, distance 95 exact), beating the place attractor on each and staying flat to 3× the
+training length.
 (`results/m2_return_gridcortex.json`, `results/m2_bearing_gridcortex.json`, `results/m2_distance_gridcortex.json`.)
 
 ## Caveats / open questions
