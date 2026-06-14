@@ -36,6 +36,12 @@ print("model cached")
 !python -u -m src.training.train_trajectory --task distance --constrained_velocity --n_train 2400 --n_val 300 --epochs 3 --out results/m2_distance_gridcortex.json
 
 
+# %% [cell 5b] DISTANCE RE-RUN — the 6-class task is prone to collapse-to-prior (ON==OFF). Give the
+# LLM more epochs (and a different seed) to open onto the cortex. The cortex rep is fine (probe
+# 98/96/91); this is an optimization fix. Run this if cell 5 gave ON==OFF ~chance.
+!python -u -m src.training.train_trajectory --task distance --constrained_velocity --n_train 2400 --n_val 300 --epochs 6 --seed 0 --out results/m2_distance_gridcortex.json
+
+
 # %% [cell 6] compare grid-cell cortex vs place/default cortex on all three tasks (paste this back)
 import json, os
 pairs = [("return",   "results/m2_return_gridcortex.json",   "results/m2_lengthgen_scalefree_mixed.json"),
