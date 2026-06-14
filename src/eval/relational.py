@@ -40,7 +40,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--N", type=int, default=12)        # items in the ordered structure
     ap.add_argument("--spacing", type=float, default=0.5)
-    ap.add_argument("--noise", type=float, default=0.08)
+    ap.add_argument("--noise", type=float, default=0.8)   # neural noise; reveals the distance effect
     a = ap.parse_args()
     torch.manual_seed(0)
     cx = _HexGridModules(64, n_modules=6, base_spacing=1.6)

@@ -607,6 +607,32 @@ grid map (the map isn't re-shaped by reward), the reward is a fixed location, an
 value-ascent (lookahead), not a learned motor policy — a standard RL abstraction of the dopamine
 system. (`results/goal_navigation.json`, `results/goal_navigation.svg`.)
 
+### Abstract / relational cognition — the grid map is a relational engine (TEM)
+
+The hippocampal–entorhinal map is not only spatial: the same grid/place code maps relational STRUCTURE
+— ordered sets, concept spaces, task graphs — enabling inference (Tolman–Eichenbaum Machine, Whittington
+2020; grid codes in concept space, Constantinescu 2016; relational memory, Eichenbaum). We placed an
+abstract ORDERED structure (items ranked 0..11) along a concept axis, mapped it with the SAME
+velocity-driven grid cortex, and taught a comparison readout ONLY adjacent pairs (`src/eval/relational.py`,
+with neural noise):
+
+- **Transitive inference: 84%** correct on non-adjacent pairs NEVER trained (A>D from A>B>C>D) — the
+  metric makes the order transitive. It even *beats* the adjacent TRAINED pairs (72%), because…
+- **The symbolic distance effect emerges**: accuracy rises monotonically with rank-distance —
+  **69% (adjacent) → 100% (farthest)**. Far-apart items are EASIER to compare — the hallmark behavioural
+  signature (humans, monkeys, rats) that an abstract dimension is held on an analog/spatial map.
+- **Schema transfer: 78%** zero-shot on a NEW ordered set in a different region of the concept space —
+  the relational structure is abstracted from the specific items (content) and reused like a schema.
+
+So the very grid machinery that path-integrates physical space, generalises across length, drives
+language, plans, and seeks reward also performs LOGICAL inference over an abstract ordered structure —
+the deepest "beyond metric" result: the cognitive map is a general relational engine, not a spatial
+special case. *Honest scope:* the concept space is hand-laid (items placed along an axis, not discovered
+from raw stimuli) and the comparison is a learned readout over the frozen grid code — we show the
+transitive-inference + distance-effect + transfer *signatures*, not a full TEM with learned
+structure/content factorisation. But the core claim — relations represented as space, enabling inference
+never trained on — holds. (`results/relational.json`, `results/relational.svg`.)
+
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
   the meaningful spatial-reasoning test.

@@ -1,0 +1,19 @@
+{
+  "N": 12,
+  "transitive_inference_acc": 0.835,
+  "adjacent_trained_acc": 0.716,
+  "schema_transfer_acc": 0.783,
+  "symbolic_distance_effect_acc_by_dist": {
+    "1": 0.69,
+    "2": 0.766,
+    "3": 0.774,
+    "4": 0.836,
+    "5": 0.848,
+    "6": 0.885,
+    "7": 0.95,
+    "8": 0.953,
+    "9": 0.958,
+    "10": 0.984,
+    "11": 1.0
+  }
+}
