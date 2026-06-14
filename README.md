@@ -1,230 +1,188 @@
-# 🌍 Spatial-LLM
+# 🧠 Spatial-LLM
 
 [![CI](https://github.com/Mohammadzamanid/Spatial-LLM/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohammadzamanid/Spatial-LLM/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12-blue)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen)](https://github.com/Mohammadzamanid/Spatial-LLM/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A neuroscience-inspired multimodal language model that fuses **grid cell coordinate encoding**, **hippocampal spatial memory**, **predictive coding**, and **neuromodulation** with a LoRA-fine-tuned LLM backbone for geographic reasoning tasks.
+**A neuroscience-inspired model that learns space the way the brain does — and a language model that reads the resulting cognitive map to navigate, plan, reason, and remember.**
+
+Most "spatial" models stop at coordinate embeddings. This one builds the mammalian navigation system from its computational primitives: a self-supervised cortex with **emergent hexagonal grid cells**, **place cells**, **path integration**, **boundary error-correction**, **replay**, and a **dopamine value system** — then a LoRA-adapted LLM reads that map to answer questions in natural language. Every step below is a real neuroscience mechanism, **measured on held-out data, with honest caveats** (full record in [`results/FINDINGS.md`](results/FINDINGS.md)).
+
+> The thesis: a human learns by *being in a place, over time* — in 4D (x, y, z, t). So we don't hand the model coordinates; we have it **move, sense, and path-integrate**, building a cognitive map the way the entorhinal–hippocampal system does, and let language ride on top.
 
 ---
 
-## Architecture
+## The architecture
 
-```
-Coordinates (lat/lon)
-  ├─→ GridCellEncoder    (entorhinal cortex — 6-scale hexagonal lattice)
-  └─→ CoordinateEmbedder (Fourier features)
-                                         ↘
-Map Tile (224×224)                        Cross-Attention   →  LLM (LoRA)  →  Answer
-  └─→ ViT SpatialTileEncoder            ↗        ↑
-                                         Neuromodulation
-Episodic Buffer                         (Dopamine / NE / ACh gating)
-  └─→ HippocampalMemory  (place cells + k-WTA sparsity)
+<img src="results/architecture.svg" width="900" alt="TrajectoryLLM architecture, layer by layer"/>
 
-Auxiliary training signal:
-  SpatialPredictiveCoding  (neocortical prediction error — self-supervised)
-```
+A path of self-motion → **conjunctive velocity cells** → a **velocity-driven hexagonal grid code** (multi-module continuous attractor) → a learned **place/value readout** → **gated cross-attention** into a frozen **Qwen2.5-1.5B + LoRA**, which answers in language. The moves never appear in the text — they reach the model *only* through the cortex.
 
-### Neuroscience Components
+---
 
-| Component | Brain Region | Mechanism |
+## The arc — what one grid/place cortex can do
+
+Each result is reproducible on CPU (`python -m src.eval.<name>`); the language results run on a single T4 (`notebooks/*.py`).
+
+### 1 · Grid cells *emerge* (and a falsification taught us why they're hexagonal)
+
+Trained only to predict bounded place cells, the path-integrating units develop **periodic, multi-field firing maps on their own** (Banino 2018; Hafting 2005). A square-torus attractor yields *square* grids; twisting the torus alone didn't help — but the canonical **velocity-driven** construction flips gridness from −0.46 to **+0.87** (255/256 units hexagonal). *Velocity, not connectivity, sets grid symmetry* — a prediction we falsified, then confirmed.
+
+<img src="results/emergence_gridcells_hexvel.svg" width="760" alt="Emergent hexagonal grid cells"/>
+
+`src/eval/emergence.py` · also: path-integration distance-compression, head-direction tuning, and the **7±2** working-memory limit all emerge.
+
+### 2 · It generalizes — across path length and across environments
+
+A fixed-length, `/T`-normalized integrator *memorizes* its training length; a **scale-free readout trained on mixed lengths extrapolates** to paths 2–3× longer (`generalize_trajectory.py`). And the grid code is a **universal metric**: one decoder transfers across environments 0-shot while place cells **remap** (cos 0.08) and a new map forms few-shot — plus **replay** consolidates a good map from 40 trajectories (`pillars.py`).
+
+### 3 · It corrects its own drift with boundaries — learned, self-supervised
+
+Noisy path integration drifts (error ∝ √T). **Boundary cells re-anchor the grid phase** (Hardcastle 2015), cutting drift ~43%. We then removed every scaffold: the boundary localizer **learns from the agent's own dead-reckoning** (no labels), even *denoising* that teacher 5× — and still bounds the drift (−32%).
+
+<img src="results/boundary_anchoring.svg" width="640" alt="Boundary anchoring corrects path-integration drift"/>
+
+`src/eval/boundary_anchoring.py`
+
+### 4 · Language reads the map — and the faithful cortex wins
+
+A LoRA-Qwen answers navigation questions *through the frozen cortex* (the prompt holds only the question). The biologically-faithful **grid-cell cortex beats a place attractor on every task and stays flat to 3× the training length** (place degrades); cortex-OFF sits at chance, so the answers genuinely ride on the spatial code.
+
+| task (cortex ON, T=8/16/24) | grid-cell cortex | place/default |
 |---|---|---|
-| `GridCellEncoder` | Medial entorhinal cortex | 6-module hexagonal lattice, learnable rotations, multi-scale (0.01°–24°) |
-| `CoordinateEmbedder` | Spatial place encoding | Fourier feature mapping, 64 frequency bands |
-| `HippocampalMemory` | Hippocampus CA1/CA3 | Place cell population code, k-WTA sparsity (k=50/512), episodic buffer |
-| `SpatialPredictiveCoding` | Neocortex | Hierarchical prediction error, 3-level architecture (Rao & Ballard 1999) |
-| `SpatialNeuromodulator` | Dopamine / ACh | Context-conditioned gain + bias modulation |
-| `AdaptiveGain` | Norepinephrine (LC-NE) | Uncertainty-driven contrast amplification |
-| `PredictionErrorGate` | Dopamine (VTA) | Novelty-gated spatial signal routing |
-| `SpatialTileEncoder` | Visual cortex V1–V4 | ViT-base-patch16-224 → LLM projection |
-| `MultiScaleSpatialFusion` | Cortico-hippocampal | Cross-attention, 2-layer, 8 heads |
+| "are you back?" (return) | **100 / 100 / 100** | 96 / 89 / 86 |
+| "which way home?" (bearing) | **85 / 83 / 80** | 71 / 78 / 73 |
+| "how far?" (distance, exact) | **95 / 88 / 85** | 62 / 46 / 40 |
 
+`src/training/train_trajectory.py` · `notebooks/m2_grid_cortex_all_tasks_kaggle.py`
 
-### Complete Neuroscience Stack (single neuron → network)
+### 5 · It plans novel shortcuts (Tolman's cognitive-map test)
 
-Spatial-LLM implements **20 neuroscience-grounded modules** across every level of brain organization. This is the differentiator: most "spatial" models stop at coordinate embeddings; this one models the actual computational primitives the mammalian navigation system uses.
+Because the grid code is linear, the A→B displacement is just the difference of grid codes — so the agent **plans a direct shortcut to a goal it reached only by a winding detour** (vector navigation, Bush 2015; forward-replay/preplay, Pfeiffer & Foster 2013): **0.33° direction error, 100% navigable, 29% shorter** than retracing known routes.
 
-| Level | Module | Biological Basis | Reference |
-|---|---|---|---|
-| **Single neuron** | `LIFNeuron` | Leaky integrate-and-fire membrane dynamics + surrogate-gradient spikes | Gerstner & Kistler 2002 |
-| | `AdaptiveLIFNeuron` | Spike-frequency adaptation (cortical pyramidal cells) | Neftci et al. 2019 |
-| | `DendriticNeuron` | Multi-compartment dendrites, NMDA-style supralinear branches | Gidon et al., *Science* 2020 |
-| **Synapse** | `HebbianLayer` | "Fire together, wire together" with Oja normalization | Oja 1982 |
-| | `STDPLayer` | Spike-timing-dependent plasticity (LTP/LTD) | Bi & Poo 1998 |
-| | `ShortTermPlasticity` | Facilitation + depression | Tsodyks & Markram 1997 |
-| **Microcircuit** | `DivisiveNormalization` | Canonical cortical gain control | Carandini & Heeger 2012 |
-| | `LateralInhibition` | Surround suppression / competition | — |
-| | `EIBalanceLayer` | Excitatory/inhibitory balance, Dale's law (80/20) | — |
-| | `CorticalColumn` | Canonical L4→L2/3→L5/6 microcircuit | Douglas & Martin 2004 |
-| **Spatial cells** | `GridAttractorNetwork` | Toroidal continuous attractor → hexagonal grids | Burak & Fiete 2009 |
-| | `HeadDirectionCells` | Ring attractor heading code (von Mises tuning) | Taube et al. 1990 |
-| | `BoundaryVectorCells` | Fire at preferred distance/angle from boundaries | Lever et al. 2009 |
-| | `SpeedCells` | Velocity signal driving path integration | Kropff et al., *Nature* 2015 |
-| **Oscillations** | `ThetaOscillator` | 4–8 Hz theta rhythm gating | Buzsáki 2002 |
-| | `PhasePrecession` | Position encoded as theta phase | O'Keefe & Recce 1993 |
-| | `ThetaGammaCoupling` | 7±2 item working-memory buffer (nested gamma) | Lisman & Idiart 1995 |
-| | `SharpWaveRipple` | Offline replay for memory consolidation | Buzsáki 2015 |
-| **Plus prior** | `PlaceCellMemory`, `PredictiveCoding`, `Neuromodulation` | hippocampus / neocortex / dopamine-ACh-NE | Rao & Ballard 1999 |
+<img src="results/planning.svg" width="640" alt="Planning a novel shortcut from the cognitive map"/>
 
-These are unified in `BrainSpatialCortex` (≈2.8M params) — coordinates flow through grid attractors, head-direction & speed cells, theta phase coding, and boundary cells, integrated by dendritic neurons and a canonical cortical column before fusing into the LLM.
+`src/eval/planning.py`
 
+### 6 · It seeks reward — a dopamine-learned value map
 
----
+From **sparse, unlabeled reward**, a value head trained by a dopamine-like prediction-error (Schultz 1997) **localizes the goal** (0.33 from truth) and drives **goal-directed navigation: 95% success in 6 steps** vs a random walker's 29% in 14. The prediction error shrinks as the world becomes predicted.
 
-## Benchmarks
+<img src="results/goal_navigation.svg" width="640" alt="Dopamine-learned value map and goal-directed navigation"/>
 
-> **Status:** The full LLM (Mistral-7B) is not yet fine-tuned (needs GPU). But the **spatial encoding stack has been trained and measured** on controlled tasks below. These are **real measured numbers** from `experiments_v2.py`, reproducible on CPU in minutes. No projections in this section.
+`src/eval/goal_navigation.py`
 
-### Measured: spatial encoder comparison (CPU, identical budget)
+### 7 · It does *relational* inference — the same map, beyond physical space (TEM)
 
-All encoders use a 64-dim output + identical linear head, same data, same training steps.
+Lay an abstract ordered structure along a concept axis, map it with the *same* grid cortex, teach only **adjacent** comparisons → it performs **transitive inference (84%)** on never-seen pairs, shows the **symbolic-distance effect** (far-apart = easier, 69%→100%), and **transfers the structure (78%)** to a new item set (Tolman–Eichenbaum Machine, Whittington 2020; Constantinescu 2016).
 
-**Task A — Coordinate denoising/regression** (input = true location + 2° noise; reconstruct true location). Lower Haversine error is better.
+<img src="results/relational.svg" width="560" alt="Symbolic distance effect from relational inference"/>
 
-| Encoder | Mean error (km) | Median error (km) |
-|---|---|---|
-| **Raw MLP (baseline)** | **226.5** | **212.9** |
-| BrainSpatialCortex (full stack) | 231.5 | 216.9 |
-| Grid cells | 297.0 | 269.8 |
-| Fourier | 350.7 | 321.6 |
+`src/eval/relational.py`
 
-**Task B — Fine-grained spatial classification** (100 classes, 1°×1° grid cells). Higher accuracy is better; chance = 1%.
+### 8 · It learns one-shot and continually — no catastrophic forgetting
 
-| Encoder | Test accuracy |
-|---|---|
-| **Fourier** | **99.7%** |
-| Grid cells | 95.7% |
-| BrainSpatialCortex (full stack) | 64.3% |
-| Raw MLP (baseline) | 37.0% |
+A **single visit** forms a localized place field (behavioral-timescale plasticity, Bittner & Magee 2017). Learning 20 places one-by-one, the one-shot, pattern-separated store **recalls all of them (~96%, flat across age)** while a shared gradient-trained net **catastrophically forgets** the oldest (→0%). Complementary Learning Systems (McClelland–O'Reilly 1995), made concrete.
 
-### What these results actually tell us (honest reading)
+<img src="results/continual.svg" width="700" alt="One-shot place fields and continual learning without forgetting"/>
 
-1. **Spatial inductive biases help enormously on fine discrimination.** On Task B, Fourier and grid-cell encoders hit 95–99% while a plain MLP manages only 37%. Periodic spatial codes carve up space far better than raw coordinates — this is the core thesis, and it holds.
-2. **But "more brain" is not automatically better.** The full `BrainSpatialCortex` (attractors + dendrites + oscillations + cells) *underperforms its own simpler components* on both tasks. The extra machinery adds parameters and optimization difficulty without payoff on these simple tasks. Complexity must earn its place.
-3. **Task structure decides the winner.** On smooth denoising (Task A) a linear MLP wins because the target is essentially a smoothed input; on fine discrimination (Task B) periodic codes dominate. There is no universally best encoder.
-4. **A real bug was found and fixed by measurement.** The grid-cell encoder initially scored 8.6% (near chance) due to frequency aliasing — its scales (0.01°) were wrong for global coordinates. After the fix (1°–32° wavelengths) it reached 95.7%. This is *why* you measure instead of trusting that "brain-inspired = good".
+`src/eval/continual.py`
 
+### 9 · It is grounded in perception — path integration from vision
 
-### Ablation: which modules actually contribute?
+No hand-given heading/speed: the agent gets a **retinal panorama** of a landmark world and a learned front-end **estimates self-motion from optic flow** (direction cosine **0.97**). The grid map path-integrates *that* and localizes from **vision alone** (error 0.48→1.33 over T=6→24) — the residual being optic-flow drift, exactly what the boundary pillar corrects. The two pillars meet.
 
-Run `python -m src.eval.ablation --mode leave_one_out`. On 100-class fine-grid classification, disabling each module from the full stack:
+<img src="results/embodiment.svg" width="760" alt="Path integration grounded in vision"/>
 
-| Disabled module | Accuracy | Δ vs full (92.7%) | Verdict |
-|---|---|---|---|
-| `grid_attractor` | 1.1% | **−91.6%** | Load-bearing — does nearly all the work |
-| `boundary` | 83.4% | −9.3% | Helps |
-| `cortical_column` | 96.4% | +3.7% | Mildly harmful here |
-| `lateral_inhibition` | 99.8% | +7.1% | Harmful here |
-| `conjunctive` | 99.9% | +7.1% | Harmful (needs movement data — dormant) |
-| `phase` | 99.9% | +7.2% | Harmful (needs movement data — dormant) |
-
-**Synchronization experiment** (`--aux_loss`, each module gets its own coordinate-reconstruction signal): dormant modules *wake up* — `phase`, `boundary`, and `cortical_column` all become load-bearing (removing them now costs −46%, −15%, −53%). But overall accuracy drops (92.7% → 69.7%) because the auxiliary objectives compete with the main task. **Takeaway: synchronizing complexity is achievable but the aux objectives must be aligned and weighted, not merely added.** This is the active research direction, not a solved problem.
-
-
-### Literature baselines (for context, measured by their authors)
-
-| Task | Model | Result | Source |
-|---|---|---|---|
-| Image geolocation | GeoCLIP | 19.4 km median | Vivanco et al., NeurIPS 2023 |
-| Image geolocation | PlaNet | 523 km median | Weyand et al., CVPR 2016 |
-| Geographic QA | GPT-4o | 71.2% EM | OpenAI 2024 |
-
-*The LLM-integrated numbers will be added here only after real fine-tuning — never projected.*
-
+`src/eval/embodiment.py`
 
 ---
 
-## Quickstart
+## How it learns like a brain
+
+`world → retinal panorama → optic-flow self-motion → velocity-driven hexagonal grid cells → place cells (Hebbian, one-shot) → boundary error-correction → value (dopamine) → planning / relational inference → language readout`
+
+One self-supervised spatial cortex, spanning **navigation → language → planning → motivation → abstract reasoning → lifelong memory → perception** — each piece a documented neuroscience mechanism, each result measured on held-out data, each caveat stated.
+
+---
+
+## Honest scope — what a real brain still has beyond this
+
+Stated plainly (full caveats per-section in [`results/FINDINGS.md`](results/FINDINGS.md)):
+
+- **Biophysical realism** — rate units + phase accumulation, not spiking neurons / continuous-time recurrent attractor dynamics (the repo *has* `spiking_neurons.py`, `synaptic_plasticity.py`, but the cognitive-map results use rate models).
+- **Real perception** — a panoramic landmark abstraction, not pixels through a visual cortex; translation-only; 2D arenas.
+- **One unified, locally-learned whole** — the pieces are individually faithful but mostly trained separately by backprop; the brain is one continuously-, locally-learning system.
+- **Scale & open-endedness** — orders of magnitude smaller than a real cortex, in closed toy worlds.
+
+These are research programs, not quick fixes. The contribution here is **breadth of faithful mechanism + honest measurement**, not a complete brain.
+
+---
+
+## The neuroscience stack (single neuron → network)
+
+The repo implements brain-grounded modules at every level of organization; the cognitive-map arc above is built mainly from the **spatial-cell, oscillation, and microcircuit** rows.
+
+| Level | Module | Biological basis | Reference |
+|---|---|---|---|
+| **Single neuron** | `LIFNeuron`, `AdaptiveLIFNeuron`, `DendriticNeuron` | LIF dynamics, spike-frequency adaptation, multi-compartment dendrites | Gerstner 2002; Gidon 2020 |
+| **Synapse** | `HebbianLayer`, `STDPLayer`, `ShortTermPlasticity` | Oja-normalized Hebbian, STDP, facilitation/depression | Oja 1982; Bi & Poo 1998 |
+| **Microcircuit** | `DivisiveNormalization`, `LateralInhibition`, `EIBalanceLayer`, `CorticalColumn` | gain control, surround suppression, Dale's law, L4→L2/3→L5/6 | Carandini & Heeger 2012 |
+| **Spatial cells** | `_HexGridModules`, `HeadDirectionCells`, `BoundaryVectorCells`, `ConjunctiveSpatialCells`, `SpeedCells` | velocity-driven hexagonal grid modules, ring-attractor HD, boundary vectors | Burak & Fiete 2009; Taube 1990; Lever 2009; Kropff 2015 |
+| **Oscillations** | `ThetaOscillator`, `PhasePrecession`, `ThetaGammaCoupling`, `SharpWaveRipple` | theta gating, phase precession, 7±2 buffer, replay | O'Keefe & Recce 1993; Lisman & Idiart 1995; Buzsáki 2015 |
+| **Systems** | `TrajectoryCortex`, `TrajectoryLLM`, value/relational/continual readouts | path integration, grid→place, dopamine RPE, CLS, TEM | Banino 2018; Schultz 1997; McClelland 1995; Whittington 2020 |
+
+---
+
+## Reproduce it
 
 ```bash
 git clone https://github.com/Mohammadzamanid/Spatial-LLM.git
 cd Spatial-LLM
 pip install -e ".[dev]"
 
-# Generate training data
-python -m src.data.synthetic --n_train 5000 --n_val 500 --output_dir data/processed/
+# --- the cognitive-map arc (CPU, minutes each; writes results/*.json + *.svg) ---
+python -m src.eval.emergence            # emergent grid cells, PI drift, HD tuning, 7±2
+python -m src.eval.emergence --topology hex            # twisted torus (falsification)
+python -m src.eval.emergence --constrained             # velocity-driven hexagonal grids (+0.87)
+python -m src.eval.generalize_trajectory # length generalization (scale-free vs /T)
+python -m src.eval.boundary_anchoring    # boundary drift-correction (geometric/learned/bootstrap)
+python -m src.eval.pillars               # remapping, replay, Hebbian place cells
+python -m src.eval.planning              # Tolman shortcut (vector navigation + preplay)
+python -m src.eval.goal_navigation       # dopamine value map + goal-directed navigation
+python -m src.eval.relational            # transitive inference + symbolic distance effect
+python -m src.eval.continual             # one-shot place fields, no catastrophic forgetting
+python -m src.eval.embodiment            # path integration from vision (optic flow)
 
-# Run all 91 tests
-pytest tests/ -v
-
-# Train
-python -m src.training.trainer --config configs/train_config.yaml
-
-# Inference
-python -m src.inference \
-  --config configs/train_config.yaml \
-  --checkpoint outputs/best \
-  --lat 35.6895 --lon 139.6917 \
-  --question "What type of urban area is this?"
-
-# API server
-uvicorn src.api.server:app --host 0.0.0.0 --port 8000
-```
-
-### Docker
-
-```bash
-cd docker
-docker compose up --build
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What city is at these coordinates?", "lat": 35.6895, "lon": 139.6917}'
+# --- the language model reading the map (single T4) ---
+# copy notebooks/m2_grid_cortex_all_tasks_kaggle.py cells into Kaggle:
+python -m src.training.train_trajectory --task distance --constrained_velocity --early_stop
 ```
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 Spatial-LLM/
-├── src/
-│   ├── models/
-│   │   ├── grid_cell_encoder.py    ← entorhinal cortex (hexagonal multi-scale)
-│   │   ├── coord_embedder.py       ← Fourier coordinate embedding
-│   │   ├── place_cell_memory.py    ← hippocampal place cells + episodic buffer
-│   │   ├── spatial_encoder.py      ← ViT tile encoder
-│   │   ├── predictive_coding.py    ← neocortical prediction error
-│   │   ├── neuromodulation.py      ← dopamine / NE / ACh gating
-│   │   ├── fusion.py               ← cross-attention spatial→LLM fusion
-│   │   └── llm_wrapper.py          ← full model (LoRA + all components)
-│   ├── data/
-│   │   ├── loader.py               ← GeoPandas JSONL dataset
-│   │   ├── tokenizer.py            ← spatial prompt injection
-│   │   ├── tile_fetcher.py         ← OSM/ESRI tile downloader
-│   │   └── synthetic.py            ← 200+ city anchor QA generator
-│   ├── training/
-│   │   ├── trainer.py              ← HuggingFace Trainer entry point
-│   │   └── loss.py                 ← Haversine loss + combined spatial LM loss
-│   ├── eval/
-│   │   ├── metrics.py              ← Haversine, BBox IoU, within-N-km
-│   │   └── benchmark.py            ← full eval pipeline
-│   ├── api/
-│   │   └── server.py               ← FastAPI server (predict / batch / health)
-│   ├── utils/
-│   │   ├── checkpoint.py           ← best-metric checkpoint manager
-│   │   └── logging_config.py       ← structured logging
-│   └── inference.py                ← production inference wrapper
-├── tests/                          ← 91 passing tests (unit + integration + real data)
-├── configs/train_config.yaml       ← all hyperparameters
-├── docker/                         ← Dockerfile + docker-compose
-├── notebooks/explore_data.ipynb
-├── MODEL_CARD.md
-└── CHANGELOG.md
+├── src/models/neuro/
+│   ├── trajectory_cortex.py     ← the cognitive map: conjunctive cells, _HexGridModules
+│   │                              (velocity-driven hex grids, boundary anchoring), _AttractorIntegrator
+│   ├── spatial_cells.py          ← head-direction, boundary, speed, conjunctive cells
+│   ├── oscillations.py           ← theta, phase precession, theta-gamma (7±2), replay
+│   └── microcircuits.py          ← divisive norm, lateral inhibition, E/I, cortical column
+├── src/models/trajectory_llm.py  ← TrajectoryLLM: cortex → spatial tokens → Qwen+LoRA
+├── src/models/fusion.py          ← gated cross-attention (Flamingo-style)
+├── src/training/train_trajectory.py ← M2 trainer (tasks, mixed lengths, early stopping)
+├── src/data/trajectory_qa.py     ← return / bearing / distance navigation QA
+├── src/eval/                     ← emergence, generalize, boundary, pillars, planning,
+│                                    goal_navigation, relational, continual, embodiment, …
+├── results/                      ← FINDINGS.md (full record) + per-experiment *.json + *.svg
+├── notebooks/                    ← Kaggle cells for the LLM runs
+└── tests/
 ```
 
----
-
-## Recommended Datasets
-
-| Dataset | Size | Use |
-|---|---|---|
-| [**GeoNames** cities15000](https://www.geonames.org) | ~25,000 real cities | **Wired in** — `python -m src.data.real_datasets` (real coords/population/timezone) |
-| [GeoQA](https://github.com/panyw5/GeoQA) | 4,998 QA pairs | Primary fine-tuning target |
-| [OSM QA](https://osmlab.github.io/osm-qa-tiles/) | ~100k entries | Spatial entity QA |
-| [BigEarthNet](https://bigearth.net/) | 590,326 tiles | Satellite imagery + labels |
-| [WHU-RS19](http://captain.whu.edu.cn/repository.html) | 1,005 images | Remote sensing scenes |
-| [SpatialBench](https://huggingface.co/datasets/allenai/SpatialBench) | varies | Spatial reasoning evaluation |
+The original geographic-QA stack (grid-cell coordinate encoder, ViT tiles, hippocampal memory, Qwen fusion for lat/lon questions) also lives here — see [`results/FINDINGS.md`](results/FINDINGS.md) for the elevation-probe and 2D-vs-3D coordinate results that started this project.
 
 ---
 
@@ -233,8 +191,10 @@ Spatial-LLM/
 ```bibtex
 @software{spatial_llm_2025,
   author  = {Mohammadzamanid},
-  title   = {Spatial-LLM: Neuroscience-Inspired Spatial Language Model},
+  title   = {Spatial-LLM: a neuroscience-inspired spatial cognitive map read by a language model},
   year    = {2025},
   url     = {https://github.com/Mohammadzamanid/Spatial-LLM}
 }
 ```
+
+*Full, honest experimental record — every number, every caveat, every falsification — in [`results/FINDINGS.md`](results/FINDINGS.md).*
