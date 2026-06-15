@@ -52,17 +52,21 @@ Noisy path integration drifts (error ∝ √T). **Boundary cells re-anchor the g
 
 `src/eval/boundary_anchoring.py`
 
-### 4 · Language reads the map — and the faithful cortex wins
+### 4 · Language reads the map — the cortex channel carries the answer
 
-A LoRA-Qwen answers navigation questions *through the frozen cortex* (the prompt holds only the question). The biologically-faithful **grid-cell cortex beats a place attractor on every task and stays flat to 3× the training length** (place degrades); cortex-OFF sits at chance, so the answers genuinely ride on the spatial code.
+A LoRA-Qwen answers navigation questions *through the frozen cortex* (the prompt holds only the question; the moves reach the model only via the spatial code). The honest **multi-seed** result (n=3, 95% CI; `results/extrapolation_llm.json`): **cortex-ON sits far above the text-only OFF control** — bearing 71–81% vs ~11%, distance ~46–58% vs ~14–17% — so the LLM genuinely reasons through the self-supervised spatial code, not the text.
 
-| task (cortex ON, T=8/16/24) | grid-cell cortex | place/default |
-|---|---|---|
-| "are you back?" (return) | **100 / 100 / 100** | 96 / 89 / 86 |
-| "which way home?" (bearing) | **85 / 83 / 80** | 71 / 78 / 73 |
-| "how far?" (distance, exact) | **95 / 88 / 85** | 62 / 46 / 40 |
+| cortex-ON exact, T=8/16/24 | grid | place | text-only (OFF) |
+|---|---|---|---|
+| "which way home?" (bearing) | **80 / 81 / 71** ±13–16 | 53 / 43 / 47 ±32–37 | ~11% |
+| "how far?" (distance) | 53 / 50 / 46 ±38–42 | 58 / 40 / 30 ±11–20 | ~14–17% |
 
-`src/training/train_trajectory.py` · `notebooks/m2_grid_cortex_all_tasks_kaggle.py`
+**Honest caveat:** an earlier *single-seed* run suggested a big grid-over-place win on distance (95/88/85 vs 62/46/40); it **did not replicate** across seeds (a lucky seed). At n=3 the seed variance is large and grid-vs-place is *not* statistically separable — bearing trends grid-favorable (tighter, higher, flat to 3×) but CIs overlap. The robust result is the cortex channel itself (ON ≫ OFF); the grid-over-alternatives advantage is modest, consistent with the representation-level characterization above.
+
+`src/training/train_trajectory.py` · `notebooks/m2_extrapolation_multiseed_kaggle.py`
+
+<img src="results/extrapolation_llm.svg" width="820" alt="Multi-seed language transfer: cortex ON vs text-only OFF, grid vs place"/>
+
 
 ### 5 · It plans novel shortcuts (Tolman's cognitive-map test)
 

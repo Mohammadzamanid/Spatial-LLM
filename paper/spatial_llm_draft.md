@@ -126,22 +126,30 @@ With its metric fixed, the *same* self-supervised code supports (multi-seed, mea
 That one brain-faithful code serves navigation, planning, value, relational inference, and memory — read
 by a frozen LLM — is the integrative significance, independent of any uniqueness claim.
 
-## 7. Language transfer ⏳
+## 7. Language transfer ✅ (n=3; ➕ more seeds to resolve grid-vs-place)
 
 A LoRA-Qwen2.5-1.5B answers navigation questions through the frozen cortex (the moves reach the model
-only via the cortex). Single-seed, the grid cortex beats the place/default cortex and stays flat to 3×
-training length, with cortex-OFF at chance:
+only via the cortex). We report the **multi-seed** result (n=3, mean ± 95% CI; `results/extrapolation_llm.json`,
+Figure 5), and it is honest in two directions:
 
-| task (cortex ON, T=8/16/24) | grid cortex | place/default |
-|---|---|---|
-| return | 100/100/100 | 96/89/86 |
-| bearing | 85/83/80 | 71/78/73 |
-| distance (exact) | 95/88/85 | 62/46/40 |
+| cortex-ON exact, T=8/16/24 | grid | place | text-only (OFF) |
+|---|---|---|---|
+| bearing | 80/81/**71** ±13–16 | 53/43/47 ±32–37 | ~11% |
+| distance | 53/50/**46** ±38–42 | 58/40/30 ±11–20 | ~14–17% |
 
-⏳ The multi-seed version (grid vs place × {distance,bearing} × seeds, 95% CI, + OFF control) is
-specified and resumable on a single T4 (`notebooks/m2_extrapolation_multiseed_kaggle.py`) — the one
-remaining GPU run, and the cleanest novel result (a frozen LLM reasoning through a self-supervised grid
-code).
+1. **The cortex channel genuinely carries the answer** — cortex-ON sits far above the text-only OFF
+   control (bearing 71–81% vs 11%; distance ~46–58% vs 14–17%), so the LLM reasons through the
+   self-supervised spatial code, not the prompt. This is the robust, primary language result.
+2. **grid vs place is not statistically separable at n=3** — seed variance is large (distance grid
+   ±40%). A clean single-seed run had suggested a big grid advantage on distance (95/88/85 vs
+   62/46/40); it **did not replicate** under multiple seeds (a lucky seed), exactly as our CPU
+   characterization predicts. *Bearing* trends grid-favorable (tighter, higher, flat to 3×) but its CIs
+   still overlap at n=3.
+
+So the language evidence supports the honest thesis precisely: a self-supervised cortex transfers
+spatial competence to a frozen LLM (ON ≫ OFF), while the *grid-over-alternatives* advantage is modest
+and, on the hardest task, within noise at n=3 — resolving it needs n≥8 (and may remain a bearing-only
+effect). (Figure 5: `results/extrapolation_llm.svg`.)
 
 ## 8. Related work ✎
 
@@ -160,7 +168,8 @@ properties transfer to a trained model + the integrative LLM demonstration.
   best pure path-integrator.
 - The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
   transfer to a trained LLM with a text context label.
-- §7 is single-seed pending the Kaggle run; emergence, boundary, replay pillars are demonstrations.
+- §7 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
+  Emergence, boundary, replay pillars are demonstrations.
 
 ## 10. Methods ✎
 
@@ -180,7 +189,8 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 ### Status / path to submission
 - ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
   multi-seed, committed.
-- ⏳ §7 multi-seed LLM table (one Kaggle run).
+- ✅ §7 multi-seed LLM (n=3): cortex ON ≫ text-only OFF (robust); grid-vs-place inconclusive at n=3.
+- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect.
 - ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
 - Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness
   claim**.

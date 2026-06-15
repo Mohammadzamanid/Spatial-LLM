@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="808" height="370" font-family="Segoe UI, Arial">
+<rect width="808" height="370" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Language transfer through the cortex (Qwen2.5-1.5B + LoRA, n=3 seeds, 95% CI)</text>
+<text x="28" y="44" font-size="10.5" fill="#5b6b8c">cortex ON &#8811; text-only OFF (the LLM reads the spatial channel); grid vs place overlaps at n=3 (wide bands) &#8212; bearing trends grid-favorable</text>
+<text x="56" y="60" font-size="12" font-weight="700" fill="#0b1324">distance (cortex-ON exact)</text>
+<line x1="56" y1="300" x2="356" y2="300" stroke="#33415c"/><line x1="56" y1="70" x2="56" y2="300" stroke="#33415c"/>
+<line x1="56" y1="300.0" x2="356" y2="300.0" stroke="#eef2f8"/>
+<text x="49" y="304.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="56" y1="242.5" x2="356" y2="242.5" stroke="#eef2f8"/>
+<text x="49" y="246.5" font-size="9" fill="#5b6b8c" text-anchor="end">25%</text>
+<line x1="56" y1="185.0" x2="356" y2="185.0" stroke="#eef2f8"/>
+<text x="49" y="189.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="56" y1="127.5" x2="356" y2="127.5" stroke="#eef2f8"/>
+<text x="49" y="131.5" font-size="9" fill="#5b6b8c" text-anchor="end">75%</text>
+<line x1="56" y1="70.0" x2="356" y2="70.0" stroke="#eef2f8"/>
+<text x="49" y="74.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="56.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="206.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="356.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<line x1="56" y1="267.8" x2="356" y2="267.8" stroke="#c9341a" stroke-dasharray="4,3" opacity="0.6"/>
+<text x="356" y="264.8" font-size="8.5" fill="#c9341a" text-anchor="end">text-only (OFF)</text>
+<polygon points="56.0,81.5 206.0,97.6 356.0,104.5 356.0,283.9 206.0,272.4 56.0,274.7" fill="#e6550d" opacity="0.13"/>
+<polyline points="56.0,178.1 206.0,185.0 356.0,194.2" fill="none" stroke="#e6550d" stroke-width="2.4"/>
+<circle cx="56.0" cy="178.1" r="3" fill="#e6550d"/>
+<circle cx="206.0" cy="185.0" r="3" fill="#e6550d"/>
+<circle cx="356.0" cy="194.2" r="3" fill="#e6550d"/>
+<polygon points="56.0,120.6 206.0,182.7 356.0,205.7 356.0,256.3 206.0,233.3 56.0,212.6" fill="#3b528b" opacity="0.13"/>
+<polyline points="56.0,166.6 206.0,208.0 356.0,231.0" fill="none" stroke="#3b528b" stroke-width="2.4"/>
+<circle cx="56.0" cy="166.6" r="3" fill="#3b528b"/>
+<circle cx="206.0" cy="208.0" r="3" fill="#3b528b"/>
+<circle cx="356.0" cy="231.0" r="3" fill="#3b528b"/>
+<text x="452" y="60" font-size="12" font-weight="700" fill="#0b1324">bearing (cortex-ON exact)</text>
+<line x1="452" y1="300" x2="752" y2="300" stroke="#33415c"/><line x1="452" y1="70" x2="452" y2="300" stroke="#33415c"/>
+<line x1="452" y1="300.0" x2="752" y2="300.0" stroke="#eef2f8"/>
+<text x="445" y="304.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="452" y1="242.5" x2="752" y2="242.5" stroke="#eef2f8"/>
+<text x="445" y="246.5" font-size="9" fill="#5b6b8c" text-anchor="end">25%</text>
+<line x1="452" y1="185.0" x2="752" y2="185.0" stroke="#eef2f8"/>
+<text x="445" y="189.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="452" y1="127.5" x2="752" y2="127.5" stroke="#eef2f8"/>
+<text x="445" y="131.5" font-size="9" fill="#5b6b8c" text-anchor="end">75%</text>
+<line x1="452" y1="70.0" x2="752" y2="70.0" stroke="#eef2f8"/>
+<text x="445" y="74.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="452.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="602.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="752.0" y="314.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<line x1="452" y1="274.7" x2="752" y2="274.7" stroke="#c9341a" stroke-dasharray="4,3" opacity="0.6"/>
+<text x="752" y="271.7" font-size="8.5" fill="#c9341a" text-anchor="end">text-only (OFF)</text>
+<polygon points="452.0,79.2 602.0,83.8 752.0,104.5 752.0,168.9 602.0,143.6 452.0,152.8" fill="#e6550d" opacity="0.13"/>
+<polyline points="452.0,116.0 602.0,113.7 752.0,136.7" fill="none" stroke="#e6550d" stroke-width="2.4"/>
+<circle cx="452.0" cy="116.0" r="3" fill="#e6550d"/>
+<circle cx="602.0" cy="113.7" r="3" fill="#e6550d"/>
+<circle cx="752.0" cy="136.7" r="3" fill="#e6550d"/>
+<polygon points="452.0,93.0 602.0,127.5 752.0,116.0 752.0,267.8 602.0,274.7 452.0,263.2" fill="#3b528b" opacity="0.13"/>
+<polyline points="452.0,178.1 602.0,201.1 752.0,191.9" fill="none" stroke="#3b528b" stroke-width="2.4"/>
+<circle cx="452.0" cy="178.1" r="3" fill="#3b528b"/>
+<circle cx="602.0" cy="201.1" r="3" fill="#3b528b"/>
+<circle cx="752.0" cy="191.9" r="3" fill="#3b528b"/>
+<rect x="56" y="340" width="14" height="5" fill="#e6550d"/>
+<text x="75" y="346" font-size="10.5" fill="#28324a">grid cortex</text>
+<rect x="176" y="340" width="14" height="5" fill="#3b528b"/>
+<text x="195" y="346" font-size="10.5" fill="#28324a">place cortex</text>
+</svg>

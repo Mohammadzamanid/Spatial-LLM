@@ -1,0 +1,23 @@
+{
+  "source": "Kaggle T4, Qwen2.5-1.5B + LoRA, notebooks/m2_extrapolation_multiseed_kaggle.py",
+  "n_seeds": 3,
+  "metric": "cortex_on_exact (mean +/- 95% CI over seeds); OFF = cortex-off text-only control",
+  "eval_lengths": [8, 16, 24],
+  "train_lengths": [6, 8, 10, 12],
+  "results": {
+    "distance": {
+      "grid":  {"T8": {"mean": 0.53, "ci95": 0.42}, "T16": {"mean": 0.50, "ci95": 0.38}, "T24": {"mean": 0.46, "ci95": 0.39}, "off_T24": 0.14, "n": 3},
+      "place": {"T8": {"mean": 0.58, "ci95": 0.20}, "T16": {"mean": 0.40, "ci95": 0.11}, "T24": {"mean": 0.30, "ci95": 0.11}, "off_T24": 0.17, "n": 3}
+    },
+    "bearing": {
+      "grid":  {"T8": {"mean": 0.80, "ci95": 0.16}, "T16": {"mean": 0.81, "ci95": 0.13}, "T24": {"mean": 0.71, "ci95": 0.14}, "off_T24": 0.11, "n": 3},
+      "place": {"T8": {"mean": 0.53, "ci95": 0.37}, "T16": {"mean": 0.43, "ci95": 0.32}, "T24": {"mean": 0.47, "ci95": 0.33}, "off_T24": 0.12, "n": 3}
+    }
+  },
+  "honest_reading": [
+    "Cortex ON >> text-only OFF for both codes (bearing 71-81% vs 11%; distance ~46-58% vs 14-17%): the LLM reads spatial answers out of the cortex channel, not the text. This is the robust, primary result.",
+    "grid vs place is NOT statistically separable at n=3 -- CIs are enormous (distance grid +/-38-42%). The single-seed 'grid 95/88/85 vs place 62/46/40' on distance did NOT replicate; multi-seed it is ~50% with +/-40% bars (a lucky seed).",
+    "Bearing is the one suggestive signal: grid is tighter/higher/flat to 3x (80/81/71) vs place noisy/lower (53/43/47), but CIs still overlap at n=3.",
+    "Distance fine-tuning is high-variance at n=3 (6-class, 1 epoch, early-stopping); resolving grid vs place needs n>=8, and -- consistent with the CPU characterization -- may well remain a tie or a modest bearing-only advantage."
+  ]
+}
