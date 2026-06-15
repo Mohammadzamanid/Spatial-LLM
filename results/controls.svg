@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="606" height="356" font-family="Segoe UI, Arial">
+<rect width="606" height="356" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Mechanism vs parameters: it is the periodic multi-scale code, not the param count</text>
+<text x="28" y="43" font-size="10.5" fill="#5b6b8c">distance exact-acc vs length; all 384-d, same readout &#183; mean &#177; 95% CI</text>
+<line x1="56" y1="318" x2="396" y2="318" stroke="#33415c"/><line x1="56" y1="78" x2="56" y2="318" stroke="#33415c"/>
+<line x1="56" y1="318.0" x2="396" y2="318.0" stroke="#eef2f8"/>
+<text x="49" y="322.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="56" y1="258.0" x2="396" y2="258.0" stroke="#eef2f8"/>
+<text x="49" y="262.0" font-size="9" fill="#5b6b8c" text-anchor="end">25%</text>
+<line x1="56" y1="198.0" x2="396" y2="198.0" stroke="#eef2f8"/>
+<text x="49" y="202.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="56" y1="138.0" x2="396" y2="138.0" stroke="#eef2f8"/>
+<text x="49" y="142.0" font-size="9" fill="#5b6b8c" text-anchor="end">75%</text>
+<line x1="56" y1="78.0" x2="396" y2="78.0" stroke="#eef2f8"/>
+<text x="49" y="82.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<text x="56.0" y="332.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="169.3" y="332.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="282.7" y="332.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=24</text>
+<text x="396.0" y="332.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=48</text>
+<polyline points="56.0,80.6 169.3,84.7 282.7,94.8 396.0,136.6" fill="none" stroke="#e6550d" stroke-width="2.2"/>
+<circle cx="56.0" cy="80.6" r="2.6" fill="#e6550d"/>
+<circle cx="169.3" cy="84.7" r="2.6" fill="#e6550d"/>
+<circle cx="282.7" cy="94.8" r="2.6" fill="#e6550d"/>
+<circle cx="396.0" cy="136.6" r="2.6" fill="#e6550d"/>
+<polyline points="56.0,81.6 169.3,86.4 282.7,97.1 396.0,139.5" fill="none" stroke="#fd8d3c" stroke-width="2.2"/>
+<circle cx="56.0" cy="81.6" r="2.6" fill="#fd8d3c"/>
+<circle cx="169.3" cy="86.4" r="2.6" fill="#fd8d3c"/>
+<circle cx="282.7" cy="97.1" r="2.6" fill="#fd8d3c"/>
+<circle cx="396.0" cy="139.5" r="2.6" fill="#fd8d3c"/>
+<polyline points="56.0,79.5 169.3,82.5 282.7,92.1 396.0,133.3" fill="none" stroke="#21908c" stroke-width="2.2"/>
+<circle cx="56.0" cy="79.5" r="2.6" fill="#21908c"/>
+<circle cx="169.3" cy="82.5" r="2.6" fill="#21908c"/>
+<circle cx="282.7" cy="92.1" r="2.6" fill="#21908c"/>
+<circle cx="396.0" cy="133.3" r="2.6" fill="#21908c"/>
+<polyline points="56.0,79.1 169.3,79.4 282.7,79.5 396.0,79.7" fill="none" stroke="#c9341a" stroke-width="2.2"/>
+<circle cx="56.0" cy="79.1" r="2.6" fill="#c9341a"/>
+<circle cx="169.3" cy="79.4" r="2.6" fill="#c9341a"/>
+<circle cx="282.7" cy="79.5" r="2.6" fill="#c9341a"/>
+<circle cx="396.0" cy="79.7" r="2.6" fill="#c9341a"/>
+<polyline points="56.0,79.5 169.3,79.6 282.7,79.9 396.0,79.5" fill="none" stroke="#756bb1" stroke-width="2.2"/>
+<circle cx="56.0" cy="79.5" r="2.6" fill="#756bb1"/>
+<circle cx="169.3" cy="79.6" r="2.6" fill="#756bb1"/>
+<circle cx="282.7" cy="79.9" r="2.6" fill="#756bb1"/>
+<circle cx="396.0" cy="79.5" r="2.6" fill="#756bb1"/>
+<polyline points="56.0,85.4 169.3,101.6 282.7,124.7 396.0,180.0" fill="none" stroke="#3b528b" stroke-width="2.2"/>
+<circle cx="56.0" cy="85.4" r="2.6" fill="#3b528b"/>
+<circle cx="169.3" cy="101.6" r="2.6" fill="#3b528b"/>
+<circle cx="282.7" cy="124.7" r="2.6" fill="#3b528b"/>
+<circle cx="396.0" cy="180.0" r="2.6" fill="#3b528b"/>
+<polyline points="56.0,79.5 169.3,79.5 282.7,79.7 396.0,79.9" fill="none" stroke="#9aa5b8" stroke-width="2.2"/>
+<circle cx="56.0" cy="79.5" r="2.6" fill="#9aa5b8"/>
+<circle cx="169.3" cy="79.5" r="2.6" fill="#9aa5b8"/>
+<circle cx="282.7" cy="79.7" r="2.6" fill="#9aa5b8"/>
+<circle cx="396.0" cy="79.9" r="2.6" fill="#9aa5b8"/>
+<rect x="408" y="82" width="13" height="5" fill="#e6550d"/>
+<text x="426" y="87" font-size="9.5" fill="#28324a">grid (geometric)</text>
+<rect x="408" y="98" width="13" height="5" fill="#fd8d3c"/>
+<text x="426" y="103" font-size="9.5" fill="#28324a">grid (random scales)</text>
+<rect x="408" y="114" width="13" height="5" fill="#21908c"/>
+<text x="426" y="119" font-size="9.5" fill="#28324a">random periodic (RFF)</text>
+<rect x="408" y="130" width="13" height="5" fill="#c9341a"/>
+<text x="426" y="135" font-size="9.5" fill="#28324a">random linear (high-d)</text>
+<rect x="408" y="146" width="13" height="5" fill="#756bb1"/>
+<text x="426" y="151" font-size="9.5" fill="#28324a">learned MLP (non-bio)</text>
+<rect x="408" y="162" width="13" height="5" fill="#3b528b"/>
+<text x="426" y="167" font-size="9.5" fill="#28324a">place</text>
+<rect x="408" y="178" width="13" height="5" fill="#9aa5b8"/>
+<text x="426" y="183" font-size="9.5" fill="#28324a">oracle</text>
+</svg>

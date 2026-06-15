@@ -98,6 +98,12 @@ displacement* cannot do (`src/eval/code_necessity.py`, `multimap_task.py`, `fron
 - **Noise robustness** ⊘ (a tie): once every code integrates the *same* noisy velocity, all degrade
   identically (~34% at σ=0.4). (An earlier probe that handed grid the clean displacement showed a
   spurious win; corrected.)
+- **Mechanism vs parameters** (control, `src/eval/controls.py`): at fixed 384-d, a random *linear*
+  projection and a learned MLP also extrapolate (they re-encode the unbounded displacement), and random
+  *periodic* / random-scale codes match the geometric grid — so it is neither the parameter count nor
+  grid-cell specifics. The lone discriminator is **saturation**: only the *bounded* place tiling fails.
+  The grid code's precise niche is **unbounded metric range with bounded, normalized (biological)
+  activations** — where a place code cannot follow and a linear code is not a realizable neural code.
 
 **Verdict.** Across length extrapolation, capacity, remapping-in-a-trained-model, sample efficiency, and
 noise, the velocity-driven grid code is *competitive but not uniquely necessary* for a trained system.
@@ -166,7 +172,8 @@ self-motion; no coordinate labels. **Baselines**: GRU integrator; Transformer en
 learned/sinusoidal/no positions and mean/sum pooling; raw-displacement and random-Fourier lifts;
 exact-integration oracle. **Statistics**: each metric re-implemented in a seed loop; mean ± 1.96·sd/√n.
 **LLM**: gated cross-attention from the cortex into frozen Qwen2.5-1.5B + LoRA (q,v); answer-only loss.
-Full configs in `results/*.json`; reproduce via `python -m src.eval.<name>` and `notebooks/*.py`.
+Full configs in `results/*.json`; one-command regeneration via `bash reproduce_all.sh`, with the
+figure→command→artifact map, verified environment, and Zenodo-release steps in `REPRODUCE.md`.
 
 ---
 

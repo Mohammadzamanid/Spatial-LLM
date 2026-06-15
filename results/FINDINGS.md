@@ -600,6 +600,33 @@ serves navigation, planning, value, relational inference, and memory, read by a 
 claim grid cells are a uniquely necessary substrate for a trained model. (`results/frontier_probes.json`,
 `results/frontier_probes.svg`.)
 
+### Mechanism vs parameters — the reviewer control
+
+"Is the grid code's extrapolation just from having a high-dimensional code (more parameters)?" We hold
+the task, readout, and code dimensionality (384) fixed and vary only the code's STRUCTURE
+(`src/eval/controls.py`, n=5; distance exact-acc):
+
+| code (all 384-d) | T=8 | T=24 | T=48 |
+|---|---|---|---|
+| grid (geometric scales) | 99% | 93% | 76% |
+| grid (random, non-geometric scales) | 98% | 92% | 74% |
+| random **periodic** (Fourier features) | 99% | 94% | 77% |
+| random **linear** (high-d, non-periodic) | 100% | 99% | 99% |
+| learned MLP encoder (non-bio) | 99% | 99% | 99% |
+| place (bounded tiling) | 97% | 81% | 57% |
+| oracle | 99% | 99% | 99% |
+
+The control is clarifying and, again, deflationary: it is **not** the parameter count (a random *linear*
+384-d projection of displacement, same size, extrapolates perfectly — it losslessly re-encodes an
+unbounded quantity), and it is **not** grid-cell specifics (random-scale grids and random *periodic*
+features match the geometric grid). The single axis that matters is **saturation**: the *bounded* place
+tiling cannot represent positions past its trained box (81%→57%), while every non-saturating code
+extrapolates. The grid code's genuine niche is precise: it attains **unbounded metric range with
+bounded, normalized (biologically plausible) activations** — where a place tiling cannot follow, and
+unlike a linear code whose activations grow without bound (not a realizable neural code). So among
+*bounded-activation* population codes, periodicity buys range; that is the honest, narrow sense in which
+the grid code is special. (`results/controls.json`, `results/controls.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
