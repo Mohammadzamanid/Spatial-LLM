@@ -1,193 +1,179 @@
-# A grid-cell code gives language models length-generalizing spatial reasoning
+# A self-supervised cognitive-map cortex for language models — and an honest account of what brain-faithful spatial coding does and does not buy
 
-**Working draft — Spatial-LLM.** Status markers: ✅ = result in hand, multi-seed; ⏳ = experiment
-specified and running (Kaggle); ✎ = prose to finalize once ⏳ lands. Every number here is reproduced
-by a script in `src/eval/` or a notebook in `notebooks/`; raw values in `results/*.json`.
+**Working draft — Spatial-LLM.** Status markers: ✅ = result in hand, multi-seed with 95% CI; ⏳ =
+specified, GPU run pending; ✎ = prose to finalize. Every number is reproduced by a script in
+`src/eval/` or a notebook in `notebooks/`; raw values in `results/*.json`. This draft commits to an
+*honest* framing: we report ties and negative results as first-class findings.
 
 ---
 
 ## Abstract ✎
 
-A cognitive map is more than a metric, and that distinction is where a brain-faithful representation
-earns its keep. We first establish, with multi-seed error-barred controls, an honest negative result that
-sets up the claim: **path integration alone is not unique to grid cells.** A representation that is
-scale-free, additive, and order-invariant extrapolates path length, and a sequence model *hand-built*
-with that bias (a no-positional, sum-pooling Transformer) matches a velocity-driven grid code — while the
-*default* representations a model would reach for (bounded place codes, standard Transformers,
-length-normalized accumulators) collapse. The contribution is what comes next: a cognitive map
-additionally requires a **high-capacity, remappable population code**, and *this* an additive integrator
-provably cannot supply. Because the same trajectory yields the same displacement in every environment,
-any deterministic function of displacement produces identical codes across environments and
-catastrophically interferes when several maps are stored together (retrieval ~1/M); grid and place cells
-**remap**, holding ~90% retrieval across 16 maps where the additive code falls to 4% — and an ablation
-that switches remapping off reproduces the additive collapse, isolating remapping as the necessary
-ingredient. The grid/place code, learned self-supervised with no coordinate labels, supplies both
-capacity and remapping, transfers length-generalizing spatial reasoning into a **frozen language model**,
-and — with its metric unchanged — also carries vector-based **planning**, dopamine-like **value** and goal
-navigation, and **relational/transitive inference**: a single substrate for the map, not merely the
-metric.
+We give a frozen language model a brain-faithful spatial substrate — a self-supervised cortex of
+velocity-driven **grid cells** and **place cells** that path-integrates self-motion into a periodic,
+multi-scale metric — and study, with multi-seed error-barred controls, what that representation
+contributes. Two things. First, an **integrative result**: a *single* self-supervised code, learned
+with no coordinate labels, transfers spatial competence to a frozen LLM (it answers navigation
+questions through the cortex, not the text) and — with its metric unchanged — also supports
+vector-based **planning**, dopamine-like **value** learning and goal navigation, **relational/transitive
+inference**, and one-shot **memory**. Second, an **honest characterization** of *which* representational
+properties actually matter, including results that run against the simplest story: on pure path
+integration the grid code is matched by a permutation-invariant, sum-pooling Transformer that shares its
+*additive integration bias*; the population code's distinctive properties (high-capacity
+pattern-separation, environment-specific **remapping**) are decisive only in narrow regimes — fixed
+associative memory and *context-free* settings — and do **not** transfer to a trained model that already
+has an external context label (as an LLM does in its prompt). The contribution is therefore a rigorous,
+fairly-baselined map of *when* brain-faithful spatial coding helps and when a simpler inductive bias
+suffices, together with the integrative demonstration. We do not claim grid cells are a uniquely
+necessary substrate for a trained system, and we show why.
 
 ---
 
-## 1. The gap ✎
+## 1. Introduction ✎
 
-Coordinate embeddings let a model memorize a map; they do not let it *compute* over space in a way that
-survives a change of scale. The decisive test of whether a system learned the **operation** of path
-integration (rather than calibrating to a training length) is length extrapolation: train on short
-walks, test on longer ones. Conventional sequence models and population codes fail this test for
-identifiable reasons; grid cells do not, which is presumably why evolution converged on them.
+Coordinate embeddings let a model memorize a map; they do not obviously let it *compute* over space in
+a way that survives a change of scale or serves many downstream uses. The mammalian
+entorhinal–hippocampal system solves navigation with a particular representational scheme — grid cells
+that path-integrate velocity into a periodic multi-scale code, read out by place cells — that also
+appears to underlie planning, value, and relational cognition. We ask a direct question: if we build
+that substrate, self-supervised and label-free, and let a frozen language model read it, **what does it
+buy, and what does it not?** We answer with fair baselines and multiple seeds throughout, and we let the
+negative results stand.
 
-Our thesis is concrete and falsifiable: a self-supervised grid-cell code is the representation that
-makes spatial reasoning extrapolate, and that advantage transfers into a language model.
+## 2. The system ✎
 
-## 2. The representation extrapolates — isolated, multi-seed, fair baselines ✅
+A path of self-motion → conjunctive velocity cells → a velocity-driven hexagonal grid code (fixed
+gains, geometric scale ratios; phase = gain·∫v wrapped on a hexagonal torus) → a learned place/value
+readout → gated cross-attention into a frozen Qwen2.5-1.5B + LoRA. The cortex is pre-trained only to
+predict bounded place-cell activity from self-motion (no coordinate labels). Architecture and configs:
+`src/models/`, `results/architecture.svg`.
 
-We strip away the language model and test the representation directly (`src/eval/extrapolation.py`). An
-agent random-walks in 2-D (faithful to the language task's data); displacement grows ~√T, so longer
-paths reach larger displacements. A position readout is trained on mixed short lengths {6,8,10,12}
-(scale-free, no `/T`) and tested out to 4× longer; the three trajectory-QA tasks are derived from the
-single decoded displacement. Four representations get identical data, training, and readout capacity —
-only the code differs — and the **place baseline is tiled exactly to the trained region** (cells where
-the model has been; longer paths reach beyond), the honest extrapolation question. *(An over-sized place
-grid that pre-tiles the test range hides the effect — a trap an early draft of our own script fell into,
-and which we flag explicitly.)* Mean ± 95% CI, n = 8 seeds:
+## 3. What transfers: length generalization ✅
 
-| distance exact-acc | T=8 | T=16 | **T=24 (3×)** | T=48 (4×) |
-|---|---|---|---|---|
-| **grid code (ours)** | **99% ±0** | **97% ±1** | **93% ±0** | **75% ±0** |
-| place tiling (trained region) | 97% ±0 | 90% ±0 | 80% ±1 | 57% ±1 |
-| learned GRU integrator | 97% ±2 | 93% ±4 | 84% ±5 | 56% ±6 |
-| exact-integration oracle | 99% | 99% | 99% | 99% |
+Stripping away the LLM (so any effect is the representation), an agent random-walks in 2-D; we train a
+position readout on mixed short paths {6,8,10,12} (scale-free) and test to 4× longer, deriving the
+trajectory-QA tasks from the decoded displacement (`src/eval/extrapolation.py`, n=8). Against a *fair*
+place baseline (tiled exactly to the trained region), the grid code wins at every length — at 3×,
+**93% ±0 vs 80% ±1** distance accuracy, non-overlapping CIs — because a bounded place code cliffs once
+paths leave its trained box while the grid code degrades gracefully (its phase is scale-free *and*
+periodic). An exact-integration oracle is flat, so the gap is the code, not the task. (Figure 1:
+`results/extrapolation.svg`. Honest ceiling: grid itself falls to 75% at 4×; range is finite.)
 
-The grid code wins at every length on every task with **non-overlapping CIs vs the place code**; the
-bounded place population *cliffs* once paths leave its trained box (position error 0.047→0.594→1.787)
-while the grid code degrades *gracefully* (0.017→0.174→1.041). The oracle is flat, so the gap is the
-**code**, not the task. We do not overclaim: the grid code itself falls to 75% at 4× — its range is
-large but finite. (Figure 1: `results/extrapolation.svg`.)
+## 4. Mechanism — it is the inductive bias, not the architecture ✅
 
-## 3. Why it extrapolates — the mechanism dissected ✅
+Single-variable ablations (`src/eval/ablations.py`, `seq_baselines.py`, n=5):
 
-Single-variable ablations, each multi-seed (`src/eval/ablations.py`, `seq_baselines.py`; n = 5):
+- **Range comes from modular coding**: 1 module aliases (14% at 4×) → 8 modules 82%, monotone.
+- **Scale-invariance is needed**: a scale-free sum is flat at 99%; the same sum ÷ T collapses to 2%.
+- **The advantage is in the code, not the training mix**: the grid code extrapolates even from a single
+  training length.
+- **A sequence model reveals the truth**: the *default* Transformer (learned positions, mean-pool)
+  collapses (16% at 3×) and sinusoidal positions only partly help (38%), but a **NoPE + sum-pool**
+  Transformer — permutation-invariant and additive — **ties the grid code (92% at 3×, and beats it at
+  4×, 88% vs 75%)**. A GRU is mediocre and seed-unreliable (82% ±8).
 
-1. **Metric range comes from modular coding.** A single periodic module aliases almost immediately (22%
-   at 3×); adding modules at geometric scales lifts 4× accuracy monotonically 14%→82% (1→8 modules)
-   (Fiete; Stensola 2012). This is why the grid code spans a large range with a fixed cell budget where
-   a place tiling cannot.
-2. **Scale-invariance is necessary.** A scale-free cumulative-sum readout is flat at 99% across length;
-   dividing the same sum by path length T (the `/T` length-normalization) discards magnitude and
-   collapses to 2% at 4×. The grid code is scale-free by construction (phase = gain·∫v).
-3. **The advantage is in the code, not the training mix.** The grid code extrapolates even trained on a
-   *single* length (69–77% at 4×); mixed-length training adds little — a sharp contrast with a learned
-   accumulator, which *requires* mixed lengths to generalize.
-4. **What sequence models reveal: it is the inductive bias, not the architecture.** Fed the same moves
-   and budget (`seq_baselines.py`), the *default* Transformer (learned absolute positions, mean-pool)
-   collapses (95%→16% by 3×, 2% at 4×); sinusoidal positions only partly help (38% at 3×); but a
-   **NoPE + sum-pool** Transformer — permutation-invariant (correct for a commutative path sum) and
-   additive — extrapolates *as well as the grid code at 3× and better at 4×* (88% vs 75%). A GRU is
-   mediocre and seed-unreliable (82% ±8). **We report this against-us result prominently:** length
-   extrapolation is not impossible for sequence models, it requires the *additive, scale-free,
-   order-invariant integration bias* — which the conventional **defaults lack** and the grid code has by
-   construction. (And a non-periodic additive integrator can exceed the finite-range grid code at extreme
-   range; the grid code is not the best pure path-integrator — see §4 for what it uniquely provides.)
+So length extrapolation requires an *additive, scale-free, order-invariant integration bias*; the
+conventional defaults lack it and the grid code has it by construction — but it is **not unique** to
+grid cells. (Figures 2: `results/ablations.svg`, `results/seq_baselines.svg`.)
 
-(Figures: `results/ablations.svg`, `results/seq_baselines.svg`.)
+## 5. Where the population code helps — and where it does not (the characterization) ✅
 
-## 4. Where the code is NECESSARY — capacity and remapping ✅
+Given that an additive integrator ties on path integration, we test what a *deterministic function of
+displacement* cannot do (`src/eval/code_necessity.py`, `multimap_task.py`, `frontier_probes.py`; n=5):
 
-If an additive integrator ties the grid code on path integration, why have a population code at all?
-Because a cognitive **map** is more than a metric. Two tests of what a deterministic function of
-displacement *cannot* do, however well it integrates (`src/eval/code_necessity.py`, n = 5, 95% CI):
+- **Memory capacity** ✅ (a win, but shared): the raw 2-D code collapses to 25% recall at 200 stored
+  locations; *any* high-dimensional population code (grid/place/random-Fourier) holds 75%. You need a
+  population code — but not specifically a grid.
+- **Multi-map storage via remapping** ✅ (a win *in the right regime*): with a fixed one-shot memory, any
+  deterministic metric code gives identical codes across environments and collides (4% over 16 maps),
+  while grid/place **remap** and hold 79–92%; an ablation switching remapping off reproduces the
+  collapse, isolating remapping as the cause.
+- **…but remapping does NOT help a trained model with a context label** ⊘ (a boundary, reported): replace
+  the one-shot memory with a trained classifier given a learned room-id embedding (the analog of a room
+  name in an LLM prompt) and the non-remapping code reaches 100% at 32 rooms — the model substitutes the
+  label for remapping. The brain remaps because it has *no* external context signal; an LLM has one.
+- **Sample efficiency** ⊘ (a non-win): the fixed grid code is *less* data-efficient (34% vs a NoPE+sum
+  Transformer's 73% at 16 training trajectories) — its high-dimensional code needs examples to learn the
+  readout.
+- **Noise robustness** ⊘ (a tie): once every code integrates the *same* noisy velocity, all degrade
+  identically (~34% at σ=0.4). (An earlier probe that handed grid the clean displacement showed a
+  spurious win; corrected.)
 
-**Capacity.** Binding K locations one-shot (Hebbian) and recalling each from a noisy probe, the
-integrator's raw 2-D output cannot pattern-separate — recall collapses to 25% at K=200 — whereas a
-high-dimensional population code holds 75%. A *periodic* lift (random Fourier features) matches the grid
-code; a smooth lift lags: to recover capacity you must build a grid-like code.
+**Verdict.** Across length extrapolation, capacity, remapping-in-a-trained-model, sample efficiency, and
+noise, the velocity-driven grid code is *competitive but not uniquely necessary* for a trained system.
+The additive integration prior captures the core; the population-code extras matter only in fixed-memory
+or context-free regimes. This map of wins / ties / boundaries — with fair baselines — is the
+contribution. (Figures 3–4: `results/code_necessity.svg`, `results/multimap_task.svg`,
+`results/frontier_probes.svg`.)
 
-**Multi-map storage (remapping) — the decisive necessity.** The same trajectory gives the same
-displacement in every environment, so any deterministic function of displacement yields identical codes
-across environments and collides when several maps are stored together. Storing M maps over recurring
-locations, retrieval (mean ± 95% CI, n=5):
+## 6. One code, many functions — the integrative substrate ✅
 
-| retrieval acc | M=1 | M=4 | M=16 maps |
-|---|---|---|---|
-| place + remap | 93% | 93% | **92% ±3** |
-| grid + remap | 93% | 91% | **79% ±2** |
-| grid, remapping OFF (ablation) | 93% | 23% | **6% ±0** |
-| additive (raw 2-D) | 65% | 16% | **4% ±0** |
+With its metric fixed, the *same* self-supervised code supports (multi-seed, mean ± 95% CI,
+`src/eval/stats.py`):
 
-Remapping codes hold ~90% across 16 maps; the additive code falls to 4% (~1/M, chance among colliding
-maps) — non-overlapping CIs. Switching remapping **off** in the grid code reproduces the additive
-collapse (6%), proving the necessary ingredient is **remapping itself** — an environment-specific
-population code that no metric integrator possesses. This, not path integration, is where the
-brain-faithful code is irreplaceable. (Figure 3: `results/code_necessity.svg`.)
-
-## 5. The advantage transfers to language ⏳
-
-A LoRA-adapted Qwen2.5-1.5B answers navigation questions *through the frozen cortex* (the prompt holds
-only the question; the moves reach the model only through the spatial code). Single-seed, the
-grid-cell cortex beats the place/default cortex on every task and stays flat to 3× training length,
-while cortex-OFF sits at chance (`src/training/train_trajectory.py`):
-
-| task (cortex ON, T=8/16/24) | grid-cell cortex | place/default |
-|---|---|---|
-| return | 100 / 100 / 100 | 96 / 89 / 86 |
-| bearing | 85 / 83 / 80 | 71 / 78 / 73 |
-| distance (exact) | 95 / 88 / 85 | 62 / 46 / 40 |
-
-⏳ **In progress:** the multi-seed version of this table (grid vs place × {distance,bearing} × seeds,
-with 95% CI and the OFF control) is running on Kaggle T4
-(`notebooks/m2_extrapolation_multiseed_kaggle.py`) and is the language-level counterpart to Figure 1.
-This is the result that elevates §5 from illustrative to publication-grade.
-
-## 6. The same code is a general cognitive substrate ✅
-
-With its metric fixed, the grid code supports — multi-seed, mean ± 95% CI (`src/eval/stats.py`):
-
-- **Planning** (Tolman novel-shortcut from the map): direction error **0.34° ± 0.04**, 100% navigable.
-- **Value / goal navigation** (dopamine-like TD on the map): **95% ± 5** vs a random walker 29% ± 3.
+- **Planning** (Tolman novel shortcut): direction error **0.34° ± 0.04**, 100% navigable.
+- **Value / goal navigation** (dopamine-like TD): **95% ± 5** vs a random walker 29% ± 3.
 - **Relational / transitive inference** (TEM-style, trained only on adjacent pairs): **84% ± 1** on
-  never-seen non-adjacent pairs; a clean symbolic-distance effect (corr 0.96 ± 0.01).
-- **One-shot / continual** (CLS): one-shot Hebbian recall **94% ± 2** vs a gradient baseline that
-  catastrophically forgets (28% ± 5).
+  unseen non-adjacent pairs; clean symbolic-distance effect (corr 0.96 ± 0.01).
+- **One-shot / continual** (CLS): Hebbian recall **94% ± 2** vs a forgetting gradient baseline 28% ± 5.
 
-These are not the central claim, but they are strong evidence that the representation is *general* — one
-brain-faithful code, many cognitive functions — which is the broader significance for AI.
+That one brain-faithful code serves navigation, planning, value, relational inference, and memory — read
+by a frozen LLM — is the integrative significance, independent of any uniqueness claim.
 
-## 7. Related work ✎
+## 7. Language transfer ⏳
 
-Grid cells and path integration (Hafting 2005; Burak & Fiete 2009); grid codes emerging in trained
-path-integrators (Banino 2018; Cueva & Wei 2018); modular/periodic coding for range (Fiete; Stensola
-2012); the Tolman-Eichenbaum Machine and grid codes in concept space (Whittington 2020; Constantinescu
-2016); Complementary Learning Systems (McClelland, McNaughton & O'Reilly 1995); length generalization in
-sequence models (a known-hard problem motivating positional-encoding research). Our contribution is to
-(i) show the representational advantage *causally* with fair, multi-seed, error-barred controls, and
-(ii) transfer it into a frozen LLM as length-generalizing spatial reasoning.
+A LoRA-Qwen2.5-1.5B answers navigation questions through the frozen cortex (the moves reach the model
+only via the cortex). Single-seed, the grid cortex beats the place/default cortex and stays flat to 3×
+training length, with cortex-OFF at chance:
 
-## 8. Limitations (honest) ✎
+| task (cortex ON, T=8/16/24) | grid cortex | place/default |
+|---|---|---|
+| return | 100/100/100 | 96/89/86 |
+| bearing | 85/83/80 | 71/78/73 |
+| distance (exact) | 95/88/85 | 62/46/40 |
 
-- The representation-level task is 2-D and uses an unbiased random walk; magnitude grows only ~√T, so
-  "3× longer path" is ~1.7× larger displacement — the regime is modest and we say so.
-- The grid code's range is finite (75% at 4×); we claim graceful, large-range extrapolation, not
-  unbounded.
-- The language results are at 1.5B parameters, LoRA, single-T4 scale; the multi-seed/​baseline version
-  (§5 ⏳) is required before strong claims.
-- Embodiment uses a simplified panoramic landmark world and a learned MLP front-end, not pixels.
-- Boundary anchoring, replay, and remapping pillars are demonstrations, not the central claim.
+⏳ The multi-seed version (grid vs place × {distance,bearing} × seeds, 95% CI, + OFF control) is
+specified and resumable on a single T4 (`notebooks/m2_extrapolation_multiseed_kaggle.py`) — the one
+remaining GPU run, and the cleanest novel result (a frozen LLM reasoning through a self-supervised grid
+code).
 
-## 9. Methods (brief) ✎
+## 8. Related work ✎
 
-Velocity-driven hexagonal grid modules (`_HexGridModules`): fixed velocity gains at geometric scale
-ratios integrate self-motion into a phase wrapped on a hexagonal torus; a learned linear readout maps
-the grid-cell population to downstream features (entorhinal→hippocampal flow). Self-supervised
-pre-training predicts bounded place-cell activity; no coordinate labels. The LLM path uses gated
-cross-attention from the cortex into a frozen Qwen2.5-1.5B + LoRA. Full configs in `results/*.json`.
+Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
+(Banino 2018; Cueva & Wei 2018); modular coding for range/capacity (Fiete; Stensola 2012; Sreenivasan &
+Fiete 2011); the Tolman-Eichenbaum Machine and grid codes in concept space (Whittington 2020;
+Constantinescu 2016); Complementary Learning Systems (McClelland, McNaughton & O'Reilly 1995); length
+generalization in sequence models (the default does not generalize — the motivation for positional-
+encoding research). Our contribution is the *fair, multi-seed characterization* of which of these
+properties transfer to a trained model + the integrative LLM demonstration.
+
+## 9. Limitations (honest) ✎
+
+- The representation tasks are 2-D, unbiased random walk (~√T magnitude growth), single-T4 LLM scale.
+- The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
+  best pure path-integrator.
+- The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
+  transfer to a trained LLM with a text context label.
+- §7 is single-seed pending the Kaggle run; emergence, boundary, replay pillars are demonstrations.
+
+## 10. Methods ✎
+
+**Grid cortex** (`_HexGridModules`): K modules, fixed velocity gains `side/spacing`,
+`spacing = base·ratio^k`; per-step velocity advances a phase integrated and min-image-wrapped on a
+hexagonal torus; module population (B, K·side²) read by a learned linear map. **Place code**: Gaussian
+fields tiling the arena. **Self-supervision**: predict bounded place activity from integrated
+self-motion; no coordinate labels. **Baselines**: GRU integrator; Transformer encoder with
+learned/sinusoidal/no positions and mean/sum pooling; raw-displacement and random-Fourier lifts;
+exact-integration oracle. **Statistics**: each metric re-implemented in a seed loop; mean ± 1.96·sd/√n.
+**LLM**: gated cross-attention from the cortex into frozen Qwen2.5-1.5B + LoRA (q,v); answer-only loss.
+Full configs in `results/*.json`; reproduce via `python -m src.eval.<name>` and `notebooks/*.py`.
 
 ---
 
-### Path to submission
-- ⏳ §5 multi-seed LLM table + language-level figure (Kaggle, running).
-- ✅ §2 Figure 1, §3 ablations + fair sequence baselines, §4 capacity/remapping necessity, §6 stats — all
+### Status / path to submission
+- ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
   multi-seed, committed.
-- ✎ tighten abstract/intro/related-work; assemble figures; write Methods/Extended Data.
-- Honest framing locked in §3.4 / abstract: the result is *which inductive bias matters* + the grid code
-  as a unified substrate, not "grid cells beat everything."
+- ⏳ §7 multi-seed LLM table (one Kaggle run).
+- ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
+- Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness
+  claim**.
