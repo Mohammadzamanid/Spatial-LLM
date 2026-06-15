@@ -549,6 +549,29 @@ it, learned self-supervised, and the same code carries planning, value, and rela
 — a single substrate for the map, not just the metric. (`results/code_necessity.json`,
 `results/code_necessity.svg`.)
 
+### Boundary of the remapping claim — it does NOT transfer to a model with an external context label
+
+Before building a multi-environment *language* task, we validated the design on CPU — and found an
+honest boundary that **saved a futile GPU run** (`src/eval/multimap_task.py`, n=5). We repeated the
+multi-map memory test, but replaced the one-shot Hebbian store with a **trained classifier** given a
+learned **room-id embedding** (the analog of the room name appearing in an LLM's text prompt):
+
+| recall acc | M=1 | M=4 | M=16 | M=32 rooms |
+|---|---|---|---|---|
+| grid + remap | 99% | 100% | 100% | 100% |
+| **grid, NO remap** | 100% | 100% | 100% | **100%** |
+| additive (raw 2-D) | 97% | 96% | 95% | 86% |
+
+With gradient training, adequate capacity, and an explicit room-id, **remapping is no longer
+necessary** — `grid, no remap` reaches 100% at every M (the classifier uses the room embedding to
+disambiguate; only the low-dimensional raw 2-D code lags). This is principled, not a failure: the brain
+**remaps because it has no external context label** — the hippocampus must *generate* the environment
+context internally. An LLM *has* that label (the room name in the prompt), so it can substitute the
+label for remapping. **The remapping necessity is therefore specific to context-free, capacity-limited
+associative memory (Fig-3B), and does not transfer to an LLM with a text room-id** — so we did not build
+that language task. Honest scoping of the claim, and a result in its own right about *when* the brain's
+remapping matters. (`results/multimap_task.json`, `results/multimap_task.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
