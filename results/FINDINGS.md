@@ -572,6 +572,34 @@ associative memory (Fig-3B), and does not transfer to an LLM with a text room-id
 that language task. Honest scoping of the claim, and a result in its own right about *when* the brain's
 remapping matters. (`results/multimap_task.json`, `results/multimap_task.svg`.)
 
+### Two more frontiers probed — sample efficiency and noise — both honest non-wins
+
+We kept hunting for a regime where the *fixed* grid code beats a model that must *learn* to integrate
+(`src/eval/frontier_probes.py`, n=5; the NoPE+sum Transformer is the toughest fair baseline):
+
+- **Sample efficiency (acc at 3× length vs # training trajectories).** The grid code is *not* more
+  data-efficient — at N=16 trajectories it scores 34% vs the NoPE+sum Transformer's 73% and the oracle's
+  93%. Its high-dimensional code needs examples to learn the *readout*; a low-dimensional displacement
+  feature generalizes from very few. (At large N all converge.)
+- **Noise robustness (acc vs per-step velocity noise).** Once the comparison is *fair* — every code
+  integrates the **same noisy velocity**, with the clean displacement only as the target — all codes
+  degrade essentially identically: at σ=0.4, grid 34%, NoPE+sum 35%, GRU 33%, place 28%, oracle 35%.
+  Velocity noise accumulates in the integrated displacement no matter how you encode it.
+  *(An earlier version of this probe handed the grid/place codes the clean displacement and showed a
+  spurious "grid is noise-immune at 96%"; we caught and fixed it. The honest result is a tie.)*
+
+**Honest verdict on the hunt.** Across every fair test — length extrapolation, memory capacity,
+remapping in a *trained* model, sample efficiency, and noise — the velocity-driven grid code is
+*competitive but not uniquely necessary* for a trained system. The **additive integration prior** (which
+a NoPE+sum Transformer also has) captures the core; the population-code extras (capacity, remapping)
+matter only in narrow regimes — fixed-capacity associative memory, or context-free settings without an
+external label. The defensible contribution is therefore the **rigorous, honestly-baselined
+characterization itself** (including these negative results — a map of *when* brain-faithful coding helps
+and when a simpler prior suffices) plus the **integrative demonstration** that one self-supervised code
+serves navigation, planning, value, relational inference, and memory, read by a frozen LLM. We do not
+claim grid cells are a uniquely necessary substrate for a trained model. (`results/frontier_probes.json`,
+`results/frontier_probes.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
