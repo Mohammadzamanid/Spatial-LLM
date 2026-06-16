@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="598" height="358" font-family="Segoe UI, Arial">
+<rect width="598" height="358" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Torus path integration: periodicity is necessary where the additive integrator fails</text>
+<text x="28" y="44" font-size="10.5" fill="#5b6b8c">toroidal position error vs path length (many wraps) &#183; a world with no Euclidean text prior &#183; mean &#177; 95% CI</text>
+<line x1="58" y1="320" x2="388" y2="320" stroke="#33415c"/><line x1="58" y1="80" x2="58" y2="320" stroke="#33415c"/>
+<line x1="58" y1="320.0" x2="388" y2="320.0" stroke="#eef2f8"/>
+<text x="51" y="324.0" font-size="9" fill="#5b6b8c" text-anchor="end">0.0</text>
+<line x1="58" y1="260.0" x2="388" y2="260.0" stroke="#eef2f8"/>
+<text x="51" y="264.0" font-size="9" fill="#5b6b8c" text-anchor="end">0.5</text>
+<line x1="58" y1="200.0" x2="388" y2="200.0" stroke="#eef2f8"/>
+<text x="51" y="204.0" font-size="9" fill="#5b6b8c" text-anchor="end">0.9</text>
+<line x1="58" y1="140.0" x2="388" y2="140.0" stroke="#eef2f8"/>
+<text x="51" y="144.0" font-size="9" fill="#5b6b8c" text-anchor="end">1.4</text>
+<line x1="58" y1="80.0" x2="388" y2="80.0" stroke="#eef2f8"/>
+<text x="51" y="84.0" font-size="9" fill="#5b6b8c" text-anchor="end">1.8</text>
+<text x="58.0" y="334.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=8</text>
+<text x="168.0" y="334.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=16</text>
+<text x="278.0" y="334.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=32</text>
+<text x="388.0" y="334.0" font-size="9" fill="#5b6b8c" text-anchor="middle">T=64</text>
+<polygon points="58.0,318.7 168.0,318.7 278.0,318.7 388.0,318.7 388.0,318.8 278.0,318.8 168.0,318.7 58.0,318.8" fill="#e6550d" opacity="0.12"/>
+<polyline points="58.0,318.8 168.0,318.7 278.0,318.7 388.0,318.7" fill="none" stroke="#e6550d" stroke-width="2.3"/>
+<circle cx="58.0" cy="318.8" r="3" fill="#e6550d"/>
+<circle cx="168.0" cy="318.7" r="3" fill="#e6550d"/>
+<circle cx="278.0" cy="318.7" r="3" fill="#e6550d"/>
+<circle cx="388.0" cy="318.7" r="3" fill="#e6550d"/>
+<polygon points="58.0,288.3 168.0,175.2 278.0,137.9 388.0,118.8 388.0,121.1 278.0,141.5 168.0,179.7 58.0,293.6" fill="#3b528b" opacity="0.12"/>
+<polyline points="58.0,290.9 168.0,177.5 278.0,139.7 388.0,119.9" fill="none" stroke="#3b528b" stroke-width="2.3"/>
+<circle cx="58.0" cy="290.9" r="3" fill="#3b528b"/>
+<circle cx="168.0" cy="177.5" r="3" fill="#3b528b"/>
+<circle cx="278.0" cy="139.7" r="3" fill="#3b528b"/>
+<circle cx="388.0" cy="119.9" r="3" fill="#3b528b"/>
+<polygon points="58.0,251.6 168.0,99.9 278.0,113.0 388.0,113.3 388.0,115.3 278.0,114.9 168.0,103.7 58.0,258.2" fill="#21908c" opacity="0.12"/>
+<polyline points="58.0,254.9 168.0,101.8 278.0,113.9 388.0,114.3" fill="none" stroke="#21908c" stroke-width="2.3"/>
+<circle cx="58.0" cy="254.9" r="3" fill="#21908c"/>
+<circle cx="168.0" cy="101.8" r="3" fill="#21908c"/>
+<circle cx="278.0" cy="113.9" r="3" fill="#21908c"/>
+<circle cx="388.0" cy="114.3" r="3" fill="#21908c"/>
+<polygon points="58.0,291.3 168.0,141.8 278.0,109.9 388.0,110.8 388.0,112.8 278.0,111.7 168.0,144.0 58.0,292.7" fill="#9aa5b8" opacity="0.12"/>
+<polyline points="58.0,292.0 168.0,142.9 278.0,110.8 388.0,111.8" fill="none" stroke="#9aa5b8" stroke-width="2.3"/>
+<circle cx="58.0" cy="292.0" r="3" fill="#9aa5b8"/>
+<circle cx="168.0" cy="142.9" r="3" fill="#9aa5b8"/>
+<circle cx="278.0" cy="110.8" r="3" fill="#9aa5b8"/>
+<circle cx="388.0" cy="111.8" r="3" fill="#9aa5b8"/>
+<polygon points="58.0,319.1 168.0,319.1 278.0,319.1 388.0,319.1 388.0,319.2 278.0,319.2 168.0,319.2 58.0,319.2" fill="#c9a227" opacity="0.12"/>
+<polyline points="58.0,319.2 168.0,319.1 278.0,319.2 388.0,319.1" fill="none" stroke="#c9a227" stroke-width="2.3"/>
+<circle cx="58.0" cy="319.2" r="3" fill="#c9a227"/>
+<circle cx="168.0" cy="319.1" r="3" fill="#c9a227"/>
+<circle cx="278.0" cy="319.2" r="3" fill="#c9a227"/>
+<circle cx="388.0" cy="319.1" r="3" fill="#c9a227"/>
+<rect x="400" y="86" width="14" height="5" fill="#e6550d"/>
+<text x="418" y="92" font-size="10.5" fill="#28324a">grid (periodic)</text>
+<rect x="400" y="105" width="14" height="5" fill="#3b528b"/>
+<text x="418" y="111" font-size="10.5" fill="#28324a">additive (cumsum)</text>
+<rect x="400" y="124" width="14" height="5" fill="#21908c"/>
+<text x="418" y="130" font-size="10.5" fill="#28324a">NoPE+sum Transformer</text>
+<rect x="400" y="143" width="14" height="5" fill="#9aa5b8"/>
+<text x="418" y="149" font-size="10.5" fill="#28324a">place (Euclidean)</text>
+<rect x="400" y="162" width="14" height="5" fill="#c9a227"/>
+<text x="418" y="168" font-size="10.5" fill="#28324a">oracle</text>
+</svg>
