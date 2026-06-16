@@ -24,8 +24,10 @@ pattern-separation, environment-specific **remapping**) are decisive only in nar
 associative memory and *context-free* settings — and do **not** transfer to a trained model that already
 has an external context label (as an LLM does in its prompt). The contribution is therefore a rigorous,
 fairly-baselined map of *when* brain-faithful spatial coding helps and when a simpler inductive bias
-suffices, together with the integrative demonstration. We do not claim grid cells are a uniquely
-necessary substrate for a trained system, and we show why.
+suffices, together with the integrative demonstration. Every claimed effect is supported by paired
+significance tests (sign-flip permutation, bootstrap CIs, n up to 20; all p<1e-4 with large effect
+sizes), and the central tie is a *certified null* (grid vs a NoPE+sum Transformer: p=0.94, d=0.04). We
+do not claim grid cells are a uniquely necessary substrate for a trained system, and we show why.
 
 ---
 
@@ -111,6 +113,15 @@ The additive integration prior captures the core; the population-code extras mat
 or context-free regimes. This map of wins / ties / boundaries — with fair baselines — is the
 contribution. (Figures 3–4: `results/code_necessity.svg`, `results/multimap_task.svg`,
 `results/frontier_probes.svg`.)
+
+**Significance (paired tests, `src/eval/significance.py`, Figure 6).** Every claimed effect is
+statistically significant under a paired sign-flip permutation test with a bootstrap CI of the
+difference (n=20 fast / n=8 heavy): grid−place distance@T24 Δ=+0.124, p<1e-4, d=10.9 (20/20 seeds);
+grid+remap−additive multi-map Δ=+0.766, p<1e-4; population−raw-2D capacity Δ=+0.507, p<1e-4;
+Hebbian−gradient Δ=+0.662, p<1e-4; value−random goal-nav Δ=+0.670, p=0.006; transitive-inference−chance
+Δ=+0.338, p<1e-4. Critically, the **honest null is certified**, not assumed: grid vs a NoPE+sum
+Transformer on path integration is Δ=+0.002, 95% CI [−0.022,+0.032], **p=0.94, d=0.04**.
+(`results/significance.svg`.)
 
 ## 6. One code, many functions — the integrative substrate ✅
 

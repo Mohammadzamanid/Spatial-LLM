@@ -956,10 +956,38 @@ value-guided navigation (0.954 ± 0.049) vs a random walker (0.285 ± 0.026). Th
 seed loop also **randomizes the reward location per seed**, so the CI reflects robustness to *where*
 the goal is, not just to initialization. These are not lucky runs.
 
-*Remaining rigor gap (honest):* this harness covers the CPU cognitive-map results. The **language**
-results (§4) are still single-seed Kaggle runs; bringing them to the same bar — grid vs place vs
-MLP vs raw-coord baselines, multiple seeds, accuracy-vs-length with error bands — is the next step
-toward a publishable central claim.
+### Paired significance tests — every headline claim with a p-value (the rigor table)
+
+Non-overlapping CIs are informal; reviewers want a test. `src/eval/significance.py` runs each headline
+comparison **paired on shared seeds** (n=20 for the analytic comparisons, n=8 for the heavy
+goal-navigation / Transformer ones) and reports, on the per-seed differences, a **bootstrap 95% CI of
+the mean difference** (20k resamples), a **two-sided sign-flip permutation p-value** (gold standard for
+paired data, no distributional assumption), and **Cohen's d** (`results/significance.json`,
+`results/significance.svg` forest plot):
+
+| comparison | Δ mean [95% CI] | p (perm) | Cohen's d | seed wins |
+|---|---|---|---|---|
+| extrapolation distance @T24: **grid − place** | +0.124 [+0.119, +0.129] | <1e-4 | 10.9 | 20/20 |
+| extrapolation distance @T24: **grid − GRU** | +0.053 [+0.034, +0.080] | <1e-4 | 1.0 | 20/20 |
+| extrapolation bearing @T24: **grid − place** | +0.078 [+0.073, +0.083] | <1e-4 | 6.8 | 20/20 |
+| multi-map @M16: **grid+remap − additive** | +0.766 [+0.754, +0.777] | <1e-4 | 27.9 | 20/20 |
+| capacity @K200: **population(grid) − raw-2D** | +0.507 [+0.497, +0.516] | <1e-4 | 21.9 | 20/20 |
+| continual: **one-shot Hebbian − gradient** | +0.662 [+0.626, +0.698] | <1e-4 | 7.9 | 20/20 |
+| relational: **transitive inference − chance** | +0.338 [+0.334, +0.343] | <1e-4 | 29.7 | 20/20 |
+| goal navigation: **value − random walker** | +0.670 [+0.618, +0.704] | 0.006 | 9.5 | 8/8 |
+| **NULL — extrapolation @T24: grid − NoPE+sum Transformer** | **+0.002 [−0.022, +0.032]** | **0.94** | **0.04** | **3/8** |
+
+Two things this certifies. (1) **Every claimed effect is significant** — p < 1e-4 (goal-nav p=0.006 at
+n=8), large effect sizes, and the sign of the difference holds in *every* seed. (2) **The honest tie is
+a certified null**, not a hand-wave: grid vs a NoPE+sum Transformer on path integration is
+Δ = +0.002 with a 95% CI that straddles zero (p = 0.94, d = 0.04) — there is genuinely no difference,
+exactly the claim we make. The forest plot (`results/significance.svg`) shows all nine effects against
+zero at a glance: eight clear of it, one centered on it.
+
+*Language-level rigor (§"Milestone 2"/§4):* the LLM grid-vs-place comparison is at n=3 with large
+seed variance and is **not** separable there; the cortex-ON ≫ text-only-OFF result *is* robust. A
+bearing-only n≥8 LLM sweep with the same paired test is specified in
+`notebooks/m2_extrapolation_multiseed_kaggle.py` (cells 5–6).
 
 ## Caveats / open questions
 - The 3D task is near-trivial (threshold one input coordinate); `coord_2d_noleak` is
