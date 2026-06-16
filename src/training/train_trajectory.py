@@ -339,9 +339,10 @@ def main(a):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--base_llm", default="Qwen/Qwen2.5-1.5B")
-    ap.add_argument("--task", choices=["return", "distance", "bearing"], default="return",
+    ap.add_argument("--task", choices=["return", "distance", "bearing", "torus"], default="return",
                     help="return=yes/no (default); distance=bucket 0-5 (magnitude); "
-                         "bearing=8-way compass home direction")
+                         "bearing=8-way compass home direction; torus=which wrap-around cell 0-8 "
+                         "(a world with no Euclidean text prior -- the leakage-proof test)")
     ap.add_argument("--cortex_dim", type=int, default=128)
     ap.add_argument("--n_train", type=int, default=4000)
     ap.add_argument("--n_val", type=int, default=600)

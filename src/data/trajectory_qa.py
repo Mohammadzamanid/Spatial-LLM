@@ -27,11 +27,14 @@ QUESTIONS = {
     "return":   "Are you back where you started?",
     "distance": "How far are you from where you started?",
     "bearing":  "Which direction is the start from here?",
+    "torus":    "On a board that wraps around at its edges, which cell (0-8) are you in?",
 }
 QUESTION = QUESTIONS["return"]                 # backward-compatible default
 PROMPT = "[NAVIGATION] You walked a path through space.\n[QUESTION] {q}\n[ANSWER]"
 RETURN_TOL = 0.5      # final displacement below this counts as "back at start"
 DIST_MAX_BUCKET = 5   # distance bucket saturates at "5" (= 5 or more)
+TORUS_L = 1.6         # torus circumference (matches the grid cortex base period); world wraps mod L
+TORUS_G = 3           # G x G toroidal cells -> TORUS_G**2 classes (answer 0..8); a wrap-aware question
 # 8 compass points, in increasing angle from +x (East) CCW. Index = sector.
 COMPASS = ["east", "northeast", "north", "northwest",
            "west", "southwest", "south", "southeast"]
@@ -77,6 +80,11 @@ def answer_for(task, dx, dy, dz):
         ang = math.atan2(-dy, -dx)                  # direction from here BACK to the start (xy)
         sector = int(round(ang / (math.pi / 4))) % 8
         return COMPASS[sector]
+    if task == "torus":
+        # toroidal cell of the wrapped xy position: requires the WRAP (Euclidean reading fails past 1 lap)
+        gx = min(int((dx % TORUS_L) / TORUS_L * TORUS_G), TORUS_G - 1)
+        gy = min(int((dy % TORUS_L) / TORUS_L * TORUS_G), TORUS_G - 1)
+        return str(gx * TORUS_G + gy)
     raise ValueError(task)
 
 
@@ -105,6 +113,11 @@ def parse_answer(task, text):
             if w in t:
                 return w
         return None
+    if task == "torus":
+        for ch in t:
+            if ch in "012345678":
+                return ch
+        return None
     raise ValueError(task)
 
 
@@ -118,11 +131,13 @@ def answer_index(task, parsed):
         return int(parsed)
     if task == "bearing":
         return COMPASS.index(parsed)
+    if task == "torus":
+        return int(parsed)
     raise ValueError(task)
 
 
 def num_classes(task):
-    return {"return": 2, "distance": DIST_MAX_BUCKET + 1, "bearing": 8}[task]
+    return {"return": 2, "distance": DIST_MAX_BUCKET + 1, "bearing": 8, "torus": TORUS_G * TORUS_G}[task]
 
 
 def is_circular(task):
@@ -145,6 +160,8 @@ def make_trajectory_qa(n, T=8, seed=0, task="return"):
                 dx, dy, _ = _final_xyz(h, s, v)
                 if dx * dx + dy * dy > 0.64:         # |xy displacement| > 0.8
                     break
+        elif task == "torus":
+            h, s, v = _walk(T, rng)                  # random walk; position wraps mod TORUS_L
         else:
             raise ValueError(task)
         dx, dy, dz = _final_xyz(h, s, v)
