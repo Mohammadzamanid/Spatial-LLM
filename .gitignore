@@ -34,3 +34,6 @@ wandb/
 # IDE
 .vscode/
 .idea/
+
+# transient per-seed checkpoint for src/eval/significance.py (resume state, not a result)
+results/significance_raw.json
