@@ -627,6 +627,59 @@ unlike a linear code whose activations grow without bound (not a realizable neur
 *bounded-activation* population codes, periodicity buys range; that is the honest, narrow sense in which
 the grid code is special. (`results/controls.json`, `results/controls.svg`.)
 
+### Non-Euclidean worlds — periodicity is NECESSARY (the tie-breaker + leakage rebuttal)
+
+The honest Euclidean tie (a NoPE+sum Transformer matches the grid code) inverts the moment the world is
+**cyclic**. On a torus, true position is θ = (∫velocity) **mod 2π**; a periodic grid code computes that
+mod *for free* (cos(∫v) = cos(θ) for any number of wraps), whereas any non-periodic code sees an
+unbounded ∫v and a readout cannot recover θ once paths leave the trained range. Train on short paths
+(≤~1 wrap), test out to many wraps (`src/eval/torus.py`, n=8; toroidal position error in radians):
+
+| code | T=8 | T=16 | T=32 | T=64 (many wraps) |
+|---|---|---|---|---|
+| **grid (periodic)** | **0.01 ±0.00** | **0.01** | **0.01** | **0.01 ±0.00** (= oracle, 100% within 45°) |
+| additive (cumsum) | 0.22 | 1.08 | 1.36 | 1.51 (28%) |
+| NoPE+sum Transformer | 0.49 | 1.65 | 1.56 | 1.56 (25% ≈ chance) |
+| place (Euclidean tiling) | 0.21 | 1.34 | 1.58 | 1.58 (25%) |
+| oracle | 0.01 | 0.01 | 0.01 | 0.01 |
+
+The grid code is **flat at the oracle floor (0.01 rad, 100%) at every length**, while **the very NoPE+sum
+Transformer that tied it on Euclidean paths collapses to chance (1.56 rad, 25%)**, as do the additive and
+Euclidean-place codes — all with tiny, non-overlapping CIs. So the periodicity that merely bought *finite
+range* on Euclidean paths (a wash vs additive integrators) is *exactly the right inductive bias* for a
+cyclic world: there, the brain-faithful code is not competitive-but-tied, it is **necessary** — a clean,
+positive, significant win. This is simultaneously the **definitive leakage rebuttal**: a torus has no
+faithful Euclidean text description, so an LLM's text prior cannot solve it; only a code that has actually
+path-integrated the cyclic geometry can. (`results/torus.json`, `results/torus.svg`.)
+
+### Structural transfer — a space-trained metric does abstract relational inference (TEM, with falsifiers)
+
+The Tolman-Eichenbaum hypothesis is that the *same* metric code maps abstract relational structure, not
+just physical space. We test it with the cortex **frozen and trained only on spatial path integration**:
+lay a non-spatial ordered structure (ranks 0…N−1) along a concept axis, push each item through the frozen
+grid code by its *own* position (never the signed relative displacement — that would leak the answer),
+and train a comparison readout on **adjacent pairs only** (`src/eval/structural_transfer.py`, n=8):
+
+| metric | mean ± 95% CI |
+|---|---|
+| **transitive inference** (far pairs, never trained) | **0.836 ± 0.008** |
+| adjacent pairs (trained) | 0.706 ± 0.019 |
+| schema transfer (a NEW item set, new region) | 0.790 ± 0.006 |
+| symbolic-distance-effect correlation | 0.953 ± 0.013 |
+| **CONTROL — shuffled positions** (rank↔space destroyed) | **0.623 ± 0.037** |
+| **CONTROL — scrambled 2nd item** | 0.656 ± 0.006 |
+
+Transitive inference on never-seen far pairs (0.836) *exceeds* the trained adjacent pairs (0.706) — that
+inversion **is** the symbolic-distance effect (far pairs are easier; corr 0.95), the behavioural
+signature of an analog/spatial representation of an abstract dimension. The two falsifiers a reviewer
+demands both fire: **shuffling the rank↔position correspondence collapses TI toward chance (0.836 → 0.623,
+paired p = 0.009)** — so TI comes from the cortex's *ordered metric*, not memorization; and scrambling the
+second item (0.656) confirms the readout compares *two* codes, not one item's magnitude. (They don't fall
+all the way to 0.50 — a residual single-item signal survives at this noise — but the significant drop
+isolates the metric as the cause.) This is the representation-level validation of the headline LLM
+experiment, where the MLP readout is replaced by a frozen Qwen+LoRA answering a linguistic comparison.
+(`results/structural_transfer.json`, `results/structural_transfer.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
