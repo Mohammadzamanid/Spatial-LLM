@@ -27,7 +27,13 @@ fairly-baselined map of *when* brain-faithful spatial coding helps and when a si
 suffices, together with the integrative demonstration. Every claimed effect is supported by paired
 significance tests (sign-flip permutation, bootstrap CIs, n up to 20; all p<1e-4 with large effect
 sizes), and the central tie is a *certified null* (grid vs a NoPE+sum Transformer: p=0.94, d=0.04). We
-do not claim grid cells are a uniquely necessary substrate for a trained system, and we show why.
+do not claim grid cells are a uniquely necessary substrate for a trained system, and we show why. We
+*do* identify two regimes where the brain-faithful code is **necessary**, not merely competitive:
+**cyclic (non-Euclidean) worlds**, where its periodicity computes toroidal position (∫v mod 2π) that
+additive integrators provably cannot — flat at the oracle floor where they collapse to chance, and a
+world a language prior cannot fake (a built-in leakage control); and **abstract relational inference**,
+where a *space-trained, frozen* metric supports transitive inference and schema transfer, falsified by
+shuffling the metric (p=0.009).
 
 ---
 
@@ -123,6 +129,17 @@ Hebbian−gradient Δ=+0.662, p<1e-4; value−random goal-nav Δ=+0.670, p=0.006
 Transformer on path integration is Δ=+0.002, 95% CI [−0.022,+0.032], **p=0.94, d=0.04**.
 (`results/significance.svg`.)
 
+**The tie inverts on non-Euclidean worlds — where the periodic code is *necessary* (Figure 7,
+`src/eval/torus.py`).** On a torus, true position is θ = (∫velocity) mod 2π; a periodic grid code
+computes that mod for free (cos ∫v = cos θ at any wrap count) while a non-periodic code sees an unbounded
+∫v and cannot recover the wrap. Trained on short paths and tested to many wraps (n=8), the grid code is
+**flat at the oracle floor (0.01 rad, 100% within 45°) at every length**, while the *same NoPE+sum
+Transformer that tied it on Euclidean paths collapses to chance (1.56 rad, 25%)**, as do additive and
+Euclidean-place codes — tiny, non-overlapping CIs. So the periodicity that was a wash on Euclidean paths
+is exactly the right inductive bias for a cyclic world: there the brain-faithful code is not
+competitive-but-tied, it is **necessary**. This is also the **leakage rebuttal** — a torus has no
+faithful Euclidean text description, so a language prior cannot substitute for having path-integrated it.
+
 ## 6. One code, many functions — the integrative substrate ✅
 
 With its metric fixed, the *same* self-supervised code supports (multi-seed, mean ± 95% CI,
@@ -136,6 +153,16 @@ With its metric fixed, the *same* self-supervised code supports (multi-seed, mea
 
 That one brain-faithful code serves navigation, planning, value, relational inference, and memory — read
 by a frozen LLM — is the integrative significance, independent of any uniqueness claim.
+
+**Structural transfer with falsifiers (Figure 8, `src/eval/structural_transfer.py`).** The relational
+result above is strengthened into the TEM claim: with the cortex **frozen and trained only on space**, a
+non-spatial ordered structure laid along a concept axis yields transitive inference on never-seen far
+pairs (**0.836 ± 0.008**, exceeding the trained adjacent pairs 0.706 — the symbolic-distance effect) and
+zero-shot schema transfer to a new item set (0.790). Two falsifiers fire: **shuffling the rank↔position
+correspondence collapses TI (0.836→0.623, paired p=0.009)** — so it is the *ordered metric*, not
+memorization — and scrambling the second item (0.656) shows the readout compares two codes, not one
+magnitude. This is the representation-level validation of the headline LLM experiment (§7 roadmap), where
+the readout is a frozen Qwen+LoRA answering a *linguistic* comparison it cannot do text-only.
 
 ## 7. Language transfer ✅ (n=3; ➕ more seeds to resolve grid-vs-place)
 

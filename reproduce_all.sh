@@ -29,6 +29,8 @@ run src.eval.multimap_task     --seeds "$SEEDS5"    # boundary: remapping doesn'
 run src.eval.frontier_probes   --seeds "$SEEDS5"    # Fig 4: sample efficiency + noise (honest non-wins)
 run src.eval.controls          --seeds "$SEEDS5"    # mechanism vs parameters control
 run src.eval.significance      --n_fast 20 --n_slow 8   # paired tests (p-values) on every headline claim; resumable
+run src.eval.torus             --seeds "$SEEDS"     # non-Euclidean (torus): periodicity NECESSARY, breaks the tie + leakage rebuttal
+run src.eval.structural_transfer --seeds "$SEEDS"   # TEM: frozen space-trained metric -> relational inference (+ falsifiers)
 
 if [ "${1:-}" = "exploratory" ]; then
   echo; echo "############ EXPLORATORY demos (illustrative; not the central claims) ############"
