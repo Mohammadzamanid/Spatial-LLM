@@ -1,0 +1,168 @@
+{
+  "n_fast": 20,
+  "n_slow": 8,
+  "comparisons": {
+    "extrapolation distance@T24: grid vs place": {
+      "mean_diff": 0.1241,
+      "ci95": [
+        0.1194,
+        0.129
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 10.907,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "grid",
+        "place"
+      ],
+      "mean_A": 0.9237,
+      "mean_B": 0.7996
+    },
+    "extrapolation distance@T24: grid vs GRU": {
+      "mean_diff": 0.0533,
+      "ci95": [
+        0.0338,
+        0.0799
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 0.965,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "grid",
+        "GRU"
+      ],
+      "mean_A": 0.9237,
+      "mean_B": 0.8704
+    },
+    "extrapolation bearing@T24: grid vs place": {
+      "mean_diff": 0.0778,
+      "ci95": [
+        0.0729,
+        0.0826
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 6.753,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "grid",
+        "place"
+      ],
+      "mean_A": 0.972,
+      "mean_B": 0.8943
+    },
+    "multi-map@M16: grid+remap vs additive": {
+      "mean_diff": 0.7659,
+      "ci95": [
+        0.754,
+        0.7773
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 27.924,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "grid+remap",
+        "additive"
+      ],
+      "mean_A": 0.8064,
+      "mean_B": 0.0406
+    },
+    "capacity@K200: population(grid) vs raw-2D": {
+      "mean_diff": 0.5074,
+      "ci95": [
+        0.4967,
+        0.5162
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 21.913,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "grid",
+        "raw-2D"
+      ],
+      "mean_A": 0.7561,
+      "mean_B": 0.2487
+    },
+    "continual: one-shot Hebbian vs gradient": {
+      "mean_diff": 0.6619,
+      "ci95": [
+        0.6261,
+        0.6978
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 7.913,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "Hebbian",
+        "gradient"
+      ],
+      "mean_A": 0.9366,
+      "mean_B": 0.2747
+    },
+    "relational: transitive inference vs chance": {
+      "mean_diff": 0.3384,
+      "ci95": [
+        0.3335,
+        0.3432
+      ],
+      "p_perm": 0.0,
+      "cohen_d": 29.709,
+      "n": 20,
+      "wins_A": 20,
+      "significant": true,
+      "labels": [
+        "TI",
+        "chance(0.5)"
+      ],
+      "mean_A": 0.8384,
+      "mean_B": 0.5
+    },
+    "goal navigation: value vs random walker": {
+      "mean_diff": 0.6696,
+      "ci95": [
+        0.6175,
+        0.7038
+      ],
+      "p_perm": 0.0061,
+      "cohen_d": 9.535,
+      "n": 8,
+      "wins_A": 8,
+      "significant": true,
+      "labels": [
+        "value",
+        "random"
+      ],
+      "mean_A": 0.9542,
+      "mean_B": 0.2846
+    },
+    "extrapolation distance@T24: grid vs NoPE+sum xf (NULL)": {
+      "mean_diff": 0.0017,
+      "ci95": [
+        -0.0221,
+        0.0317
+      ],
+      "p_perm": 0.9384,
+      "cohen_d": 0.042,
+      "n": 8,
+      "wins_A": 3,
+      "significant": false,
+      "labels": [
+        "grid",
+        "NoPE+sum"
+      ],
+      "mean_A": 0.9274,
+      "mean_B": 0.9257
+    }
+  }
+}
