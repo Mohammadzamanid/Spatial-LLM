@@ -113,3 +113,67 @@ with open("results/extrapolation_llm.json", "w") as fh:
     json.dump({"seeds": SEEDS, "tasks": TASKS, "cortex": CORTEX, "eval_lengths": LENS,
                "metric": "cortex_on_exact", "aggregate": agg}, fh, indent=2)
 print("\nwrote results/extrapolation_llm.json  <-- paste the table above back, or share this file")
+
+
+# %% [cell 5] BEARING-only, n=8 (the one worthwhile follow-up: resolve grid-vs-place on the
+# trending, stable task). distance is too seed-variable at this scale to resolve, so we DON'T spend
+# T4 hours on it. Resumable: skips runs already done (incl. the 3 bearing seeds from cell 3).
+import os, subprocess, time
+OUTDIR = "results/extrap_llm"; os.makedirs(OUTDIR, exist_ok=True)
+BSEEDS = list(range(8))
+BCORTEX = {"grid": ["--constrained_velocity"], "place": []}
+BCOMMON = ["--task", "bearing", "--epochs", "3", "--n_train", "2400", "--n_val", "300",
+           "--train_lengths", "6", "8", "10", "12", "--eval_lengths", "8", "16", "24"]
+bjobs = [(c, s) for c in BCORTEX for s in BSEEDS]
+print(f"bearing: {len(bjobs)} runs (done ones skipped)\n")
+for cortex, seed in bjobs:
+    out = f"{OUTDIR}/bearing_{cortex}_s{seed}.json"
+    if os.path.exists(out):
+        print(f"skip  bearing {cortex:5} seed={seed}"); continue
+    cmd = (["python", "-u", "-m", "src.training.train_trajectory"] + BCOMMON
+           + ["--seed", str(seed), "--out", out] + BCORTEX[cortex])
+    print(f"\n>>> bearing {cortex} seed={seed}", flush=True); t0 = time.time()
+    subprocess.run(cmd, check=True); print(f"    done in {(time.time()-t0)/60:.1f} min", flush=True)
+print("\nbearing sweep pass complete (re-run if any remain)")
+
+
+# %% [cell 6] BEARING paired significance: grid vs place per seed, per length (bootstrap CI + sign-flip p)
+import os, json, math, random
+OUTDIR = "results/extrap_llm"; SEEDS = list(range(8)); LENS = [8, 16, 24]
+
+
+def load(cortex, s):
+    f = f"{OUTDIR}/bearing_{cortex}_s{s}.json"
+    return json.load(open(f)) if os.path.exists(f) else None
+
+
+def paired(diffs, iters=20000):
+    n = len(diffs); m = sum(diffs) / n
+    rng = random.Random(0)
+    boot = sorted(sum(diffs[rng.randrange(n)] for _ in range(n)) / n for _ in range(iters))
+    lo, hi = boot[int(0.025 * iters)], boot[int(0.975 * iters)]
+    # two-sided sign-flip permutation p
+    ge = 0
+    for _ in range(iters):
+        v = sum(d * (1 if rng.random() < 0.5 else -1) for d in diffs) / n
+        ge += abs(v) >= abs(m) - 1e-12
+    return m, lo, hi, ge / iters
+
+
+print("BEARING — grid vs place, paired over seeds (cortex-ON exact)\n" + "=" * 64)
+out = {}
+for T in LENS:
+    g = [load("grid", s)["results_by_len"][str(T)]["cortex_on_exact"] for s in SEEDS if load("grid", s)]
+    p = [load("place", s)["results_by_len"][str(T)]["cortex_on_exact"] for s in SEEDS if load("place", s)]
+    n = min(len(g), len(p))
+    if n < 2:
+        print(f"  T={T}: need both grid & place for >=2 seeds (have {len(g)},{len(p)})"); continue
+    diffs = [g[i] - p[i] for i in range(n)]
+    m, lo, hi, pv = paired(diffs)
+    sig = "SIGNIFICANT" if (lo > 0 or hi < 0) else "ns"
+    out[T] = {"grid_mean": round(sum(g[:n]) / n, 4), "place_mean": round(sum(p[:n]) / n, 4),
+              "delta": round(m, 4), "ci95": [round(lo, 4), round(hi, 4)], "p_perm": round(pv, 4), "n": n}
+    print(f"  T={T}: grid {sum(g[:n])/n:.0%} vs place {sum(p[:n])/n:.0%} | Δ={m:+.3f} "
+          f"[{lo:+.3f},{hi:+.3f}] p={pv:.4f}  {sig}  (n={n})")
+json.dump(out, open("results/extrapolation_llm_bearing.json", "w"), indent=2)
+print("\nwrote results/extrapolation_llm_bearing.json  <-- paste the table above back")
