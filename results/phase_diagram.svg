@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="812" height="454" font-family="Segoe UI, Arial">
+<rect width="812" height="454" fill="#ffffff"/>
+<text x="16" y="26" font-size="16" font-weight="800" fill="#0b1324">When does each inductive bias win?</text>
+<text x="16" y="45" font-size="11" fill="#5b6b8c">green = wins &#183; yellow = ties &#183; red = loses &#183; assembled from the committed multi-seed results</text>
+<text x="421" y="82" font-size="11.5" font-weight="700" fill="#28324a" text-anchor="middle">grid (periodic)</text>
+<text x="571" y="82" font-size="11.5" font-weight="700" fill="#28324a" text-anchor="middle">place (bounded)</text>
+<text x="721" y="82" font-size="11.5" font-weight="700" fill="#28324a" text-anchor="middle">additive integrator</text>
+<text x="16" y="113" font-size="10.6" font-weight="600" fill="#0b1324">Euclidean extrapolation (4x length)</text>
+<text x="16" y="127" font-size="8.8" fill="#5b6b8c">additive prior suffices; grid ties it, beats place</text>
+<rect x="352" y="97" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="421" y="119" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 75%</text>
+<rect x="502" y="97" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="571" y="119" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 57%</text>
+<rect x="652" y="97" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="721" y="119" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 88%</text>
+<text x="16" y="159" font-size="10.6" font-weight="600" fill="#0b1324">Cyclic world (torus, many wraps)</text>
+<text x="16" y="173" font-size="8.8" fill="#5b6b8c">periodicity NECESSARY; additive/place collapse to chance</text>
+<rect x="352" y="143" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="421" y="165" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 100%</text>
+<rect x="502" y="143" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="571" y="165" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 25%</text>
+<rect x="652" y="143" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="721" y="165" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 25%</text>
+<text x="16" y="205" font-size="10.6" font-weight="600" fill="#0b1324">One-shot memory capacity (200 items)</text>
+<text x="16" y="219" font-size="8.8" fill="#5b6b8c">population code NEEDED; raw 2-D collapses</text>
+<rect x="352" y="189" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="421" y="211" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 75%</text>
+<rect x="502" y="189" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="571" y="211" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 75%</text>
+<rect x="652" y="189" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="721" y="211" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 25%</text>
+<text x="16" y="251" font-size="10.6" font-weight="600" fill="#0b1324">Multi-map, NO context label (16 maps)</text>
+<text x="16" y="265" font-size="8.8" fill="#5b6b8c">remapping NEEDED; any deterministic metric collides</text>
+<rect x="352" y="235" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="421" y="257" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 79%</text>
+<rect x="502" y="235" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="571" y="257" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 92%</text>
+<rect x="652" y="235" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="721" y="257" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 4%</text>
+<text x="16" y="297" font-size="10.6" font-weight="600" fill="#0b1324">Multi-map, WITH context label (16 rooms)</text>
+<text x="16" y="311" font-size="8.8" fill="#5b6b8c">label substitutes for remapping; tie</text>
+<rect x="352" y="281" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="421" y="303" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 100%</text>
+<rect x="502" y="281" width="138" height="36" rx="6" fill="#d7dde6" opacity="0.82"/>
+<text x="571" y="303" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">n/a</text>
+<rect x="652" y="281" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="721" y="303" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 95%</text>
+<text x="16" y="343" font-size="10.6" font-weight="600" fill="#0b1324">Very low data (16 train trajectories)</text>
+<text x="16" y="357" font-size="8.8" fill="#5b6b8c">low-dim code reads more easily; grid LOSES</text>
+<rect x="352" y="327" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="421" y="349" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 34%</text>
+<rect x="502" y="327" width="138" height="36" rx="6" fill="#c9341a" opacity="0.82"/>
+<text x="571" y="349" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">LOSE 45%</text>
+<rect x="652" y="327" width="138" height="36" rx="6" fill="#2ca25f" opacity="0.82"/>
+<text x="721" y="349" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">WIN 73%</text>
+<text x="16" y="389" font-size="10.6" font-weight="600" fill="#0b1324">Heavy integration noise (sigma=0.4)</text>
+<text x="16" y="403" font-size="8.8" fill="#5b6b8c">noise hits all equally; tie</text>
+<rect x="352" y="373" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="421" y="395" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 34%</text>
+<rect x="502" y="373" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="571" y="395" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 28%</text>
+<rect x="652" y="373" width="138" height="36" rx="6" fill="#d9b400" opacity="0.82"/>
+<text x="721" y="395" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE 35%</text>
+</svg>

@@ -32,6 +32,7 @@ bash reproduce_all.sh exploratory   # also run the illustrative demos
 | §6 | cognitive suite: planning / value / relational / continual | `python -m src.eval.stats --seeds 8` | `results/stats.json` |
 | §3–6 | **paired significance** (perm p + bootstrap CI + d) on every headline claim; certified null | `python -m src.eval.significance --n_fast 20 --n_slow 8` | `results/significance.{json,svg}` |
 | §5 (tie-breaker) | **torus** (non-Euclidean): periodicity necessary; grid=oracle, additive/NoPE collapse; leakage rebuttal | `python -m src.eval.torus --seeds 8` | `results/torus.{json,svg}` |
+| §5 (synthesis) | **phase diagram**: when each inductive bias wins (assembled from the JSONs; no training) | `python -m src.eval.phase_diagram` | `results/phase_diagram.{json,svg}` |
 | §6 (TEM) | **structural transfer**: frozen space-trained metric → transitive inference + schema transfer (+ falsifiers) | `python -m src.eval.structural_transfer --seeds 8` | `results/structural_transfer.{json,svg}` |
 
 ## LANGUAGE results (GPU, single T4) → notebook

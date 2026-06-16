@@ -680,6 +680,33 @@ isolates the metric as the cause.) This is the representation-level validation o
 experiment, where the MLP readout is replaced by a frozen Qwen+LoRA answering a linguistic comparison.
 (`results/structural_transfer.json`, `results/structural_transfer.svg`.)
 
+### The phase diagram — *when* each inductive bias wins (synthesis)
+
+The negative/tie results stop being a deflation once organized into a predictive map. `src/eval/phase_diagram.py`
+assembles all the committed multi-seed results into one regime × code matrix (win / tie / lose vs the
+best in that regime), turning "grid isn't uniquely necessary" into "**here is the win-region of each
+inductive bias**":
+
+| regime | grid (periodic) | place (bounded) | additive integrator |
+|---|---|---|---|
+| Euclidean extrapolation (4×) | tie | lose | **win** |
+| **Cyclic world (torus)** | **WIN** | lose | lose |
+| One-shot capacity (200 items) | **WIN** | win | lose |
+| Multi-map, NO context label | tie | win | lose |
+| Multi-map, WITH context label | tie | – | tie |
+| Very low data (16 trajectories) | lose | lose | **win** |
+| Heavy integration noise | tie | tie | tie |
+
+Read off the map: the periodic grid code **wins where periodicity / pattern-separation is load-bearing**
+(cyclic worlds; one-shot capacity — alongside the place code), is **competitive (tie)** where a plain
+integration bias suffices (Euclidean magnitude extrapolation, multi-map once a context label is given,
+heavy noise), and **loses only in the very-low-data regime**, where a low-dimensional code is simply
+easier to read. The additive integrator wins exactly the two regimes where structure is *not* needed
+(Euclidean extrapolation, low data); the bounded place code wins *nowhere on its own*. This is the
+honest contribution: not "grid cells are magic," but a **falsifiable account of which world-properties
+make a brain-faithful code necessary** — confirmed, not asserted. (`results/phase_diagram.json`,
+`results/phase_diagram.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

@@ -117,8 +117,12 @@ displacement* cannot do (`src/eval/code_necessity.py`, `multimap_task.py`, `fron
 noise, the velocity-driven grid code is *competitive but not uniquely necessary* for a trained system.
 The additive integration prior captures the core; the population-code extras matter only in fixed-memory
 or context-free regimes. This map of wins / ties / boundaries — with fair baselines — is the
-contribution. (Figures 3–4: `results/code_necessity.svg`, `results/multimap_task.svg`,
-`results/frontier_probes.svg`.)
+contribution, and it is summarized as a single predictive **phase diagram** of *when each inductive bias
+wins* (Figure 9, `src/eval/phase_diagram.py`): grid wins where periodicity / pattern-separation is
+load-bearing (cyclic worlds, one-shot capacity), ties where a plain integration bias suffices (Euclidean
+extrapolation, labelled multi-map, noise), and loses only in the very-low-data regime. (Figures 3–4:
+`results/code_necessity.svg`, `results/multimap_task.svg`, `results/frontier_probes.svg`;
+`results/phase_diagram.svg`.)
 
 **Significance (paired tests, `src/eval/significance.py`, Figure 6).** Every claimed effect is
 statistically significant under a paired sign-flip permutation test with a bootstrap CI of the

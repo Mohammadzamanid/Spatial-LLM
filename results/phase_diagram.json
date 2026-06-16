@@ -1,0 +1,146 @@
+{
+  "codes": [
+    "grid (periodic)",
+    "place (bounded)",
+    "additive integrator"
+  ],
+  "matrix": [
+    {
+      "regime": "Euclidean extrapolation (4x length)",
+      "rule": "additive prior suffices; grid ties it, beats place",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "tie",
+          "value": 0.7537
+        },
+        "place (bounded)": {
+          "outcome": "lose",
+          "value": 0.5736
+        },
+        "additive integrator": {
+          "outcome": "win",
+          "value": 0.8774
+        }
+      }
+    },
+    {
+      "regime": "Cyclic world (torus, many wraps)",
+      "rule": "periodicity NECESSARY; additive/place collapse to chance",
+      "note": "leakage-proof",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "win",
+          "value": 1.0
+        },
+        "place (bounded)": {
+          "outcome": "lose",
+          "value": 0.2482
+        },
+        "additive integrator": {
+          "outcome": "lose",
+          "value": 0.2545
+        }
+      }
+    },
+    {
+      "regime": "One-shot memory capacity (200 items)",
+      "rule": "population code NEEDED; raw 2-D collapses",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "win",
+          "value": 0.752
+        },
+        "place (bounded)": {
+          "outcome": "win",
+          "value": 0.7467
+        },
+        "additive integrator": {
+          "outcome": "lose",
+          "value": 0.2546
+        }
+      }
+    },
+    {
+      "regime": "Multi-map, NO context label (16 maps)",
+      "rule": "remapping NEEDED; any deterministic metric collides",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "tie",
+          "value": 0.7939
+        },
+        "place (bounded)": {
+          "outcome": "win",
+          "value": 0.9241
+        },
+        "additive integrator": {
+          "outcome": "lose",
+          "value": 0.0394
+        }
+      }
+    },
+    {
+      "regime": "Multi-map, WITH context label (16 rooms)",
+      "rule": "label substitutes for remapping; tie",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "tie",
+          "value": 1.0
+        },
+        "place (bounded)": {
+          "outcome": "n/a",
+          "value": null
+        },
+        "additive integrator": {
+          "outcome": "tie",
+          "value": 0.9462
+        }
+      }
+    },
+    {
+      "regime": "Very low data (16 train trajectories)",
+      "rule": "low-dim code reads more easily; grid LOSES",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "lose",
+          "value": 0.3424
+        },
+        "place (bounded)": {
+          "outcome": "lose",
+          "value": 0.4533
+        },
+        "additive integrator": {
+          "outcome": "win",
+          "value": 0.7258
+        }
+      }
+    },
+    {
+      "regime": "Heavy integration noise (sigma=0.4)",
+      "rule": "noise hits all equally; tie",
+      "note": "",
+      "cells": {
+        "grid (periodic)": {
+          "outcome": "tie",
+          "value": 0.3446
+        },
+        "place (bounded)": {
+          "outcome": "tie",
+          "value": 0.2826
+        },
+        "additive integrator": {
+          "outcome": "tie",
+          "value": 0.3521
+        }
+      }
+    }
+  ],
+  "grid_win_regions": [
+    "Cyclic world (torus, many wraps)",
+    "One-shot memory capacity (200 items)"
+  ]
+}
