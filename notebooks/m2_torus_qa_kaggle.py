@@ -8,6 +8,13 @@
 #
 # Design validated on CPU first (src/eval/torus_qa.py): a small readout on the grid cortex solves the
 # toroidal cells (76-99%) while a text-only proxy is at chance (11%). This cell runs it through Qwen.
+#
+# IMPORTANT FIX (after a first null run): the cortex is pre-trained self-supervised and FROZEN, and a
+# Euclidean-pretrained readout HIDES the toroidal cell from the LLM (frozen probe = chance 16%). The
+# trainer now pre-trains a TOROIDAL self-supervised target for --task torus (harmonics of L; place/grid
+# codes are environment-specific — a real toroidal grid manifold, Gardner 2022). Faithful CPU check:
+# frozen toroidally-pretrained cortex -> 85-98% on torus cells. If you ran the pre-fix version, DELETE
+# results/torus_llm/*.json before re-running cell 3.
 # RESUMABLE: skips runs already written. Copy each block into its own Kaggle cell. ~30-60 min/run on T4.
 # ===========================================================================
 

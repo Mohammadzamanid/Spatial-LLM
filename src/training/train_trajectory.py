@@ -46,7 +46,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, set_seed
 
-from ..data.trajectory_qa import (PROMPT, QUESTIONS, TrajectoryQADataset, answer_index,
+from ..data.trajectory_qa import (PROMPT, QUESTIONS, TORUS_L, TrajectoryQADataset, answer_index,
                                    collate, is_circular, make_trajectory_qa, num_classes,
                                    parse_answer)
 from ..models.trajectory_llm import TrajectoryLLM
@@ -194,7 +194,20 @@ def main(a):
         cortex = model.cortex
         mse = nn.MSELoss()
         if a.cortex_pretrain == "selfsup":
-            if a.code == "grid":
+            if task == "torus":
+                # TOROIDAL self-supervised target: harmonics of the world period L, so the (frozen)
+                # cortex readout encodes WRAPPED position (place/grid codes are environment-specific;
+                # a toroidal grid manifold is real — Gardner et al. 2022). A Euclidean target leaves
+                # the toroidal cell unrecoverable from the frozen readout (the LLM then sees nothing).
+                Kh = 6
+                ks = torch.arange(1, Kh + 1, device=device).float()
+                sup_head = nn.Linear(a.cortex_dim, 4 * Kh).to(device)
+
+                def selfsup_target(pos):                       # pos (B,3); xy made periodic with L
+                    ph = (2 * math.pi / TORUS_L) * pos[:, :2].unsqueeze(-1) * ks.view(1, 1, -1)
+                    return torch.cat([ph.sin(), ph.cos()], -1).reshape(pos.shape[0], -1)
+                print(f"selfsup TOROIDAL code: {Kh} harmonics of L={TORUS_L} (wrap-aware)", flush=True)
+            elif a.code == "grid":
                 m = a.n_centers if a.n_centers is not None else 256
                 freqs = _grid_freqs(m, a.grid_period_min, a.grid_period_max, device)
                 sup_head = nn.Linear(a.cortex_dim, 2 * m).to(device)
