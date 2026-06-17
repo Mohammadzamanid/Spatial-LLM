@@ -92,6 +92,10 @@ def collate(pairs, ranks, tok, device, max_len=48):
 
 @torch.no_grad()
 def evaluate(model, tok, pairs, ranks, xpos, device, ablate=False, scramble=False, bs=64):
+    """Score by comparing the Yes-vs-No next-token LOGITS at [ANSWER] (deterministic; no generation/
+    parsing, so a model that never says yes/no can't masquerade as 50%)."""
+    yes_id = tok(" Yes", add_special_tokens=False).input_ids[0]
+    no_id = tok(" No", add_special_tokens=False).input_ids[0]
     cor = tot = 0
     prompt_ids = tok(PROMPT, return_tensors="pt").input_ids.to(device)
     for k in range(0, len(pairs), bs):
@@ -100,8 +104,7 @@ def evaluate(model, tok, pairs, ranks, xpos, device, ablate=False, scramble=Fals
         if scramble:
             jj = jj[torch.randperm(len(jj))]
         pa = item_paths(xpos[ii], device); pbp = item_paths(xpos[jj], device)
-        ids = prompt_ids.expand(len(pb_), -1)
-        attn = torch.ones_like(ids)
+        ids = prompt_ids.expand(len(pb_), -1); attn = torch.ones_like(ids)
         text = model._embed()(ids); B = len(pb_)
         if ablate:
             sp = torch.zeros(B, 2 * model.n_tokens, text.shape[-1], device=device, dtype=text.dtype)
@@ -110,12 +113,10 @@ def evaluate(model, tok, pairs, ranks, xpos, device, ablate=False, scramble=Fals
             tb = model.to_tokens(model.cortex.encode(*pbp)).view(B, model.n_tokens, -1)
             sp = torch.cat([ta, tb], 1).to(text.dtype)
         fused = model.fusion(text, sp)
-        out = model.llm.generate(inputs_embeds=fused, attention_mask=attn, max_new_tokens=3, do_sample=False)
+        last = model.llm(inputs_embeds=fused, attention_mask=attn).logits[:, -1, :]   # next-token logits
+        pred = (last[:, yes_id] > last[:, no_id]).long().cpu()
         for r, (i, j) in enumerate(pb_):
-            t = tok.decode(out[r], skip_special_tokens=True).strip().lower()
-            yi, ni = t.find("yes"), t.find("no")
-            pred = 1 if (yi != -1 and (ni == -1 or yi < ni)) else 0
-            cor += int(pred == int(ranks[i] > ranks[j])); tot += 1
+            cor += int(int(pred[r]) == int(ranks[i] > ranks[j])); tot += 1
     return cor / max(tot, 1)
 
 
@@ -124,7 +125,8 @@ def main():
     ap.add_argument("--base_llm", default="Qwen/Qwen2.5-1.5B")
     ap.add_argument("--n_items", type=int, default=12)
     ap.add_argument("--spacing", type=float, default=0.5)
-    ap.add_argument("--epochs", type=int, default=4)
+    ap.add_argument("--steps", type=int, default=1500)        # gradient steps (jittered -> unlimited data)
+    ap.add_argument("--jitter", type=float, default=0.15)     # position noise (< spacing/2 keeps rank order)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--seed", type=int, default=0)
@@ -148,19 +150,19 @@ def main():
     train_params = [p for n, p in model.named_parameters() if p.requires_grad]   # LoRA + to_tokens + fusion
     opt = torch.optim.AdamW(train_params, lr=a.lr)
     model.train()
-    import random
-    rng = random.Random(a.seed)
-    steps_per = max(1, len(adj) // a.bs)
-    for ep in range(a.epochs):
-        order = adj * 8; rng.shuffle(order)            # oversample adjacent pairs
-        for k in range(0, len(order), a.bs):
-            batch = order[k:k + a.bs]
-            ii = torch.tensor([p[0] for p in batch]); jj = torch.tensor([p[1] for p in batch])
-            b = collate(batch, ranks, tok, device)
-            pa = item_paths(xpos[ii], device); pb = item_paths(xpos[jj], device)
-            out = two_path_out(model, b["input_ids"], b["attention_mask"], pa, pb, labels=b["labels"])
-            opt.zero_grad(); out.loss.backward(); opt.step()
-        print(f"epoch {ep}: loss {out.loss.item():.3f}", flush=True)
+    g = torch.Generator().manual_seed(a.seed)
+    adj_t = torch.tensor(adj)
+    for step in range(a.steps):                          # step-based; positions JITTERED -> unlimited data
+        sel = adj_t[torch.randint(len(adj_t), (a.bs,), generator=g)]
+        ii, jj = sel[:, 0], sel[:, 1]
+        xa = xpos[ii] + a.jitter * torch.randn(a.bs, generator=g)   # jitter keeps rank order (< spacing/2)
+        xb = xpos[jj] + a.jitter * torch.randn(a.bs, generator=g)
+        b = collate(list(zip(ii.tolist(), jj.tolist())), ranks, tok, device)
+        pa = item_paths(xa, device); pb = item_paths(xb, device)
+        out = two_path_out(model, b["input_ids"], b["attention_mask"], pa, pb, labels=b["labels"])
+        opt.zero_grad(); out.loss.backward(); opt.step()
+        if step % 200 == 0 or step == a.steps - 1:
+            print(f"step {step}: loss {out.loss.item():.3f}", flush=True)
 
     model.eval()
     res = {

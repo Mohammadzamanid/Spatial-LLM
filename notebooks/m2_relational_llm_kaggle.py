@@ -37,7 +37,7 @@ for seed in [0, 1, 2]:
     if os.path.exists(out):
         print(f"skip seed={seed}"); continue
     cmd = ["python", "-u", "-m", "src.training.train_relational",
-           "--n_items", "12", "--epochs", "4", "--seed", str(seed), "--out", out]
+           "--n_items", "12", "--steps", "1500", "--jitter", "0.15", "--seed", str(seed), "--out", out]
     print(f"\n>>> relational seed={seed}", flush=True); t0 = time.time()
     subprocess.run(cmd, check=True); print(f"    done in {(time.time()-t0)/60:.1f} min", flush=True)
 print("\nrelational sweep pass complete (re-run if any remain)")
