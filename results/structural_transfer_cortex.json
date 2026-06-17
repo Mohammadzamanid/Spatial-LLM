@@ -1,0 +1,22 @@
+{
+  "n_seeds": 4,
+  "results": {
+    "ti": {
+      "mean": 0.993,
+      "ci95": 0.013
+    },
+    "adj": {
+      "mean": 0.852,
+      "ci95": 0.043
+    },
+    "ti_shuffled_pos": {
+      "mean": 0.73,
+      "ci95": 0.221
+    },
+    "ti_scrambled_2nd": {
+      "mean": 0.695,
+      "ci95": 0.04
+    }
+  },
+  "verdict": "SOUND (frozen Euclidean cortex exposes the concept axis -> build the LLM cell)"
+}
