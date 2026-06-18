@@ -44,16 +44,22 @@ def item_paths(xpos, device):
     return heading.contiguous(), speed.contiguous(), vz
 
 
-def two_path_out(model, ids, attn, pa, pb, labels=None, ablate=False):
-    """Reuse TrajectoryLLM submodules: encode two item-paths -> concat spatial tokens -> fuse -> LLM."""
-    text = model._embed()(ids)
-    B = text.shape[0]
+def pair_spatial(model, pair_head, pa, pb, ablate=False):
+    """JOINT pair readout: concat the two FROZEN item codes -> trainable pair_head -> spatial tokens.
+    (The two-separate-token-sets version did not learn the comparison via cross-attention; concatenating
+    the codes makes the relation linearly accessible, matching the CPU validation. Cortex stays frozen;
+    each item still enters by its own position -> no leak.)"""
+    B = pa[0].shape[0]
+    llm_dim = model.to_tokens.out_features // model.n_tokens
     if ablate:
-        spatial = torch.zeros(B, 2 * model.n_tokens, text.shape[-1], device=text.device, dtype=text.dtype)
-    else:
-        ta = model.to_tokens(model.cortex.encode(*pa)).view(B, model.n_tokens, -1)
-        tb = model.to_tokens(model.cortex.encode(*pb)).view(B, model.n_tokens, -1)
-        spatial = torch.cat([ta, tb], dim=1).to(text.dtype)
+        return torch.zeros(B, model.n_tokens, llm_dim, device=pa[0].device)
+    code = torch.cat([model.cortex.encode(*pa), model.cortex.encode(*pb)], -1)   # (B, 2*cortex_dim), frozen
+    return pair_head(code).view(B, model.n_tokens, llm_dim)
+
+
+def two_path_out(model, pair_head, ids, attn, pa, pb, labels=None, ablate=False):
+    text = model._embed()(ids)
+    spatial = pair_spatial(model, pair_head, pa, pb, ablate).to(text.dtype)
     fused = model.fusion(text, spatial)
     return model.llm(inputs_embeds=fused, attention_mask=attn, labels=labels)
 
@@ -91,30 +97,32 @@ def collate(pairs, ranks, tok, device, max_len=48):
 
 
 @torch.no_grad()
-def evaluate(model, tok, pairs, ranks, xpos, device, ablate=False, scramble=False, bs=64):
-    """Score by comparing the Yes-vs-No next-token LOGITS at [ANSWER] (deterministic; no generation/
-    parsing, so a model that never says yes/no can't masquerade as 50%)."""
-    yes_id = tok(" Yes", add_special_tokens=False).input_ids[0]
-    no_id = tok(" No", add_special_tokens=False).input_ids[0]
+def evaluate(model, pair_head, tok, pairs, ranks, xpos, device, ablate=False, scramble=False, bs=32):
+    """Candidate-NLL scoring (consistent with training; no token-id/position guessing): for each pair
+    compute the model's NLL of ' Yes.' and ' No.' given the items' spatial tokens, pick the lower."""
+    plen = len(tok(PROMPT)["input_ids"])
+    cands = [" Yes.", " No."]
     cor = tot = 0
-    prompt_ids = tok(PROMPT, return_tensors="pt").input_ids.to(device)
     for k in range(0, len(pairs), bs):
-        pb_ = pairs[k:k + bs]
+        pb_ = pairs[k:k + bs]; B = len(pb_)
         ii = torch.tensor([p[0] for p in pb_]); jj = torch.tensor([p[1] for p in pb_])
         if scramble:
-            jj = jj[torch.randperm(len(jj))]
+            jj = jj[torch.randperm(B)]
         pa = item_paths(xpos[ii], device); pbp = item_paths(xpos[jj], device)
-        ids = prompt_ids.expand(len(pb_), -1); attn = torch.ones_like(ids)
-        text = model._embed()(ids); B = len(pb_)
-        if ablate:
-            sp = torch.zeros(B, 2 * model.n_tokens, text.shape[-1], device=device, dtype=text.dtype)
-        else:
-            ta = model.to_tokens(model.cortex.encode(*pa)).view(B, model.n_tokens, -1)
-            tb = model.to_tokens(model.cortex.encode(*pbp)).view(B, model.n_tokens, -1)
-            sp = torch.cat([ta, tb], 1).to(text.dtype)
-        fused = model.fusion(text, sp)
-        last = model.llm(inputs_embeds=fused, attention_mask=attn).logits[:, -1, :]   # next-token logits
-        pred = (last[:, yes_id] > last[:, no_id]).long().cpu()
+        sp = pair_spatial(model, pair_head, pa, pbp, ablate)
+        nlls = []
+        for cand in cands:
+            enc = tok([PROMPT + cand] * B, max_length=48, padding="max_length", truncation=True, return_tensors="pt")
+            ids = enc["input_ids"].to(device); attn = enc["attention_mask"].to(device)
+            labels = ids.clone(); labels[:, :plen] = -100; labels[attn == 0] = -100
+            text = model._embed()(ids)
+            fused = model.fusion(text, sp.to(text.dtype))
+            logits = model.llm(inputs_embeds=fused, attention_mask=attn).logits
+            lp = logits[:, :-1, :]; ll = labels[:, 1:]
+            nll = F.cross_entropy(lp.reshape(-1, lp.size(-1)), ll.reshape(-1),
+                                  reduction="none", ignore_index=-100).reshape(B, -1).sum(1)
+            nlls.append(nll)
+        pred = (nlls[0] < nlls[1]).long().cpu()       # 1 => " Yes." more likely
         for r, (i, j) in enumerate(pb_):
             cor += int(int(pred[r]) == int(ranks[i] > ranks[j])); tot += 1
     return cor / max(tot, 1)
@@ -140,6 +148,8 @@ def main():
         tok.pad_token = tok.eos_token
     model = TrajectoryLLM(base_llm=a.base_llm, cortex_constrained_velocity=True).to(device)
     pretrain_freeze_cortex(model, device, seed=a.seed)
+    llm_dim = model.to_tokens.out_features // model.n_tokens
+    pair_head = nn.Linear(2 * model.cortex.embed_dim, llm_dim * model.n_tokens).to(device)  # joint pair readout
 
     N, D = a.n_items, a.spacing
     ranks = torch.arange(N).float()
@@ -147,7 +157,7 @@ def main():
     adj = [(i, i + 1) for i in range(N - 1)] + [(i + 1, i) for i in range(N - 1)]
     far = [(i, j) for i in range(N) for j in range(N) if abs(i - j) >= 2]
 
-    train_params = [p for n, p in model.named_parameters() if p.requires_grad]   # LoRA + to_tokens + fusion
+    train_params = [p for p in model.parameters() if p.requires_grad] + list(pair_head.parameters())  # LoRA+fusion+pair_head
     opt = torch.optim.AdamW(train_params, lr=a.lr)
     model.train()
     g = torch.Generator().manual_seed(a.seed)
@@ -159,21 +169,21 @@ def main():
         xb = xpos[jj] + a.jitter * torch.randn(a.bs, generator=g)
         b = collate(list(zip(ii.tolist(), jj.tolist())), ranks, tok, device)
         pa = item_paths(xa, device); pb = item_paths(xb, device)
-        out = two_path_out(model, b["input_ids"], b["attention_mask"], pa, pb, labels=b["labels"])
+        out = two_path_out(model, pair_head, b["input_ids"], b["attention_mask"], pa, pb, labels=b["labels"])
         opt.zero_grad(); out.loss.backward(); opt.step()
         if step % 200 == 0 or step == a.steps - 1:
             print(f"step {step}: loss {out.loss.item():.3f}", flush=True)
 
     model.eval()
     res = {
-        "transitive_inference_far": round(evaluate(model, tok, far, ranks, xpos, device), 4),
-        "adjacent_trained": round(evaluate(model, tok, adj, ranks, xpos, device), 4),
-        "far_cortex_OFF": round(evaluate(model, tok, far, ranks, xpos, device, ablate=True), 4),
-        "far_scrambled_2nd": round(evaluate(model, tok, far, ranks, xpos, device, scramble=True), 4),
+        "transitive_inference_far": round(evaluate(model, pair_head, tok, far, ranks, xpos, device), 4),
+        "adjacent_trained": round(evaluate(model, pair_head, tok, adj, ranks, xpos, device), 4),
+        "far_cortex_OFF": round(evaluate(model, pair_head, tok, far, ranks, xpos, device, ablate=True), 4),
+        "far_scrambled_2nd": round(evaluate(model, pair_head, tok, far, ranks, xpos, device, scramble=True), 4),
     }
     # shuffled-position falsifier: re-place ranks at random positions, eval the SAME model
     xpos_sh = xpos[torch.randperm(N)]
-    res["far_shuffled_positions"] = round(evaluate(model, tok, far, ranks, xpos_sh, device), 4)
+    res["far_shuffled_positions"] = round(evaluate(model, pair_head, tok, far, ranks, xpos_sh, device), 4)
     print("\nSTRUCTURAL TRANSFER through the frozen LLM:", flush=True)
     for k, v in res.items():
         print(f"  {k:28} {v:.1%}", flush=True)
@@ -181,7 +191,13 @@ def main():
     if a.out:
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         json.dump({"seed": a.seed, "n_items": N, "results": res}, open(a.out, "w"), indent=2)
-        print(f"\nwrote {a.out}", flush=True)
+        ckpt = {f"model.{n}": p.detach().cpu() for n, p in model.named_parameters() if p.requires_grad}
+        ckpt.update({f"pair_head.{n}": p.detach().cpu() for n, p in pair_head.named_parameters()})
+        torch.save(ckpt, a.out.replace(".json", ".pt"))     # trainable weights (re-eval w/o re-training)
+        print(f"\nwrote {a.out} (+ .pt checkpoint)", flush=True)
+    if res["adjacent_trained"] < 0.6:
+        print("  WARNING: adjacent (TRAINED) acc ~chance despite low train loss -> eval/readout mismatch,"
+              " not a real null; the model fit the training answers.", flush=True)
 
 
 if __name__ == "__main__":
