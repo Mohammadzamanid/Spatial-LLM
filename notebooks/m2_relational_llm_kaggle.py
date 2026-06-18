@@ -30,17 +30,22 @@ print("model cached")
 
 
 # %% [cell 3] structural-transfer sweep (resumable). seeds 0..2; ~20-40 min each on T4.
-import os, subprocess, time
+import os, subprocess, time, glob
 OUTDIR = "results/relational_llm"; os.makedirs(OUTDIR, exist_ok=True)
+FRESH = True   # True = clear old JSONs and run all seeds fresh (prevents reading stale/degenerate results)
+if FRESH:
+    for f in glob.glob(f"{OUTDIR}/*.json"):
+        os.remove(f)
+    print("cleared old results in", OUTDIR)
 for seed in [0, 1, 2]:
     out = f"{OUTDIR}/relational_s{seed}.json"
     if os.path.exists(out):
-        print(f"skip seed={seed}"); continue
+        print(f"skip seed={seed} (exists)"); continue
     cmd = ["python", "-u", "-m", "src.training.train_relational",
            "--n_items", "12", "--steps", "1500", "--jitter", "0.15", "--seed", str(seed), "--out", out]
-    print(f"\n>>> relational seed={seed}", flush=True); t0 = time.time()
+    print(f"\n>>> relational seed={seed}  (watch the 'step N: loss' lines)", flush=True); t0 = time.time()
     subprocess.run(cmd, check=True); print(f"    done in {(time.time()-t0)/60:.1f} min", flush=True)
-print("\nrelational sweep pass complete (re-run if any remain)")
+print("\nrelational sweep pass complete")
 
 
 # %% [cell 4] aggregate -> mean +/- 95% CI + paired TI-vs-shuffled test (paste this back)
