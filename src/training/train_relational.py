@@ -15,13 +15,12 @@ Design validated on CPU first (src/eval/structural_transfer_cortex.py): through 
 cortex.encode, TI = 0.99 and the shuffled control collapses. This reuses the proven TrajectoryLLM
 components (cortex / to_tokens / gated fusion / LoRA-LLM); the only addition is the two-item forward.
 
-    python -m src.training.train_relational --n_items 12 --epochs 4 --seed 0 --out results/relational_llm_s0.json
+    python -m src.training.train_relational --n_items 12 --steps 1200 --seed 0 --out results/relational_llm/relational_s0.json
 """
 import argparse
 import json
 import math
 import os
-from collections import Counter
 
 import torch
 import torch.nn as nn
