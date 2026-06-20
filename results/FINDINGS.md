@@ -680,6 +680,18 @@ isolates the metric as the cause.) This is the representation-level validation o
 experiment, where the MLP readout is replaced by a frozen Qwen+LoRA answering a linguistic comparison.
 (`results/structural_transfer.json`, `results/structural_transfer.svg`.)
 
+*LLM-transfer of the relational comparison — a negative result, reported.* We tried to lift this to a
+frozen Qwen (`src/training/train_relational.py`, `notebooks/m2_relational_llm_kaggle.py`): each item
+enters by its own position through the frozen cortex; a LoRA-Qwen reads both and answers "is the first
+ranked higher?", trained on adjacent pairs. Across 4 configurations and 3 independent evaluators
+(generation, Yes/No-logit, candidate-NLL), it stayed at **exactly 50% including on the trained pairs** —
+training loss sits at the trivial answer-token floor while the Yes/No token stays at chance, i.e. the
+LLM never learns to *use* the spatial channel for a **two-item comparison** (single-item tasks like
+return/distance/bearing/torus do learn, because the answer is a direct readout of one trajectory). So
+the TEM claim is supported at the representation level (TI 0.99 through the real frozen cortex) but
+**does not currently transfer through the frozen-LLM fusion interface for pairwise comparison** — an
+honest limitation and a target for future work (e.g. a comparison-aware fusion or a larger adapter).
+
 ### The phase diagram — *when* each inductive bias wins (synthesis)
 
 The negative/tie results stop being a deflation once organized into a predictive map. `src/eval/phase_diagram.py`
