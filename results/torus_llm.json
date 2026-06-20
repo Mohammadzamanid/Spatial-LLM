@@ -1,0 +1,14 @@
+{
+  "source": "Kaggle T4, Qwen2.5-1.5B + LoRA, src/training/train_trajectory.py --task torus --constrained_velocity",
+  "design": "frozen cortex with TOROIDAL self-supervised pretraining (harmonics of L=1.6); moves never in the prompt; a torus has no faithful Euclidean text description (leakage rebuttal)",
+  "metric": "exact 9-cell accuracy: cortex-ON vs cortex-OFF (text-only) per path length; chance ~11-18%",
+  "n_seeds": 1,
+  "eval_lengths": [8, 16, 24],
+  "results_by_len": {
+    "8":  {"cortex_on_exact": 0.94, "cortex_off_exact": 0.11, "on_within1": 0.97, "off_within1": 0.27, "tag": "train-range"},
+    "16": {"cortex_on_exact": 0.78, "cortex_off_exact": 0.10, "on_within1": 0.88, "off_within1": 0.37, "tag": "extrapolation"},
+    "24": {"cortex_on_exact": 0.70, "cortex_off_exact": 0.06, "on_within1": 0.84, "off_within1": 0.32, "tag": "extrapolation"}
+  },
+  "headline": "cortex-ON >> text-only-OFF (chance) on a non-Euclidean (toroidal) world, flat-ish to 3x training length: the LLM causally reads a path-integrated toroidal-cell code it cannot get from text. Single-seed; multi-seed (n=3) pending.",
+  "contrast": "single-item readouts (return/distance/bearing/torus) transfer to the frozen LLM; pairwise comparison (relational) does not (results/relational_llm.json) -- an honest boundary."
+}

@@ -652,6 +652,25 @@ positive, significant win. This is simultaneously the **definitive leakage rebut
 faithful Euclidean text description, so an LLM's text prior cannot solve it; only a code that has actually
 path-integrated the cyclic geometry can. (`results/torus.json`, `results/torus.svg`.)
 
+**Confirmed through the frozen LLM — the leakage-proof causal headline (`--task torus`).** A frozen
+cortex, **self-supervised-pretrained on the torus** (toroidal harmonics of L; a Euclidean-pretrained
+readout hides the wrapped cell — see the boundary note below), lets a LoRA-Qwen answer "which of 9
+wrap-around cells are you in?" — a question with no faithful Euclidean text description, with the moves
+**never in the prompt** (n=1 seed so far; `results/torus_llm.json`):
+
+| torus-cell exact acc | T=8 (train) | T=16 (extrapolation) | T=24 (extrapolation) |
+|---|---|---|---|
+| **cortex-ON** | **94%** | **78%** | **70%** |
+| text-only OFF | 11% | 10% | 6% |
+
+cortex-ON sits **far above the text-only control (~chance)** and stays high to **3× the training length**
+(within-1: 97/88/84% vs 27/37/32%). Because the world is a torus (no Euclidean text prior) and the
+self-motion reaches Qwen only through the cortex, this is a clean *causal* statement: the LLM answers by
+**reading a path-integrated toroidal code**, not by exploiting a language prior over Euclidean space.
+This is the single-item counterpart to the §"structural transfer" negative: **single-item spatial
+readouts transfer to the frozen LLM (even on a non-Euclidean world); pairwise comparison does not** — an
+honest, informative boundary. (Multi-seed n=3 + CIs pending.)
+
 ### Structural transfer — a space-trained metric does abstract relational inference (TEM, with falsifiers)
 
 The Tolman-Eichenbaum hypothesis is that the *same* metric code maps abstract relational structure, not

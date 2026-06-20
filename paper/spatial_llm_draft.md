@@ -193,6 +193,17 @@ spatial competence to a frozen LLM (ON ≫ OFF), while the *grid-over-alternativ
 and, on the hardest task, within noise at n=3 — resolving it needs n≥8 (and may remain a bearing-only
 effect). (Figure 5: `results/extrapolation_llm.svg`.)
 
+**Leakage-proof causal transfer on a non-Euclidean world (`--task torus`).** The cleanest language
+result: a frozen cortex *pretrained on the torus* lets Qwen answer "which wrap-around cell are you in?"
+— a question with no faithful Euclidean text description, with the moves never in the prompt — at
+**cortex-ON 94/78/70%** (T=8/16/24) vs **text-only-OFF 11/10/6% (chance)**, flat to 3× length (n=1 seed;
+multi-seed pending; `results/torus_llm.json`). Because the world is cyclic, a language prior over
+Euclidean space cannot substitute; the LLM must be *reading the path-integrated toroidal code*. This
+single-item readout transfers cleanly — whereas a two-item **comparison** does **not** train through the
+same frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance across seeds/evaluators).
+That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
+itself a finding and an honest scope statement.
+
 ## 8. Related work ✎
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
