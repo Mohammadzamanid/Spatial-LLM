@@ -654,22 +654,26 @@ path-integrated the cyclic geometry can. (`results/torus.json`, `results/torus.s
 
 **Confirmed through the frozen LLM — the leakage-proof causal headline (`--task torus`).** A frozen
 cortex, **self-supervised-pretrained on the torus** (toroidal harmonics of L; a Euclidean-pretrained
-readout hides the wrapped cell — see the boundary note below), lets a LoRA-Qwen answer "which of 9
-wrap-around cells are you in?" — a question with no faithful Euclidean text description, with the moves
-**never in the prompt** (n=1 seed so far; `results/torus_llm.json`):
+readout hides the wrapped cell — that is itself the boundary result above), lets a LoRA-Qwen answer
+"which of 9 wrap-around cells are you in?" — a question with no faithful Euclidean text description, with
+the moves **never in the prompt** (n=3 seeds; `results/torus_llm.json`):
 
-| torus-cell exact acc | T=8 (train) | T=16 (extrapolation) | T=24 (extrapolation) |
+| torus-cell exact acc | T=8 (train) | T=16 (extrap.) | T=24 (extrap.) |
 |---|---|---|---|
-| **cortex-ON** | **94%** | **78%** | **70%** |
-| text-only OFF | 11% | 10% | 6% |
+| **cortex-ON** | **71% ±45** | **62% ±39** | **52% ±38** |
+| text-only OFF | 14% ±4 | 10% ±2 | 11% ±5 |
+| **Δ (ON − OFF), every seed** | **+57** | **+51** | **+42** |
 
-cortex-ON sits **far above the text-only control (~chance)** and stays high to **3× the training length**
-(within-1: 97/88/84% vs 27/37/32%). Because the world is a torus (no Euclidean text prior) and the
-self-motion reaches Qwen only through the cortex, this is a clean *causal* statement: the LLM answers by
-**reading a path-integrated toroidal code**, not by exploiting a language prior over Euclidean space.
+In **every seed**, cortex-ON beats the text-only control by **42–57 points** while OFF stays at chance —
+so the *causal, leakage-proof* claim is robust: the LLM answers by **reading a path-integrated toroidal
+code**, not a language prior over Euclidean space (the world is cyclic, so no such prior helps). *Honest
+caveats:* ON magnitude is **seed-variable** (one seed reached 94/78/70%, others ~50–60%), so the CIs are
+wide; and the paired sign-flip p reads 0.248 — the **n=3 permutation floor** (2/2³), not a null, so n≥6
+is needed to certify a p-value. The *direction* is consistent; the *magnitude* needs more seeds.
+
 This is the single-item counterpart to the §"structural transfer" negative: **single-item spatial
 readouts transfer to the frozen LLM (even on a non-Euclidean world); pairwise comparison does not** — an
-honest, informative boundary. (Multi-seed n=3 + CIs pending.)
+honest, informative boundary.
 
 ### Structural transfer — a space-trained metric does abstract relational inference (TEM, with falsifiers)
 

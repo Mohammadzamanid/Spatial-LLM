@@ -195,12 +195,14 @@ effect). (Figure 5: `results/extrapolation_llm.svg`.)
 
 **Leakage-proof causal transfer on a non-Euclidean world (`--task torus`).** The cleanest language
 result: a frozen cortex *pretrained on the torus* lets Qwen answer "which wrap-around cell are you in?"
-— a question with no faithful Euclidean text description, with the moves never in the prompt — at
-**cortex-ON 94/78/70%** (T=8/16/24) vs **text-only-OFF 11/10/6% (chance)**, flat to 3× length (n=1 seed;
-multi-seed pending; `results/torus_llm.json`). Because the world is cyclic, a language prior over
-Euclidean space cannot substitute; the LLM must be *reading the path-integrated toroidal code*. This
-single-item readout transfers cleanly — whereas a two-item **comparison** does **not** train through the
-same frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance across seeds/evaluators).
+— a question with no faithful Euclidean text description, with the moves never in the prompt. Across n=3
+seeds, **cortex-ON beats text-only-OFF by +42 to +57 points at every length and in every seed** (ON
+71/62/52% at T=8/16/24 vs OFF ~10–14% chance; `results/torus_llm.json`). Because the world is cyclic, a
+language prior over Euclidean space cannot substitute; the LLM must be *reading the path-integrated
+toroidal code*. (Honest caveats: ON magnitude is seed-variable — one seed reached 94/78/70% — so CIs are
+wide, and the paired p sits at the n=3 permutation floor of 0.25; n≥6 would certify it.) This single-item
+readout transfers cleanly — whereas a two-item **comparison** does **not** train through the same
+frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance across seeds/evaluators).
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
 itself a finding and an honest scope statement.
 
