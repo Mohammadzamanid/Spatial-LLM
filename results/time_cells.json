@@ -1,29 +1,46 @@
 {
   "n_seeds": 8,
-  "TMAX": 20.0,
-  "K": 50,
-  "weber": 0.2,
-  "sigma0": 0.4,
+  "T": 50,
+  "hidden": 128,
+  "noise": 0.06,
+  "act_cost": 0.001,
+  "iters": 2000,
   "results": {
-    "weber_corr_widening": {
-      "mean": 0.949,
-      "ci95": 0.009
+    "decode_mae": {
+      "mean": 0.1975,
+      "ci95": 0.0396
     },
-    "weber_corr_fixed": {
-      "mean": 0.006,
-      "ci95": 0.0429
+    "ctrl_decode_mae": {
+      "mean": 3.5637,
+      "ci95": 1.3704
+    },
+    "time_cell_frac": {
+      "mean": 0.1699,
+      "ci95": 0.0305
+    },
+    "ctrl_time_cell_frac": {
+      "mean": 0.0107,
+      "ci95": 0.0126
+    },
+    "early_fraction": {
+      "mean": 0.916,
+      "ci95": 0.0443
+    },
+    "width_latency_corr": {
+      "mean": 0.671,
+      "ci95": 0.097
+    },
+    "scalar_sigma_corr": {
+      "mean": 0.9761,
+      "ci95": 0.0106
     },
     "weber_fraction_cv": {
-      "mean": 0.0924,
-      "ci95": 0.0043
+      "mean": 0.1506,
+      "ci95": 0.0156
     },
-    "decode_elapsed_r2": {
-      "mean": 0.9964,
-      "ci95": 0.0002
-    },
-    "order_acc_separated": {
-      "mean": 1.0,
-      "ci95": 0.0
+    "ctrl_weber_fraction_cv": {
+      "mean": 0.2226,
+      "ci95": 0.0876
     }
   }
 }

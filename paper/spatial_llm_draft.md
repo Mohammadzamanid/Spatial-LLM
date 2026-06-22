@@ -36,9 +36,9 @@ where a *space-trained, frozen* metric supports transitive inference and schema 
 shuffling the metric (p=0.009). Finally, prompted by the neuroscience of space *and time*, we extend the
 purely-geometric cortex along the two axes it omits: a **successor-representation** map that plans
 detours around barriers where a metric map stalls (100% vs 62%, paired p=0.009) and bends its fields to
-geodesic rather than Euclidean distance, and **time cells** whose fields widen with latency to reproduce
-scalar (Weber) timing as a readout-independent property of the code — each validated against its own
-falsifier on CPU.
+geodesic rather than Euclidean distance, and a recurrent substrate that, trained only to read elapsed
+time, **grows time cells** whose latency-dependent widening reproduces the brain's scalar (Weber) timing
+law unbidden (17% of units vs 1% untrained) — these temporal signatures *emerge*, not imposed.
 
 ---
 
@@ -191,15 +191,17 @@ Euclidean distance-to-goal stalls at **61.7% ± 9.3%** — the wall makes the st
 and a **TD-learned** SR matches the closed form at **0.97 ± 0.003**, so it is acquired from experience,
 not merely constructed (`results/successor.{json,svg}`).
 
-**Temporal map (`src/eval/time_cells.py`, Figure 11).** Time cells tile elapsed time with fields that
-**widen with their latency**; this *causes* scalar (Weber) timing, which we verify *readout-independently*:
-the just-noticeable difference **JND(t) = 1/‖da/dt‖** (inverse local discriminability) grows ~linearly
-with elapsed time (**corr(JND, t) = 0.95 ± 0.01**) where a fixed-width control is flat (**0.01 ± 0.04**),
-with a constant Weber fraction in the scale-invariant regime (CV 0.09). Decoded with the standard,
-**parameter-free population vector**, the code recovers elapsed time at **R² = 0.996** and event order at
-**100%** — so "the code is usable" owes nothing to a fitted readout (the widening fields are deliberately
-collinear, rank 26/50, which is precisely why a naive least-squares readout fails and the population
-vector is the faithful decode). `results/time_cells.{json,svg}`.
+**Temporal map (`src/eval/time_cells.py`, Figure 11).** We do not build a time-cell basis; we let it
+emerge. A generic recurrent substrate (`src/models/neuro/temporal_cortex.py`: leaky rectified rate-RNN,
+one uniform time-constant, learned recurrence, private noise — nothing timing-specific) is trained on a
+single task, "report elapsed time when probed at a random moment," with a metabolic activity cost; we
+then measure what appears (n=8; an untrained net of the same architecture is the control). A **precise
+timer emerges** (decode error **0.20 ± 0.04** steps vs untrained **3.6**); its code is a population of
+**time cells** (**17%** of units vs untrained **1%**, single-peaked, tiling, **92% denser in the first
+half** — Mau 2018) whose **fields widen with latency** (corr **+0.67**, every seed); and it obeys
+**Weber's law** — decoded-time SD grows with elapsed time at a ~constant Weber fraction (CV **0.15**,
+scale-invariant; untrained 0.22). None of these were in the loss: the brain's interval-timing signatures
+are *measured, not designed*. `results/time_cells.{json,svg}`.
 
 Together these give the cortex a map that **plans** (detours a metric map cannot) and **keeps time**
 (with the brain's scalar law) — the two axes a purely-spatial code omits, each falsified before transfer.

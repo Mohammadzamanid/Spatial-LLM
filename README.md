@@ -118,7 +118,7 @@ A metric map only points; a **predictive** map plans. The **successor representa
 
 ### 11 · It keeps *time* — hippocampal time cells with scalar (Weber) timing
 
-Beyond space, the cortex tiles **elapsed time** with **time cells** whose fields **widen with their latency** (Eichenbaum 2014; MacDonald 2011; Howard's scale-invariant timing). That widening *causes* the brain's signature **scalar (Weber) timing**: temporal precision — the just-noticeable difference JND = 1/‖da/dt‖ — degrades ~linearly with elapsed time (**corr 0.95**) where a fixed-width control stays flat (**0.01**), measured from the code geometry, not a decoder. The standard parameter-free **population vector** still reads elapsed time (**R²=0.996**) and event order (**100%**).
+Beyond space, we don't hand-build time cells — we let them **emerge**. A generic recurrent substrate (leaky rectified rate-RNN, one uniform time-constant, learned recurrence, private noise — nothing timing-specific) is trained on one task: *report how much time has elapsed since a start pulse*. With nothing about time in the loss, there **emerge** (measured against an untrained control): a precise timer (decode error **0.20 steps** vs untrained **3.6**), a population of **time cells** (**17%** of units vs **1%**, single-peaked, tiling, and **92% denser early** — Mau 2018) whose **fields widen with latency** (corr **+0.67**), and the brain's **scalar (Weber) timing** law — decoded-time SD grows with elapsed time at a ~constant Weber fraction (CV **0.15**, scale-invariant; Gibbon 1977).
 
 <img src="results/time_cells.svg" width="640" alt="Time cells widen with latency, reproducing scalar (Weber) timing"/>
 

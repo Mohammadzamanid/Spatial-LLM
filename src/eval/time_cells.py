@@ -1,31 +1,25 @@
 """
 src/eval/time_cells.py
 
-THE TEMPORAL AXIS — hippocampal TIME CELLS (Eichenbaum 2014; MacDonald et al. 2011; Howard's
-scale-invariant timing; Mau et al. 2018; Tacikowski et al. 2024), the dimension our purely-spatial
-cortex omits.
+THE TEMPORAL AXIS — do hippocampal TIME CELLS and the brain's SCALAR (Weber) TIMING law EMERGE from a
+generic recurrent substrate, the way grid cells emerge from path integration (src/eval/emergence.py)?
+NOTHING about time cells, field widening, or scalar timing is built into the substrate
+(src/models/neuro/temporal_cortex.py: a leaky rectified rate-RNN, one uniform time-constant, learned
+recurrence, private noise) or into the LOSS. We train it on a single task — "report how much time has
+elapsed since the start pulse, when probed at a random moment" — with a metabolic activity cost, and
+then MEASURE, purely from the trained units:
 
-Time cells fire at successive moments within a structured interval, tiling ELAPSED TIME the way place
-cells tile space. Their defining, falsifiable signature is SCALAR (Weber) timing: temporal precision
-degrades in proportion to elapsed time, because time fields WIDEN with their latency. We build a
-faithful time-cell basis and verify, readout-independently where it matters, that:
+  1. TIME CELLS emerge — units fire as single-peaked fields that TILE the interval, and (unprompted)
+     are DENSER at short latencies, the real biological gradient (Mau et al. 2018).
+  2. FIELDS WIDEN with latency — field width correlates with peak time (corr -> +1). Never in the loss;
+     it falls out of the learned dynamics. This is the mechanistic substrate of scalar timing.
+  3. SCALAR / WEBER TIMING emerges — the trial-to-trial standard deviation of the network's decoded
+     time grows ~linearly with elapsed time (corr(sigma_t, t) -> 1; ~constant Weber fraction), the
+     defining behavioral law of interval timing (Gibbon 1977). It arises from private noise integrated
+     through the widening code.
 
-  1. SCALAR TIMING / WEBER'S LAW (the signature, measured from the code geometry, not a decoder):
-     the just-noticeable-difference in elapsed time JND(t) = 1 / ||da/dt|| (the inverse of the
-     population's local discriminability) grows ~linearly with elapsed time when fields widen
-     (corr(JND, t) -> 1), and is FLAT for fixed-width fields (corr -> 0). The Weber fraction JND/t
-     stabilizes to a constant in the scale-invariant regime (a positive floor at short intervals is
-     the generalized Weber law). The widening *causes* scalar timing; because JND is read off the
-     code geometry itself it cannot be a trained-readout artifact.
-  2. The code IDENTIFIES elapsed time and EVENT ORDER for separated events. We decode with the
-     standard, parameter-free POPULATION VECTOR (center of mass) -- no fitting, nothing to tune, so
-     "the code is usable" is not a property of a learned readout. (The widening late fields are
-     deliberately collinear, which is exactly why a naive least-squares readout is ill-conditioned;
-     the population vector sidesteps that and is the textbook neuroscience decode.)
-
-Tiling is mildly jittered per seed (real time-cell centers are irregular) for an honest multi-seed
-CI; it is held ~uniform in density on purpose so that the fixed-width control is genuinely flat and
-WIDENING is the sole manipulated cause of scalar timing.
+An UNTRAINED substrate (same architecture + noise, random weights) is the control: the signatures are
+absent until the task is learned, so they are EMERGENT, not architectural artifacts.
 
 Multi-seed, mean +/- 95% CI. Writes results/time_cells.json + .svg.
 
@@ -38,38 +32,24 @@ import os
 
 import torch
 
-TMAX = 20.0            # length of the interval (elapsed-time units)
-K = 50                 # number of time cells
-WEBER = 0.20           # field-widening slope (Weber coefficient)
-SIGMA0 = 0.4           # field width at t=0 (the short-interval timing floor)
+from src.models.neuro.temporal_cortex import TemporalCortex
+
+T = 50              # interval length (steps)
+HIDDEN = 128
+NOISE = 0.06        # private membrane noise (the source of scalar variability)
+ACT_COST = 1e-3     # metabolic / efficient-coding penalty (generic prior; not timing-specific)
 
 
-def fields(centers, weber=WEBER, sigma0=SIGMA0, fixed=False):
-    """Field widths. Scalar (Weber) widening sigma_k = sigma0*(1 + weber*center_k): later fields are
-    broader, the empirical hallmark of time cells. fixed=True holds width at the mean (the control)."""
-    if fixed:
-        return torch.full_like(centers, sigma0 * (1 + weber * TMAX / 2))
-    return sigma0 * (1 + weber * centers)
+def make_trial(B, gen):
+    x = torch.zeros(B, T, 2); x[:, 0, 0] = 1.0                       # start pulse (channel 0)
+    probe = torch.randint(T // 5, T, (B,), generator=gen)
+    x[torch.arange(B), probe, 1] = 1.0                              # probe pulse (channel 1): report now
+    return x, probe
 
 
-def population(t, centers, sig):
-    return torch.exp(-((t.unsqueeze(-1) - centers.unsqueeze(0)) ** 2) / (2 * sig.unsqueeze(0) ** 2))
-
-
-def com_decode(A, centers):
-    """Population-vector / center-of-mass decode of elapsed time. Parameter-free, no fitting -- the
-    standard neuroscience population decode, robust to the collinear widening fields."""
-    return (A @ centers) / (A.sum(1) + 1e-9)
-
-
-def jnd_vs_time(centers, fixed, dt=0.05):
-    """Just-noticeable-difference in elapsed time JND(t) = 1 / ||da/dt||  (inverse local
-    discriminability of the population code). Returns the interior t grid and JND(t), measured from
-    the code geometry -- no decoder, so it cannot be a readout artifact."""
-    sig = fields(centers, fixed=fixed)
-    t = torch.linspace(1.0, TMAX - 1.0, 60)                       # interior (avoid edge truncation)
-    speed = (population(t + dt, centers, sig) - population(t, centers, sig)).norm(dim=1) / dt
-    return t, 1.0 / (speed + 1e-9)
+def ridge(A, y, lam=1.0):
+    Ab = torch.cat([A, torch.ones(A.shape[0], 1)], 1)
+    return torch.linalg.solve(Ab.t() @ Ab + lam * torch.eye(Ab.shape[1]), Ab.t() @ y)
 
 
 def _corr(a, b):
@@ -77,109 +57,162 @@ def _corr(a, b):
     return (a @ b / (a.norm() * b.norm() + 1e-9)).item()
 
 
-def run_seed(seed, n=4000):
-    g = torch.Generator().manual_seed(seed)
-    # mildly jittered tiling (real time-cell centers are irregular); density held ~uniform so the
-    # fixed-width control stays flat and WIDENING is the only manipulated cause of scalar timing.
-    base = torch.linspace(0.0, TMAX, K); spacing = TMAX / (K - 1)
-    centers = (base + 0.35 * spacing * torch.randn(K, generator=g)).clamp(0.0, TMAX).sort().values
+def probe_substrate(net, gen, n=600):
+    """Run many noisy trials through a substrate and measure the emergent temporal signatures."""
+    with torch.no_grad():
+        x, probe = make_trial(n, gen)
+        R = net.dynamics(x, noise=NOISE, gen=gen)                    # (n,T,H) rates
+        A = R.mean(0)                                                # (T,H) tuning curves
+        ts = torch.arange(T).float()
 
-    # 1. scalar timing (Weber): JND grows ~linearly with elapsed time for widening fields, flat for fixed
-    t, jnd_w = jnd_vs_time(centers, fixed=False)
-    _, jnd_f = jnd_vs_time(centers, fixed=True)
-    weber_corr_widening = _corr(t, jnd_w)
-    weber_corr_fixed = _corr(t, jnd_f)
-    # Weber fraction JND/t stabilizes to a constant in the scale-invariant regime (t > TMAX/2);
-    # low coefficient of variation there = scale-invariant timing (a floor remains at short t).
-    wf = (jnd_w / t)[t > TMAX / 2]
-    weber_fraction_cv = (wf.std(unbiased=True) / (wf.mean() + 1e-9)).item()
+        # decode elapsed time; trial-to-trial std vs t = scalar timing
+        W = ridge(A, ts)
+        that = torch.cat([R, torch.ones(n, T, 1)], -1) @ W
+        mae = (that.mean(0) - ts).abs().mean().item()                # mean decode error (steps)
+        sigma = that.std(0)
+        mid = (ts > 5) & (ts < T - 5)
+        scalar_corr = _corr(ts[mid], sigma[mid])
+        cv = sigma[mid] / ts[mid]
+        weber_cv = (cv.std(unbiased=True) / (cv.mean() + 1e-9)).item()
 
-    # 2. the code identifies elapsed time (parameter-free population-vector decode) and event order
-    sig = fields(centers)
-    te = torch.rand(n, generator=g) * TMAX
-    pred = com_decode(population(te, centers, sig), centers)
-    decode_r2 = (1 - ((pred - te) ** 2).sum() / (((te - te.mean()) ** 2).sum() + 1e-9)).item()
-    e1 = torch.rand(n, generator=g) * TMAX; e2 = torch.rand(n, generator=g) * TMAX
-    sep = (e2 - e1).abs() > 0.15 * TMAX                           # well-separated events
-    p1 = com_decode(population(e1, centers, sig), centers)
-    p2 = com_decode(population(e2, centers, sig), centers)
-    order_acc = (((p2 - p1) > 0) == ((e2 - e1) > 0))[sep].float().mean().item()
+        # time cells: single-peaked fields tiling the interval
+        Ar = A / (A.max(0).values + 1e-6)
+        peak = Ar.argmax(0).float(); width = (Ar > 0.5).float().sum(0)
+        near = torch.stack([Ar[max(0, int(p) - 5):int(p) + 6, u].sum() for u, p in enumerate(peak)])
+        active = A.max(0).values > 0.05 * A.max()
+        is_tc = active & (near / (Ar.sum(0) + 1e-6) > 0.5) & (width < T * 0.5) & (peak > 1) & (peak < T - 2)
+        tc = is_tc.nonzero().squeeze(-1)
+        frac_tc = is_tc.float().mean().item()
+        width_corr = _corr(peak[tc], width[tc]) if len(tc) > 5 else float("nan")
+        early_frac = (peak[tc] < T / 2).float().mean().item() if len(tc) > 0 else float("nan")
+    arrays = {"A": A, "peak": peak, "width": width, "tc": tc, "sigma": sigma, "ts": ts, "Ar": Ar}
+    return {"decode_mae": mae, "time_cell_frac": frac_tc, "width_latency_corr": width_corr,
+            "scalar_sigma_corr": scalar_corr, "weber_fraction_cv": weber_cv,
+            "early_fraction": early_frac}, arrays
 
-    return {"weber_corr_widening": weber_corr_widening, "weber_corr_fixed": weber_corr_fixed,
-            "weber_fraction_cv": weber_fraction_cv, "decode_elapsed_r2": decode_r2,
-            "order_acc_separated": order_acc}
+
+def run_seed(seed, iters=2000, want_arrays=False):
+    g = torch.Generator().manual_seed(seed); torch.manual_seed(seed)
+    net = TemporalCortex(hidden=HIDDEN, n_in=2, n_out=1)
+    opt = torch.optim.Adam(net.parameters(), 3e-3)
+    for _ in range(iters):
+        x, probe = make_trial(96, g)
+        pred, R = net(x, noise=NOISE, gen=g)
+        pred = pred[torch.arange(96), probe].squeeze(-1)
+        loss = ((pred - probe.float() / T) ** 2).mean() + ACT_COST * R.pow(2).mean()
+        opt.zero_grad(); loss.backward(); opt.step()
+    trained, arr = probe_substrate(net, g)
+
+    # control: an UNTRAINED substrate (same architecture + noise), to show the signatures are emergent
+    ctrl_net = TemporalCortex(hidden=HIDDEN, n_in=2, n_out=1)
+    control, carr = probe_substrate(ctrl_net, g)
+    out = {**trained, "ctrl_decode_mae": control["decode_mae"],
+           "ctrl_time_cell_frac": control["time_cell_frac"],
+           "ctrl_weber_fraction_cv": control["weber_fraction_cv"]}
+    return (out, arr, carr) if want_arrays else (out, None, None)
 
 
 def ci95(vals):
+    vals = [v for v in vals if v == v]                               # drop nan
+    if not vals:
+        return float("nan"), 0.0
     t = torch.tensor(vals, dtype=torch.float); n = len(vals)
     sd = t.std(unbiased=True).item() if n > 1 else 0.0
-    return round(t.mean().item(), 4), round(1.96 * sd / math.sqrt(n), 4)
+    return round(t.mean().item(), 4), round(1.96 * sd / math.sqrt(n), 4) if n > 1 else 0.0
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--seeds", type=int, default=8); a = ap.parse_args()
-    per = [run_seed(s) for s in range(a.seeds)]
-    keys = ["weber_corr_widening", "weber_corr_fixed", "weber_fraction_cv",
-            "decode_elapsed_r2", "order_acc_separated"]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seeds", type=int, default=8)
+    ap.add_argument("--iters", type=int, default=2000)
+    a = ap.parse_args()
+    per = []
+    arr0 = carr0 = None
+    for s in range(a.seeds):
+        out, arr, carr = run_seed(s, iters=a.iters, want_arrays=(s == 0))
+        if s == 0:
+            arr0, carr0 = arr, carr
+        per.append(out)
+        print(f"  seed {s}: time-cells {out['time_cell_frac']:.0%}, widen corr {out['width_latency_corr']:+.2f}, "
+              f"scalar corr {out['scalar_sigma_corr']:+.2f}, decode MAE {out['decode_mae']:.2f} steps", flush=True)
+
+    keys = ["decode_mae", "ctrl_decode_mae", "time_cell_frac", "ctrl_time_cell_frac",
+            "early_fraction", "width_latency_corr", "scalar_sigma_corr",
+            "weber_fraction_cv", "ctrl_weber_fraction_cv"]
     agg = {k: ci95([p[k] for p in per]) for k in keys}
-    lab = {"weber_corr_widening": "Weber: corr(JND, elapsed time), WIDENING fields (->1)",
-           "weber_corr_fixed": "  control: same with FIXED-width fields (->0)",
-           "weber_fraction_cv": "Weber fraction JND/t, CV in scale-invariant regime (low)",
-           "decode_elapsed_r2": "decode elapsed time, R^2 (pop-vector, parameter-free)",
-           "order_acc_separated": "event-order accuracy, well-separated events"}
-    print(f"TIME CELLS — the temporal axis (n={a.seeds} seeds; mean ± 95% CI)\n" + "=" * 70, flush=True)
+    lab = {"decode_mae": "elapsed-time decode error (steps) — a precise timer EMERGED",
+           "ctrl_decode_mae": "  control (UNTRAINED, same architecture): cannot time",
+           "time_cell_frac": "time cells emerged (fraction of units, single-peaked, tiling)",
+           "ctrl_time_cell_frac": "  control (UNTRAINED): time-cell fraction",
+           "early_fraction": "  of those, fraction peaking in first half (denser-early; Mau 2018)",
+           "width_latency_corr": "FIELD WIDENING: corr(field width, peak latency) (every seed +; emergent)",
+           "scalar_sigma_corr": "SCALAR TIMING: corr(decoded-time SD, elapsed time) (->+1)",
+           "weber_fraction_cv": "  scale-invariance: Weber fraction SD/t, CV (LOW = Weber's law)",
+           "ctrl_weber_fraction_cv": "  control (UNTRAINED): Weber fraction CV"}
+    print(f"\nTIME CELLS — emergent temporal code (n={a.seeds} seeds; mean ± 95% CI)\n" + "=" * 72, flush=True)
     for k in keys:
-        print(f"  {lab[k]:60} {agg[k][0]:.3f} ± {agg[k][1]:.3f}", flush=True)
-    print(f"\n  -> widening time fields REPRODUCE scalar/Weber timing (JND grows with elapsed time, corr "
-          f"{agg['weber_corr_widening'][0]:.2f}; Weber fraction ~constant, CV {agg['weber_fraction_cv'][0]:.2f}) "
-          f"where fixed-width fields do not ({agg['weber_corr_fixed'][0]:.2f});", flush=True)
-    print(f"     the population still pinpoints elapsed time (R^2 {agg['decode_elapsed_r2'][0]:.2f}) and "
-          f"event order ({agg['order_acc_separated'][0]:.0%}).", flush=True)
-    out = {"n_seeds": a.seeds, "TMAX": TMAX, "K": K, "weber": WEBER, "sigma0": SIGMA0,
-           "results": {k: {"mean": agg[k][0], "ci95": agg[k][1]} for k in keys}}
+        print(f"  {lab[k]:68} {agg[k][0]:+.3f} ± {agg[k][1]:.3f}", flush=True)
+    print(f"\n  -> a substrate with NO timing structure imposed, trained only to report elapsed time, EMERGES "
+          f"into a precise timer (decode error {agg['decode_mae'][0]:.2f} steps vs untrained "
+          f"{agg['ctrl_decode_mae'][0]:.1f}); its code is a population of TIME CELLS ({agg['time_cell_frac'][0]:.0%} "
+          f"of units vs untrained {agg['ctrl_time_cell_frac'][0]:.0%}, denser early) whose fields WIDEN with "
+          f"latency (corr {agg['width_latency_corr'][0]:+.2f}); and it obeys WEBER'S LAW — decoded-time SD grows "
+          f"with elapsed time at a ~constant Weber fraction (CV {agg['weber_fraction_cv'][0]:.2f}, scale-invariant). "
+          f"None of these were in the loss.", flush=True)
+
+    out = {"n_seeds": a.seeds, "T": T, "hidden": HIDDEN, "noise": NOISE, "act_cost": ACT_COST,
+           "iters": a.iters, "results": {k: {"mean": agg[k][0], "ci95": agg[k][1]} for k in keys}}
     os.makedirs("results", exist_ok=True)
     json.dump(out, open("results/time_cells.json", "w"), indent=2)
-    svg_time(agg, "results/time_cells.svg")
+    if arr0 is not None:
+        svg_time(agg, arr0, carr0, "results/time_cells.svg")
     print("\nwrote results/time_cells.json and results/time_cells.svg", flush=True)
 
 
-def svg_time(agg, out):
-    centers = torch.linspace(0.0, TMAX, K); sig = fields(centers)          # uniform centers: clean schematic
-    ts = torch.linspace(0, TMAX, 200); A = population(ts, centers, sig)
-    t_j, jnd_w = jnd_vs_time(centers, fixed=False); _, jnd_f = jnd_vs_time(centers, fixed=True)
-    pad = 56; pw = 380; ph = 150
-    W = pad + pw + pad; H = 60 + ph + 46 + ph + 44
+def svg_time(agg, arr, carr, out):
+    """Emergent time-cell sequence (sorted by peak) + scalar-timing law (trained vs untrained)."""
+    tc = arr["tc"]; Ar = arr["Ar"]; peak = arr["peak"]
+    order = tc[peak[tc].argsort()]
+    pad = 56; pw = 360; ph = 150
+    W = pad + pw + pad; H = 60 + ph + 52 + ph + 44
     e = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" font-family="Segoe UI, Arial">',
          f'<rect width="{W}" height="{H}" fill="#ffffff"/>']
     e.append('<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">'
-             'Time cells: fields tile &amp; widen with latency &#8594; scalar (Weber) timing</text>')
-    # top: tuning curves (widening visible)
-    oy = 52
-    def X(t): return pad + (t / TMAX) * pw
-    def Yt(v): return oy + ph - v * (ph - 8)
-    for k in range(0, K, 2):
-        pts = " ".join(f"{X(ts[i].item()):.1f},{Yt(A[i, k].item()):.1f}" for i in range(0, 200, 2))
-        e.append(f'<polyline points="{pts}" fill="none" stroke="hsl({int(20+220*k/K)},70%,45%)" stroke-width="1" opacity="0.65"/>')
+             'Emergent time cells: trained only to read elapsed time &#8594; sequence, widening, Weber timing</text>')
+    # top: emergent time-cell sequence (heatmap, units sorted by peak latency)
+    oy = 50; rh = (ph - 2) / max(1, len(order))
+    def X(t): return pad + (t / (T - 1)) * pw
+    for row, u in enumerate(order):
+        yv = oy + row * rh
+        for t in range(T):
+            v = Ar[t, u].item()
+            if v > 0.08:
+                e.append(f'<rect x="{X(t):.1f}" y="{yv:.1f}" width="{pw/T+0.6:.1f}" height="{rh+0.6:.1f}" '
+                         f'fill="hsl({int(250-200*row/max(1,len(order)))},75%,55%)" opacity="{v:.2f}"/>')
     e.append(f'<line x1="{pad}" y1="{oy+ph}" x2="{pad+pw}" y2="{oy+ph}" stroke="#33415c"/>')
-    e.append(f'<text x="{pad+pw/2:.0f}" y="{oy+ph+15:.0f}" font-size="10" fill="#5b6b8c" text-anchor="middle">elapsed time &#8594; (fields broaden)</text>')
-    # bottom: JND vs elapsed time (widening rises = Weber; fixed flat)
-    by = oy + ph + 40
-    jm = max(jnd_w.max().item(), jnd_f.max().item()) * 1.1
-    def Yj(v): return by + ph - (v / jm) * ph
-    e.append(f'<text x="{pad}" y="{by-6}" font-size="11" fill="#28324a">timing JND vs elapsed time '
-             '(rising = Weber/scalar timing)</text>')
+    e.append(f'<text x="{pad+pw/2:.0f}" y="{oy+ph+15:.0f}" font-size="10" fill="#5b6b8c" text-anchor="middle">'
+             f'elapsed time &#8594; ({len(order)} emergent time cells, sorted by peak; fields broaden downward)</text>')
+    e.append(f'<text x="{pad-8}" y="{oy+8:.0f}" font-size="9" fill="#5b6b8c" text-anchor="end">cell</text>')
+    # bottom: scalar timing (decoded-time SD vs elapsed time), trained vs untrained
+    by = oy + ph + 46
+    sg = arr["sigma"]; sgc = carr["sigma"]; ts = arr["ts"]
+    sm = max(sg.max().item(), sgc.max().item()) * 1.12
+    def Yj(v): return by + ph - (v / sm) * ph
+    e.append(f'<text x="{pad}" y="{by-6}" font-size="11" fill="#28324a">scalar (Weber) timing: '
+             'decoded-time SD vs elapsed time (rising = Weber)</text>')
     e.append(f'<line x1="{pad}" y1="{by+ph}" x2="{pad+pw}" y2="{by+ph}" stroke="#33415c"/>'
              f'<line x1="{pad}" y1="{by}" x2="{pad}" y2="{by+ph}" stroke="#33415c"/>')
-    for jnd, col in [(jnd_w, "#2ca25f"), (jnd_f, "#9aa5b8")]:
-        pts = " ".join(f"{X(t_j[i].item()):.1f},{Yj(jnd[i].item()):.1f}" for i in range(len(t_j)))
+    for s_, col in [(sg, "#2ca25f"), (sgc, "#9aa5b8")]:
+        pts = " ".join(f"{X(i):.1f},{Yj(s_[i].item()):.1f}" for i in range(2, T - 2))
         e.append(f'<polyline points="{pts}" fill="none" stroke="{col}" stroke-width="2.4"/>')
     ly = by + 10
-    for col, lab in [("#2ca25f", f"widening fields &#8594; Weber (corr {agg['weber_corr_widening'][0]:.2f})"),
-                     ("#9aa5b8", f"fixed-width control (corr {agg['weber_corr_fixed'][0]:.2f})")]:
-        e.append(f'<rect x="{pad+pw-176}" y="{ly}" width="13" height="4" fill="{col}"/>')
-        e.append(f'<text x="{pad+pw-159}" y="{ly+5}" font-size="9.5" fill="#28324a">{lab}</text>'); ly += 15
+    for col, txt in [("#2ca25f", f"trained: scalar timer (MAE {agg['decode_mae'][0]:.2f} steps)"),
+                     ("#9aa5b8", f"untrained control (MAE {agg['ctrl_decode_mae'][0]:.1f} steps)")]:
+        e.append(f'<rect x="{pad+pw-186}" y="{ly}" width="13" height="4" fill="{col}"/>')
+        e.append(f'<text x="{pad+pw-169}" y="{ly+5}" font-size="9.5" fill="#28324a">{txt}</text>'); ly += 15
     e.append(f'<text x="{pad+pw/2:.0f}" y="{by+ph+15:.0f}" font-size="10" fill="#5b6b8c" text-anchor="middle">'
-             f'elapsed time &#183; decode R&#178;={agg["decode_elapsed_r2"][0]:.2f}, order acc={agg["order_acc_separated"][0]:.0%}</text>')
+             f'elapsed time &#183; field-widening corr {agg["width_latency_corr"][0]:+.2f} &#183; '
+             f'time cells {agg["time_cell_frac"][0]:.0%} of units</text>')
     e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     open(out, "w").write("\n".join(e))

@@ -771,24 +771,30 @@ future occupancy) on a barriered gridworld and asks what it buys over a purely g
   a brain following the same TD rule would acquire. (SVG: SR field, the grid-like SR eigenvector, and
   the planning bars. `results/successor.json`, `results/successor.svg`.)
 
-### Temporal map — time cells reproduce scalar (Weber) timing, the brain's falsifiable fingerprint
+### Temporal map — time cells and scalar (Weber) timing EMERGE from the substrate
 
-`src/eval/time_cells.py` builds a time-cell basis (fields tiling elapsed time, **widening with their
-latency** — Howard's scale-invariant code) and verifies the defining, falsifiable signature
-*readout-independently*, plus that the code is usable (n=8):
+We do not hand-build a time-cell basis; we let it emerge, exactly as grid cells emerge from path
+integration. `src/models/neuro/temporal_cortex.py` is a generic recurrent substrate (a leaky rectified
+rate-RNN, ONE uniform time-constant, learned recurrence, private membrane noise) — nothing about time
+cells, field widening, or scalar timing is built in. `src/eval/time_cells.py` trains it on a single task,
+"report how much time has elapsed since a start pulse, when probed at a random moment," with a metabolic
+activity cost, and then MEASURES what appeared (n=8; an UNTRAINED net of the same architecture controls):
 
-- **Scalar / Weber timing (measured from the code geometry, not a decoder).** The
-  just-noticeable-difference in elapsed time **JND(t) = 1 / ‖da/dt‖** (inverse local discriminability)
-  grows ~linearly with elapsed time when fields widen — **corr(JND, t) = 0.95 ± 0.01** — and is **flat
-  for a fixed-width control, 0.01 ± 0.04**. The widening *causes* scalar timing; because JND is read
-  off the population geometry itself it cannot be a trained-readout artifact. The Weber fraction JND/t
-  stabilizes to a constant in the scale-invariant regime (**CV 0.09 ± 0.004**), with a floor at short
-  intervals — the *generalized* Weber law.
-- **The code pinpoints "what happened when."** Decoded with the standard, **parameter-free population
-  vector** (center of mass — nothing fitted, so usability is not a property of a learned readout),
-  elapsed time comes back at **R² = 0.996** and the **order of well-separated events at 100%**. The
-  widening late fields are deliberately collinear (rank 26 of 50) — which is *why* a naive
-  least-squares readout is ill-conditioned and the population vector is the right, faithful decode.
+- **A precise timer emerges.** Elapsed time decodes at **0.20 ± 0.04 steps** of error; the untrained
+  control cannot time (**3.56 ± 1.37**). Time became a usable quantity purely from learning the task.
+- **Time cells emerge.** **17% ± 3%** of units are single-peaked fields tiling the interval (untrained
+  **1%**), and — unprompted — **92% peak in the first half**, the real denser-at-short-latency gradient
+  (Mau et al. 2018).
+- **Fields widen with latency.** corr(field width, peak time) = **+0.67 ± 0.10**, positive in every seed
+  — never in the loss; the cellular substrate of scalar timing, fallen out of the learned dynamics.
+- **It obeys Weber's law.** The trial-to-trial SD of decoded time grows ~linearly with elapsed time (corr
+  **+0.98 ± 0.01**) at a ~constant Weber fraction (CV **0.15 ± 0.02**, scale-invariant) — the defining
+  behavioral signature of interval timing (Gibbon 1977), arising from private noise integrated through
+  the widening code; the untrained net is not scale-invariant (CV 0.22) and cannot time at all.
+
+So the temporal neuroscience is *measured, not designed*: a substrate told only to read elapsed time
+develops hippocampal time cells, their latency-dependent widening, and the brain's scalar-timing law.
+(`results/time_cells.json`, `results/time_cells.svg`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document

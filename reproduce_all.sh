@@ -33,7 +33,7 @@ run src.eval.torus             --seeds "$SEEDS"     # non-Euclidean (torus): per
 run src.eval.structural_transfer --seeds "$SEEDS"   # TEM: frozen space-trained metric -> relational inference (+ falsifiers)
 python -u -m src.eval.phase_diagram   # SYNTHESIS: when each inductive bias wins (reads the JSONs above; no training)
 run src.eval.successor         --seeds "$SEEDS"     # §7 predictive map (SR): plans detours where geometry stalls; geodesic fields; TD-learned
-run src.eval.time_cells        --seeds "$SEEDS"     # §7 temporal map: time cells reproduce scalar (Weber) timing (readout-independent)
+run src.eval.time_cells        --seeds "$SEEDS"     # §7 temporal map: time cells + scalar (Weber) timing EMERGE from a trained recurrent substrate (vs untrained control)
 
 if [ "${1:-}" = "exploratory" ]; then
   echo; echo "############ EXPLORATORY demos (illustrative; not the central claims) ############"
