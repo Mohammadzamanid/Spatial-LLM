@@ -204,7 +204,7 @@ wide, and the paired p sits at the n=3 permutation floor of 0.25; n≥6 would ce
 readout transfers cleanly — whereas a two-item **comparison** does **not** train through the same
 frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance across seeds/evaluators).
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
-itself a finding and an honest scope statement.
+itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.svg`.)
 
 ## 8. Related work ✎
 
