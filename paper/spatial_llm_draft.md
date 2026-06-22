@@ -244,6 +244,17 @@ frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance acros
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
 itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.svg`.)
 
+**The emergent TIME code transfers too — the temporal analogue (`notebooks/m3_temporal_full_kaggle.py`).**
+The same single-item-readout logic closes the *temporal* loop: a frozen LoRA-Qwen answers "how much time
+has elapsed?" (6 bins) reading ONLY the FROZEN *emergent* temporal cortex (§7) — elapsed time never in the
+prompt. Across n=3 seeds (chance 17%), **cortex-ON beats text-only-OFF in every seed**: EXACT ON **59% ±
+30** vs OFF **19% ± 3** (Δ+40), and on WITHIN-1 (the natural metric for a scalar quantity) ON **74% ± 22**
+vs OFF **45% ± 15** (Δ+30), best seed **86%/96%**. Same honest caveats as torus: ON magnitude is
+seed-variable (the cortex's emergent-code quality varies seed to seed) and the paired p is at the n=3
+floor (0.25; n≥6 certifies). So a frozen LLM reads an **emergent time-cell code it was never given in
+text** — both axes of the predictive-spatiotemporal map, space (torus) and time (elapsed), now transfer
+to language, all emergent. (`results/elapsed_time_llm.json`.)
+
 ## 9. Related work ✎
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators

@@ -1,0 +1,12 @@
+{
+  "experiment": "elapsed-time readout through a frozen LLM (temporal analogue of torus-QA)",
+  "notebook": "notebooks/m3_temporal_full_kaggle.py",
+  "n_seeds": 3,
+  "bins": 6,
+  "chance": 0.1667,
+  "exact":   {"on_mean": 0.59, "on_ci95": 0.30, "off_mean": 0.19, "off_ci95": 0.03, "delta": 0.40, "paired_p": 0.2483},
+  "within1": {"on_mean": 0.74, "on_ci95": 0.22, "off_mean": 0.45, "off_ci95": 0.15, "delta": 0.30, "paired_p": 0.2483},
+  "best_seed_exact": 0.86,
+  "best_seed_within1": 0.96,
+  "note": "A frozen LoRA-Qwen2.5-1.5B answers 'how much time has elapsed?' (6 bins) reading ONLY the FROZEN emergent temporal cortex; the elapsed time never appears in the prompt. cortex-ON >> text-only-OFF in every seed on both EXACT and WITHIN-1. paired permutation p is at the n=3 floor (0.25); n>=6 certifies (as for torus-QA). ON magnitude is seed-variable (cortex emergent-code quality varies seed to seed)."
+}
