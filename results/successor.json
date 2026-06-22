@@ -1,0 +1,36 @@
+{
+  "n_seeds": 8,
+  "G": 11,
+  "gamma": 0.95,
+  "results": {
+    "plan_sr_barrier": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "plan_euclid_barrier": {
+      "mean": 0.6171,
+      "ci95": 0.0929
+    },
+    "plan_sr_open": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "plan_euclid_open": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "sr_field_vs_geodesic_corr": {
+      "mean": 0.6917,
+      "ci95": 0.059
+    },
+    "sr_field_vs_euclidean_corr": {
+      "mean": 0.3109,
+      "ci95": 0.1231
+    },
+    "td_vs_true_sr_corr": {
+      "mean": 0.9716,
+      "ci95": 0.0026
+    }
+  },
+  "barrier_plan_paired_p": 0.0086
+}
