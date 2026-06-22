@@ -1,0 +1,29 @@
+{
+  "n_seeds": 8,
+  "TMAX": 20.0,
+  "K": 50,
+  "weber": 0.2,
+  "sigma0": 0.4,
+  "results": {
+    "weber_corr_widening": {
+      "mean": 0.949,
+      "ci95": 0.009
+    },
+    "weber_corr_fixed": {
+      "mean": 0.006,
+      "ci95": 0.0429
+    },
+    "weber_fraction_cv": {
+      "mean": 0.0924,
+      "ci95": 0.0043
+    },
+    "decode_elapsed_r2": {
+      "mean": 0.9964,
+      "ci95": 0.0002
+    },
+    "order_acc_separated": {
+      "mean": 1.0,
+      "ci95": 0.0
+    }
+  }
+}
