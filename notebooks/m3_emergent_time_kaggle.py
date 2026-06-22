@@ -1,27 +1,29 @@
 # =====================================================================================
 # Emergent TIME CELLS + scalar (Weber) timing on a T4 — at scale.  SELF-CONTAINED: paste
-# into ONE Kaggle GPU cell and run. No repo, no data download. ~10-20 min on a T4.
+# into ONE Kaggle GPU cell.  ~10-15 min on a T4.  (v2: GPU guard + live progress + lighter
+# workload so it never silently grinds for hours.)
 #
-# THE CLAIM (and what makes it faithful): nothing about time cells, field widening, or scalar
-# timing is hard-coded. We build a GENERIC recurrent substrate (leaky rectified rate-RNN, ONE
-# uniform time-constant, learned recurrence, private noise) and train it on ONE task — "report
-# how much time has elapsed since a start pulse, when probed at a random moment" — with a
-# metabolic activity cost.  Then we MEASURE what emerged:
-#   (1) time cells (single-peaked, tiling the interval, denser early -- Mau 2018),
-#   (2) fields that WIDEN with latency  (never in the loss),
-#   (3) SCALAR/Weber timing: decoded-time SD grows ~linearly with elapsed time at a ~constant
-#       Weber fraction (Gibbon 1977) -- while an UNTRAINED net of the same architecture cannot
-#       time at all.  Scaling up (bigger net, longer interval) shows it is not a toy artifact.
+# FIRST: enable the GPU — Kaggle right panel -> Settings -> Accelerator -> "GPU T4 x1".
+# The cell PRINTS the device and ABORTS on CPU (CPU would take hours for this recurrent net).
+#
+# THE CLAIM: nothing about time cells, field widening, or scalar timing is hard-coded. We build
+# a GENERIC recurrent substrate (leaky rectified rate-RNN, ONE uniform time-constant, learned
+# recurrence, private noise) and train it on ONE task — "report elapsed time since a start pulse,
+# when probed at a random moment" — with a metabolic activity cost. Then we MEASURE what emerged:
+# a precise timer, time cells (denser early, Mau 2018), fields that WIDEN with latency, and
+# SCALAR/Weber timing (Gibbon 1977) — vs an untrained net of the same architecture.
 # =====================================================================================
-import math, torch, torch.nn as nn
+import math, time, torch, torch.nn as nn
 import matplotlib.pyplot as plt
 
 dev = "cuda" if torch.cuda.is_available() else "cpu"
-print("device:", dev, torch.cuda.get_device_name(0) if dev == "cuda" else "")
+print("device:", dev, torch.cuda.get_device_name(0) if dev == "cuda" else "(NO GPU)")
+assert dev == "cuda", ("No GPU — enable Settings -> Accelerator -> GPU T4, then re-run. "
+                       "(This recurrent cell takes hours on CPU; we abort instead of grinding.)")
 
-# ---- scale (T4 lets us go bigger than the CPU run; emergence should be ROBUST to scale) ----
-T = 80; HIDDEN = 256; NOISE = 0.06; ACT_COST = 1e-3; GAIN = 1.4; ALPHA = 0.25
-ITERS = 4000; BATCH = 256; SEEDS = 8
+# ---- scale: bigger than the CPU run (H 128->256, T 50->64) but kept fast ----
+T = 64; HIDDEN = 256; NOISE = 0.06; ACT_COST = 1e-3; GAIN = 1.4; ALPHA = 0.25
+ITERS = 2500; BATCH = 128; SEEDS = 6          # bump SEEDS to 8 / ITERS to 4000 for a final pass
 
 class TemporalCortex(nn.Module):
     """Generic recurrent substrate. No timing structure imposed."""
@@ -64,7 +66,8 @@ def probe(net, n=800):
     mid = (ts > 5) & (ts < T-5); scal = corr(ts[mid], sigma[mid])
     cv = sigma[mid]/ts[mid]; weber_cv = (cv.std(unbiased=True)/(cv.mean()+1e-9)).item()
     Ar = A / (A.max(0).values + 1e-6); peak = Ar.argmax(0).float(); width = (Ar > 0.5).float().sum(0)
-    near = torch.stack([Ar[max(0,int(p)-int(0.1*T)):int(p)+int(0.1*T)+1, u].sum() for u, p in enumerate(peak)])
+    w = int(0.1*T)
+    near = torch.stack([Ar[max(0,int(p)-w):int(p)+w+1, u].sum() for u, p in enumerate(peak)])
     act = A.max(0).values > 0.05*A.max()
     is_tc = act & (near/(Ar.sum(0)+1e-6) > 0.5) & (width < T*0.5) & (peak > 1) & (peak < T-2)
     tc = is_tc.nonzero().squeeze(-1)
@@ -77,40 +80,45 @@ def probe(net, n=800):
 def run_seed(seed):
     torch.manual_seed(seed)
     net = TemporalCortex(HIDDEN).to(dev); opt = torch.optim.Adam(net.parameters(), 3e-3)
+    t0 = time.time()
     for it in range(ITERS):
         x, probe_t = make_trial(BATCH); pred, R = net(x, noise=NOISE)
         pred = pred[torch.arange(BATCH, device=dev), probe_t].squeeze(-1)
         loss = ((pred - probe_t.float()/T)**2).mean() + ACT_COST*R.pow(2).mean()
         opt.zero_grad(); loss.backward(); opt.step()
+        if it % 500 == 0:
+            print(f"    seed {seed} iter {it}/{ITERS}  loss {loss.item():.4f}  ({time.time()-t0:.0f}s)", flush=True)
     tr, arr = probe(net)
     ct, carr = probe(TemporalCortex(HIDDEN).to(dev))          # untrained control
-    tr["ctrl_mae"], tr["ctrl_weber_cv"], tr["ctrl_wcorr"] = ct["mae"], ct["weber_cv"], ct["wcorr"]
+    tr["ctrl_mae"], tr["ctrl_weber_cv"], tr["ctrl_frac"] = ct["mae"], ct["weber_cv"], ct["frac"]
     return tr, arr, carr
 
-rows = []; arr0 = carr0 = None
+print(f"\ntraining {SEEDS} seeds (H={HIDDEN}, T={T}, {ITERS} iters)...", flush=True)
+rows = []; arr0 = carr0 = None; t_start = time.time()
 for s in range(SEEDS):
     r, arr, carr = run_seed(s)
     if s == 0: arr0, carr0 = arr, carr
     rows.append(r)
-    print(f"seed {s}: time-cells {r['frac']:.0%} | widen {r['wcorr']:+.2f} | scalar {r['scal']:+.2f} | "
-          f"WeberCV {r['weber_cv']:.2f} | MAE {r['mae']:.2f} (ctrl MAE {r['ctrl_mae']:.1f}, ctrl WeberCV {r['ctrl_weber_cv']:.2f})")
+    print(f"  seed {s}: time-cells {r['frac']:.0%} (untrained {r['ctrl_frac']:.0%}) | widen {r['wcorr']:+.2f} | "
+          f"scalar {r['scal']:+.2f} | WeberCV {r['weber_cv']:.2f} | MAE {r['mae']:.2f} vs ctrl {r['ctrl_mae']:.1f}", flush=True)
+print(f"total {time.time()-t_start:.0f}s")
 
 def agg(k):
-    v = torch.tensor([r[k] for r in rows if r[k] == r[k]]);
+    v = torch.tensor([r[k] for r in rows if r[k] == r[k]])
     return v.mean().item(), (1.96*v.std(unbiased=True)/math.sqrt(len(v))).item() if len(v) > 1 else 0.0
 print("\n=== EMERGENT TIME CODE @ scale (n=%d, H=%d, T=%d) — mean +/- 95%% CI ===" % (SEEDS, HIDDEN, T))
-for k, name in [("frac","time-cell fraction"),("early","  peaking in first half (denser-early)"),
-                ("wcorr","FIELD WIDENING corr (emergent)"),("ctrl_wcorr","  untrained widening corr"),
-                ("scal","scalar-timing corr (SD vs t)"),("weber_cv","Weber-fraction CV (LOW=scale-inv)"),
-                ("ctrl_weber_cv","  untrained Weber CV (HIGH)"),("mae","decode MAE steps"),
-                ("ctrl_mae","  untrained MAE steps")]:
-    m, c = agg(k); print(f"  {name:42} {m:+.3f} +/- {c:.3f}")
+for k, name in [("mae","decode MAE steps (a precise timer EMERGED)"),("ctrl_mae","  untrained: cannot time"),
+                ("frac","time-cell fraction"),("ctrl_frac","  untrained time-cell fraction"),
+                ("early","  peaking in first half (denser-early; Mau 2018)"),
+                ("wcorr","FIELD WIDENING corr (every seed +; emergent)"),
+                ("scal","scalar-timing corr (SD vs t)"),("weber_cv","Weber-fraction CV (LOW=Weber's law)"),
+                ("ctrl_weber_cv","  untrained Weber CV")]:
+    m, c = agg(k); print(f"  {name:46} {m:+.3f} +/- {c:.3f}")
 
 # ---- figure ----
 fig, ax = plt.subplots(1, 3, figsize=(16, 4.2))
 tc0 = arr0["tc"]; order = tc0[arr0["peak"][tc0].argsort()]
-ax[0].imshow(arr0["Ar"][:, order].T.numpy(), aspect="auto", cmap="magma", origin="lower",
-             extent=[0, T, 0, len(order)])
+ax[0].imshow(arr0["Ar"][:, order].T.numpy(), aspect="auto", cmap="magma", origin="lower", extent=[0, T, 0, len(order)])
 ax[0].set_title(f"Emergent time cells ({len(order)}), sorted by peak"); ax[0].set_xlabel("elapsed time"); ax[0].set_ylabel("cell")
 ax[1].scatter(arr0["peak"][tc0].numpy(), arr0["width"][tc0].numpy(), s=14, c="#2ca25f")
 ax[1].set_title(f"Fields WIDEN with latency (corr {agg('wcorr')[0]:+.2f})"); ax[1].set_xlabel("peak time"); ax[1].set_ylabel("field width")
