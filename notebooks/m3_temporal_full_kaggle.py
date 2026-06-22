@@ -10,9 +10,9 @@
 #   B) LANGUAGE READOUT (cell 4): freeze that emergent temporal code and let a LoRA-Qwen
 #      answer "how much time has elapsed?" reading the cortex ONLY (the elapsed time is
 #      never in the text).  cortex-ON vs text-only-OFF = a causal, leakage-proof statement
-#      that the LLM reads the emergent time code.  (Mirrors the proven torus-QA path.)
+#      that the LLM reads the emergent time code.  Multi-seed, EXACT + WITHIN-1, paired test.
 #
-# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~35-45 min total on a T4.
+# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~5-8 min (cell 3) + ~25 min/seed (cell 4).
 # Nothing is hard-coded: the neuroscience EMERGES and is measured.
 # =====================================================================================
 
@@ -113,44 +113,24 @@ plt.tight_layout(); plt.savefig("emergent_time.png", dpi=130); plt.show()
 print("saved emergent_time.png")
 
 
-# %% [cell 4] EXPERIMENT B — read the EMERGENT time code through a frozen LLM (~25-35 min)
-# cortex-ON vs text-only-OFF: the LLM names the elapsed-time bin only by reading the frozen
-# temporal cortex (the elapsed time is never in the prompt). Mirrors the proven torus-QA path.
-import math, time, torch, torch.nn as nn
+# %% [cell 4] EXPERIMENT B — read the EMERGENT time code through a frozen LLM (multi-seed)
+# cortex-ON vs text-only-OFF, EXACT + WITHIN-1 (elapsed time is a scalar -> within-1 is the
+# natural metric), n seeds with 95% CI + a paired test. Mirrors the proven torus-QA path.
+# ~25-30 min PER SEED on a T4. Set SEEDS=[0] for a quick single-seed pass.
+import os, math, time, json, random, torch, torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from peft import LoraConfig, TaskType, get_peft_model
 from src.models.fusion import MultiScaleSpatialFusion
 from src.models.llm_wrapper import _get_embed_layer
 from src.models.neuro.temporal_cortex import TemporalCortex
 
-dev = "cuda"; set_seed(0)
+dev = "cuda"
 T = 50; HIDDEN = 128; NOISE = 0.06; ACT_COST = 1e-3; C = 6        # 6 elapsed-time bins (answer 0..5)
 BASE = "Qwen/Qwen2.5-1.5B"
 PROMPT = "[INTERVAL] Time has passed since a start signal.\n[QUESTION] How much time has elapsed? Answer 0 to 5.\n[ANSWER]"
+SEEDS = [0, 1, 2]; CORTEX_ITERS = 2000; STEPS = 1500; BS = 4   # resumable; use list(range(6)) to
+# clear the paired-permutation p-floor (n=3 floors at 2/2^3=0.25; n=6 -> 2/2^6=0.03, like torus-QA)
 
-# ---- 1. train + FREEZE the temporal cortex on the elapsed-time task (emergent code) ----
-def make_pulse(B):
-    x = torch.zeros(B, T, 2, device=dev); x[:, 0, 0] = 1.0
-    probe = torch.randint(T // 5, T, (B,), device=dev); x[torch.arange(B, device=dev), probe, 1] = 1.0
-    return x, probe
-cortex = TemporalCortex(hidden=HIDDEN).to(dev); copt = torch.optim.Adam(cortex.parameters(), 3e-3)
-print("training + freezing the temporal cortex...", flush=True)
-for it in range(2000):
-    x, probe = make_pulse(96); pred, R = cortex(x, noise=NOISE)
-    pred = pred[torch.arange(96, device=dev), probe].squeeze(-1)
-    loss = ((pred - probe.float() / T) ** 2).mean() + ACT_COST * R.pow(2).mean()
-    copt.zero_grad(); loss.backward(); copt.step()
-for p in cortex.parameters(): p.requires_grad_(False)
-cortex.eval()
-
-@torch.no_grad()
-def temporal_code(probe):                                        # (B,) probe times -> (B,HIDDEN) emergent code
-    B = probe.shape[0]; x = torch.zeros(B, T, 2, device=dev); x[:, 0, 0] = 1.0
-    R = cortex.dynamics(x, noise=NOISE)                          # noisy: the LLM reads a realistic time code
-    return R[torch.arange(B, device=dev), probe]
-def bin_of(probe): return [str(min(int(p.item() / T * C), C - 1)) for p in probe]
-
-# ---- 2. frozen Qwen + LoRA + gated fusion of the cortex tokens (mirrors TrajectoryLLM) ----
 tok = AutoTokenizer.from_pretrained(BASE, use_fast=True)
 if tok.pad_token is None: tok.pad_token = tok.eos_token
 
@@ -161,7 +141,7 @@ class TemporalReadoutLLM(nn.Module):
         except TypeError: llm = AutoModelForCausalLM.from_pretrained(base, torch_dtype=torch.float32)
         cfg = LoraConfig(task_type=TaskType.CAUSAL_LM, r=16, lora_alpha=32, lora_dropout=0.05, bias="none",
                          target_modules=["q_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"])
-        self.llm = get_peft_model(llm, cfg); self.llm.print_trainable_parameters()
+        self.llm = get_peft_model(llm, cfg)
         D = llm.config.hidden_size; self.n = n_tokens
         self.to_tokens = nn.Linear(hidden, D * n_tokens)
         self.fusion = MultiScaleSpatialFusion(hidden_dim=D, num_heads=8, num_layers=2, gate_init=2.0)
@@ -181,52 +161,104 @@ class TemporalReadoutLLM(nn.Module):
         return self.llm.generate(inputs_embeds=self.fusion(text, sp), attention_mask=attn,
                                  max_new_tokens=max_new, do_sample=False)
 
-model = TemporalReadoutLLM(BASE, HIDDEN).to(dev)
-if hasattr(model.llm, "gradient_checkpointing_enable"):
-    model.llm.gradient_checkpointing_enable(); model.llm.enable_input_require_grads(); model.llm.config.use_cache = False
-opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=2e-4)
+def make_pulse(B):
+    x = torch.zeros(B, T, 2, device=dev); x[:, 0, 0] = 1.0
+    probe = torch.randint(T // 5, T, (B,), device=dev); x[torch.arange(B, device=dev), probe, 1] = 1.0
+    return x, probe
+def bin_of(probe): return [min(int(p.item() / T * C), C - 1) for p in probe]
 
-def train_batch(bs):
-    probe = torch.randint(T // 5, T, (bs,), device=dev); code = temporal_code(probe)
-    fulls = [PROMPT + " " + a for a in bin_of(probe)]
-    enc = tok(fulls, max_length=48, padding="max_length", truncation=True, return_tensors="pt")
-    labels = enc["input_ids"].clone(); plen = len(tok(PROMPT)["input_ids"])
-    labels[:, :plen] = -100; labels[enc["attention_mask"] == 0] = -100
-    return (enc["input_ids"].to(dev), enc["attention_mask"].to(dev), code, labels.to(dev))
+def run_seed(seed, smoke=False):
+    set_seed(seed); torch.manual_seed(seed)
+    # 1. train + FREEZE the temporal cortex on the elapsed-time task (emergent code)
+    cortex = TemporalCortex(hidden=HIDDEN).to(dev); copt = torch.optim.Adam(cortex.parameters(), 3e-3)
+    for it in range(CORTEX_ITERS):
+        x, probe = make_pulse(96); pred, R = cortex(x, noise=NOISE)
+        pred = pred[torch.arange(96, device=dev), probe].squeeze(-1)
+        loss = ((pred - probe.float() / T) ** 2).mean() + ACT_COST * R.pow(2).mean()
+        copt.zero_grad(); loss.backward(); copt.step()
+    for p in cortex.parameters(): p.requires_grad_(False)
+    cortex.eval()
 
-# ---- SMOKE: one tiny step to catch any bug in seconds, before the long run ----
-ids, attn, code, lab = train_batch(2)
-l = model(ids, attn, code, labels=lab).loss; l.backward(); opt.zero_grad()
-print(f"smoke OK (loss {float(l):.3f}) — starting training", flush=True)
+    @torch.no_grad()
+    def temporal_code(probe):                                    # (B,) -> (B,HIDDEN) noisy emergent code
+        B = probe.shape[0]; x = torch.zeros(B, T, 2, device=dev); x[:, 0, 0] = 1.0
+        R = cortex.dynamics(x, noise=NOISE); return R[torch.arange(B, device=dev), probe]
 
-# ---- 3. train LoRA+fusion to read the frozen cortex (cortex stays frozen) ----
-BS = 4; STEPS = 1500; model.train(); cortex.eval(); t0 = time.time()
-for it in range(STEPS):
-    ids, attn, code, lab = train_batch(BS)
-    opt.zero_grad(); loss = model(ids, attn, code, labels=lab).loss; loss.backward(); opt.step()
-    if it % 150 == 0: print(f"  step {it}/{STEPS} loss {loss.item():.3f} ({time.time()-t0:.0f}s)", flush=True)
+    # 2. frozen Qwen + LoRA + gated fusion of the cortex tokens
+    model = TemporalReadoutLLM(BASE, HIDDEN).to(dev)
+    if hasattr(model.llm, "gradient_checkpointing_enable"):
+        model.llm.gradient_checkpointing_enable(); model.llm.enable_input_require_grads(); model.llm.config.use_cache = False
+    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=2e-4)
 
-# ---- 4. eval: cortex-ON vs text-only-OFF (the causal, leakage-proof control) ----
-@torch.no_grad()
-def evaluate(ablate, n=300):
-    model.eval(); enc = tok(PROMPT, return_tensors="pt")
-    ids = enc["input_ids"].to(dev); attn = enc["attention_mask"].to(dev); correct = tot = 0
-    for i in range(0, n, BS):
-        m = min(BS, n - i); probe = torch.randint(T // 5, T, (m,), device=dev)
-        out = model.gen(ids.repeat(m, 1), attn.repeat(m, 1), temporal_code(probe), ablate=ablate, max_new=3)
-        ans = bin_of(probe)
-        for j in range(m):
-            txt = tok.decode(out[j], skip_special_tokens=True)
-            pred = next((ch for ch in txt if ch in "012345"), None)
-            tot += 1; correct += int(pred == ans[j])
-    return correct / max(tot, 1)
+    def train_batch(bs):
+        probe = torch.randint(T // 5, T, (bs,), device=dev); code = temporal_code(probe)
+        fulls = [PROMPT + " " + str(b) for b in bin_of(probe)]
+        enc = tok(fulls, max_length=48, padding="max_length", truncation=True, return_tensors="pt")
+        labels = enc["input_ids"].clone(); plen = len(tok(PROMPT)["input_ids"])
+        labels[:, :plen] = -100; labels[enc["attention_mask"] == 0] = -100
+        return enc["input_ids"].to(dev), enc["attention_mask"].to(dev), code, labels.to(dev)
 
-on = evaluate(False); off = evaluate(True)
+    if smoke:                                                    # one tiny step to catch bugs in seconds
+        ids, attn, code, lab = train_batch(2)
+        l = model(ids, attn, code, labels=lab).loss; l.backward(); opt.zero_grad()
+        print(f"  smoke OK (loss {float(l):.3f})", flush=True)
+
+    model.train(); cortex.eval(); t0 = time.time()
+    for it in range(STEPS):
+        ids, attn, code, lab = train_batch(BS)
+        opt.zero_grad(); loss = model(ids, attn, code, labels=lab).loss; loss.backward(); opt.step()
+        if it % 200 == 0: print(f"  seed {seed} step {it}/{STEPS} loss {loss.item():.3f} ({time.time()-t0:.0f}s)", flush=True)
+
+    @torch.no_grad()
+    def evaluate(ablate, n=400):
+        model.eval(); enc = tok(PROMPT, return_tensors="pt")
+        ids = enc["input_ids"].to(dev); attn = enc["attention_mask"].to(dev)
+        exact = within1 = tot = 0
+        for i in range(0, n, BS):
+            m = min(BS, n - i); probe = torch.randint(T // 5, T, (m,), device=dev)
+            out = model.gen(ids.repeat(m, 1), attn.repeat(m, 1), temporal_code(probe), ablate=ablate, max_new=3)
+            truth = bin_of(probe)
+            for j in range(m):
+                txt = tok.decode(out[j], skip_special_tokens=True)
+                pc = next((ch for ch in txt if ch in "012345"), None)
+                tot += 1
+                if pc is not None:
+                    pi = int(pc)
+                    exact += int(pi == truth[j]); within1 += int(abs(pi - truth[j]) <= 1)
+        return exact / max(tot, 1), within1 / max(tot, 1)
+
+    on_e, on_w = evaluate(False); off_e, off_w = evaluate(True)
+    return {"on_exact": on_e, "on_w1": on_w, "off_exact": off_e, "off_w1": off_w}
+
+OUT = "results_elapsed_llm"; os.makedirs(OUT, exist_ok=True)        # resumable: skip seeds already done
+res = []
+for s in SEEDS:
+    f = f"{OUT}/seed{s}.json"
+    if os.path.exists(f):
+        r = json.load(open(f)); print(f"===== seed {s}: cached =====", flush=True)
+    else:
+        print(f"\n===== ELAPSED-TIME READOUT  seed {s} =====", flush=True)
+        r = run_seed(s, smoke=(s == SEEDS[0])); json.dump(r, open(f, "w"))
+    res.append(r)
+    print(f"  seed {s}: ON exact {r['on_exact']:.0%} (w1 {r['on_w1']:.0%})  |  OFF exact {r['off_exact']:.0%} (w1 {r['off_w1']:.0%})", flush=True)
+
+def ci95(xs):
+    n = len(xs); m = sum(xs) / n
+    sd = (sum((x - m) ** 2 for x in xs) / (n - 1)) ** 0.5 if n > 1 else 0.0
+    return m, 1.96 * sd / math.sqrt(n)
+def paired_p(d, iters=20000):
+    n = len(d); m = sum(d) / n; rng = random.Random(0)
+    return sum(abs(sum(x * (1 if rng.random() < 0.5 else -1) for x in d) / n) >= abs(m) - 1e-12 for _ in range(iters)) / iters
+
 print("\n================ ELAPSED-TIME READOUT through a frozen LLM ================")
-print(f"  chance ~ 1/{C} = {1/C:.0%}")
-print(f"  cortex-ON : {on:.0%}      text-only OFF : {off:.0%}      Delta(ON-OFF) : {on-off:+.0%}")
-print("  ON >> OFF  =>  the LLM names elapsed time by READING the emergent temporal code")
-print("  (the elapsed time was never in the prompt) -- the temporal analogue of torus-QA.")
-import json; json.dump({"on": on, "off": off, "delta": on - off, "chance": 1 / C, "bins": C},
-                       open("results_elapsed_time_llm.json", "w"), indent=2)
-print("\nwrote results_elapsed_time_llm.json -- paste these numbers back")
+print(f"  n={len(res)} seeds | chance ~ 1/{C} = {1/C:.0%}")
+for metric in ("exact", "w1"):
+    on = [r[f"on_{metric}"] for r in res]; off = [r[f"off_{metric}"] for r in res]
+    mo, co = ci95(on); mf, cf = ci95(off); d = [on[i] - off[i] for i in range(len(res))]
+    p = paired_p(d) if len(res) >= 2 else float("nan")
+    tag = "EXACT  " if metric == "exact" else "WITHIN-1"
+    print(f"  {tag}  ON {mo:.0%} +/-{co:.0%}   OFF {mf:.0%} +/-{cf:.0%}   Delta {sum(d)/len(d):+.0%}   p={p:.4f}")
+print("  ON >> OFF => the LLM names elapsed time by READING the emergent temporal code")
+print("  (elapsed time was never in the prompt) -- the temporal analogue of torus-QA.")
+json.dump({"n_seeds": len(res), "chance": 1 / C, "per_seed": res}, open("results_elapsed_time_llm.json", "w"), indent=2)
+print("\nwrote results_elapsed_time_llm.json -- paste the table back")
