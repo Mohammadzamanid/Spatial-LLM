@@ -742,6 +742,58 @@ honest contribution: not "grid cells are magic," but a **falsifiable account of 
 make a brain-faithful code necessary** — confirmed, not asserted. (`results/phase_diagram.json`,
 `results/phase_diagram.svg`.)
 
+## The map is PREDICTIVE and TEMPORAL — the two axes the spatial cortex omitted
+
+Reading *The Neuroscience of Learning in Space and Time* against our model surfaced a real gap: the
+hippocampal map is **not a geometric record of where you are** but a **predictive model of where you
+are going** (the successor representation; Dayan 1993, Stachenfeld 2017), indexed in **time** as much
+as in space (time cells; Eichenbaum 2014, MacDonald 2011, Howard's scale-invariant timing). Our cortex
+was purely spatial and purely geometric. Two CPU-validatable modules close that gap, each reproducing
+the *falsifiable signature* the brain is known for — multi-seed, mean ± 95% CI.
+
+### Predictive map — the successor representation routes around barriers where geometry stalls
+
+`src/eval/successor.py` builds the successor representation **M = (I − γT)⁻¹** (expected discounted
+future occupancy) on a barriered gridworld and asks what it buys over a purely geometric map (n=8):
+
+- **Planning around a wall.** Greedily ascending the SR value reaches the goal **100%** of the time
+  with a barrier present; greedily descending *Euclidean* distance-to-goal stalls at **61.7% ± 9.3%**
+  — because the wall makes the straight-line gradient point *into* the barrier (paired sign-flip
+  **p = 0.0086**, +38 pts). On an **open** field both succeed 100% — the SR advantage is *specifically*
+  the detour, not generic competence. This is Tolman's insight in one number: a predictive map plans;
+  a metric map only points.
+- **The field bends around the wall.** SR place fields track **geodesic** (on-manifold) distance, not
+  Euclidean: for across-wall cell pairs the SR field correlates **0.69 ± 0.06** with graph-geodesic
+  distance vs **0.31 ± 0.12** with Euclidean. The map measures *reachability*, the topology, not the
+  ruler.
+- **It is learnable from experience.** A TD-learned SR (online, from sampled transitions only) matches
+  the analytic closed form at **0.97 ± 0.003** — so this is not just an algebraic construct; it is what
+  a brain following the same TD rule would acquire. (SVG: SR field, the grid-like SR eigenvector, and
+  the planning bars. `results/successor.json`, `results/successor.svg`.)
+
+### Temporal map — time cells reproduce scalar (Weber) timing, the brain's falsifiable fingerprint
+
+`src/eval/time_cells.py` builds a time-cell basis (fields tiling elapsed time, **widening with their
+latency** — Howard's scale-invariant code) and verifies the defining, falsifiable signature
+*readout-independently*, plus that the code is usable (n=8):
+
+- **Scalar / Weber timing (measured from the code geometry, not a decoder).** The
+  just-noticeable-difference in elapsed time **JND(t) = 1 / ‖da/dt‖** (inverse local discriminability)
+  grows ~linearly with elapsed time when fields widen — **corr(JND, t) = 0.95 ± 0.01** — and is **flat
+  for a fixed-width control, 0.01 ± 0.04**. The widening *causes* scalar timing; because JND is read
+  off the population geometry itself it cannot be a trained-readout artifact. The Weber fraction JND/t
+  stabilizes to a constant in the scale-invariant regime (**CV 0.09 ± 0.004**), with a floor at short
+  intervals — the *generalized* Weber law.
+- **The code pinpoints "what happened when."** Decoded with the standard, **parameter-free population
+  vector** (center of mass — nothing fitted, so usability is not a property of a learned readout),
+  elapsed time comes back at **R² = 0.996** and the **order of well-separated events at 100%**. The
+  widening late fields are deliberately collinear (rank 26 of 50) — which is *why* a naive
+  least-squares readout is ill-conditioned and the population vector is the right, faithful decode.
+
+Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
+**temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
+identified as missing, each validated against its own falsifier before any LLM wiring.
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

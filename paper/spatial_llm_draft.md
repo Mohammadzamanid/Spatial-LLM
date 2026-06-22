@@ -33,7 +33,12 @@ do not claim grid cells are a uniquely necessary substrate for a trained system,
 additive integrators provably cannot — flat at the oracle floor where they collapse to chance, and a
 world a language prior cannot fake (a built-in leakage control); and **abstract relational inference**,
 where a *space-trained, frozen* metric supports transitive inference and schema transfer, falsified by
-shuffling the metric (p=0.009).
+shuffling the metric (p=0.009). Finally, prompted by the neuroscience of space *and time*, we extend the
+purely-geometric cortex along the two axes it omits: a **successor-representation** map that plans
+detours around barriers where a metric map stalls (100% vs 62%, paired p=0.009) and bends its fields to
+geodesic rather than Euclidean distance, and **time cells** whose fields widen with latency to reproduce
+scalar (Weber) timing as a readout-independent property of the code — each validated against its own
+falsifier on CPU.
 
 ---
 
@@ -165,10 +170,41 @@ pairs (**0.836 ± 0.008**, exceeding the trained adjacent pairs 0.706 — the sy
 zero-shot schema transfer to a new item set (0.790). Two falsifiers fire: **shuffling the rank↔position
 correspondence collapses TI (0.836→0.623, paired p=0.009)** — so it is the *ordered metric*, not
 memorization — and scrambling the second item (0.656) shows the readout compares two codes, not one
-magnitude. This is the representation-level validation of the headline LLM experiment (§7 roadmap), where
+magnitude. This is the representation-level validation of the headline LLM experiment (§8 roadmap), where
 the readout is a frozen Qwen+LoRA answering a *linguistic* comparison it cannot do text-only.
 
-## 7. Language transfer ✅ (n=3; ➕ more seeds to resolve grid-vs-place)
+## 7. The map is predictive and temporal — beyond a geometric record ✅ (CPU, n=8)
+
+The hippocampal map is not a geometric record of position but a **predictive** model of future states
+(the successor representation, SR; Dayan 1993, Stachenfeld 2017), indexed in **time** as much as in
+space (time cells; Eichenbaum 2014, Howard's scale-invariant timing). Our cortex was purely spatial and
+geometric; we close both gaps with CPU-validatable modules, each reproducing the brain's *falsifiable
+signature* (multi-seed, mean ± 95% CI), before any LLM wiring.
+
+**Predictive map (`src/eval/successor.py`, Figure 10).** The successor representation
+**M = (I − γT)⁻¹** (expected discounted future occupancy) confers what a metric map cannot. On a
+barriered gridworld, greedily ascending SR value reaches the goal **100%** of the time, while descending
+Euclidean distance-to-goal stalls at **61.7% ± 9.3%** — the wall makes the straight-line gradient point
+*into* it (paired sign-flip **p = 0.0086**); on an open field both reach 100%, so the gain is
+*specifically* the detour (Tolman's insight, quantified). SR fields track **geodesic** distance
+(across-wall corr **0.69 ± 0.06**) not Euclidean (**0.31 ± 0.12**) — the map bends around the barrier —
+and a **TD-learned** SR matches the closed form at **0.97 ± 0.003**, so it is acquired from experience,
+not merely constructed (`results/successor.{json,svg}`).
+
+**Temporal map (`src/eval/time_cells.py`, Figure 11).** Time cells tile elapsed time with fields that
+**widen with their latency**; this *causes* scalar (Weber) timing, which we verify *readout-independently*:
+the just-noticeable difference **JND(t) = 1/‖da/dt‖** (inverse local discriminability) grows ~linearly
+with elapsed time (**corr(JND, t) = 0.95 ± 0.01**) where a fixed-width control is flat (**0.01 ± 0.04**),
+with a constant Weber fraction in the scale-invariant regime (CV 0.09). Decoded with the standard,
+**parameter-free population vector**, the code recovers elapsed time at **R² = 0.996** and event order at
+**100%** — so "the code is usable" owes nothing to a fitted readout (the widening fields are deliberately
+collinear, rank 26/50, which is precisely why a naive least-squares readout fails and the population
+vector is the faithful decode). `results/time_cells.{json,svg}`.
+
+Together these give the cortex a map that **plans** (detours a metric map cannot) and **keeps time**
+(with the brain's scalar law) — the two axes a purely-spatial code omits, each falsified before transfer.
+
+## 8. Language transfer ✅ (n=3; ➕ more seeds to resolve grid-vs-place)
 
 A LoRA-Qwen2.5-1.5B answers navigation questions through the frozen cortex (the moves reach the model
 only via the cortex). We report the **multi-seed** result (n=3, mean ± 95% CI; `results/extrapolation_llm.json`,
@@ -206,7 +242,7 @@ frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance acros
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
 itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.svg`.)
 
-## 8. Related work ✎
+## 9. Related work ✎
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
 (Banino 2018; Cueva & Wei 2018); modular coding for range/capacity (Fiete; Stensola 2012; Sreenivasan &
@@ -216,17 +252,17 @@ generalization in sequence models (the default does not generalize — the motiv
 encoding research). Our contribution is the *fair, multi-seed characterization* of which of these
 properties transfer to a trained model + the integrative LLM demonstration.
 
-## 9. Limitations (honest) ✎
+## 10. Limitations (honest) ✎
 
 - The representation tasks are 2-D, unbiased random walk (~√T magnitude growth), single-T4 LLM scale.
 - The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
   best pure path-integrator.
 - The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
   transfer to a trained LLM with a text context label.
-- §7 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
+- §8 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
   Emergence, boundary, replay pillars are demonstrations.
 
-## 10. Methods ✎
+## 11. Methods ✎
 
 **Grid cortex** (`_HexGridModules`): K modules, fixed velocity gains `side/spacing`,
 `spacing = base·ratio^k`; per-step velocity advances a phase integrated and min-image-wrapped on a
@@ -244,7 +280,7 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 ### Status / path to submission
 - ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
   multi-seed, committed.
-- ✅ §7 multi-seed LLM (n=3): cortex ON ≫ text-only OFF (robust); grid-vs-place inconclusive at n=3.
+- ✅ §8 multi-seed LLM (n=3): cortex ON ≫ text-only OFF (robust); grid-vs-place inconclusive at n=3.
 - ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect.
 - ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
 - Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness

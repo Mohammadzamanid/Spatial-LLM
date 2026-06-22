@@ -108,13 +108,29 @@ No hand-given heading/speed: the agent gets a **retinal panorama** of a landmark
 
 `src/eval/embodiment.py`
 
+### 10 · Its map is *predictive*, not just geometric — it plans around barriers
+
+A metric map only points; a **predictive** map plans. The **successor representation** M=(I−γT)⁻¹ (expected discounted future occupancy; Dayan 1993, Stachenfeld 2017) reaches a goal **100%** of the time when a wall blocks the straight line — where greedily descending Euclidean distance stalls at **62%** because the gradient points *into* the wall (paired p=0.009; on an open field both succeed, so the gain is the detour). Its place fields bend around the barrier, tracking **geodesic** not Euclidean distance (0.69 vs 0.31), and the map is **learned from experience** by a TD rule (0.97 vs the closed form).
+
+<img src="results/successor.svg" width="760" alt="Successor representation plans around barriers where Euclidean navigation stalls"/>
+
+`src/eval/successor.py`
+
+### 11 · It keeps *time* — hippocampal time cells with scalar (Weber) timing
+
+Beyond space, the cortex tiles **elapsed time** with **time cells** whose fields **widen with their latency** (Eichenbaum 2014; MacDonald 2011; Howard's scale-invariant timing). That widening *causes* the brain's signature **scalar (Weber) timing**: temporal precision — the just-noticeable difference JND = 1/‖da/dt‖ — degrades ~linearly with elapsed time (**corr 0.95**) where a fixed-width control stays flat (**0.01**), measured from the code geometry, not a decoder. The standard parameter-free **population vector** still reads elapsed time (**R²=0.996**) and event order (**100%**).
+
+<img src="results/time_cells.svg" width="640" alt="Time cells widen with latency, reproducing scalar (Weber) timing"/>
+
+`src/eval/time_cells.py`
+
 ---
 
 ## How it learns like a brain
 
-`world → retinal panorama → optic-flow self-motion → velocity-driven hexagonal grid cells → place cells (Hebbian, one-shot) → boundary error-correction → value (dopamine) → planning / relational inference → language readout`
+`world → retinal panorama → optic-flow self-motion → velocity-driven hexagonal grid cells → place cells (Hebbian, one-shot) → boundary error-correction → value (dopamine) → planning / relational inference → predictive (successor) & temporal (time-cell) maps → language readout`
 
-One self-supervised spatial cortex, spanning **navigation → language → planning → motivation → abstract reasoning → lifelong memory → perception** — each piece a documented neuroscience mechanism, each result measured on held-out data, each caveat stated.
+One self-supervised spatial cortex, spanning **navigation → language → planning → motivation → abstract reasoning → lifelong memory → perception → prediction & time** — each piece a documented neuroscience mechanism, each result measured on held-out data, each caveat stated.
 
 ---
 
@@ -142,7 +158,7 @@ The repo implements brain-grounded modules at every level of organization; the c
 | **Microcircuit** | `DivisiveNormalization`, `LateralInhibition`, `EIBalanceLayer`, `CorticalColumn` | gain control, surround suppression, Dale's law, L4→L2/3→L5/6 | Carandini & Heeger 2012 |
 | **Spatial cells** | `_HexGridModules`, `HeadDirectionCells`, `BoundaryVectorCells`, `ConjunctiveSpatialCells`, `SpeedCells` | velocity-driven hexagonal grid modules, ring-attractor HD, boundary vectors | Burak & Fiete 2009; Taube 1990; Lever 2009; Kropff 2015 |
 | **Oscillations** | `ThetaOscillator`, `PhasePrecession`, `ThetaGammaCoupling`, `SharpWaveRipple` | theta gating, phase precession, 7±2 buffer, replay | O'Keefe & Recce 1993; Lisman & Idiart 1995; Buzsáki 2015 |
-| **Systems** | `TrajectoryCortex`, `TrajectoryLLM`, value/relational/continual readouts | path integration, grid→place, dopamine RPE, CLS, TEM | Banino 2018; Schultz 1997; McClelland 1995; Whittington 2020 |
+| **Systems** | `TrajectoryCortex`, `TrajectoryLLM`, value/relational/continual readouts, successor & time-cell maps | path integration, grid→place, dopamine RPE, CLS, TEM, successor representation, scalar (Weber) timing | Banino 2018; Schultz 1997; McClelland 1995; Whittington 2020; Stachenfeld 2017; Eichenbaum 2014 |
 
 ---
 
@@ -188,7 +204,8 @@ Spatial-LLM/
 ├── src/training/train_trajectory.py ← M2 trainer (tasks, mixed lengths, early stopping)
 ├── src/data/trajectory_qa.py     ← return / bearing / distance navigation QA
 ├── src/eval/                     ← emergence, generalize, boundary, pillars, planning,
-│                                    goal_navigation, relational, continual, embodiment, …
+│                                    goal_navigation, relational, continual, embodiment,
+│                                    successor (predictive map), time_cells (Weber timing), …
 ├── results/                      ← FINDINGS.md (full record) + per-experiment *.json + *.svg
 ├── notebooks/                    ← Kaggle cells for the LLM runs
 └── tests/

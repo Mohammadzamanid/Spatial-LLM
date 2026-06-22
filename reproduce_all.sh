@@ -32,6 +32,8 @@ run src.eval.significance      --n_fast 20 --n_slow 8   # paired tests (p-values
 run src.eval.torus             --seeds "$SEEDS"     # non-Euclidean (torus): periodicity NECESSARY, breaks the tie + leakage rebuttal
 run src.eval.structural_transfer --seeds "$SEEDS"   # TEM: frozen space-trained metric -> relational inference (+ falsifiers)
 python -u -m src.eval.phase_diagram   # SYNTHESIS: when each inductive bias wins (reads the JSONs above; no training)
+run src.eval.successor         --seeds "$SEEDS"     # §7 predictive map (SR): plans detours where geometry stalls; geodesic fields; TD-learned
+run src.eval.time_cells        --seeds "$SEEDS"     # §7 temporal map: time cells reproduce scalar (Weber) timing (readout-independent)
 
 if [ "${1:-}" = "exploratory" ]; then
   echo; echo "############ EXPLORATORY demos (illustrative; not the central claims) ############"
