@@ -128,8 +128,8 @@ dev = "cuda"
 T = 50; HIDDEN = 128; NOISE = 0.06; ACT_COST = 1e-3; C = 6        # 6 elapsed-time bins (answer 0..5)
 BASE = "Qwen/Qwen2.5-1.5B"
 PROMPT = "[INTERVAL] Time has passed since a start signal.\n[QUESTION] How much time has elapsed? Answer 0 to 5.\n[ANSWER]"
-SEEDS = [0, 1, 2]; CORTEX_ITERS = 2000; STEPS = 1500; BS = 4   # resumable; use list(range(6)) to
-# clear the paired-permutation p-floor (n=3 floors at 2/2^3=0.25; n=6 -> 2/2^6=0.03, like torus-QA)
+SEEDS = list(range(6)); CORTEX_ITERS = 2000; STEPS = 1500; BS = 4   # n=6 -> paired-perm p can reach
+# 2/2^6 = 0.03 (n=3 floors at 0.25). RESUMABLE: skips seeds already in results_elapsed_llm/ (re-run safe).
 
 tok = AutoTokenizer.from_pretrained(BASE, use_fast=True)
 if tok.pad_token is None: tok.pad_token = tok.eos_token
