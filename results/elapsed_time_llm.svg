@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="674" height="378" font-family="Segoe UI, Arial">
+<rect width="674" height="378" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Elapsed-time readout through a frozen LLM: cortex-ON &#8811; text-only (n=6, 95% CI)</text>
+<text x="28" y="44" font-size="10.5" fill="#5b6b8c">the LLM names how much time has elapsed by reading the emergent time-cell code &#183; elapsed time never in the prompt &#183; leakage-proof</text>
+<line x1="64" y1="332.0" x2="524" y2="332.0" stroke="#33415c"/><line x1="64" y1="82" x2="64" y2="332.0" stroke="#33415c"/>
+<line x1="64" y1="332.0" x2="524" y2="332.0" stroke="#eef2f8"/>
+<text x="56" y="336.0" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<line x1="64" y1="269.5" x2="524" y2="269.5" stroke="#eef2f8"/>
+<text x="56" y="273.5" font-size="9" fill="#5b6b8c" text-anchor="end">25%</text>
+<line x1="64" y1="207.0" x2="524" y2="207.0" stroke="#eef2f8"/>
+<text x="56" y="211.0" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<line x1="64" y1="144.5" x2="524" y2="144.5" stroke="#eef2f8"/>
+<text x="56" y="148.5" font-size="9" fill="#5b6b8c" text-anchor="end">75%</text>
+<line x1="64" y1="82.0" x2="524" y2="82.0" stroke="#eef2f8"/>
+<text x="56" y="86.0" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<line x1="64" y1="290.3" x2="524" y2="290.3" stroke="#c9341a" stroke-dasharray="4,3" opacity="0.5"/>
+<text x="522" y="287.3" font-size="8.5" fill="#c9341a" text-anchor="end">chance</text>
+<rect x="88" y="194.5" width="56" height="137.5" fill="#2ca25f" opacity="0.88"/>
+<line x1="116.0" y1="144.5" x2="116.0" y2="244.5" stroke="#0b1324" stroke-width="1.4"/>
+<text x="116.0" y="187.5" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">55%</text>
+<text x="116.0" y="347.0" font-size="10" fill="#28324a" text-anchor="middle">cortex-ON</text>
+<rect x="164" y="292.0" width="56" height="40.0" fill="#9aa5b8" opacity="0.88"/>
+<line x1="192.0" y1="277.0" x2="192.0" y2="307.0" stroke="#0b1324" stroke-width="1.4"/>
+<text x="192.0" y="285.0" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">16%</text>
+<text x="192.0" y="347.0" font-size="10" fill="#28324a" text-anchor="middle">text-only</text>
+<text x="154" y="364" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">EXACT bin</text>
+<text x="154" y="94" font-size="10" fill="#2ca25f" text-anchor="middle">&#916;+40 &#183; p=0.033</text>
+<rect x="348" y="157.0" width="56" height="175.0" fill="#2ca25f" opacity="0.88"/>
+<line x1="376.0" y1="109.5" x2="376.0" y2="204.5" stroke="#0b1324" stroke-width="1.4"/>
+<text x="376.0" y="150.0" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">70%</text>
+<text x="376.0" y="347.0" font-size="10" fill="#28324a" text-anchor="middle">cortex-ON</text>
+<rect x="424" y="239.5" width="56" height="92.5" fill="#9aa5b8" opacity="0.88"/>
+<line x1="452.0" y1="197.0" x2="452.0" y2="282.0" stroke="#0b1324" stroke-width="1.4"/>
+<text x="452.0" y="232.5" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">37%</text>
+<text x="452.0" y="347.0" font-size="10" fill="#28324a" text-anchor="middle">text-only</text>
+<text x="414" y="364" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">WITHIN-1 (scalar)</text>
+<text x="414" y="94" font-size="10" fill="#2ca25f" text-anchor="middle">&#916;+33 &#183; p=0.033</text>
+<rect x="542" y="90" width="14" height="5" fill="#2ca25f"/>
+<text x="560" y="96" font-size="9.5" fill="#28324a">cortex-ON (reads the cortex)</text>
+<rect x="542" y="108" width="14" height="5" fill="#9aa5b8"/>
+<text x="560" y="114" font-size="9.5" fill="#28324a">text-only (cortex ablated)</text>
+</svg>

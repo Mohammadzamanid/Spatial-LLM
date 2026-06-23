@@ -38,7 +38,11 @@ purely-geometric cortex along the two axes it omits: a **successor-representatio
 detours around barriers where a metric map stalls (100% vs 62%, paired p=0.009) and bends its fields to
 geodesic rather than Euclidean distance, and a recurrent substrate that, trained only to read elapsed
 time, **grows time cells** whose latency-dependent widening reproduces the brain's scalar (Weber) timing
-law unbidden (17% of units vs 1% untrained) — these temporal signatures *emerge*, not imposed.
+law unbidden (17% of units vs 1% untrained) — these temporal signatures *emerge*, not imposed. A frozen
+LLM then reads **both** codes from language — naming which cell of a wrap-around (toroidal) world it
+occupies, and how much time has elapsed, purely through the cortex — each a significant cortex-ON ≫
+text-only-OFF causal control (n=6, paired **p=0.033**), with the elapsed-time question never appearing in
+the prompt.
 
 ---
 
