@@ -8,6 +8,7 @@
 #
 # This is the ONLY experiment in this notebook. Run the cells top to bottom. ~36 min/seed on a T4;
 # resumable (skips seeds already done). Self-contained — no other cells needed.
+# n=6 seeds so the paired sign-flip permutation p can reach 2/2^6 = 0.03 (n=3 floors at 0.25).
 # ============================================================================================
 
 
@@ -27,10 +28,10 @@ print("setup done")
 print("model cached")
 
 
-# %% [cell 3] train + evaluate torus-QA for 3 seeds (resumable; ~36 min each on a T4)
+# %% [cell 3] train + evaluate torus-QA for 6 seeds (resumable; ~36 min each -> ~3.5h fresh, or only the missing seeds)
 import os, subprocess, time
 OUT = "results/torus_llm"; os.makedirs(OUT, exist_ok=True)
-for seed in [0, 1, 2]:
+for seed in range(6):
     out = f"{OUT}/torus_grid_s{seed}.json"
     if os.path.exists(out):
         print(f"skip seed={seed} (already done)"); continue
@@ -60,7 +61,7 @@ def paired_p(diffs, iters=20000):
                for _ in range(iters)) / iters
 
 
-rows = [json.load(open(f"{OUT}/torus_grid_s{s}.json")) for s in [0, 1, 2]
+rows = [json.load(open(f"{OUT}/torus_grid_s{s}.json")) for s in range(6)
         if os.path.exists(f"{OUT}/torus_grid_s{s}.json")]
 print(f"TORUS-QA through the frozen LLM (n={len(rows)} seeds; chance ~11-18%)"); print("=" * 64)
 print("  T      cortex-ON          text-only OFF      Delta(ON-OFF)   p")
