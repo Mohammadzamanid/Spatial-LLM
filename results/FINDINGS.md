@@ -801,17 +801,18 @@ develops hippocampal time cells, their latency-dependent widening, and the brain
 A frozen LoRA-Qwen2.5-1.5B answers **"how much time has elapsed?"** (6 bins) reading ONLY the FROZEN
 emergent temporal cortex — the elapsed time never appears in the prompt, so a high cortex-ON vs
 text-only-OFF gap is a causal, leakage-proof statement that the LLM reads the emergent time-cell code
-(`notebooks/m3_temporal_full_kaggle.py`, n=3; chance 17%):
+(`notebooks/m3_temporal_full_kaggle.py`, **n=6**; chance 17%):
 
-- **EXACT bin:** ON **59% ± 30** vs OFF **19% ± 3** (Δ **+40**).
-- **WITHIN-1** (the natural metric for a *scalar* quantity): ON **74% ± 22** vs OFF **45% ± 15** (Δ **+30**).
+- **EXACT bin:** ON **55% ± 20** vs OFF **16% ± 6** (Δ **+40**; OFF sits at chance — the clean causal contrast).
+- **WITHIN-1** (the natural metric for a *scalar* quantity): ON **70% ± 19** vs OFF **37% ± 17** (Δ **+33**).
 
-ON exceeds OFF in **every seed** (best seed **86% exact / 96% within-1**). As for torus-QA, the paired
-permutation p sits at the n=3 floor (0.25; n≥6 certifies) and the ON magnitude is seed-variable (the
-cortex's *emergent* code quality varies seed to seed), so we report the honest spread. This closes the
-temporal loop the spatial torus-QA closed: **a frozen LLM reads an emergent time-cell code it was never
-given in text.** Both axes of the predictive-spatiotemporal map — space (torus) and time (elapsed) — now
-transfer to language, all emergent, nothing hard-coded. (`results/elapsed_time_llm.json`.)
+ON exceeds OFF in **all six seeds** (best seed **86% exact / 96% within-1**), so the paired sign-flip
+permutation test is **significant on both metrics (p = 0.033)** — clearing the n=3 floor of 0.25. As for
+torus-QA, the ON magnitude is seed-variable (±20; the cortex's *emergent* code quality varies seed to
+seed), so we report the honest spread. This closes the temporal loop the spatial torus-QA closed: **a
+frozen LLM reads an emergent time-cell code it was never given in text.** Both axes of the
+predictive-spatiotemporal map — space (torus) and time (elapsed) — now transfer to language, all
+emergent, nothing hard-coded. (`results/elapsed_time_llm.json`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document

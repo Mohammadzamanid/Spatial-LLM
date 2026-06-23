@@ -247,11 +247,12 @@ itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.sv
 **The emergent TIME code transfers too — the temporal analogue (`notebooks/m3_temporal_full_kaggle.py`).**
 The same single-item-readout logic closes the *temporal* loop: a frozen LoRA-Qwen answers "how much time
 has elapsed?" (6 bins) reading ONLY the FROZEN *emergent* temporal cortex (§7) — elapsed time never in the
-prompt. Across n=3 seeds (chance 17%), **cortex-ON beats text-only-OFF in every seed**: EXACT ON **59% ±
-30** vs OFF **19% ± 3** (Δ+40), and on WITHIN-1 (the natural metric for a scalar quantity) ON **74% ± 22**
-vs OFF **45% ± 15** (Δ+30), best seed **86%/96%**. Same honest caveats as torus: ON magnitude is
-seed-variable (the cortex's emergent-code quality varies seed to seed) and the paired p is at the n=3
-floor (0.25; n≥6 certifies). So a frozen LLM reads an **emergent time-cell code it was never given in
+prompt. Across **n=6 seeds** (chance 17%), **cortex-ON beats text-only-OFF in every seed**: EXACT ON **55%
+± 20** vs OFF **16% ± 6** (Δ+40; OFF at chance — the clean contrast), and on WITHIN-1 (the natural metric
+for a scalar quantity) ON **70% ± 19** vs OFF **37% ± 17** (Δ+33), best seed **86%/96%**. With all six
+seeds ON>OFF the paired sign-flip permutation test is **significant on both metrics (p = 0.033)**. The
+only caveat (shared with torus) is that the ON magnitude is seed-variable (±20; the cortex's emergent-code
+quality varies seed to seed). So a frozen LLM reads an **emergent time-cell code it was never given in
 text** — both axes of the predictive-spatiotemporal map, space (torus) and time (elapsed), now transfer
 to language, all emergent. (`results/elapsed_time_llm.json`.)
 
@@ -293,8 +294,10 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 ### Status / path to submission
 - ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
   multi-seed, committed.
-- ✅ §8 multi-seed LLM (n=3): cortex ON ≫ text-only OFF (robust); grid-vs-place inconclusive at n=3.
-- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect.
+- ✅ §7 predictive (SR) + temporal (time-cell) map — CPU, n=8, committed; temporal signatures EMERGE.
+- ✅ §8 multi-seed LLM: cortex ON ≫ text-only OFF (robust). Torus-QA n=3 (p at floor). **Elapsed-time
+  readout n=6: ON 55%±20 vs OFF 16%±6 exact, p=0.033 — significant** (both language axes now transfer).
+- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect; n≥6 torus.
 - ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
 - Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness
   claim**.
