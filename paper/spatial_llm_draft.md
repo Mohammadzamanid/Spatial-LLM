@@ -206,7 +206,7 @@ are *measured, not designed*. `results/time_cells.{json,svg}`.
 Together these give the cortex a map that **plans** (detours a metric map cannot) and **keeps time**
 (with the brain's scalar law) — the two axes a purely-spatial code omits, each falsified before transfer.
 
-## 8. Language transfer ✅ (n=3; ➕ more seeds to resolve grid-vs-place)
+## 8. Language transfer ✅ (causal ON≫OFF readouts significant at n=6; grid-vs-place n=3)
 
 A LoRA-Qwen2.5-1.5B answers navigation questions through the frozen cortex (the moves reach the model
 only via the cortex). We report the **multi-seed** result (n=3, mean ± 95% CI; `results/extrapolation_llm.json`,
@@ -233,12 +233,13 @@ effect). (Figure 5: `results/extrapolation_llm.svg`.)
 
 **Leakage-proof causal transfer on a non-Euclidean world (`--task torus`).** The cleanest language
 result: a frozen cortex *pretrained on the torus* lets Qwen answer "which wrap-around cell are you in?"
-— a question with no faithful Euclidean text description, with the moves never in the prompt. Across n=3
-seeds, **cortex-ON beats text-only-OFF by +42 to +57 points at every length and in every seed** (ON
-71/62/52% at T=8/16/24 vs OFF ~10–14% chance; `results/torus_llm.json`). Because the world is cyclic, a
+— a question with no faithful Euclidean text description, with the moves never in the prompt. Across
+**n=6 seeds**, **cortex-ON beats text-only-OFF by +52 to +73 points at every length and in every seed**
+(ON 84/74/63% at T=8/16/24 vs OFF ~9–11% chance; `results/torus_llm.json`). Because the world is cyclic, a
 language prior over Euclidean space cannot substitute; the LLM must be *reading the path-integrated
-toroidal code*. (Honest caveats: ON magnitude is seed-variable — one seed reached 94/78/70% — so CIs are
-wide, and the paired p sits at the n=3 permutation floor of 0.25; n≥6 would certify it.) This single-item
+toroidal code*. The paired sign-flip permutation test is **significant at every length (p = 0.033)**,
+clearing the n=3 floor; the ON magnitude remains seed-variable (CIs wide), but the causal direction is
+significant and consistent across seeds and lengths. This single-item
 readout transfers cleanly — whereas a two-item **comparison** does **not** train through the same
 frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance across seeds/evaluators).
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
@@ -295,9 +296,10 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 - ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
   multi-seed, committed.
 - ✅ §7 predictive (SR) + temporal (time-cell) map — CPU, n=8, committed; temporal signatures EMERGE.
-- ✅ §8 multi-seed LLM: cortex ON ≫ text-only OFF (robust). Torus-QA n=3 (p at floor). **Elapsed-time
-  readout n=6: ON 55%±20 vs OFF 16%±6 exact, p=0.033 — significant** (both language axes now transfer).
-- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect; n≥6 torus.
+- ✅ §8 causal language readouts, **both significant at n=6 (paired p=0.033, every seed ON≫OFF)**:
+  **torus-QA** (space) ON 84/74/63% vs OFF ~10% at T=8/16/24; **elapsed-time** (time) ON 55%±20 vs OFF
+  16%±6 exact. A frozen LLM reads the emergent spatial *and* temporal codes it was never given in text.
+- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect.
 - ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
 - Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness
   claim**.

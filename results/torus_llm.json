@@ -2,14 +2,13 @@
   "source": "Kaggle T4, Qwen2.5-1.5B + LoRA, src/training/train_trajectory.py --task torus --constrained_velocity",
   "design": "frozen cortex with TOROIDAL self-supervised pretraining (harmonics of L=1.6); moves never in the prompt; a torus has no faithful Euclidean text description (leakage rebuttal)",
   "metric": "exact 9-cell accuracy: cortex-ON vs cortex-OFF (text-only) per path length; chance ~11-18%",
-  "n_seeds": 3,
+  "n_seeds": 6,
   "results_by_len": {
-    "8":  {"on_mean": 0.71, "on_ci95": 0.45, "off_mean": 0.14, "off_ci95": 0.04, "delta": 0.57},
-    "16": {"on_mean": 0.62, "on_ci95": 0.39, "off_mean": 0.10, "off_ci95": 0.02, "delta": 0.51},
-    "24": {"on_mean": 0.52, "on_ci95": 0.38, "off_mean": 0.11, "off_ci95": 0.05, "delta": 0.42}
+    "8":  {"on_mean": 0.84, "on_ci95": 0.23, "off_mean": 0.11, "off_ci95": 0.04, "delta": 0.73, "paired_p": 0.0328},
+    "16": {"on_mean": 0.74, "on_ci95": 0.21, "off_mean": 0.09, "off_ci95": 0.02, "delta": 0.66, "paired_p": 0.0328},
+    "24": {"on_mean": 0.63, "on_ci95": 0.19, "off_mean": 0.11, "off_ci95": 0.03, "delta": 0.52, "paired_p": 0.0328}
   },
-  "paired_p_floor_note": "paired sign-flip permutation p = 0.2483 is the n=3 FLOOR (2/2^3=0.25), not a null; needs n>=6 to drop below it",
-  "headline": "cortex-ON >> text-only-OFF (chance) on a non-Euclidean (toroidal) world by +42 to +57 points in EVERY seed = the LLM causally reads a path-integrated toroidal code, leakage-proof. Direction robust; ON magnitude is seed-variable (52-94%), CIs wide at n=3.",
-  "seed0_was": {"8": 0.94, "16": 0.78, "24": 0.70},
-  "contrast": "single-item readouts (return/distance/bearing/torus) transfer to the frozen LLM; pairwise comparison (relational) does not (results/relational_llm.json) -- an honest boundary."
+  "paired_p_note": "paired sign-flip permutation p = 0.0328 at every length (all 6 seeds cortex-ON > text-only-OFF): SIGNIFICANT, clears the n=3 floor (0.25).",
+  "headline": "cortex-ON >> text-only-OFF (chance) on a non-Euclidean (toroidal) world by +52 to +73 points, EVERY seed, p=0.033 at all lengths = the LLM causally reads a path-integrated toroidal code, leakage-proof. ON magnitude seed-variable (CIs wide), direction significant and consistent.",
+  "contrast": "single-item readouts (return/distance/bearing/torus/elapsed-time) transfer to the frozen LLM; pairwise comparison (relational) does not (results/relational_llm.json) -- an honest boundary."
 }

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="380" font-family="Segoe UI, Arial">
 <rect width="600" height="380" fill="#ffffff"/>
-<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Torus-QA through a frozen LLM: cortex-ON &#8811; text-only (n=3 seeds, 95% CI)</text>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Torus-QA through a frozen LLM: cortex-ON &#8811; text-only (n=6 seeds, 95% CI)</text>
 <text x="28" y="44" font-size="10.5" fill="#5b6b8c">a wrap-around world with no Euclidean text prior; moves never in the prompt &#183; leakage-proof causal readout</text>
 <line x1="60" y1="328.0" x2="420" y2="328.0" stroke="#33415c"/><line x1="60" y1="78" x2="60" y2="328.0" stroke="#33415c"/>
 <line x1="60" y1="328.0" x2="420" y2="328.0" stroke="#eef2f8"/>
@@ -18,15 +18,15 @@
 <text x="60.0" y="343.0" font-size="9.5" fill="#5b6b8c" text-anchor="middle">T=8 (train)</text>
 <text x="240.0" y="343.0" font-size="9.5" fill="#5b6b8c" text-anchor="middle">T=16 (extrap.)</text>
 <text x="420.0" y="343.0" font-size="9.5" fill="#5b6b8c" text-anchor="middle">T=24 (extrap.)</text>
-<polygon points="60.0,78.0 240.0,78.0 420.0,103.0 420.0,293.0 240.0,270.5 60.0,263.0" fill="#e6550d" opacity="0.14"/>
-<polyline points="60.0,150.5 240.0,173.0 420.0,198.0" fill="none" stroke="#e6550d" stroke-width="2.6"/>
-<circle cx="60.0" cy="150.5" r="3.5" fill="#e6550d"/>
-<circle cx="240.0" cy="173.0" r="3.5" fill="#e6550d"/>
-<circle cx="420.0" cy="198.0" r="3.5" fill="#e6550d"/>
-<polygon points="60.0,283.0 240.0,298.0 420.0,288.0 420.0,313.0 240.0,308.0 60.0,303.0" fill="#9aa5b8" opacity="0.14"/>
-<polyline points="60.0,293.0 240.0,303.0 420.0,300.5" fill="none" stroke="#9aa5b8" stroke-width="2.6"/>
-<circle cx="60.0" cy="293.0" r="3.5" fill="#9aa5b8"/>
-<circle cx="240.0" cy="303.0" r="3.5" fill="#9aa5b8"/>
+<polygon points="60.0,78.0 240.0,90.5 420.0,123.0 420.0,218.0 240.0,195.5 60.0,175.5" fill="#e6550d" opacity="0.14"/>
+<polyline points="60.0,118.0 240.0,143.0 420.0,170.5" fill="none" stroke="#e6550d" stroke-width="2.6"/>
+<circle cx="60.0" cy="118.0" r="3.5" fill="#e6550d"/>
+<circle cx="240.0" cy="143.0" r="3.5" fill="#e6550d"/>
+<circle cx="420.0" cy="170.5" r="3.5" fill="#e6550d"/>
+<polygon points="60.0,290.5 240.0,300.5 420.0,293.0 420.0,308.0 240.0,310.5 60.0,310.5" fill="#9aa5b8" opacity="0.14"/>
+<polyline points="60.0,300.5 240.0,305.5 420.0,300.5" fill="none" stroke="#9aa5b8" stroke-width="2.6"/>
+<circle cx="60.0" cy="300.5" r="3.5" fill="#9aa5b8"/>
+<circle cx="240.0" cy="305.5" r="3.5" fill="#9aa5b8"/>
 <circle cx="420.0" cy="300.5" r="3.5" fill="#9aa5b8"/>
 <rect x="432" y="86" width="14" height="5" fill="#e6550d"/>
 <text x="450" y="92" font-size="10" fill="#28324a">cortex-ON (reads the cortex)</text>
