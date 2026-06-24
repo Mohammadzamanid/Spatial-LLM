@@ -814,6 +814,32 @@ frozen LLM reads an emergent time-cell code it was never given in text.** Both a
 predictive-spatiotemporal map — space (torus) and time (elapsed) — now transfer to language, all
 emergent, nothing hard-coded. (`results/elapsed_time_llm.json`.)
 
+### Toward the organ — a SPIKING, multi-timescale time code (honest, mixed)
+
+The rate model above reproduces the time-cell *signature*; a spiking substrate narrows the gap toward
+the biophysical *organ*. `src/models/neuro/spiking_temporal_cortex.py` is a recurrent **adaptive-LIF**
+network (surrogate-gradient spikes, per-unit **learnable membrane & adaptation time-constants**, private
+noise) — grounded in recent SNN-timing work (heterogeneous learnable τ → multi-timescale dynamics;
+adaptive-LIF → transient firing). Trained only to report elapsed time, with rate homeostasis, then
+measured vs a **homogeneous-τ control** (n=6):
+
+- **Spiking time cells emerge** — **46% ± 5%** of units are single-peaked and tile the interval (the
+  control also has ~49%: the time cells come from spike-frequency **adaptation**, present in both).
+- **A multi-timescale spectrum emerges and is *functional*** — learnable membrane τ spread **14.6× ± 3.6**
+  (control 1.0× by construction), and the heterogeneity **improves timing: decode error 0.87 ± 0.44 steps
+  vs 1.47 ± 0.31 homogeneous**. This is the clean "multi-timescale matters" result.
+- **Widening + scalar timing reproduce in spikes**, more noisily than rates: width-vs-latency
+  **+0.47 ± 0.19**, scalar-σ **+0.70 ± 0.18** (Weber CV 0.39 vs the rate model's 0.15 — spikes add
+  variability).
+- **Honest non-result.** A "slow cells code late" (Howard log-compression) trend looked strong at n=2
+  (+0.36) but **did not replicate at n=6** (corr(τ, peak) **+0.10 ± 0.17**, CI crosses 0). We withdraw
+  it — the multi-seed run did its job. The robust multi-timescale claim is the *spectrum + the timing
+  benefit*, not τ-to-latency alignment.
+
+So **spiking** and **multi-timescale** are closed (signatures reproduced in spikes; an emergent τ
+spectrum that aids timing); content-binding (what-where-when), local learning (e-prop), and circuit
+embedding remain. (`results/spiking_time_cells.json`, `results/spiking_time_cells.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

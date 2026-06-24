@@ -152,9 +152,10 @@ def main():
         print(f"  {lab[k]:66} {agg[k][0]:+.3f} ± {agg[k][1]:.3f}", flush=True)
     print(f"\n  -> a SPIKING substrate trained only to read elapsed time grows spiking time cells "
           f"({agg['time_cell_frac'][0]:.0%}) that widen with latency ({agg['width_latency_corr'][0]:+.2f}) and "
-          f"time scalarly; a heterogeneous TIMESCALE SPECTRUM emerges ({agg['tau_spread'][0]:.1f}x) in which "
-          f"SLOW cells code LATE (corr {agg['slow_late_corr'][0]:+.2f}, log-compression) — both gone in the "
-          f"homogeneous-tau control ({agg['ctrl_tau_spread'][0]:.1f}x, slow->late {agg['ctrl_slow_late_corr'][0]:+.2f}).",
+          f"time scalarly ({agg['scalar_sigma_corr'][0]:+.2f}); a heterogeneous TIMESCALE SPECTRUM emerges "
+          f"({agg['tau_spread'][0]:.1f}x vs 1x control) and IMPROVES timing (MAE {agg['decode_mae'][0]:.2f} vs "
+          f"homogeneous {agg['ctrl_decode_mae'][0]:.2f}). HONEST NON-RESULT: the slow->late log-compression is "
+          f"not robust ({agg['slow_late_corr'][0]:+.2f} ± {agg['slow_late_corr'][1]:.2f}, CI crosses 0).",
           flush=True)
     out = {"n_seeds": a.seeds, "T": T, "hidden": HIDDEN, "noise": NOISE, "iters": a.iters,
            "results": {k: {"mean": agg[k][0], "ci95": agg[k][1]} for k in keys}}
@@ -174,7 +175,7 @@ def svg(agg, arr, out):
     e = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" font-family="Segoe UI, Arial">',
          f'<rect width="{W}" height="{H}" fill="#ffffff"/>']
     e.append('<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">'
-             'Spiking, multi-timescale time cells: a spectrum emerges &#38; slow cells code late</text>')
+             'Spiking time cells + an emergent multi-timescale spectrum that aids timing</text>')
     oy = 50; rh = (ph - 2) / max(1, len(order))
     def X(t): return pad + (t / (T - 1)) * pw
     for row, u in enumerate(order):
@@ -187,21 +188,24 @@ def svg(agg, arr, out):
     e.append(f'<line x1="{pad}" y1="{oy+ph}" x2="{pad+pw}" y2="{oy+ph}" stroke="#33415c"/>')
     e.append(f'<text x="{pad+pw/2:.0f}" y="{oy+ph+15:.0f}" font-size="10" fill="#5b6b8c" text-anchor="middle">'
              f'elapsed time &#8594; ({len(order)} emergent SPIKING time cells, sorted by peak)</text>')
-    # bottom: slow->late scatter (tau vs peak) for time cells
+    # bottom: the emergent TIMESCALE SPECTRUM (histogram of membrane time-constants) — the robust result
     by = oy + ph + 46
-    tt = tau[tc]; pp = peak[tc]
-    tmin, tmax = tt.min().item(), tt.max().item()
-    def Xt(t): return pad + (t / (T - 1)) * pw
-    def Yt(v): return by + ph - ((v - tmin) / (tmax - tmin + 1e-9)) * ph
-    e.append(f'<text x="{pad}" y="{by-6}" font-size="11" fill="#28324a">membrane time-constant &#964; vs '
-             f'peak latency (rising = log-compression, corr {agg["slow_late_corr"][0]:+.2f})</text>')
-    e.append(f'<line x1="{pad}" y1="{by+ph}" x2="{pad+pw}" y2="{by+ph}" stroke="#33415c"/>'
-             f'<line x1="{pad}" y1="{by}" x2="{pad}" y2="{by+ph}" stroke="#33415c"/>')
-    for i in range(len(tc)):
-        e.append(f'<circle cx="{Xt(pp[i].item()):.1f}" cy="{Yt(tt[i].item()):.1f}" r="2.6" fill="#2ca25f" opacity="0.7"/>')
+    taus = arr["tau"]
+    tmin, tmax = taus.min().item(), taus.max().item()
+    nb = 24
+    edges = [tmin * (tmax / tmin) ** (i / nb) for i in range(nb + 1)]                 # log-spaced bins
+    counts = [int(((taus >= edges[i]) & (taus < edges[i + 1])).sum()) for i in range(nb)]
+    cmax = max(counts) or 1
+    e.append(f'<text x="{pad}" y="{by-6}" font-size="11" fill="#28324a">emergent timescale spectrum '
+             f'(membrane &#964; histogram): {agg["tau_spread"][0]:.0f}&#215; spread vs 1&#215; homogeneous control</text>')
+    e.append(f'<line x1="{pad}" y1="{by+ph}" x2="{pad+pw}" y2="{by+ph}" stroke="#33415c"/>')
+    bwid = pw / nb
+    for i, c in enumerate(counts):
+        h = c / cmax * ph; x = pad + i * bwid
+        e.append(f'<rect x="{x:.1f}" y="{by+ph-h:.1f}" width="{bwid-1:.1f}" height="{h:.1f}" fill="#2ca25f" opacity="0.8"/>')
     e.append(f'<text x="{pad+pw/2:.0f}" y="{by+ph+15:.0f}" font-size="10" fill="#5b6b8c" text-anchor="middle">'
-             f'peak latency &#183; spectrum {agg["tau_spread"][0]:.1f}&#215; (control {agg["ctrl_tau_spread"][0]:.1f}&#215;) '
-             f'&#183; time cells {agg["time_cell_frac"][0]:.0%} &#183; scalar {agg["scalar_sigma_corr"][0]:+.2f}</text>')
+             f'membrane &#964; (log scale) &#183; multi-timescale times better: MAE {agg["decode_mae"][0]:.2f} vs '
+             f'homogeneous {agg["ctrl_decode_mae"][0]:.2f} &#183; {agg["time_cell_frac"][0]:.0%} spiking time cells</text>')
     e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     open(out, "w").write("\n".join(e))

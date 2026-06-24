@@ -1,57 +1,57 @@
 {
-  "n_seeds": 1,
+  "n_seeds": 6,
   "T": 40,
   "hidden": 128,
   "noise": 0.2,
-  "iters": 250,
+  "iters": 2000,
   "results": {
     "time_cell_frac": {
-      "mean": 0.6797,
-      "ci95": 0.0
+      "mean": 0.4583,
+      "ci95": 0.0531
     },
     "width_latency_corr": {
-      "mean": 0.9776,
-      "ci95": 0.0
+      "mean": 0.4664,
+      "ci95": 0.191
     },
     "scalar_sigma_corr": {
-      "mean": 0.9243,
-      "ci95": 0.0
+      "mean": 0.7039,
+      "ci95": 0.1822
     },
     "weber_fraction_cv": {
-      "mean": 0.4977,
-      "ci95": 0.0
+      "mean": 0.3852,
+      "ci95": 0.1697
     },
     "tau_spread": {
-      "mean": 7.9242,
-      "ci95": 0.0
+      "mean": 14.6317,
+      "ci95": 3.6479
     },
     "slow_late_corr": {
-      "mean": 0.1929,
-      "ci95": 0.0
+      "mean": 0.1049,
+      "ci95": 0.1742
     },
     "decode_mae": {
-      "mean": 2.4219,
-      "ci95": 0.0
+      "mean": 0.8655,
+      "ci95": 0.4396
     },
     "spike_rate": {
-      "mean": 0.1315,
-      "ci95": 0.0
+      "mean": 0.067,
+      "ci95": 0.004
     },
     "ctrl_tau_spread": {
       "mean": 1.0,
       "ci95": 0.0
     },
     "ctrl_slow_late_corr": {
-      "mean": 0.0,
+      "mean": -0.0,
       "ci95": 0.0
     },
     "ctrl_time_cell_frac": {
-      "mean": 0.6172,
-      "ci95": 0.0
+      "mean": 0.4909,
+      "ci95": 0.061
     },
     "ctrl_decode_mae": {
-      "mean": 3.2657,
-      "ci95": 0.0
+      "mean": 1.4657,
+      "ci95": 0.3126
     }
   }
 }

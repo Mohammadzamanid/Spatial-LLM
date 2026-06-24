@@ -207,6 +207,16 @@ half** — Mau 2018) whose **fields widen with latency** (corr **+0.67**, every 
 scale-invariant; untrained 0.22). None of these were in the loss: the brain's interval-timing signatures
 are *measured, not designed*. `results/time_cells.{json,svg}`.
 
+*Toward the biophysical organ (spiking, multi-timescale).* A spiking successor
+(`src/models/neuro/spiking_temporal_cortex.py`: recurrent adaptive-LIF, surrogate-gradient spikes,
+per-unit **learnable** membrane and adaptation time-constants) reproduces the signature in spikes and
+adds a functional multi-timescale result (n=6, vs a homogeneous-τ control): spiking time cells emerge
+(**46%**, from spike-frequency adaptation), and a heterogeneous **timescale spectrum emerges (14.6×)**
+that **improves timing** (decode error **0.87** vs **1.47** steps homogeneous); widening (**+0.47**) and
+scalar timing (**+0.70**) reproduce, noisier than rates. Honest non-result: a "slow cells code late"
+(log-compression) trend at n=2 did not replicate at n=6 (corr(τ,peak) +0.10 ± 0.17). Content-binding,
+local (e-prop) learning, and grid-cortex embedding remain open. `results/spiking_time_cells.{json,svg}`.
+
 Together these give the cortex a map that **plans** (detours a metric map cannot) and **keeps time**
 (with the brain's scalar law) — the two axes a purely-spatial code omits, each falsified before transfer.
 

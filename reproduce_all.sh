@@ -34,6 +34,7 @@ run src.eval.structural_transfer --seeds "$SEEDS"   # TEM: frozen space-trained 
 python -u -m src.eval.phase_diagram   # SYNTHESIS: when each inductive bias wins (reads the JSONs above; no training)
 run src.eval.successor         --seeds "$SEEDS"     # §7 predictive map (SR): plans detours where geometry stalls; geodesic fields; TD-learned
 run src.eval.time_cells        --seeds "$SEEDS"     # §7 temporal map: time cells + scalar (Weber) timing EMERGE from a trained recurrent substrate (vs untrained control)
+run src.eval.spiking_time_cells --seeds 6           # §7 SPIKING + multi-timescale: spiking time cells + emergent tau-spectrum that aids timing (vs homogeneous-tau control)
 
 if [ "${1:-}" = "exploratory" ]; then
   echo; echo "############ EXPLORATORY demos (illustrative; not the central claims) ############"
