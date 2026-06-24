@@ -1,0 +1,57 @@
+{
+  "n_seeds": 1,
+  "T": 40,
+  "hidden": 128,
+  "noise": 0.2,
+  "iters": 250,
+  "results": {
+    "time_cell_frac": {
+      "mean": 0.6797,
+      "ci95": 0.0
+    },
+    "width_latency_corr": {
+      "mean": 0.9776,
+      "ci95": 0.0
+    },
+    "scalar_sigma_corr": {
+      "mean": 0.9243,
+      "ci95": 0.0
+    },
+    "weber_fraction_cv": {
+      "mean": 0.4977,
+      "ci95": 0.0
+    },
+    "tau_spread": {
+      "mean": 7.9242,
+      "ci95": 0.0
+    },
+    "slow_late_corr": {
+      "mean": 0.1929,
+      "ci95": 0.0
+    },
+    "decode_mae": {
+      "mean": 2.4219,
+      "ci95": 0.0
+    },
+    "spike_rate": {
+      "mean": 0.1315,
+      "ci95": 0.0
+    },
+    "ctrl_tau_spread": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "ctrl_slow_late_corr": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "ctrl_time_cell_frac": {
+      "mean": 0.6172,
+      "ci95": 0.0
+    },
+    "ctrl_decode_mae": {
+      "mean": 3.2657,
+      "ci95": 0.0
+    }
+  }
+}
