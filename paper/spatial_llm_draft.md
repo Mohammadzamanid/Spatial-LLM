@@ -267,6 +267,15 @@ frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance acros
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
 itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.svg`.)
 
+*What-happened-when (content-binding capstone) — a categorical/scalar split.* Asking the frozen LLM to
+read BOTH fields of the content-binding cortex (§7) — "`<event> <time>`", neither in the prompt — gives a
+clean split (n=6): **WHAT (event) transfers, significant** (cortex-ON 76% vs OFF 26%, chance 33%, paired
+p=0.033), while **WHEN (elapsed time) does not transfer jointly** (p=0.78), *despite* the standalone
+elapsed-time readout succeeding (p=0.033) and the cortex encoding both. Through the fusion interface the
+**categorical** field is read but the **scalar** field is dropped under competition — refining the scope
+statement: categorical single-item readouts transfer robustly; a scalar readout transfers alone but is
+crowded out by a categorical one. (`results/what_when_llm.json`.)
+
 **The emergent TIME code transfers too — the temporal analogue (`notebooks/m3_temporal_full_kaggle.py`).**
 The same single-item-readout logic closes the *temporal* loop: a frozen LoRA-Qwen answers "how much time
 has elapsed?" (6 bins) reading ONLY the FROZEN *emergent* temporal cortex (§7) — elapsed time never in the

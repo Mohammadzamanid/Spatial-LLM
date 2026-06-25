@@ -855,9 +855,19 @@ random probe, to report BOTH elapsed time AND which event — nothing about conj
 
 So a single recurrent substrate, told only to report what-and-when, grows a hippocampus-like code that
 **binds episodic content to time** — the third "organ" gap (after spiking and multi-timescale) closed on
-CPU; local learning (e-prop) and grid-cortex circuit embedding remain. The natural payoff is a frozen-LLM
-**"what happened when?"** readout (a single GPU run). (`results/content_binding.json`,
+CPU; local learning (e-prop) and grid-cortex circuit embedding remain. (`results/content_binding.json`,
 `results/content_binding.svg`.)
+
+**Through the frozen LLM — what transfers, when (jointly) does not (honest split, n=6).** A LoRA-Qwen
+reads ONLY this content-binding cortex and answers "`<event> <time>`" (neither in the prompt;
+`notebooks/m4_what_when_kaggle.py`). **WHAT (event) transfers and is significant: cortex-ON 76% ± 18 vs
+text-only-OFF 26% ± 10** (chance 33%, every seed ON>OFF, **paired p = 0.033**) — episodic *content*
+binds to language. **WHEN (elapsed time) does NOT transfer in this joint readout** (exact ON 20% vs OFF
+18%, p=0.78; within-1 p=0.88) — *even though* the cortex encodes both (CPU decode above) and the
+**standalone** elapsed-time readout transfers (`results/elapsed_time_llm.json`, p=0.033). So through the
+frozen-LLM fusion the **categorical** field is read but the **scalar** field is dropped when both must be
+reported together — a categorical-vs-scalar readout boundary that sharpens the earlier "single-item
+readouts transfer, pairwise comparison does not". (`results/what_when_llm.json`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
