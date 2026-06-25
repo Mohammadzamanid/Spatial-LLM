@@ -1,12 +1,15 @@
 # =====================================================================================
 # M4 — "WHAT HAPPENED WHEN?" through a frozen LLM (Kaggle T4).  The content-binding capstone:
 # a frozen LoRA-Qwen reads ONLY the content-binding cortex and names BOTH the event (what) and
-# the elapsed-time bin (when) — neither is ever in the prompt.  cortex-ON vs text-only-OFF =
-# a causal, leakage-proof statement that the LLM reads the emergent what-where-when code.
-# The third member of the family: torus-QA (space), elapsed-time (time), and now what x when.
+# the elapsed-time bin (when) -- neither ever in the prompt.  cortex-ON vs text-only-OFF.
+#
+# WHEN-RECOVERY version: the first joint run read WHAT (event) significantly but DROPPED WHEN
+# (the easy 3-way event dominated the gradient and crowded out the scalar time field). Two fixes:
+#   (1) answer TIME-FIRST  ("<time> <event>") so the scalar isn't an afterthought, and
+#   (2) UP-WEIGHT the time tokens in the loss (TIME_WEIGHT) so event can't starve them.
 #
 # FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~25-30 min/seed; resumable.
-# Run cells top to bottom.  Nothing is hard-coded; the cortex code is emergent (see M3).
+# (Delete results_what_when_llm/ if re-running after changing the recipe.)  Run cells top to bottom.
 # =====================================================================================
 
 
@@ -26,8 +29,9 @@ print("device:", torch.cuda.get_device_name(0), "| setup done")
 print("model cached")
 
 
-# %% [cell 3] "what happened when?" readout: cortex-ON vs text-only-OFF (multi-seed, resumable)
+# %% [cell 3] "what happened when?" readout, WHEN-recovery recipe (multi-seed, resumable)
 import os, math, time, json, random, torch, torch.nn as nn
+import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from peft import LoraConfig, TaskType, get_peft_model
 from src.models.fusion import MultiScaleSpatialFusion
@@ -35,11 +39,13 @@ from src.models.llm_wrapper import _get_embed_layer
 from src.models.neuro.temporal_cortex import TemporalCortex
 
 dev = "cuda"
-T = 50; HIDDEN = 128; K = 3; C = 6; NOISE = 0.06; ACT_COST = 1e-3      # K events ("what"), C time bins ("when")
+T = 50; HIDDEN = 128; K = 3; C = 6; NOISE = 0.06; ACT_COST = 1e-3
 BASE = "Qwen/Qwen2.5-1.5B"
+# TIME-FIRST answer so the scalar field leads; up-weight its tokens so the easy event can't starve it.
 PROMPT = ("[EPISODE] An event occurred at the start; then time passed.\n"
-          "[QUESTION] Which event (0-2) and how much time has elapsed (0-5)? Answer: <event> <time>.\n[ANSWER]")
-SEEDS = list(range(6)); CORTEX_ITERS = 2000; STEPS = 1500; BS = 4      # resumable; n=6 -> paired p can reach 0.03
+          "[QUESTION] How much time has elapsed (0-5) and which event was it (0-2)? Answer: <time> <event>.\n[ANSWER]")
+SEEDS = list(range(6)); CORTEX_ITERS = 2000; STEPS = 1800; BS = 4
+TIME_WEIGHT = 4.0                                                      # up-weight the (leading) time tokens
 
 tok = AutoTokenizer.from_pretrained(BASE, use_fast=True)
 if tok.pad_token is None: tok.pad_token = tok.eos_token
@@ -62,9 +68,9 @@ class TemporalReadoutLLM(nn.Module):                                    # same p
     def _tok(self, code, ablate):
         t = self.to_tokens(code).view(code.shape[0], self.n, -1)
         return torch.zeros_like(t) if ablate else t
-    def forward(self, input_ids, attn, code, labels=None, ablate=False):
+    def logits(self, input_ids, attn, code, ablate=False):
         text = self.emb()(input_ids); sp = self._tok(code, ablate).to(text.dtype)
-        return self.llm(inputs_embeds=self.fusion(text, sp), attention_mask=attn, labels=labels)
+        return self.llm(inputs_embeds=self.fusion(text, sp), attention_mask=attn).logits
     @torch.no_grad()
     def gen(self, input_ids, attn, code, ablate=False, max_new=5):
         text = self.emb()(input_ids); sp = self._tok(code, ablate).to(text.dtype)
@@ -72,15 +78,21 @@ class TemporalReadoutLLM(nn.Module):                                    # same p
                                  max_new_tokens=max_new, do_sample=False)
 
 def bin_of(probe): return [min(int(p.item() / T * C), C - 1) for p in probe]
-def parse(txt):
+def parse(txt):                                                        # TIME first, then EVENT
     ds = [c for c in txt if c.isdigit()]
-    ev = int(ds[0]) if ds else None
-    tm = int(ds[1]) if len(ds) > 1 else None
-    return ev, tm
+    return (int(ds[0]) if ds else None, int(ds[1]) if len(ds) > 1 else None)   # (time, event)
+
+def weighted_loss(logits, labels):
+    """CE over answer tokens, with the first two answer tokens (the leading TIME field) up-weighted."""
+    sl = logits[:, :-1].reshape(-1, logits.size(-1)); tl = labels[:, 1:].reshape(-1)
+    ce = F.cross_entropy(sl, tl, reduction="none", ignore_index=-100).view(labels.size(0), -1)
+    mask = (labels[:, 1:] != -100).float()
+    order = mask.cumsum(1)                                             # 1,2,3,... over answer tokens
+    w = torch.where((mask > 0) & (order <= 2), mask * TIME_WEIGHT, mask)   # up-weight first 2 (time)
+    return (ce * w).sum() / w.sum().clamp(min=1)
 
 def run_seed(seed, smoke=False):
     set_seed(seed); torch.manual_seed(seed)
-    # 1. train + FREEZE the CONTENT-BINDING cortex (event at t=0; report what + when)
     cx = TemporalCortex(hidden=HIDDEN, n_in=K + 1).to(dev)
     th = nn.Linear(HIDDEN, 1).to(dev); eh = nn.Linear(HIDDEN, K).to(dev)
     co = torch.optim.Adam(list(cx.parameters()) + list(th.parameters()) + list(eh.parameters()), 3e-3)
@@ -99,11 +111,10 @@ def run_seed(seed, smoke=False):
     cx.eval()
 
     @torch.no_grad()
-    def code(ev, probe):                                               # (B,) event ids + probe times -> (B,HIDDEN)
+    def code(ev, probe):
         B = ev.shape[0]; x = torch.zeros(B, T, K + 1, device=dev); x[torch.arange(B, device=dev), 0, ev] = 1.0
         R = cx.dynamics(x, noise=NOISE); return R[torch.arange(B, device=dev), probe]
 
-    # 2. frozen Qwen + LoRA reads the cortex; answer "<event> <time>"
     model = TemporalReadoutLLM(BASE, HIDDEN).to(dev)
     if hasattr(model.llm, "gradient_checkpointing_enable"):
         model.llm.gradient_checkpointing_enable(); model.llm.enable_input_require_grads(); model.llm.config.use_cache = False
@@ -112,7 +123,7 @@ def run_seed(seed, smoke=False):
     def batch(bs):
         ev = torch.randint(K, (bs,), device=dev); probe = torch.randint(T // 5, T, (bs,), device=dev)
         c = code(ev, probe); tb = bin_of(probe)
-        fulls = [PROMPT + f" {int(ev[i])} {tb[i]}" for i in range(bs)]
+        fulls = [PROMPT + f" {tb[i]} {int(ev[i])}" for i in range(bs)]   # TIME first, then EVENT
         enc = tok(fulls, max_length=64, padding="max_length", truncation=True, return_tensors="pt")
         labels = enc["input_ids"].clone(); plen = len(tok(PROMPT)["input_ids"])
         labels[:, :plen] = -100; labels[enc["attention_mask"] == 0] = -100
@@ -120,13 +131,13 @@ def run_seed(seed, smoke=False):
 
     if smoke:
         ids, attn, c, lab = batch(2)
-        l = model(ids, attn, c, labels=lab).loss; l.backward(); opt.zero_grad()
+        l = weighted_loss(model.logits(ids, attn, c), lab); l.backward(); opt.zero_grad()
         print(f"  smoke OK (loss {float(l):.3f})", flush=True)
 
     model.train(); cx.eval(); t0 = time.time()
     for it in range(STEPS):
         ids, attn, c, lab = batch(BS)
-        opt.zero_grad(); loss = model(ids, attn, c, labels=lab).loss; loss.backward(); opt.step()
+        opt.zero_grad(); loss = weighted_loss(model.logits(ids, attn, c), lab); loss.backward(); opt.step()
         if it % 200 == 0: print(f"  seed {seed} step {it}/{STEPS} loss {loss.item():.3f} ({time.time()-t0:.0f}s)", flush=True)
 
     @torch.no_grad()
@@ -139,9 +150,8 @@ def run_seed(seed, smoke=False):
             out = model.gen(ids.repeat(m, 1), attn.repeat(m, 1), code(ev, probe), ablate=ablate, max_new=5)
             tb = bin_of(probe)
             for j in range(m):
-                pe, pt = parse(tok.decode(out[j], skip_special_tokens=True))
-                tot += 1
-                what_ok += int(pe == int(ev[j]))
+                pt, pe = parse(tok.decode(out[j], skip_special_tokens=True))   # time first, event second
+                tot += 1; what_ok += int(pe == int(ev[j]))
                 if pt is not None:
                     when_ok += int(pt == tb[j]); when_w1 += int(abs(pt - tb[j]) <= 1)
         return what_ok / tot, when_ok / tot, when_w1 / tot
@@ -171,13 +181,14 @@ def paired_p(d, iters=20000):
     n = len(d); m = sum(d) / n; rng = random.Random(0)
     return sum(abs(sum(x * (1 if rng.random() < 0.5 else -1) for x in d) / n) >= abs(m) - 1e-12 for _ in range(iters)) / iters
 
-print("\n================ WHAT-HAPPENED-WHEN through a frozen LLM ================")
+print("\n================ WHAT-HAPPENED-WHEN through a frozen LLM (WHEN-recovery recipe) ================")
 print(f"  n={len(res)} seeds | WHAT chance ~ 1/{K} = {1/K:.0%} | WHEN chance ~ 1/{C} = {1/C:.0%}")
 for key, name in [("what", "WHAT (event)"), ("when", "WHEN exact"), ("when_w1", "WHEN within-1")]:
     on = [r[f"{key}_on"] for r in res]; off = [r[f"{key}_off"] for r in res]
     mo, co = ci95(on); mf, cf = ci95(off); d = [on[i] - off[i] for i in range(len(res))]
     p = paired_p(d) if len(res) >= 2 else float("nan")
     print(f"  {name:14} ON {mo:.0%} +/-{co:.0%}   OFF {mf:.0%} +/-{cf:.0%}   Delta {sum(d)/len(d):+.0%}   p={p:.4f}")
-print("  ON >> OFF on BOTH => the LLM reads the emergent what-where-when code (neither in the prompt).")
-json.dump({"n_seeds": len(res), "K": K, "C": C, "per_seed": res}, open("results_what_when_llm.json", "w"), indent=2)
+print("  Goal: ON >> OFF on BOTH (what AND when) => the LLM reads the full what-when code from the cortex.")
+json.dump({"n_seeds": len(res), "K": K, "C": C, "recipe": "time-first + time-weight", "per_seed": res},
+          open("results_what_when_llm.json", "w"), indent=2)
 print("\nwrote results_what_when_llm.json -- paste the table back")
