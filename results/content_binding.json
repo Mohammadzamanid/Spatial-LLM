@@ -1,0 +1,37 @@
+{
+  "n_seeds": 6,
+  "T": 50,
+  "hidden": 128,
+  "K": 3,
+  "iters": 1800,
+  "results": {
+    "time_cell_frac": {
+      "mean": 0.1432,
+      "ci95": 0.0229
+    },
+    "frac_pure": {
+      "mean": 0.2881,
+      "ci95": 0.0719
+    },
+    "frac_conjunctive": {
+      "mean": 0.7119,
+      "ci95": 0.0719
+    },
+    "width_latency_corr": {
+      "mean": 0.7277,
+      "ci95": 0.0864
+    },
+    "what_acc": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "what_chance": {
+      "mean": 0.3333,
+      "ci95": 0.0
+    },
+    "when_mae": {
+      "mean": 1.3078,
+      "ci95": 0.1214
+    }
+  }
+}

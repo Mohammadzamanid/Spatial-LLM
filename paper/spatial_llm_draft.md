@@ -214,8 +214,16 @@ adds a functional multi-timescale result (n=6, vs a homogeneous-τ control): spi
 (**46%**, from spike-frequency adaptation), and a heterogeneous **timescale spectrum emerges (14.6×)**
 that **improves timing** (decode error **0.87** vs **1.47** steps homogeneous); widening (**+0.47**) and
 scalar timing (**+0.70**) reproduce, noisier than rates. Honest non-result: a "slow cells code late"
-(log-compression) trend at n=2 did not replicate at n=6 (corr(τ,peak) +0.10 ± 0.17). Content-binding,
-local (e-prop) learning, and grid-cortex embedding remain open. `results/spiking_time_cells.{json,svg}`.
+(log-compression) trend at n=2 did not replicate at n=6 (corr(τ,peak) +0.10 ± 0.17).
+`results/spiking_time_cells.{json,svg}`.
+
+*Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
+result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
+report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**
+time cells (29% ± 7) and **conjunctive "contextual"** cells (71% ± 7, event × time) — and decodes BOTH
+**what** (event 100% vs 33% chance) and **when** (1.31 ± 0.12 steps), n=6 (`src/eval/content_binding.py`,
+`results/content_binding.{json,svg}`). Local (e-prop) learning and grid-cortex embedding remain open; the
+natural next step is a frozen-LLM "what happened when?" readout.
 
 Together these give the cortex a map that **plans** (detours a metric map cannot) and **keeps time**
 (with the brain's scalar law) — the two axes a purely-spatial code omits, each falsified before transfer.

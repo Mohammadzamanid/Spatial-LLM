@@ -837,8 +837,27 @@ measured vs a **homogeneous-τ control** (n=6):
   benefit*, not τ-to-latency alignment.
 
 So **spiking** and **multi-timescale** are closed (signatures reproduced in spikes; an emergent τ
-spectrum that aids timing); content-binding (what-where-when), local learning (e-prop), and circuit
-embedding remain. (`results/spiking_time_cells.json`, `results/spiking_time_cells.svg`.)
+spectrum that aids timing); local learning (e-prop) and circuit embedding remain (content-binding is
+closed next). (`results/spiking_time_cells.json`, `results/spiking_time_cells.svg`.)
+
+### Content-binding — the code says WHAT happened WHEN (conjunctive vs pure time cells)
+
+The temporal code also BINDS CONTENT, reproducing a 2023 hippocampal finding (bat CA1; Shimbo et al.,
+Nature Neuroscience; space–time integration, Neuron 2024): time cells split into two coexisting
+populations. `src/eval/content_binding.py` gives the substrate ONE of K=3 events at t=0 and asks it, at a
+random probe, to report BOTH elapsed time AND which event — nothing about conjunctive/pure cells imposed
+(n=6):
+
+- **Both populations EMERGE, every seed:** **PURE time cells 29% ± 7** (fire at their moment regardless of
+  event) and **CONJUNCTIVE "contextual" cells 71% ± 7** (event × time).
+- **The population decodes BOTH what and when:** event identity **100% ± 0** (chance 33%) and elapsed time
+  **1.31 ± 0.12 steps**; the time cells still widen with latency (+0.73).
+
+So a single recurrent substrate, told only to report what-and-when, grows a hippocampus-like code that
+**binds episodic content to time** — the third "organ" gap (after spiking and multi-timescale) closed on
+CPU; local learning (e-prop) and grid-cortex circuit embedding remain. The natural payoff is a frozen-LLM
+**"what happened when?"** readout (a single GPU run). (`results/content_binding.json`,
+`results/content_binding.svg`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
