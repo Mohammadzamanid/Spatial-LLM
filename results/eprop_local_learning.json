@@ -1,0 +1,25 @@
+{
+  "n_seeds": 5,
+  "T": 40,
+  "N": 64,
+  "iters": 2500,
+  "mean_floor": 0.0833,
+  "results": {
+    "final_loss": {
+      "mean": 0.0301,
+      "ci95": 0.0252
+    },
+    "times_below_floor": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "decode_mae": {
+      "mean": 2.4497,
+      "ci95": 0.7555
+    },
+    "time_cell_frac": {
+      "mean": 0.1031,
+      "ci95": 0.0184
+    }
+  }
+}

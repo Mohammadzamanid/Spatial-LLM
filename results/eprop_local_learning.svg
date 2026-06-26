@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="492" height="278" font-family="Segoe UI, Arial">
+<rect width="492" height="278" fill="#ffffff"/>
+<text x="26" y="24" font-size="14.5" font-weight="800" fill="#0b1324">Time cells under the BRAIN'S local rule (e-prop, no backprop)</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">eligibility traces + broadcast signal &#183; times at MAE 2.4 steps (loss &#8810; mean-floor) &#183; 10% spiking time cells emerge</text>
+<rect x="143.7" y="54.0" width="10.1" height="29.0" fill="hsl(265,75%,52%)" opacity="1.00"/>
+<rect x="172.9" y="82.0" width="10.1" height="29.0" fill="hsl(230,75%,52%)" opacity="1.00"/>
+<rect x="182.7" y="110.0" width="10.1" height="29.0" fill="hsl(195,75%,52%)" opacity="1.00"/>
+<rect x="202.2" y="138.0" width="10.1" height="29.0" fill="hsl(160,75%,52%)" opacity="1.00"/>
+<rect x="231.4" y="166.0" width="10.1" height="29.0" fill="hsl(125,75%,52%)" opacity="1.00"/>
+<rect x="241.1" y="194.0" width="10.1" height="29.0" fill="hsl(90,75%,52%)" opacity="1.00"/>
+<line x1="56" y1="224" x2="436" y2="224" stroke="#33415c"/>
+<text x="246" y="240" font-size="10" fill="#5b6b8c" text-anchor="middle">elapsed time &#8594; (6 e-prop-grown time cells, sorted by peak; raw spike rate)</text>
+</svg>

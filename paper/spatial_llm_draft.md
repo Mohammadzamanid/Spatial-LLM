@@ -217,6 +217,15 @@ scalar timing (**+0.70**) reproduce, noisier than rates. Honest non-result: a "s
 (log-compression) trend at n=2 did not replicate at n=6 (corr(τ,peak) +0.10 ± 0.17).
 `results/spiking_time_cells.{json,svg}`.
 
+*The signatures survive the brain's learning rule (local e-prop, no backprop).* The rest of the paper
+trains by BPTT, which brains do not do. Trained instead by **e-prop** (Bellec 2020: per-synapse
+eligibility traces + one broadcast error signal; ALIF neurons give the slow adaptation-eligibility that
+carries temporal credit across the delay; no autograd), a recurrent ALIF net (n=5) **learns to time**
+(loss/T 0.030 < the 0.083 predict-mean floor in all 5 seeds; decode MAE 2.4 steps) and **grows spiking
+time cells** (10% ± 2; fewer than backprop's ~46% but consistent). The time-cell signature thus does not
+require backprop — the architecture gives rise to it even under a brain-faithful local rule.
+`results/eprop_local_learning.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

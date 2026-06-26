@@ -877,6 +877,25 @@ complete picture is: a frozen LLM reads *either* field of the bound code **to si
 readout **cannot max both at once**; the bottleneck is the readout's capacity/training-share, not the
 binding (which the CPU decode confirms). (`results/what_when_llm.json`.)
 
+### The signatures survive the BRAIN'S learning rule — local e-prop, no backprop (n=5)
+
+Everything above is trained by backprop/BPTT, which the brain does not do. `src/eval/eprop_local_learning.py`
+asks whether the temporal signatures survive a biologically-plausible **local** rule: **e-prop** (Bellec
+et al. 2020) — each synapse keeps an **eligibility trace** of its own pre/post activity, gated by one
+broadcast **learning signal** (the readout error); no backward pass through time. Adaptive-LIF neurons
+supply a *slow* adaptation-eligibility component that carries temporal credit across the delay. Trained
+this way only (no autograd), a recurrent ALIF net (n=5):
+
+- **Learns to time** — loss/T **0.030 ± 0.025**, below the predict-the-mean floor (0.083) in **all 5
+  seeds**; elapsed time decodes at **MAE 2.45 ± 0.76 steps** (of 40).
+- **Grows spiking time cells** — **10.3% ± 1.8%** (single-peaked, raw-spike tuning; every seed 8–12%).
+  Fewer than under backprop (~46%) and coarser, but unmistakably present.
+
+So the time-cell signature does **not** require backprop: it emerges under the brain's own kind of local,
+online plasticity. This is the strongest form of the project's thesis — the *architecture* (recurrent
+adaptive spiking dynamics) gives rise to the neuroscience, even when the *learning rule* is also
+brain-faithful. (`results/eprop_local_learning.json`, `results/eprop_local_learning.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
