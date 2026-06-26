@@ -1,0 +1,28 @@
+{
+  "n_seeds": 5,
+  "T": 40,
+  "hidden": 128,
+  "iters": 2000,
+  "results": {
+    "frac_place": {
+      "mean": 0.1878,
+      "ci95": 0.0319
+    },
+    "frac_time": {
+      "mean": 0.1724,
+      "ci95": 0.0319
+    },
+    "frac_conjunctive": {
+      "mean": 0.5123,
+      "ci95": 0.0322
+    },
+    "pos_mae": {
+      "mean": 0.1993,
+      "ci95": 0.0066
+    },
+    "time_mae": {
+      "mean": 1.2949,
+      "ci95": 0.0554
+    }
+  }
+}

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="818" height="276" font-family="Segoe UI, Arial">
+<rect width="818" height="276" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">One circuit: place, time &amp; conjunctive space&#215;time cells coexist</text>
+<text x="50" y="50" font-size="11" font-weight="700" fill="#28324a">a PLACE cell (spatial rate map)</text>
+<rect x="50" y="56" width="26.5" height="26.5" fill="#450253"/>
+<rect x="76" y="56" width="26.5" height="26.5" fill="#591c4e"/>
+<rect x="102" y="56" width="26.5" height="26.5" fill="#7e4945"/>
+<rect x="128" y="56" width="26.5" height="26.5" fill="#ab8139"/>
+<rect x="154" y="56" width="26.5" height="26.5" fill="#d4b52f"/>
+<rect x="180" y="56" width="26.5" height="26.5" fill="#f9e225"/>
+<rect x="50" y="82" width="26.5" height="26.5" fill="#470553"/>
+<rect x="76" y="82" width="26.5" height="26.5" fill="#5f234c"/>
+<rect x="102" y="82" width="26.5" height="26.5" fill="#7e4a45"/>
+<rect x="128" y="82" width="26.5" height="26.5" fill="#aa8039"/>
+<rect x="154" y="82" width="26.5" height="26.5" fill="#d0af30"/>
+<rect x="180" y="82" width="26.5" height="26.5" fill="#fbe525"/>
+<rect x="50" y="108" width="26.5" height="26.5" fill="#450353"/>
+<rect x="76" y="108" width="26.5" height="26.5" fill="#5a1d4e"/>
+<rect x="102" y="108" width="26.5" height="26.5" fill="#6f3748"/>
+<rect x="128" y="108" width="26.5" height="26.5" fill="#98693e"/>
+<rect x="154" y="108" width="26.5" height="26.5" fill="#d3b32f"/>
+<rect x="180" y="108" width="26.5" height="26.5" fill="#fde725"/>
+<rect x="50" y="134" width="26.5" height="26.5" fill="#450253"/>
+<rect x="76" y="134" width="26.5" height="26.5" fill="#55174f"/>
+<rect x="102" y="134" width="26.5" height="26.5" fill="#703848"/>
+<rect x="128" y="134" width="26.5" height="26.5" fill="#97683e"/>
+<rect x="154" y="134" width="26.5" height="26.5" fill="#cfae30"/>
+<rect x="180" y="134" width="26.5" height="26.5" fill="#fbe525"/>
+<rect x="50" y="160" width="26.5" height="26.5" fill="#450353"/>
+<rect x="76" y="160" width="26.5" height="26.5" fill="#54154f"/>
+<rect x="102" y="160" width="26.5" height="26.5" fill="#763f47"/>
+<rect x="128" y="160" width="26.5" height="26.5" fill="#a0733c"/>
+<rect x="154" y="160" width="26.5" height="26.5" fill="#cdab31"/>
+<rect x="180" y="160" width="26.5" height="26.5" fill="#f1d927"/>
+<rect x="50" y="186" width="26.5" height="26.5" fill="#440154"/>
+<rect x="76" y="186" width="26.5" height="26.5" fill="#54154f"/>
+<rect x="102" y="186" width="26.5" height="26.5" fill="#753e47"/>
+<rect x="128" y="186" width="26.5" height="26.5" fill="#9e713c"/>
+<rect x="154" y="186" width="26.5" height="26.5" fill="#cead30"/>
+<rect x="180" y="186" width="26.5" height="26.5" fill="#ebd129"/>
+<text x="262" y="50" font-size="11" font-weight="700" fill="#28324a">a TIME cell (tuning vs elapsed time)</text>
+<line x1="262" y1="212" x2="512" y2="212" stroke="#33415c"/>
+<polyline points="262.0,211.1 289.8,212.0 317.6,212.0 345.3,211.5 373.1,201.1 400.9,173.4 428.7,141.9 456.4,114.4 484.2,88.5 512.0,64.0" fill="none" stroke="#2ca25f" stroke-width="2.6"/>
+<text x="387" y="228" font-size="10" fill="#5b6b8c" text-anchor="middle">elapsed time &#8594;</text>
+<text x="568" y="50" font-size="11" font-weight="700" fill="#28324a">population</text>
+<rect x="568" y="183" width="44" height="29" fill="#3182bd" opacity="0.85"/>
+<text x="590" y="178" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">19%</text>
+<text x="590" y="226" font-size="9.5" fill="#28324a" text-anchor="middle">place</text>
+<rect x="626" y="185" width="44" height="27" fill="#2ca25f" opacity="0.85"/>
+<text x="648" y="180" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">17%</text>
+<text x="648" y="226" font-size="9.5" fill="#28324a" text-anchor="middle">time</text>
+<rect x="684" y="132" width="44" height="80" fill="#e6550d" opacity="0.85"/>
+<text x="706" y="127" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">51%</text>
+<text x="706" y="226" font-size="9.5" fill="#28324a" text-anchor="middle">conj.</text>
+<line x1="568" y1="212" x2="742" y2="212" stroke="#33415c"/>
+</svg>

@@ -896,6 +896,23 @@ online plasticity. This is the strongest form of the project's thesis — the *a
 adaptive spiking dynamics) gives rise to the neuroscience, even when the *learning rule* is also
 brain-faithful. (`results/eprop_local_learning.json`, `results/eprop_local_learning.svg`.)
 
+### One circuit for space AND time — place, time, and conjunctive cells coexist (n=5)
+
+In hippocampus, place cells, time cells, and **conjunctive space×time** cells share a single population
+(Neuron 2024; bat CA1, Nat. Neurosci. 2023). `src/eval/space_time_circuit.py` feeds ONE recurrent
+substrate self-motion velocity **and** a start pulse and trains it to report **both** position and
+elapsed time; we then measure, per unit, the variance explained (η²) by position vs by elapsed time (a
+bounded box keeps the two ~decorrelated, so the tunings are separable). The single circuit develops all
+three cell types, coexisting (n=5):
+
+- **PURE PLACE** (space-tuned, time-invariant): **19% ± 3** · **PURE TIME** (time-tuned, space-invariant):
+  **17% ± 3** · **CONJUNCTIVE space×time**: **51% ± 3** — the conjunctive majority matching the data.
+- It decodes both at once: position **MAE 0.20** (box half-width 1.0) and elapsed time **MAE 1.30 steps**.
+
+So space and time are not separate modules here — one recurrent circuit multiplexes *where* and *when* in
+the same units, with the conjunctive code dominant, exactly the hippocampal organisation.
+(`results/space_time_circuit.json`, `results/space_time_circuit.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

@@ -226,6 +226,14 @@ time cells** (10% ± 2; fewer than backprop's ~46% but consistent). The time-cel
 require backprop — the architecture gives rise to it even under a brain-faithful local rule.
 `results/eprop_local_learning.{json,svg}`.
 
+*One circuit for space and time.* Hippocampal place, time, and conjunctive space×time cells share a
+single population (Neuron 2024). Feeding ONE recurrent substrate velocity + a start pulse and training it
+to report both position and elapsed time, all three coexist (n=5; classified by η² variance-explained for
+space vs time, decorrelated in a bounded box): pure place **19% ± 3**, pure time **17% ± 3**, conjunctive
+**51% ± 3** (conjunctive-dominant, as observed), decoding position (MAE 0.20) and time (MAE 1.30 steps)
+together. Space and time are multiplexed in the same units, not separate modules.
+`results/space_time_circuit.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**
