@@ -275,8 +275,11 @@ time tokens reads **WHEN** strongly (exact 67% vs 17%, p=0.033; within-1 91% vs 
 marginal (43%, p=0.095). The fusion interface reads the categorical *or* the scalar field — whichever the
 loss emphasizes — but a single autoregressive answer is a capacity bottleneck. This is a *readout*
 property, not the binding: the cortex encodes both (CPU decode) and the standalone elapsed-time readout
-succeeds (p=0.033); a separate-query readout (asking *what?* or *when?* independently) isolates the
-bottleneck to the joint-answer format. (`results/what_when_llm.json`.)
+succeeds (p=0.033). A separate-query readout (asking *what?* or *when?* independently) confirms each is
+readable but inherits the same limit — split 50/50, WHEN stays significant (78% within-1, p=0.033) while
+WHAT slips to marginal (p=0.16) on its halved share. Net: a frozen LLM reads *either* field of the bound
+code to significance, but a single small LoRA readout cannot max both — a capacity/training-share limit
+of the interface, not of the binding. (`results/what_when_llm.json`.)
 
 **The emergent TIME code transfers too — the temporal analogue (`notebooks/m3_temporal_full_kaggle.py`).**
 The same single-item-readout logic closes the *temporal* loop: a frozen LoRA-Qwen answers "how much time

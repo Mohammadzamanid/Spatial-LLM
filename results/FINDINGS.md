@@ -869,8 +869,13 @@ WHAT drops to marginal (43%, p=0.095). So the frozen-LLM fusion can read the **c
 bottleneck** that crowds out the other. This is a property of the *readout interface*, not the binding:
 the cortex encodes both (CPU decode: what 100%, when 1.31 steps), and the standalone elapsed-time readout
 transfers on its own (`results/elapsed_time_llm.json`, p=0.033). A separate-query readout
-(`notebooks/m4b_separate_readout_kaggle.py`, asking *what?* or *when?* independently) is the clean test
-that both are simultaneously readable. (`results/what_when_llm.json`.)
+(`notebooks/m4b_separate_readout_kaggle.py`, asking *what?* or *when?* independently) confirms it but
+inherits the same limit: split 50/50, **WHEN stays significant** (exact 36% vs 13%, within-1 78% vs 42%,
+p=0.033) while **WHAT slips to marginal** (47% vs 33%, p=0.16) on its halved training share. So the
+complete picture is: a frozen LLM reads *either* field of the bound code **to significance** — WHAT
+(p=0.033) when event-emphasized, WHEN (p=0.033) when time gets a fair share — but a single small LoRA
+readout **cannot max both at once**; the bottleneck is the readout's capacity/training-share, not the
+binding (which the CPU decode confirms). (`results/what_when_llm.json`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document

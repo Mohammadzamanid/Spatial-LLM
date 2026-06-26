@@ -16,6 +16,11 @@
     "when_exact":   {"on": 0.67, "off": 0.17, "delta": 0.49, "paired_p": 0.0328, "note": "WHEN recovered, significant"},
     "when_within1": {"on": 0.91, "off": 0.44, "delta": 0.48, "paired_p": 0.0328}
   },
-  "separate_query": "PENDING (notebooks/m4b_separate_readout_kaggle.py): ask WHAT or WHEN as separate queries so they never compete in one answer; expect BOTH ON>>OFF simultaneously, isolating the bottleneck to the joint-answer format, not the binding.",
-  "interpretation": "The cortex BINDS both (CPU decode: what 100%, when 1.31 steps). Through the frozen-LLM fusion the categorical (what) and scalar (when) fields are each individually readable (WHAT sig event-first; WHEN sig time-first+upweighted) but trade off in a single joint answer -- a readout capacity bottleneck, distinct from the binding itself."
+  "separate_query": {
+    "notebook": "notebooks/m4b_separate_readout_kaggle.py (ask WHAT or WHEN independently, 50/50)",
+    "what":         {"on": 0.47, "off": 0.33, "delta": 0.14, "paired_p": 0.1597, "note": "marginal -- WHAT got only ~half the training share"},
+    "when_exact":   {"on": 0.36, "off": 0.13, "delta": 0.23, "paired_p": 0.0328},
+    "when_within1": {"on": 0.78, "off": 0.42, "delta": 0.36, "paired_p": 0.0328}
+  },
+  "interpretation": "The cortex BINDS both (CPU decode: what 100%, when 1.31 steps -- the neuroscience result). Through the frozen LLM, EACH field is independently readable to SIGNIFICANCE -- WHAT 76% p=0.033 (event-emphasized); WHEN 67-91% p=0.033 (time-emphasized or fair share) -- but a single small LoRA readout cannot max BOTH at once: emphasizing/starving one trades off the other (joint event-first -> WHAT; joint time-first -> WHEN; separate 50/50 -> WHEN sig, WHAT marginal from the halved training share). This is a capacity/training-share property of the readout INTERFACE, not of the binding."
 }
