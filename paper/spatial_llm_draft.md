@@ -234,6 +234,16 @@ space vs time, decorrelated in a bounded box): pure place **19% ± 3**, pure tim
 together. Space and time are multiplexed in the same units, not separate modules.
 `results/space_time_circuit.{json,svg}`.
 
+*From reproducing neuroscience to proposing it.* Because the signatures emerge rather than being built
+in, the substrate can be perturbed to generate **falsifiable predictions** (`src/eval/predictions.py`).
+Two standing examples: (P1) content load sets the conjunctive/pure ratio — the share of conjunctive
+(event×time) time cells rises from 0% (content-free) to ~70% (cue-rich); (P2) spatial-input reliability
+sets the space/time mix — corrupting self-motion input drives the pure-time share from 21% to 84%.
+Neither was designed in; each is a number an experiment can refute (degrade vestibular/optic-flow input,
+or vary cue count, and read out the cell-type proportions). We have also run the loop in the rejecting
+direction: the model's "slow cells code late" log-compression prediction failed to replicate at n=6.
+`results/predictions.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

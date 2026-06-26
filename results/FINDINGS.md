@@ -917,6 +917,29 @@ Together: the cortex now has a map that is **predictive** (plans detours geometr
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
 
+## The platform as a hypothesis generator — predictions for experiment
+
+Once the architecture reproduces the neuroscience *by emergence*, it can be **perturbed to predict**.
+`src/eval/predictions.py` sweeps one controlled variable at a time and records the model's quantitative
+consequence as a **falsifiable biological hypothesis**. We have already run one full predict→test→falsify
+cycle in-house: the model predicted "slow cells code late" (log-compression), which **did not replicate**
+at n=6 (`results/spiking_time_cells.json`) — the loop rejects as well as proposes. Two standing
+predictions (n=3 conditions × seeds; `results/predictions.json`, `results/predictions.svg`):
+
+- **P1 — content load sets the conjunctive/pure time-cell ratio.** As the number of distinct events the
+  code must bind grows, the share of CONJUNCTIVE (event×time) cells among time cells rises from **0%
+  (content-free, K=1)** to **~70% (K≥3)** (it saturates rather than climbing monotonically). *Testable:*
+  a timing task with more distinct cues should yield proportionally more cue-selective ("contextual")
+  time cells and fewer purely temporal ones; a content-free interval task should be dominated by pure
+  time cells.
+- **P2 — spatial-input reliability sets the space/time cell mix.** Corrupting the self-motion (velocity)
+  input drives the PURE-TIME share of tuned cells from **21% (clean)** to **84% (noisy)**. *Testable:*
+  degrading vestibular / optic-flow input should reallocate the hippocampal population away from
+  place/conjunctive coding toward time cells.
+
+Neither relationship was designed in; each falls out of the substrate and is stated as a number an
+experiment can refute. This is the turn from *reproducing* known neuroscience to *proposing* it.
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

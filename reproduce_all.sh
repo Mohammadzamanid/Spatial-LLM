@@ -37,6 +37,7 @@ run src.eval.time_cells        --seeds "$SEEDS"     # §7 temporal map: time cel
 run src.eval.spiking_time_cells --seeds 6           # §7 SPIKING + multi-timescale: spiking time cells + emergent tau-spectrum that aids timing (vs homogeneous-tau control)
 run src.eval.eprop_local_learning --seeds 5         # §7 LOCAL LEARNING: time cells emerge under e-prop (eligibility traces, NO backprop) -- the brain's learning rule
 run src.eval.space_time_circuit --seeds 5           # §7 CIRCUIT EMBEDDING: place + time + conjunctive space-time cells coexist in ONE circuit (Neuron 2024)
+run src.eval.predictions       --seeds 3            # §7 HYPOTHESIS GENERATOR: falsifiable predictions (content->conjunctive; spatial-noise->pure-time)
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then
