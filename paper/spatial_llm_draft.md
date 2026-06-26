@@ -267,14 +267,16 @@ frozen-LLM fusion interface (`results/relational_llm.json`: exactly chance acros
 That contrast — single-item spatial readouts transfer to a frozen LLM, pairwise comparison does not — is
 itself a finding and an honest scope statement. (Figure 7: `results/torus_llm.svg`.)
 
-*What-happened-when (content-binding capstone) — a categorical/scalar split.* Asking the frozen LLM to
-read BOTH fields of the content-binding cortex (§7) — "`<event> <time>`", neither in the prompt — gives a
-clean split (n=6): **WHAT (event) transfers, significant** (cortex-ON 76% vs OFF 26%, chance 33%, paired
-p=0.033), while **WHEN (elapsed time) does not transfer jointly** (p=0.78), *despite* the standalone
-elapsed-time readout succeeding (p=0.033) and the cortex encoding both. Through the fusion interface the
-**categorical** field is read but the **scalar** field is dropped under competition — refining the scope
-statement: categorical single-item readouts transfer robustly; a scalar readout transfers alone but is
-crowded out by a categorical one. (`results/what_when_llm.json`.)
+*What-happened-when (content-binding capstone) — a joint-answer capacity tradeoff.* Asking the frozen LLM
+to read BOTH fields of the content-binding cortex (§7) — neither in the prompt — each field is
+*individually* significant but they *trade off in one answer* (n=6): event-first/equal-weight reads
+**WHAT** (cortex-ON 76% vs OFF 26%, p=0.033) with WHEN at chance (p=0.78); time-first + up-weighting the
+time tokens reads **WHEN** strongly (exact 67% vs 17%, p=0.033; within-1 91% vs 44%, p=0.033) with WHAT
+marginal (43%, p=0.095). The fusion interface reads the categorical *or* the scalar field — whichever the
+loss emphasizes — but a single autoregressive answer is a capacity bottleneck. This is a *readout*
+property, not the binding: the cortex encodes both (CPU decode) and the standalone elapsed-time readout
+succeeds (p=0.033); a separate-query readout (asking *what?* or *when?* independently) isolates the
+bottleneck to the joint-answer format. (`results/what_when_llm.json`.)
 
 **The emergent TIME code transfers too — the temporal analogue (`notebooks/m3_temporal_full_kaggle.py`).**
 The same single-item-readout logic closes the *temporal* loop: a frozen LoRA-Qwen answers "how much time

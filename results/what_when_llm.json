@@ -1,13 +1,21 @@
 {
   "experiment": "what-happened-when readout through a frozen LLM (content-binding language capstone)",
-  "notebook": "notebooks/m4_what_when_kaggle.py",
+  "notebook": "notebooks/m4_what_when_kaggle.py (joint) ; notebooks/m4b_separate_readout_kaggle.py (separate-query)",
   "n_seeds": 6,
   "K_events": 3,
   "C_time_bins": 6,
   "what_chance": 0.333,
   "when_chance": 0.167,
-  "what":         {"on_mean": 0.76, "on_ci95": 0.18, "off_mean": 0.26, "off_ci95": 0.10, "delta": 0.49,  "paired_p": 0.0328},
-  "when_exact":   {"on_mean": 0.20, "on_ci95": 0.14, "off_mean": 0.18, "off_ci95": 0.02, "delta": 0.02,  "paired_p": 0.7839},
-  "when_within1": {"on_mean": 0.41, "on_ci95": 0.15, "off_mean": 0.44, "off_ci95": 0.10, "delta": -0.03, "paired_p": 0.8756},
-  "note": "SPLIT result. WHAT (event identity) transfers to language and is SIGNIFICANT: cortex-ON 76% vs text-only-OFF 26% (chance 33%), every seed ON>OFF, paired p=0.0328. WHEN (elapsed time) does NOT transfer in the JOINT what+when readout (exact p=0.78, within-1 p=0.88), even though (a) the cortex encodes both (CPU decode: what 100%, when 1.31 steps; results/content_binding.json) and (b) the STANDALONE elapsed-time readout transfers (results/elapsed_time_llm.json: ON 55% vs 16%, p=0.033). Interpretation: through the frozen-LLM fusion the CATEGORICAL field (what) is read but the SCALAR field (when) is dropped when both must be reported jointly -- a categorical-vs-scalar readout boundary, sharpening 'single-item readouts transfer, pairwise comparison does not'."
+  "finding": "Both fields are individually readable from the bound cortex code through the frozen LLM, but a JOINT single answer ('<...> <...>') has a CAPACITY TRADEOFF: the LLM reads whichever field training emphasizes, and what/when trade off.",
+  "joint_event_first_equal_weight": {
+    "what":       {"on": 0.76, "off": 0.26, "delta": 0.49, "paired_p": 0.0328, "note": "WHAT wins"},
+    "when_exact": {"on": 0.20, "off": 0.18, "delta": 0.02, "paired_p": 0.7839, "note": "WHEN dropped"}
+  },
+  "joint_time_first_upweighted": {
+    "what":         {"on": 0.43, "off": 0.17, "delta": 0.26, "paired_p": 0.0954, "note": "WHAT now marginal"},
+    "when_exact":   {"on": 0.67, "off": 0.17, "delta": 0.49, "paired_p": 0.0328, "note": "WHEN recovered, significant"},
+    "when_within1": {"on": 0.91, "off": 0.44, "delta": 0.48, "paired_p": 0.0328}
+  },
+  "separate_query": "PENDING (notebooks/m4b_separate_readout_kaggle.py): ask WHAT or WHEN as separate queries so they never compete in one answer; expect BOTH ON>>OFF simultaneously, isolating the bottleneck to the joint-answer format, not the binding.",
+  "interpretation": "The cortex BINDS both (CPU decode: what 100%, when 1.31 steps). Through the frozen-LLM fusion the categorical (what) and scalar (when) fields are each individually readable (WHAT sig event-first; WHEN sig time-first+upweighted) but trade off in a single joint answer -- a readout capacity bottleneck, distinct from the binding itself."
 }

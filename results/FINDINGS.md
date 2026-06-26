@@ -858,16 +858,19 @@ So a single recurrent substrate, told only to report what-and-when, grows a hipp
 CPU; local learning (e-prop) and grid-cortex circuit embedding remain. (`results/content_binding.json`,
 `results/content_binding.svg`.)
 
-**Through the frozen LLM — what transfers, when (jointly) does not (honest split, n=6).** A LoRA-Qwen
-reads ONLY this content-binding cortex and answers "`<event> <time>`" (neither in the prompt;
-`notebooks/m4_what_when_kaggle.py`). **WHAT (event) transfers and is significant: cortex-ON 76% ± 18 vs
-text-only-OFF 26% ± 10** (chance 33%, every seed ON>OFF, **paired p = 0.033**) — episodic *content*
-binds to language. **WHEN (elapsed time) does NOT transfer in this joint readout** (exact ON 20% vs OFF
-18%, p=0.78; within-1 p=0.88) — *even though* the cortex encodes both (CPU decode above) and the
-**standalone** elapsed-time readout transfers (`results/elapsed_time_llm.json`, p=0.033). So through the
-frozen-LLM fusion the **categorical** field is read but the **scalar** field is dropped when both must be
-reported together — a categorical-vs-scalar readout boundary that sharpens the earlier "single-item
-readouts transfer, pairwise comparison does not". (`results/what_when_llm.json`.)
+**Through the frozen LLM — both fields readable, but a joint-answer capacity tradeoff (n=6).** A
+LoRA-Qwen reads ONLY this content-binding cortex (neither field in the prompt;
+`notebooks/m4_what_when_kaggle.py`). Each field is **individually significant**, but they **trade off in
+a single joint answer**: with the event first / equal weight, **WHAT wins** (cortex-ON 76% ± 18 vs OFF
+26% ± 10, **p=0.033**) while WHEN sits at chance (p=0.78); flip to time-first + up-weight the time tokens
+and **WHEN wins, strongly** (exact ON 67% vs OFF 17%, **p=0.033**; within-1 **91%** vs 44%, p=0.033) while
+WHAT drops to marginal (43%, p=0.095). So the frozen-LLM fusion can read the **categorical** *or* the
+**scalar** field — whichever the loss emphasizes — but a single autoregressive answer is a **capacity
+bottleneck** that crowds out the other. This is a property of the *readout interface*, not the binding:
+the cortex encodes both (CPU decode: what 100%, when 1.31 steps), and the standalone elapsed-time readout
+transfers on its own (`results/elapsed_time_llm.json`, p=0.033). A separate-query readout
+(`notebooks/m4b_separate_readout_kaggle.py`, asking *what?* or *when?* independently) is the clean test
+that both are simultaneously readable. (`results/what_when_llm.json`.)
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
