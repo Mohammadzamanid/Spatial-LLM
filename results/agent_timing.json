@@ -1,0 +1,29 @@
+{
+  "n_seeds": 3,
+  "target_D": 25,
+  "reward_sigma": 3.0,
+  "intact": {
+    "reward": [
+      0.884,
+      0.114
+    ],
+    "act_mean": [
+      24.737,
+      0.147
+    ],
+    "act_std": [
+      1.912,
+      0.612
+    ]
+  },
+  "lesioned": {
+    "reward": [
+      0.0,
+      0.0
+    ],
+    "act_mean": [
+      1.113,
+      0.081
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="492" height="294" font-family="Segoe UI, Arial">
+<rect width="492" height="294" fill="#ffffff"/>
+<text x="26" y="24" font-size="14.5" font-weight="800" fill="#0b1324">Timing-guided agent: acts on cue at D, abolished by lesioning the temporal code</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">action-time distribution &#183; INTACT reward 0.88 vs LESIONED 0.00</text>
+<line x1="56" y1="234" x2="436" y2="234" stroke="#33415c"/>
+<line x1="299.6" y1="54" x2="299.6" y2="234" stroke="#c9341a" stroke-dasharray="4,3" opacity="0.6"/>
+<text x="299.6" y="52" font-size="9" fill="#c9341a" text-anchor="middle">target D=25</text>
+<polyline points="56.0,54.0 65.7,137.2 75.5,184.3 85.2,210.8 95.0,216.6 104.7,227.5 114.5,226.3 124.2,230.8 133.9,232.7 143.7,233.4 153.4,234.0 163.2,233.4 172.9,234.0 182.7,234.0 192.4,234.0 202.2,234.0 211.9,234.0 221.6,234.0 231.4,234.0 241.1,234.0 250.9,234.0 260.6,234.0 270.4,234.0 280.1,234.0 289.8,234.0 299.6,234.0 309.3,234.0 319.1,234.0 328.8,234.0 338.6,234.0 348.3,234.0 358.1,234.0 367.8,234.0 377.5,234.0 387.3,234.0 397.0,234.0 406.8,234.0 416.5,234.0 426.3,234.0 436.0,234.0" fill="none" stroke="#9aa5b8" stroke-width="2.4"/>
+<polyline points="56.0,233.4 65.7,234.0 75.5,234.0 85.2,234.0 95.0,234.0 104.7,234.0 114.5,234.0 124.2,234.0 133.9,234.0 143.7,234.0 153.4,234.0 163.2,234.0 172.9,234.0 182.7,234.0 192.4,234.0 202.2,234.0 211.9,234.0 221.6,234.0 231.4,234.0 241.1,234.0 250.9,234.0 260.6,233.4 270.4,226.3 280.1,199.8 289.8,133.4 299.6,90.8 309.3,154.0 319.1,215.9 328.8,232.7 338.6,233.4 348.3,234.0 358.1,234.0 367.8,234.0 377.5,234.0 387.3,234.0 397.0,234.0 406.8,234.0 416.5,234.0 426.3,234.0 436.0,234.0" fill="none" stroke="#2ca25f" stroke-width="2.4"/>
+<text x="246" y="250" font-size="10" fill="#5b6b8c" text-anchor="middle">action time (steps since start)</text>
+<rect x="248" y="60" width="13" height="4" fill="#2ca25f"/>
+<text x="265" y="65" font-size="9.5" fill="#28324a">INTACT (reads time cells)</text>
+<rect x="248" y="75" width="13" height="4" fill="#9aa5b8"/>
+<text x="265" y="80" font-size="9.5" fill="#28324a">LESIONED (temporal code zeroed)</text>
+</svg>

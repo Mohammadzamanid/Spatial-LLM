@@ -258,6 +258,15 @@ from **142 → 7 steps** (the agent stores the location in one shot and recalls 
 episodic store abolishes the savings** (latency stays ~130) while leaving navigation intact — the Morris-
 water-maze signature and its hippocampal dependence, emergent in the agent. `results/agent_memory.{json,svg}`.
 
+*Timing-guided behavior (`src/eval/agent_timing.py`, n=3).* The temporal organ driving action: in an
+interval-production task (act at target D, reward peaks at D), a policy reading the emergent time-cell
+population acts **precisely at D=25** (reward **0.88**); **lesioning the temporal code abolishes timing**
+(acts immediately, reward **0.00**), the rest intact. Across the three behaving-agent capacities the map
+is clean — flexible navigation (cognitive map), one-shot place memory (episodic store), timed action
+(time cells) — each emergent from integrating an organ into the loop, and each **independently
+lesionable**: a brain-in-miniature with a structure→function→lesion correspondence.
+`results/agent_timing.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

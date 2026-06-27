@@ -984,8 +984,27 @@ readout) and navigate straight there via the map. The result is the Morris-water
 exactly one capacity (one-trial memory), reproducing the hippocampal dependence of one-shot place
 learning. (`results/agent_memory.json`, `results/agent_memory.svg`.)
 
-Natural next steps in this phase (all CPU): timing-guided behavior (wiring the time cells into action)
-and putting the real grid cortex in the loop (replacing the fixed place code), then scale.
+**Timing-guided behavior — acting on time, abolished by lesioning the temporal code**
+(`src/eval/agent_timing.py`, n=3). The third capacity integrates the **temporal organ** into action: an
+interval-production task where the agent must emit its move at a target interval D (reward peaks at D and
+decays). The policy reads the **emergent time-cell population** (a frozen TemporalCortex) to time the
+action. With it intact the agent acts **precisely at D=25** (act time 25 ± ~2; reward **0.88 ± 0.11**);
+**lesioning the temporal code** (zeroing it) abolishes timing — the agent can no longer tell elapsed time,
+acts immediately (act time ~1), reward **0.00** — while the rest of the agent is intact.
+
+**The behaving agent's clean structure→function→lesion map.** Three capacities, three organs, three
+specific lesions:
+
+| capacity | organ integrated | lesion removes (only) this |
+|---|---|---|
+| flexible navigation | cognitive map (SR) | — (Euclidean/model-free fail without it) |
+| one-shot place memory | hippocampal episodic store | latency savings (142→7 gone) |
+| timed action | time cells (temporal cortex) | timing (reward 0.88→0.00) |
+
+A brain-in-miniature where each capacity emerges from integrating an organ into the closed loop, and each
+is independently lesionable. Remaining behaving-agent steps (all CPU): putting the real grid cortex in
+the loop (replacing the fixed place code), then the scale study. (`results/agent_timing.json`,
+`results/agent_timing.svg`.)
 
 ## Emergent neuroscience signatures — measured, not designed
 
