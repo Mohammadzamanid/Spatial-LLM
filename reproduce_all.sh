@@ -42,6 +42,7 @@ run src.eval.agent_navigation  --seeds 5            # BEHAVING AGENT: closed-loo
 run src.eval.agent_memory      --seeds 5            # BEHAVING AGENT: one-shot place learning (episodic store); lesion abolishes it (Morris water maze)
 run src.eval.agent_timing      --seeds 3            # BEHAVING AGENT: interval-timed action (time cells); lesion abolishes timing (reward 0.88->0.00)
 run src.eval.agent_unified     --seeds 3            # BEHAVING AGENT: ONE task needs space+memory+time; clean triple-lesion dissociation (99% -> 0/0/0)
+run src.eval.basal_ganglia     --seeds 3            # TIER-2 SYSTEM: basal-ganglia Go/NoGo action selection; dopamine lesion abolishes learning (100->35%)
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then

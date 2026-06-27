@@ -1026,6 +1026,27 @@ from integrating faithful organs, and they dissociate like the brain's. Remainin
 real grid cortex in the loop, then the scale study. (`results/agent_unified.json`,
 `results/agent_unified.svg`.)
 
+## Beyond the hippocampal core — a basal-ganglia action-selection organ
+
+The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action
+selector upgraded from a generic softmax to a faithful circuit (`src/eval/basal_ganglia.py`, n=3). A
+cortico-striatal **Go (D1) / NoGo (D2)** opponent circuit selects actions by softmax(Go − NoGo)
+(direct−indirect, thalamic disinhibition), and learns by **local, dopamine-RPE-gated three-factor
+plasticity** (positive RPE → Go LTP, negative → NoGo LTP; Frank's OpAL) with synaptic homeostasis — **no
+backprop**. On a navigation task:
+
+- **INTACT** learns to **100%**; **−dopamine** (RPE no longer gates striatal plasticity) stays at **chance
+  (35%)** — the **dopamine-dependence of reward-based action learning** (the Parkinsonian signature),
+  emergent from a faithful circuit with a local rule.
+- *Honest nuance:* the **Go/NoGo pathways are partially redundant** on this task — a single-pathway lesion
+  (−D1 or −D2) still reaches 100% (slower early: 75–81% vs 89%), because dopamine gates *both*. So it is
+  the loss of **dopamine** (the shared neuromodulatory teaching signal), not of one pathway, that
+  abolishes learning.
+
+So action selection joins navigation, memory, and timing as a faithful organ with its own signature
+lesion — and the agent now selects actions through a real basal ganglia, learned without backprop.
+(`results/basal_ganglia.json`, `results/basal_ganglia.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

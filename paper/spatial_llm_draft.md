@@ -275,6 +275,14 @@ failure mode (**−map 0%**: can't reach; **−memory 0%**: wrong place; **−ti
 capacities, emergent from one self-supervised substrate, dissociating like the brain's — the cleanest
 single embodiment of the thesis. `results/agent_unified.{json,svg}`.
 
+*A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
+hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
+NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
+Intact it learns to **100%**; **lesioning dopamine collapses learning to chance (35%)** — the
+dopamine-dependence of reward-based action learning. (The Go/NoGo pathways are partially redundant here —
+either alone reaches 100% — so it is loss of the shared dopamine signal, not one pathway, that abolishes
+learning.) `results/basal_ganglia.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**
