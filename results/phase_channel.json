@@ -1,0 +1,42 @@
+{
+  "n_seeds": 3,
+  "rate": {
+    "what": [
+      1.0,
+      0.0
+    ],
+    "when": [
+      1.407,
+      0.436
+    ]
+  },
+  "rate2_capacity_matched": {
+    "what": [
+      1.0,
+      0.0
+    ],
+    "when": [
+      0.962,
+      0.055
+    ]
+  },
+  "phasor_rate_plus_phase": {
+    "what": [
+      1.0,
+      0.0
+    ],
+    "when": [
+      1.067,
+      0.145
+    ]
+  },
+  "segregation_when_from_rate": [
+    1.158,
+    0.076
+  ],
+  "segregation_when_from_phase": [
+    0.817,
+    0.144
+  ],
+  "conclusion": "No representational tradeoff: a rate-only linear reader decodes both what (~100%) and when (~1 step). The earlier what/when tradeoff is a property of the tiny frozen-LLM reader, not the cortical code. Phase adds only a mild Huxter-direction signal (time decodes better from phase than rate); it does not rescue a non-existent population-level tradeoff."
+}

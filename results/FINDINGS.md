@@ -877,6 +877,16 @@ complete picture is: a frozen LLM reads *either* field of the bound code **to si
 readout **cannot max both at once**; the bottleneck is the readout's capacity/training-share, not the
 binding (which the CPU decode confirms). (`results/what_when_llm.json`.)
 
+*Follow-up — we tested whether a theta rate+phase code fixes it, and recorded an honest framing
+correction* (`src/eval/phase_channel.py`, n=3). At the population level there is **no tradeoff to fix**: a
+plain rate-only *linear* reader already decodes **both** (what 100%, when MAE 1.4 steps). So the joint
+tradeoff is a property of the *tiny frozen-LLM reader*, not the cortical code, and a rate+phase phasor
+does not rescue a non-problem (phasor ≈ capacity-matched rate). The one genuine phase signature is the
+Huxter-direction lean: **elapsed time decodes better from the phase channel than from rate (MAE 0.82 vs
+1.16, CIs non-overlapping)** — partial rate–phase independent coding, not full segregation. Lesson: phase
+multiplexing is the brain's solution *at scale*; over-applying it to our toy was the wrong inference.
+(`results/phase_channel.json`.)
+
 ### The signatures survive the BRAIN'S learning rule — local e-prop, no backprop (n=5)
 
 Everything above is trained by backprop/BPTT, which the brain does not do. `src/eval/eprop_local_learning.py`
