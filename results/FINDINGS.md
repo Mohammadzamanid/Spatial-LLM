@@ -970,10 +970,22 @@ gap): perception → decision → action → consequence, integrating modules we
   goals (**13% ± 4**). Flexible goal-directed behavior from a self-learned predictive map is exactly what
   a cognitive map is *for* — and here it drives an agent, not a probe.
 
-This converts the pile of faithful organs into a behaving brain-in-miniature. Natural next steps in this
-phase (all CPU): memory-guided behavior (one-shot reward-location memory via the hippocampal store) and
-timing-guided behavior (wiring the time cells into action). (`results/agent_navigation.json`,
+This converts the pile of faithful organs into a behaving brain-in-miniature. (`results/agent_navigation.json`,
 `results/agent_navigation.svg`.)
+
+**Memory-guided behavior — one-shot place learning, abolished by lesioning episodic memory**
+(`src/eval/agent_memory.py`, n=5). The second capacity integrates a *different* organ — the hippocampal
+**episodic store** — into behavior. Each "day" the reward moves to a new cell; trial 1 the agent explores
+to find it and stores its place code in **one shot**, then later trials recall it (population-vector
+readout) and navigate straight there via the map. The result is the Morris-water-maze signature: a
+**single** rewarded trial collapses latency from **142 ± 10 to 7 ± 1 steps** (one-shot savings ~135).
+**Lesioning the episodic store abolishes it** — latency stays ~130 every trial (savings ~8) — while
+*navigation itself is intact* (the agent still reaches a goal it is given). So removing one organ removes
+exactly one capacity (one-trial memory), reproducing the hippocampal dependence of one-shot place
+learning. (`results/agent_memory.json`, `results/agent_memory.svg`.)
+
+Natural next steps in this phase (all CPU): timing-guided behavior (wiring the time cells into action)
+and putting the real grid cortex in the loop (replacing the fixed place code), then scale.
 
 ## Emergent neuroscience signatures — measured, not designed
 

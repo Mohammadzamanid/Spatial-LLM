@@ -252,6 +252,12 @@ around a barrier (**100%**), where Euclidean vector-navigation stalls (**69%**) 
 policy fails to transfer (**13%**) — the defining capacity of a cognitive map, now driving an agent rather
 than being probed. `results/agent_navigation.{json,svg}`.
 
+*Memory-guided behavior — one-shot place learning (`src/eval/agent_memory.py`, n=5).* Adding the
+hippocampal episodic store: when the reward moves each "day", a single rewarded trial collapses latency
+from **142 → 7 steps** (the agent stores the location in one shot and recalls it), and **lesioning the
+episodic store abolishes the savings** (latency stays ~130) while leaving navigation intact — the Morris-
+water-maze signature and its hippocampal dependence, emergent in the agent. `results/agent_memory.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**
