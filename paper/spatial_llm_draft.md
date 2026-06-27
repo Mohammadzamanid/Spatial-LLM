@@ -244,6 +244,14 @@ or vary cue count, and read out the cell-type proportions). We have also run the
 direction: the model's "slow cells code late" log-compression prediction failed to replicate at n=6.
 `results/predictions.{json,svg}`.
 
+*The behaving agent — the map drives behavior.* Closing the loop (`src/eval/agent_navigation.py`, n=5):
+an agent path-integrates self-motion into a place code, feeds a dopamine-TD critic + a basal-ganglia-like
+actor, acts, and learns online — goal-directed navigation emerges (success → 100%). And one **successor
+map the agent learns from its own exploration** drives **flexible, zero-shot navigation to any goal**
+around a barrier (**100%**), where Euclidean vector-navigation stalls (**69%**) and a model-free goal-A
+policy fails to transfer (**13%**) — the defining capacity of a cognitive map, now driving an agent rather
+than being probed. `results/agent_navigation.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

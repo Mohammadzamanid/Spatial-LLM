@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="782" height="294" font-family="Segoe UI, Arial">
+<rect width="782" height="294" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">The behaving agent: navigation emerges, and one self-learned map navigates anywhere</text>
+<text x="56" y="48" font-size="11" font-weight="700" fill="#28324a">A. closed-loop navigation emerges</text>
+<line x1="56" y1="234" x2="356" y2="234" stroke="#33415c"/><line x1="56" y1="54" x2="56" y2="234" stroke="#33415c"/>
+<text x="50" y="238" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<text x="50" y="148" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<text x="50" y="58" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<polyline points="56.0,69.7 98.9,54.0 141.7,54.0 184.6,54.0 227.4,54.0 270.3,54.0 313.1,54.0 356.0,54.0" fill="none" stroke="#e6550d" stroke-width="2.6"/>
+<text x="206" y="250" font-size="10" fill="#5b6b8c" text-anchor="middle">training episodes &#8594; success rate</text>
+<text x="426" y="48" font-size="11" font-weight="700" fill="#28324a">B. flexible zero-shot navigation (any goal)</text>
+<line x1="426" y1="234" x2="726" y2="234" stroke="#33415c"/>
+<rect x="450" y="54" width="56" height="180" fill="#2ca25f" opacity="0.85"/>
+<text x="478" y="49" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">100%</text>
+<text x="478" y="249" font-size="9.5" fill="#28324a" text-anchor="middle">SR map</text>
+<rect x="536" y="110" width="56" height="124" fill="#9aa5b8" opacity="0.85"/>
+<text x="564" y="105" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">69%</text>
+<text x="564" y="249" font-size="9.5" fill="#28324a" text-anchor="middle">Euclid</text>
+<rect x="622" y="211" width="56" height="23" fill="#c9341a" opacity="0.85"/>
+<text x="650" y="206" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">13%</text>
+<text x="650" y="249" font-size="9.5" fill="#28324a" text-anchor="middle">model-free</text>
+</svg>

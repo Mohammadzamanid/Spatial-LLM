@@ -1,0 +1,33 @@
+{
+  "n_seeds": 5,
+  "closed_loop_success_early": [
+    0.913,
+    0.021
+  ],
+  "closed_loop_success_late": [
+    1.0,
+    0.0
+  ],
+  "learning_curve": [
+    0.9128000000000001,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "flex_sr": [
+    1.0,
+    0.0
+  ],
+  "flex_euclidean": [
+    0.691,
+    0.101
+  ],
+  "flex_modelfree_transfer": [
+    0.129,
+    0.036
+  ]
+}

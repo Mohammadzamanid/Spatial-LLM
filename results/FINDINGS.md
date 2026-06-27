@@ -950,6 +950,31 @@ predictions (n=3 conditions × seeds; `results/predictions.json`, `results/predi
 Neither relationship was designed in; each falls out of the substrate and is stated as a number an
 experiment can refute. This is the turn from *reproducing* known neuroscience to *proposing* it.
 
+## The behaving agent — the cognitive map drives flexible behavior
+
+Everything above *probes* the cognitive map; this closes the loop and lets an agent *use* it
+(`src/eval/agent_navigation.py`, n=5). It is the first step of the embodied-agent program (the agency
+gap): perception → decision → action → consequence, integrating modules we already have.
+
+- **Navigation emerges from one closed loop.** An agent in a 2D arena path-integrates its own moves into
+  a PLACE code (no coordinates given), feeds it to a dopamine-TD **critic** (value) and a
+  basal-ganglia-like softmax **actor** (action selection), acts, and learns **online** from the
+  reward-prediction error. Goal-directed navigation is learned end-to-end — success rises to **100%**
+  (every seed; learning curve in `results/agent_navigation.json`). The cognitive map is now something the
+  agent *behaves with*, not just something we decode.
+- **One self-learned map → flexible, zero-shot, any-goal navigation (the defining capacity).** The agent
+  learns a **successor representation** of a barriered world from its *own* random-walk exploration (TD),
+  and then ONE map serves ANY goal: greedily ascending V = M[:, goal] navigates **zero-shot** to
+  arbitrary goals, around the wall — **100% ± 0**. Controls fail: **Euclidean** vector-navigation stalls
+  at the barrier (**69% ± 10**), and a **model-free** policy trained for goal A does not transfer to other
+  goals (**13% ± 4**). Flexible goal-directed behavior from a self-learned predictive map is exactly what
+  a cognitive map is *for* — and here it drives an agent, not a probe.
+
+This converts the pile of faithful organs into a behaving brain-in-miniature. Natural next steps in this
+phase (all CPU): memory-guided behavior (one-shot reward-location memory via the hippocampal store) and
+timing-guided behavior (wiring the time cells into action). (`results/agent_navigation.json`,
+`results/agent_navigation.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
