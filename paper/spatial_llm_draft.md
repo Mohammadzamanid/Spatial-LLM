@@ -283,6 +283,18 @@ dopamine-dependence of reward-based action learning. (The Go/NoGo pathways are p
 either alone reaches 100% — so it is loss of the shared dopamine signal, not one pathway, that abolishes
 learning.) `results/basal_ganglia.{json,svg}`.
 
+*Why a grid cortex? — coding capacity at scale (`src/eval/grid_capacity.py`, n=5).* The agent runs on a
+grid cortex; here we show *why* the brain pays for one. Behaviorally, navigation to a region is forgiving
+(grid and place both reach ~100% across arena sizes — no behavioral edge); the grid advantage is
+**representational** (the Fiete claim). We measure it decoder-agnostically with **Fisher information** (the
+Cramér–Rao bound; both closed forms verified against autograd). At a **fixed neuron budget**, as the arena
+scales 8×, grid local resolution stays **~flat** (log-log slope **+0.18**; set by its finest, space-reused
+period) while place degrades **~linearly** (slope **+1.00**; a fixed budget of bumps tiles ever more
+coarsely) — the grid advantage **grows to 33×** (exponential-vs-linear capacity; Sreenivasan & Fiete 2011).
+*Honest caveat:* a **linear** reader cannot extract it (linear-decode MAE is *worse* for grid than place) —
+the capacity is real but requires a nonlinear/Bayesian decoder, which is exactly why downstream place cells
+(a nonlinear conjunction of grid inputs) exist. `results/grid_capacity.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

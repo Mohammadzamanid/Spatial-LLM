@@ -1047,6 +1047,42 @@ So action selection joins navigation, memory, and timing as a faithful organ wit
 lesion — and the agent now selects actions through a real basal ganglia, learned without backprop.
 (`results/basal_ganglia.json`, `results/basal_ganglia.svg`.)
 
+## Why grid cells? — coding capacity at scale (Fiete), and an honest caveat
+
+The agent's navigation/return/bearing tasks above already *use* a grid cortex, but they don't show
+*why* the brain pays for one: closed-loop navigation to a region is forgiving of a coarse code (we
+checked — grid and place both reach ~100% across arena sizes; **no behavioral advantage**). The grid
+advantage is **representational**, and that is the actual Fiete claim. So we measure it directly
+(`src/eval/grid_capacity.py`, n=5): at a **fixed neuron budget**, how precisely is position encoded by a
+periodic multi-scale **grid** code vs a local-bump **place** code, as the arena scales up 8×?
+
+We use **Fisher information** — the Cramér–Rao bound, i.e. the position precision *available in the code,
+independent of any decoder* (`res = det(Fisher)^(-1/4)`; lower = finer). Both Fisher forms are closed-form
+and **verified against autograd** (det match to 6 sig figs; `tests/test_grid_capacity.py`).
+
+| arena width | grid resolution | place resolution | place/grid |
+|---|---|---|---|
+| 2  | 0.027 | 0.16 | 6.0× |
+| 4  | 0.031 | 0.32 | 10.3× |
+| 8  | 0.035 | 0.64 | 18.3× |
+| 16 | 0.039 | 1.29 | **32.9×** |
+| **log-log slope vs arena** | **+0.18 (flat)** | **+1.00 (linear)** | — |
+
+- **The grid code holds resolution ~constant as the arena grows** (slope +0.18; it's set by the finest
+  period, which is reused across all of space), while **place degrades exactly linearly** (slope +1.00; a
+  fixed budget of bumps must tile an ever-larger arena ever more coarsely). The grid advantage **grows
+  with scale**, reaching **33×** at the largest arena — the exponential-vs-linear capacity that is the
+  textbook reason the brain uses grid cells (Sreenivasan & Fiete 2011; Fiete et al. 2008).
+- **Honest caveat (the capacity is real, but not free).** A *linear* reader **cannot extract it**: linear-
+  decode MAE is actually *worse* for grid than place (grid 0.19→1.20 vs place 0.007→0.05 over the same
+  arenas), because the phase→position map is nonlinear/periodic. The information is in the code, but it
+  takes a **nonlinear/Bayesian decoder** to read out — which is exactly why downstream hippocampal place
+  cells (a nonlinear conjunction of grid inputs) exist.
+
+So the grid cortex the agent already runs on is not a stylistic choice: at scale it is the only one of the
+two codes whose precision survives a fixed budget — and the caveat tells us *why* a place-cell read-out
+sits downstream of it. (`results/grid_capacity.json`, `results/grid_capacity.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge
