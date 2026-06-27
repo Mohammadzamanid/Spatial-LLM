@@ -1002,9 +1002,29 @@ specific lesions:
 | timed action | time cells (temporal cortex) | timing (reward 0.88→0.00) |
 
 A brain-in-miniature where each capacity emerges from integrating an organ into the closed loop, and each
-is independently lesionable. Remaining behaving-agent steps (all CPU): putting the real grid cortex in
-the loop (replacing the fixed place code), then the scale study. (`results/agent_timing.json`,
-`results/agent_timing.svg`.)
+is independently lesionable. (`results/agent_timing.json`, `results/agent_timing.svg`.)
+
+**The unified agent — one task needs all three, a clean triple-lesion dissociation (the culmination)**
+(`src/eval/agent_unified.py`, n=3). The three capacities above are *separate* demos; here a **single**
+agent solves a task that needs all three at once — a *delayed memory-guided harvest*: each day reward is
+at a new location available only in a brief window around time D, so the agent must **recall where**
+(episodic store) → **navigate there** (cognitive map) → **harvest at the right moment** (time cells).
+Reward = at the remembered place AND acting at |t − D| ≤ 4. The result is a textbook triple dissociation:
+
+| condition | reward | failure mode when lesioned |
+|---|---|---|
+| **all intact** | **99% ± 2** | — |
+| **− cognitive map** | **0%** | can't reach the place |
+| **− episodic store** | **0%** | navigates to the *wrong* place |
+| **− time cells** | **0%** | right place, *wrong moment* |
+
+Removing **any one organ** zeros the reward, and *only* via that organ's own failure — exactly the
+structure→function→lesion logic of systems neuroscience, in a *single* behaving brain-in-miniature whose
+spatial, mnemonic, and temporal capacities all emerged from the same self-supervised substrate. This is
+the cleanest single embodiment of the program's thesis: capacities are not engineered in, they *emerge*
+from integrating faithful organs, and they dissociate like the brain's. Remaining steps (all CPU): the
+real grid cortex in the loop, then the scale study. (`results/agent_unified.json`,
+`results/agent_unified.svg`.)
 
 ## Emergent neuroscience signatures — measured, not designed
 

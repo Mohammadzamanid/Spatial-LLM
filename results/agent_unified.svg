@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="536" height="320" font-family="Segoe UI, Arial">
+<rect width="536" height="320" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">One unified agent: three organs, three lesions, one clean dissociation</text>
+<text x="28" y="44" font-size="10.5" fill="#5b6b8c">delayed memory-guided harvest: recall WHERE + navigate THERE + harvest at WHEN &#183; reward needs all three</text>
+<line x1="54" y1="258" x2="482" y2="258" stroke="#33415c"/>
+<text x="48" y="262" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<text x="48" y="162" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<text x="48" y="62" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<rect x="60" y="59.6" width="70" height="198.4" fill="#2ca25f" opacity="0.88"/>
+<text x="95" y="54" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">99%</text>
+<text x="95" y="274" font-size="10" fill="#28324a" text-anchor="middle">all</text>
+<text x="95" y="286" font-size="10" fill="#28324a" text-anchor="middle">intact</text>
+<rect x="164" y="258.0" width="70" height="0.0" fill="#3182bd" opacity="0.88"/>
+<text x="199" y="252" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<text x="199" y="274" font-size="10" fill="#28324a" text-anchor="middle">− map</text>
+<rect x="268" y="258.0" width="70" height="0.0" fill="#e6550d" opacity="0.88"/>
+<text x="303" y="252" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<text x="303" y="274" font-size="10" fill="#28324a" text-anchor="middle">− memory</text>
+<rect x="372" y="258.0" width="70" height="0.0" fill="#9467bd" opacity="0.88"/>
+<text x="407" y="252" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<text x="407" y="274" font-size="10" fill="#28324a" text-anchor="middle">− time</text>
+</svg>

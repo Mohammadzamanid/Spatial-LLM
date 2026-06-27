@@ -1,0 +1,23 @@
+{
+  "n_seeds": 3,
+  "target_D": 25,
+  "window": 4,
+  "results": {
+    "all-intact": {
+      "mean": 0.992,
+      "ci95": 0.016
+    },
+    "-map": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "-memory": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "-time": {
+      "mean": 0.0,
+      "ci95": 0.0
+    }
+  }
+}

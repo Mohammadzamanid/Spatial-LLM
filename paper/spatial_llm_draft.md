@@ -267,6 +267,14 @@ is clean — flexible navigation (cognitive map), one-shot place memory (episodi
 lesionable**: a brain-in-miniature with a structure→function→lesion correspondence.
 `results/agent_timing.{json,svg}`.
 
+*The unified agent — one task, all three organs, a triple dissociation (`src/eval/agent_unified.py`, n=3).*
+A single agent on a *delayed memory-guided harvest* (recall WHERE via the episodic store → navigate THERE
+via the cognitive map → harvest at WHEN via the time cells; reward needs all three) shows a textbook
+triple dissociation: **all-intact 99%**, and removing any single organ zeros the reward via *its own*
+failure mode (**−map 0%**: can't reach; **−memory 0%**: wrong place; **−time 0%**: wrong moment). Three
+capacities, emergent from one self-supervised substrate, dissociating like the brain's — the cleanest
+single embodiment of the thesis. `results/agent_unified.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**
