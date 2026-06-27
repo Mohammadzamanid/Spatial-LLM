@@ -1056,6 +1056,38 @@ navigation that capacity buys. The *why* (grid codes resolve space at scale) and
 agent path-integrates, localizes, and navigates on that code) are now one result.
 (`results/agent_grid_cortex.json`, `results/agent_grid_cortex.svg`.)
 
+**Path-integration drift, and its correction by boundary-vector cells — the Fiete caveat, resolved**
+(`src/eval/agent_grid_drift.py`, n=3). A grid code path-integrates self-motion, but real self-motion is
+**noisy**, so the integrated grid phase **drifts** from the true position — error that accumulates *without
+bound* (Burak & Fiete 2009; the famous caveat to grid path integration). The brain corrects this with
+**allothetic** cues: when the animal senses a known boundary, **boundary-vector cells** supply an external
+position fix that *resets* accumulated grid error (Hardcastle, Ganguli & Giocomo 2015). We reproduce both
+halves on the closed-loop agent, using the **real `BoundaryVectorCells` organ** with a *learned* (not
+hard-coded) allothetic read-out (near-wall coordinate error **0.005**):
+
+| | self-localization error over a 120-step walk (mean / **final**) | |
+|---|---|---|
+| self-motion noise | **no anchoring** (drift) | **BVC anchoring** |
+| 0.00 | 0.014 / 0.015 | 0.014 / 0.014 |
+| 0.05 | 0.48 / **0.69** | 0.20 / 0.21 |
+| 0.10 | 0.84 / **1.21** | 0.40 / 0.43 |
+| 0.15 | 1.29 / **1.72** | 0.57 / 0.61 |
+
+- **(A) Drift is unbounded; anchoring bounds it.** Without correction the localization error *grows* over
+  the walk — **final ≫ mean** (0.69 vs 0.48, 1.21 vs 0.84, 1.72 vs 1.29): the hallmark of accumulating
+  path-integration error. Routing the boundary sense through boundary-vector cells makes it *stationary* —
+  **final ≈ mean** (0.21≈0.20, 0.43≈0.40, 0.61≈0.57): the classic **sawtooth** (drift, then reset at a
+  wall), ~2.5–3.5× lower error.
+- **(B) The behavioral consequence — foraging.** Over a 6-goal episode drift *compounds*, so without
+  anchoring the agent reaches fewer goals as noise rises (**66% → 33% → 23% → 15%** at noise 0.05→0.20);
+  BVC anchoring substantially rescues it (**78% → 48% → 33% → 24%**).
+
+Nothing here is hard-coded: the allothetic localizer is *learned* self-supervised from the BVC population,
+and the drift/correction dynamic *emerges* from combining the noisy grid integrator with the gated boundary
+sense. This completes the grid-cell arc — **why** a grid code (capacity), **what** it does in the loop (the
+behaving agent), and now **its failure mode and the brain's fix** (drift + boundary correction), all on one
+substrate. (`results/agent_grid_drift.json`, `results/agent_grid_drift.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action

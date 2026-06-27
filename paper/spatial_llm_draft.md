@@ -286,6 +286,18 @@ dissociation holds exactly (**all-intact 100%**; **−grid 2%**, **−memory 1%*
 organ is no longer an abstraction but the same biologically-constrained grid code whose capacity we measured
 above, and lesioning it abolishes the navigation that capacity buys. `results/agent_grid_cortex.{json,svg}`.
 
+*Path-integration drift and its correction by boundary-vector cells — the Fiete caveat, resolved
+(`src/eval/agent_grid_drift.py`, n=3).* Grid path integration is famously vulnerable to **drift** under
+noisy self-motion (Burak & Fiete 2009); the brain corrects it with **allothetic** boundary cues
+(Hardcastle, Ganguli & Giocomo 2015). We reproduce both on the closed-loop agent using the **real
+`BoundaryVectorCells` organ** with a *learned* allothetic read-out (near-wall error 0.005). (A) Without
+correction the self-localization error over a long walk **grows unbounded** (final ≫ mean: 1.72 vs 1.29 at
+noise 0.15); routing the boundary sense through boundary-vector cells makes it **stationary** (final ≈ mean,
+0.61 vs 0.57 — the classic sawtooth), ~3× lower. (B) The behavioral cost: over a 6-goal foraging episode
+drift compounds (no-anchor 66%→15% as noise grows 0.05→0.20) and BVC anchoring rescues it (78%→24%).
+Nothing is hard-coded — the localizer is learned from the BVC population and the drift/correction dynamic
+emerges from combining the noisy integrator with the gated boundary sense. `results/agent_grid_drift.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
