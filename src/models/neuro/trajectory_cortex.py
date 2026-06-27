@@ -155,6 +155,14 @@ class _HexGridModules(nn.Module):
         bump = torch.exp(-best / (2 * self.sigma ** 2))                        # (K,B,M)
         return bump.permute(1, 0, 2).reshape(B, self.K * self.M)
 
+    def grid_code_at(self, pos):
+        """Grid-cell population code for absolute 2D position(s) ``pos`` (B,2), via the module's FIXED
+        gains (exact, noiseless path-integration from the origin: phi = gains * pos). Returns (B, K*M).
+        Lets a closed-loop agent read this cortex's grid code at any position without re-running the
+        recurrent integrator step by step (used by src/eval/agent_grid_cortex.py)."""
+        phi = self.gains.view(self.K, 1, 1) * pos.unsqueeze(0)                 # (K,B,2)
+        return self._grid_code(phi)
+
     def _z_code(self, z):                            # z (B,) -> (B, z_cells)
         return torch.exp(-((z.unsqueeze(1) - self.z_centers.unsqueeze(0)) ** 2) / (2 * self.z_sigma ** 2))
 

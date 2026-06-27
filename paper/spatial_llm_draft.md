@@ -275,6 +275,17 @@ failure mode (**−map 0%**: can't reach; **−memory 0%**: wrong place; **−ti
 capacities, emergent from one self-supervised substrate, dissociating like the brain's — the cleanest
 single embodiment of the thesis. `results/agent_unified.{json,svg}`.
 
+*The agent on its real grid cortex — connecting WHY a grid code to WHAT it does (`src/eval/agent_grid_cortex.py`,
+n=3).* We replace the abstract map with the **real velocity-driven hexagonal grid cortex** (`_HexGridModules`:
+6 modules, fixed biological gains; Burak & Fiete 2009) as the agent's spatial substrate. The agent
+**path-integrates self-motion** so a 384-unit grid code is its only sense of position (verified: the public
+`grid_code_at()` equals the recurrent integrator exactly), **reads position with a nonlinear place-cell-like
+network** — the very decoder §grid-capacity shows is needed (decode error 0.024 nonlinear vs 0.030 linear) —
+and **vector-navigates** to a remembered goal (100% closed-loop). On this real substrate the triple
+dissociation holds exactly (**all-intact 100%**; **−grid 2%**, **−memory 1%**, **−time 0%**). The spatial
+organ is no longer an abstraction but the same biologically-constrained grid code whose capacity we measured
+above, and lesioning it abolishes the navigation that capacity buys. `results/agent_grid_cortex.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.

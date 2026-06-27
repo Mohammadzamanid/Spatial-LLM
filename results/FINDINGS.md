@@ -1022,9 +1022,39 @@ Removing **any one organ** zeros the reward, and *only* via that organ's own fai
 structure→function→lesion logic of systems neuroscience, in a *single* behaving brain-in-miniature whose
 spatial, mnemonic, and temporal capacities all emerged from the same self-supervised substrate. This is
 the cleanest single embodiment of the program's thesis: capacities are not engineered in, they *emerge*
-from integrating faithful organs, and they dissociate like the brain's. Remaining steps (all CPU): the
-real grid cortex in the loop, then the scale study. (`results/agent_unified.json`,
+from integrating faithful organs, and they dissociate like the brain's. (`results/agent_unified.json`,
 `results/agent_unified.svg`.)
+
+**The agent on its REAL grid cortex — closing the loop between *why* a grid code and *what* it does**
+(`src/eval/agent_grid_cortex.py`, n=3). The unified agent above runs on an abstract successor map; here we
+swap in the **real velocity-driven hexagonal grid cortex** (`_HexGridModules`: 6 modules at geometric
+scale ratios, **fixed biological velocity gains**; Burak & Fiete 2009, Guanella 2007, Stensola 2012) as the
+agent's spatial substrate, and re-run the dissociation. The agent now:
+
+1. **path-integrates its own self-motion** through the grid cortex — a **384-unit grid-cell code is its only
+   sense of position** (no GPS). (The public `grid_code_at()` is verified *exactly* equal to the recurrent
+   integrator's path-integrated code — reading the code at a place == having walked there.)
+2. **reads position from the grid code with a nonlinear (place-cell-like) network** — the
+   entorhinal→hippocampal read, and exactly the **nonlinear decoder `grid_capacity` says you need**:
+   decode error **0.024 (nonlinear) vs 0.030 (linear)**, the nonlinear edge in the same direction the
+   capacity analysis predicts.
+3. **vector-navigates** by the decoded displacement to a remembered goal (Bush et al. 2015) — closed-loop,
+   reaching the goal at **100%**.
+
+On this real grid substrate the triple dissociation holds exactly:
+
+| condition | reward | failure mode |
+|---|---|---|
+| **all intact** (grid-nav + recall + time) | **100% ± 0** | — |
+| **− grid cortex** | **2% ± 2** | can't localize / path-integrate → can't navigate |
+| **− episodic store** | **1% ± 2** | recalls the wrong place |
+| **− time cells** | **0% ± 0** | right place, wrong moment |
+
+So the agent's spatial organ is no longer an abstraction: it is the **same biologically-constrained grid
+cortex** whose capacity advantage we measured in `grid_capacity.py` — and lesioning it abolishes the very
+navigation that capacity buys. The *why* (grid codes resolve space at scale) and the *what* (the behaving
+agent path-integrates, localizes, and navigates on that code) are now one result.
+(`results/agent_grid_cortex.json`, `results/agent_grid_cortex.svg`.)
 
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 

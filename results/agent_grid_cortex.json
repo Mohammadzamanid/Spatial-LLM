@@ -1,0 +1,37 @@
+{
+  "n_seeds": 3,
+  "target_D": 25,
+  "window": 4,
+  "arena_R": 2.5,
+  "n_modules": 6,
+  "decode_err_nonlinear": [
+    0.024,
+    0.018
+  ],
+  "decode_err_linear": [
+    0.03,
+    0.002
+  ],
+  "nav_success": [
+    1.0,
+    0.0
+  ],
+  "results": {
+    "all-intact": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "-grid": {
+      "mean": 0.017,
+      "ci95": 0.016
+    },
+    "-memory": {
+      "mean": 0.008,
+      "ci95": 0.016
+    },
+    "-time": {
+      "mean": 0.0,
+      "ci95": 0.0
+    }
+  }
+}
