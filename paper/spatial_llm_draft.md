@@ -353,6 +353,18 @@ reanchoring by translating the pattern. (Honest: object-relative nav is robust t
 via temporal averaging, not a graceful down-weighting.) This turns the model from a global path-integrator
 into an entorhinal reference-frame transformer. `results/reference_frame.{json,svg}`.
 
+*Dynamic reanchoring of the grid phase to a landmark — allocentric & egocentric coexisting
+(`src/eval/landmark_anchoring.py`, n=3).* The review's exact mechanism: the grid phase dynamically
+reanchored to a landmark during path integration under cue reliability (`ego = OVC(landmark)`;
+`p_hat = anchor − R(heading)·ego`; `grid = (1−w)·grid + w·gains·p_hat`), like boundary anchoring but anywhere
+the landmark is seen. (A) reanchoring corrects allocentric drift (pure PI drifts to 3.12; landmark-anchored
+0.87). (B) allocentric (global, from the grid: 0.87) and egocentric (landmark-relative, from object-vector
+cells: 0.78) positions COEXIST — read at once, the two MEC frames (Nature Comms 2025). (C) reliability: a
+reliable landmark helps (0.97), the benefit vanishing toward PI as it gets noisy. Honest: the strictly-optimal
+combiner is the learned fuser of agent_cue_integration; a hand-coded Kalman gate is mis-calibrated here, so we
+report the reliability dependence, not optimal weighting. The grid is path-integrated globally and reanchored
+to landmarks on demand, both frames coexisting. `results/landmark_anchoring.{json,svg}`.
+
 *3D navigation via a plane-aligned 2D grid — the bat scheme (`src/eval/plane_of_motion.py`, n=5).* Bats
 appear to use a 2D toroidal grid aligned to the behaviorally-relevant plane of motion + an off-plane code,
 not a full 3D lattice (2026); the repo's `(x,y,z,t)` had coded height as a 1D stub. We implement it with the

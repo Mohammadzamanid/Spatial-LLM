@@ -1253,6 +1253,29 @@ grid is not only path-integrated globally but dynamically reanchored to egocentr
 frame-transform — the single most current-neuroscience-faithful extension. (`results/reference_frame.json`,
 `results/reference_frame.svg`.)
 
+**Dynamic reanchoring of the grid phase to a landmark — allocentric & egocentric coexisting**
+(`src/eval/landmark_anchoring.py`, n=3). The review's *exact* mechanism: not only the object-vector cells and
+the static translation signature above, but the grid phase **dynamically reanchored** to a landmark *during
+path integration*, under cue reliability — like boundary anchoring, but anywhere a landmark is seen:
+
+> `ego = EgocentricObjectVectorCells(landmark)`; `p_hat = anchor − R(heading)·ego`;
+> `w = reliability_gate`; `grid_phase = (1−w)·grid_phase + w·gains·p_hat`
+
+- **(A) Reanchoring corrects allocentric drift.** Pure path integration drifts unbounded (**3.12**); a
+  landmark seen anywhere bounds the global-position error to **0.87** — an allothetic fix that, unlike the
+  boundary reset, works in open space wherever the landmark is visible.
+- **(B) Allocentric *and* egocentric coexist.** At every step the agent reads **both** global position
+  (allocentric, from the grid: **0.87**) **and** landmark-relative position (egocentric, from the
+  object-vector cells: **0.78**) — the two MEC reference frames simultaneously (Nature Comms 2025).
+- **(C) Reliability.** A reliable landmark helps strongly (**0.97** at low noise); as it gets noisier the
+  reliability gate down-weights it and the benefit vanishes back toward PI (**~3.2**). *Honest:* the
+  strictly-optimal combiner is the **learned fuser** of `agent_cue_integration` — a hand-coded Kalman gate is
+  mis-calibrated here, so we use a reliability gate and report the dependence, not an optimal-weighting claim.
+
+So the grid is path-integrated *globally* and dynamically *reanchored* to landmarks on demand, with both
+reference frames coexisting — the entorhinal map as a **reference-frame transformer**, exactly the review's
+"multi-reference-frame" framing. (`results/landmark_anchoring.json`, `results/landmark_anchoring.svg`.)
+
 **3D navigation via a plane-aligned 2D grid — the bat scheme** (`src/eval/plane_of_motion.py`, n=5). The
 review's last item: the repo claimed `(x,y,z,t)` but coded height as a 1-D place stub. Freely-flying bats
 appear to use a **2-D toroidal grid aligned to the behaviorally-relevant plane of motion** + an off-plane
