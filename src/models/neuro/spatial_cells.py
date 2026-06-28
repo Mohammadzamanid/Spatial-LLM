@@ -119,6 +119,42 @@ class BoundaryVectorCells(nn.Module):
         return self.proj(activity)
 
 
+class EgocentricObjectVectorCells(nn.Module):
+    """
+    Object-vector cells (Høydal, Skytøen, Andersson, Moser & Moser, *Nature* 2019) — fire when a discrete
+    object / landmark is at a preferred DISTANCE and a preferred EGOCENTRIC BEARING (relative to the
+    animal's own heading). The egocentric tuning is the defining contrast with BoundaryVectorCells
+    (allocentric): an object-vector cell's field stays locked to the object and rotates with the animal, so
+    downstream cells can REANCHOR a map to the object's reference frame and translate the grid pattern with
+    the object (the multi-reference-frame map; cf. grid reanchoring to objects/rewards, Butler 2019,
+    Boccara 2019). Optionally conditioned on object identity.
+    """
+
+    def __init__(self, num_cells: int = 32, embed_dim: int = 64,
+                 max_distance: float = 3.0, num_objects: int = 1):
+        super().__init__()
+        self.num_cells = num_cells
+        self.pref_dist = nn.Parameter(torch.rand(num_cells) * max_distance)
+        self.pref_bearing = nn.Parameter(torch.rand(num_cells) * 2 * math.pi)   # EGOCENTRIC preferred bearing
+        self.log_sigma_d = nn.Parameter(torch.zeros(num_cells))
+        self.log_sigma_b = nn.Parameter(torch.zeros(num_cells))
+        self.id_emb = nn.Embedding(num_objects, num_cells) if num_objects > 1 else None
+        self.proj = nn.Linear(num_cells, embed_dim)
+
+    def forward(self, object_dist: torch.Tensor, object_bearing: torch.Tensor,
+                object_id: torch.Tensor = None) -> torch.Tensor:
+        """object_dist (B,), object_bearing (B,) EGOCENTRIC bearing to the object (rad); -> (B, embed_dim)."""
+        bd = object_dist.unsqueeze(1); bb = object_bearing.unsqueeze(1)
+        sig_d = self.log_sigma_d.exp().clamp(min=0.05); sig_b = self.log_sigma_b.exp().clamp(min=0.05)
+        dist_term = ((bd - self.pref_dist) ** 2) / (2 * sig_d ** 2)
+        ang = torch.atan2(torch.sin(bb - self.pref_bearing), torch.cos(bb - self.pref_bearing))
+        ang_term = (ang ** 2) / (2 * sig_b ** 2)
+        act = torch.exp(-(dist_term + ang_term))                                # (B, num_cells)
+        if self.id_emb is not None and object_id is not None:
+            act = act * torch.sigmoid(self.id_emb(object_id))
+        return self.proj(act)
+
+
 class SpeedCells(nn.Module):
     """
     Speed cells — firing rate proportional to running speed. They provide the

@@ -10,7 +10,8 @@ SYNAPSE (synaptic_plasticity.py):
 MICROCIRCUIT (microcircuits.py):
     DivisiveNormalization, LateralInhibition, EIBalanceLayer, CorticalColumn
 SPATIAL CELLS (spatial_cells.py):
-    HeadDirectionCells, BoundaryVectorCells, SpeedCells, ConjunctiveSpatialCells
+    HeadDirectionCells, BoundaryVectorCells, SpeedCells, ConjunctiveSpatialCells,
+    EgocentricObjectVectorCells
 OSCILLATIONS (oscillations.py):
     ThetaOscillator, PhasePrecession, ThetaGammaCoupling, SharpWaveRipple
 ATTRACTOR DYNAMICS (attractor.py):
@@ -26,6 +27,7 @@ from .microcircuits import (
 )
 from .spatial_cells import (
     HeadDirectionCells, BoundaryVectorCells, SpeedCells, ConjunctiveSpatialCells,
+    EgocentricObjectVectorCells,
 )
 from .oscillations import (
     ThetaOscillator, PhasePrecession, ThetaGammaCoupling, SharpWaveRipple,
@@ -36,7 +38,7 @@ __all__ = [
     "LIFNeuron", "AdaptiveLIFNeuron", "DendriticNeuron",
     "HebbianLayer", "STDPLayer", "ShortTermPlasticity",
     "DivisiveNormalization", "LateralInhibition", "EIBalanceLayer", "CorticalColumn",
-    "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells",
+    "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells",
     "ThetaOscillator", "PhasePrecession", "ThetaGammaCoupling", "SharpWaveRipple",
     "ContinuousAttractorNetwork", "GridAttractorNetwork",
 ]

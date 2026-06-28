@@ -50,6 +50,7 @@ run src.eval.agent_deadreckoning --seeds 3          # DEAD-RECKONING BRAIN: unif
 run src.eval.basal_ganglia     --seeds 3            # TIER-2 SYSTEM: basal-ganglia Go/NoGo action selection; dopamine lesion abolishes learning (100->35%)
 run src.eval.grid_capacity     --seeds 5            # WHY GRID CELLS: coding capacity (Fiete) via Fisher info -- grid resolution flat vs arena, place linear (33x at scale); + honest linear-decode caveat
 run src.eval.grid_catastrophe   --seeds 5            # CATASTROPHIC ERRORS (Fiete other half): multi-module grid code suppresses catastrophic decode jumps exponentially with module count; bimodal error law; grid dominates place at matched budget
+run src.eval.reference_frame   --seeds 5            # MULTI-REFERENCE-FRAME MAP: egocentric object-vector cells (Hoydal 2019) + grid REANCHORING to an object frame; object-relative goal (moving object) solved by object-frame agent, not global; grid translates with the object
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then
