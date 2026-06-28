@@ -1253,6 +1253,31 @@ grid is not only path-integrated globally but dynamically reanchored to egocentr
 frame-transform — the single most current-neuroscience-faithful extension. (`results/reference_frame.json`,
 `results/reference_frame.svg`.)
 
+**3D navigation via a plane-aligned 2D grid — the bat scheme** (`src/eval/plane_of_motion.py`, n=5). The
+review's last item: the repo claimed `(x,y,z,t)` but coded height as a 1-D place stub. Freely-flying bats
+appear to use a **2-D toroidal grid aligned to the behaviorally-relevant plane of motion** + an off-plane
+code, *not* a full 3-D lattice (2026). We implement that faithfully with the **real hex grid cortex** on the
+**PCA-estimated motion plane**:
+
+| motion-plane tilt | plane-aligned 3D err | plane-recovery err | fixed-plane 3D err |
+|---|---|---|---|
+| 0° | 0.128 | 0.004 | 0.138 |
+| 57° | 0.126 | 0.004 | 0.145 |
+| 80° | 0.127 | 0.005 | **0.174** |
+
+- **(A)** PCA recovers the motion-plane normal **almost exactly** (err ~0.005) at every orientation — the
+  grid can be aligned to whatever plane the animal moves in.
+- **(B)** the plane-aligned 2-D grid localizes 3-D position with accuracy **flat across plane tilt**
+  (0.128→0.127) — **orientation-invariant**: it works in any motion plane because it aligns to it.
+- **(C)** a **fixed** (horizontal) grid **degrades** as the plane tilts steeply (**0.138→0.174** at 80°) —
+  the in-plane motion rotates into the coarse off-axis code, so **alignment is necessary**.
+
+*Honest scope.* At matched budget we found **no robust 3-D-decode advantage** of the plane-aligned 2-D grid
+over a *naive isotropic 3-D grid* (a learned decoder compensates for both; the capacity gap is modest in
+this regime). So the contribution is the **faithful, orientation-invariant mechanism** (a 2-D grid on the
+estimated motion plane — the bat scheme, replacing the `z`-stub) and the **alignment necessity**, *not* a
+decode win over a 3-D lattice. (`results/plane_of_motion.json`, `results/plane_of_motion.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action

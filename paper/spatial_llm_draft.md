@@ -353,6 +353,17 @@ reanchoring by translating the pattern. (Honest: object-relative nav is robust t
 via temporal averaging, not a graceful down-weighting.) This turns the model from a global path-integrator
 into an entorhinal reference-frame transformer. `results/reference_frame.{json,svg}`.
 
+*3D navigation via a plane-aligned 2D grid — the bat scheme (`src/eval/plane_of_motion.py`, n=5).* Bats
+appear to use a 2D toroidal grid aligned to the behaviorally-relevant plane of motion + an off-plane code,
+not a full 3D lattice (2026); the repo's `(x,y,z,t)` had coded height as a 1D stub. We implement it with the
+real hex grid cortex on the PCA-estimated motion plane: (A) PCA recovers the motion-plane normal almost
+exactly (err ~0.005, any orientation); (B) the plane-aligned 2D grid localizes 3D position with accuracy
+flat across plane tilt (0.128→0.127) — orientation-invariant; (C) a fixed horizontal grid degrades as the
+plane tilts steeply (0.138→0.174 at 80°) — alignment is necessary. Honest scope: at matched budget there is
+no robust 3D-decode advantage over a naive isotropic 3D grid (decoder-masked), so the contribution is the
+faithful, orientation-invariant mechanism + the alignment necessity, not a decode win over a 3D lattice.
+`results/plane_of_motion.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
