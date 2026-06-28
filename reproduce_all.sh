@@ -66,4 +66,6 @@ fi
 echo; echo "############ LANGUAGE results (GPU) ############"
 echo "Run on a single T4 (not here): notebooks/m2_extrapolation_multiseed_kaggle.py (multi-seed grid vs place),"
 echo "and notebooks/m2_grid_cortex_all_tasks_kaggle.py. See REPRODUCE.md for the figure->command map."
+echo "CAPSTONE: notebooks/m5_deadreckoning_llm_kaggle.py -- a frozen LLM reads the emergent HD+grid neural"
+echo "  code to answer self-localization (WHERE + egocentric HOME vector); cortex-ON vs text-only-OFF, n=6."
 echo; echo "DONE — see results/*.json and results/*.svg"
