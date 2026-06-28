@@ -1,0 +1,55 @@
+{
+  "n_seeds": 5,
+  "emergence": {
+    "trained": {
+      "decode_err": [
+        2.623,
+        0.378
+      ],
+      "hd_frac": [
+        0.566,
+        0.045
+      ],
+      "ring_corr": [
+        0.871,
+        0.128
+      ]
+    },
+    "untrained": {
+      "decode_err": [
+        86.311,
+        13.862
+      ],
+      "hd_frac": [
+        0.241,
+        0.032
+      ],
+      "ring_corr": [
+        0.969,
+        0.006
+      ]
+    }
+  },
+  "drift": {
+    "no_reset": {
+      "heading_err": [
+        76.6,
+        37.047
+      ],
+      "pos_err": [
+        13.42,
+        6.832
+      ]
+    },
+    "reset": {
+      "heading_err": [
+        12.76,
+        2.307
+      ],
+      "pos_err": [
+        3.091,
+        0.908
+      ]
+    }
+  }
+}

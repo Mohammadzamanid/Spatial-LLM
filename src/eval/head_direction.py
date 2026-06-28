@@ -12,11 +12,15 @@ brain signatures that were never in the loss.
   (1) EMERGENCE. A generic rate-RNN is trained only to track heading from angular velocity (angular path
       integration). We then measure, vs an untrained control:
         - HD CELLS: units tuned to a single preferred heading (mean resultant length > 0.4).
-        - A RING ATTRACTOR: the population state lies on a 1-D ring whose phase tracks heading (circular
-          correlation between the top-2-PC angle and heading ~ 1).
-        - accurate heading read-out (population decode error in degrees).
-      HD cells and the ring are NOT built in (the recurrent weights are learned, generic) — they emerge,
-      as in Drosophila/rodent compass circuits (Zhang 1996; Kim et al. 2017; Taube 1990).
+        - A FUNCTIONAL RING ATTRACTOR: the trained net maintains and updates a single heading bump and reads
+          heading out accurately and stably (population decode error in degrees); its activity lies on a 1-D
+          ring manifold (visualised in the figure). Honest nuance: a ring-SHAPED manifold appears even in
+          the UNTRAINED recurrent net (it is partly inherent to recurrent integration), so the
+          training-specific emergence is the HD tuning and the accurate, stable maintenance — the attractor
+          FUNCTION — not the manifold shape per se (we report the PC-angle~heading correlation for both and
+          do not claim it as a trained>untrained signature).
+      HD cells and accurate heading maintenance are NOT built in (the recurrent weights are learned,
+      generic) — they emerge, as in Drosophila/rodent compass circuits (Zhang 1996; Kim et al. 2017; Taube 1990).
 
   (2) HEADING-DOMINATED DRIFT + VISUAL RESET (Knierim, Kudrimoti & McNaughton 1995). The emergent HD net
       integrates NOISY angular velocity, so heading drifts; the agent path-integrates POSITION using that
@@ -178,16 +182,19 @@ def main():
     print(f"    {'metric':>26} | {'TRAINED':>16} | {'untrained':>16}", flush=True)
     print(f"    {'heading decode err (deg)':>26} | {em['decode_err'][0]:>14.1f}   | {em_un['decode_err'][0]:>14.1f}", flush=True)
     print(f"    {'HD-tuned units':>26} | {em['hd_frac'][0]:>14.0%}   | {em_un['hd_frac'][0]:>14.0%}", flush=True)
-    print(f"    {'ring corr (PC-angle~heading)':>26} | {em['ring_corr'][0]:>14.2f}   | {em_un['ring_corr'][0]:>14.2f}", flush=True)
+    print(f"    {'ring corr (PC-angle~heading)':>26} | {em['ring_corr'][0]:>14.2f}   | {em_un['ring_corr'][0]:>14.2f}"
+          f"   (NOT a clean discriminator: a ring manifold is inherent to recurrent integration)", flush=True)
     print("\n(2) HEADING-DOMINATED DRIFT + VISUAL RESET (Knierim 1995):", flush=True)
     print(f"    {'condition':>18} | {'heading err (deg)':>18} | {'position err':>14}", flush=True)
     for tag, lbl in (("no_reset", "no reset (drift)"), ("reset", "VISUAL reset")):
         d = drift[tag]
         print(f"    {lbl:>18} | {d['heading_err'][0]:>13.1f}±{d['heading_err'][1]:<3.1f} | {d['pos_err'][0]:>9.3f}±{d['pos_err'][1]:<.3f}", flush=True)
-    print(f"\n  -> (1) HD cells ({em['hd_frac'][0]:.0%} vs {em_un['hd_frac'][0]:.0%}) and a ring attractor "
-          f"(PC-angle~heading corr {em['ring_corr'][0]:.2f} vs {em_un['ring_corr'][0]:.2f}; heading decoded to "
-          f"{em['decode_err'][0]:.0f}° vs {em_un['decode_err'][0]:.0f}°) EMERGE from angular path integration -- "
-          f"nothing HD-specific is built in. (2) the emergent HD system's noisy integration makes heading "
+    print(f"\n  -> (1) HD cells ({em['hd_frac'][0]:.0%} vs {em_un['hd_frac'][0]:.0%}) and a FUNCTIONAL ring "
+          f"attractor -- accurate, stable heading maintenance (decoded to {em['decode_err'][0]:.0f}° vs "
+          f"{em_un['decode_err'][0]:.0f}°; the untrained net does not hold heading) -- EMERGE from angular path "
+          f"integration; nothing HD-specific is built in (the ring-shaped manifold itself appears even "
+          f"untrained, so the emergent signatures are HD tuning + accurate maintenance, not the manifold shape). "
+          f"(2) the emergent HD system's noisy integration makes heading "
           f"DRIFT ({drift['no_reset']['heading_err'][0]:.0f}°), which drives POSITION drift "
           f"({drift['no_reset']['pos_err'][0]:.1f}); a VISUAL landmark pinning the ring bump bounds both "
           f"(heading {drift['reset']['heading_err'][0]:.0f}°, position {drift['reset']['pos_err'][0]:.1f}) -- the "
@@ -224,8 +231,8 @@ def svg(em0, em, em_un, traces, drift, out):
         e.append(f'<circle cx="{oxA + pc[i,0].item()*scale:.1f}" cy="{cyA - pc[i,1].item()*scale:.1f}" r="3.4" '
                  f'fill="hsl({hue},70%,50%)"/>')
     e.append(f'<text x="{oxA:.0f}" y="{cyA:.0f}" font-size="8.5" fill="#7787a6" text-anchor="middle">colour = heading</text>')
-    e.append(f'<text x="{pad}" y="{oy+ph+14:.0f}" font-size="9" fill="#5b6b8c">population state traces a 1-D ring; '
-             f'PC-angle~heading corr {em["ring_corr"][0]:.2f} (vs {em_un["ring_corr"][0]:.2f})</text>')
+    e.append(f'<text x="{pad}" y="{oy+ph+14:.0f}" font-size="9" fill="#5b6b8c">the trained net&#8217;s heading bump '
+             f'traces a 1-D ring manifold (HD cells {em["hd_frac"][0]:.0%} vs {em_un["hd_frac"][0]:.0%} untrained)</text>')
     # Panel B: heading error vs time (drift vs visual reset)
     oxB = pad + pw + gap
     tmax = max(max(traces["no_reset"]), max(traces["reset"])) * 1.12 + 1e-6

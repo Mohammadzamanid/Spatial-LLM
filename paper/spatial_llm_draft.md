@@ -313,6 +313,19 @@ temporal averaging — left open). A record of method as much as result: the rig
 boundary correction) had been reproduced with the wrong mechanism (a fixed gate), and was corrected.
 `results/agent_cue_integration.{json,svg}`.
 
+*A head-direction organ — emergent ring attractor + heading-dominated drift (`src/eval/head_direction.py`,
+n=5).* Biological PI drift is dominated by heading (angular) error from the head-direction system, which the
+drift module above crudely modelled as translational noise. By the same emergence method (train a generic
+substrate; measure signatures never in the loss), a generic rate-RNN trained only to track heading from
+angular velocity develops (1) HD cells (units tuned to one heading, 57% vs 24% untrained) and a functional
+ring attractor — accurate, stable heading maintenance (decode 2.6° vs 86° untrained; the untrained net
+cannot hold heading). Honest nuance: a ring-*shaped* manifold appears even untrained (inherent to recurrent
+integration), so the emergent signatures are the HD tuning and accurate maintenance, not the manifold shape.
+(2) The emergent HD net integrates noisy angular velocity, so heading drifts (77° over a 140-step walk) and
+drives position drift (13.4); a visual landmark pinning the ring bump bounds both (heading 13°, position 3.1)
+— the biologically-correct heading-dominated drift and its allothetic correction (Knierim 1995). This makes
+drift in the agent loop mechanistically right. `results/head_direction.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
