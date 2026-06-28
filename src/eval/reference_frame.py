@@ -143,16 +143,19 @@ def main():
     print(f"\n(C) grid REANCHORING signature: object-frame code matches translated-by-delta "
           f"{reanchor['match'][0]:.3f} vs un-shifted {reanchor['unshift'][0]:.3f} "
           f"-> the grid pattern reanchors by TRANSLATING with the object.", flush=True)
-    print("\n(D) reliability — object-relative success vs object-cue noise:", flush=True)
+    print("\n(D) robustness — object-relative success vs object-cue noise (honest: flat, not a down-weighting):", flush=True)
     for s in NOISES:
         print(f"    sigma_obj={s}: {rel[s][0]:.0%} ± {rel[s][1]:.0%}", flush=True)
     print(f"\n  -> the map is now MULTI-reference-frame: egocentric object-vector cells (decode err {decode[0]:.2f}) "
           f"let the agent solve an object-relative goal whose object MOVES ({diss['objvec'][0]:.0%}) that a "
           f"global map cannot ({diss['global'][0]:.0%}); the HD organ supplies the egocentric->allocentric "
-          f"transform (lesion {diss['lesion_hd'][0]:.0%}); the grid REANCHORS by translating with the object "
-          f"(match {reanchor['match'][0]:.3f} vs un-shifted {reanchor['unshift'][0]:.3f}); and the landmark cue "
-          f"is used under reliability (success {rel[NOISES[0]][0]:.0%}->{rel[NOISES[-1]][0]:.0%} as noise rises). "
-          f"This is the entorhinal map as a reference-frame transformer (Høydal 2019; grid reanchoring 2025).", flush=True)
+          f"transform (lesion {diss['lesion_hd'][0]:.0%} ~= global, so BOTH the object cue and the HD transform "
+          f"are needed); and the grid REANCHORS by translating with the object (match {reanchor['match'][0]:.3f} "
+          f"vs un-shifted {reanchor['unshift'][0]:.3f}). The entorhinal map as a reference-frame transformer "
+          f"(Høydal 2019; grid reanchoring 2025). Honest note: object-relative nav is ROBUST to object-cue "
+          f"noise (flat {rel[NOISES[0]][0]:.0%}->{rel[NOISES[-1]][0]:.0%}) because the unbiased cue is averaged "
+          f"over the trajectory -- the same robustness as cue integration, NOT a graceful down-weighting "
+          f"(which would need biased/single-shot cues; left open).", flush=True)
 
     out = {"n_seeds": a.seeds, "decode_err": decode, "dissociation": {m: diss[m] for m in diss},
            "reanchor": reanchor, "reliability": {str(s): rel[s] for s in NOISES}}
@@ -187,21 +190,22 @@ def svg(diss, rel, reanchor, decode, out):
         e.append(f'<text x="{x+bw/2:.0f}" y="{base+14:.0f}" font-size="9" fill="#28324a" text-anchor="middle">{short[m]}</text>')
     e.append(f'<text x="{pad}" y="{base+30:.0f}" font-size="8.5" fill="#5b6b8c">object-vector decode err {decode[0]:.2f}; '
              f'grid reanchors by translating (match {reanchor["match"][0]:.3f} vs un-shifted {reanchor["unshift"][0]:.2f})</text>')
-    # Panel C: reliability sweep
+    # Panel C: grid reanchoring signature (object-frame code = grid translated by the object displacement)
     oxB = pad + pw + gap
-    def XB(i): return oxB + (i / (len(NOISES) - 1)) * pw
-    def YB(v): return oy + ph - v * ph
-    e.append(f'<text x="{oxB}" y="{oy-4}" font-size="11.5" font-weight="700" fill="#0b1324">(D) reliability: success vs object-cue noise</text>')
-    e.append(f'<line x1="{oxB}" y1="{oy+ph}" x2="{oxB+pw}" y2="{oy+ph}" stroke="#33415c"/>'
-             f'<line x1="{oxB}" y1="{oy}" x2="{oxB}" y2="{oy+ph}" stroke="#33415c"/>')
-    for vv in (0.0, 0.5, 1.0):
-        e.append(f'<text x="{oxB-6}" y="{YB(vv)+3:.0f}" font-size="8.5" fill="#5b6b8c" text-anchor="end">{int(vv*100)}%</text>')
-    pts = " ".join(f"{XB(i):.1f},{YB(rel[s][0]):.1f}" for i, s in enumerate(NOISES))
-    e.append(f'<polyline points="{pts}" fill="none" stroke="#2ca25f" stroke-width="2.6"/>')
-    for i, s in enumerate(NOISES):
-        e.append(f'<circle cx="{XB(i):.1f}" cy="{YB(rel[s][0]):.1f}" r="2.8" fill="#2ca25f"/>')
-        e.append(f'<text x="{XB(i):.0f}" y="{oy+ph+14:.0f}" font-size="9" fill="#5b6b8c" text-anchor="middle">{s}</text>')
-    e.append(f'<text x="{oxB+pw/2:.0f}" y="{oy+ph+30:.0f}" font-size="9.5" fill="#5b6b8c" text-anchor="middle">object-cue noise &#8594;</text>')
+    emax = max(reanchor["unshift"][0], 1e-3) * 1.3
+    bw2 = 80; gp2 = 70; b0 = oy + ph
+    e.append(f'<text x="{oxB}" y="{oy-4}" font-size="11.5" font-weight="700" fill="#0b1324">(C) grid reanchors by translating with the object</text>')
+    e.append(f'<line x1="{oxB-6}" y1="{b0}" x2="{oxB+2*(bw2+gp2)}" y2="{b0}" stroke="#33415c"/>')
+    bars = [("match\n(translated by &#916;)", reanchor["match"][0], "#2ca25f", "&#10003; reanchors"),
+            ("un-shifted\n(object ignored)", reanchor["unshift"][0], "#c9341a", "&#10007; mismatch")]
+    for i, (name, v, c, tag) in enumerate(bars):
+        x = oxB + 20 + i * (bw2 + gp2); h = v / emax * ph
+        e.append(f'<rect x="{x}" y="{b0-h:.1f}" width="{bw2}" height="{max(h,1.0):.1f}" fill="{c}" opacity="0.88"/>')
+        e.append(f'<text x="{x+bw2/2:.0f}" y="{b0-max(h,1.0)-5:.0f}" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">{v:.3f}</text>')
+        for j, ln in enumerate(name.split("\n")):
+            e.append(f'<text x="{x+bw2/2:.0f}" y="{b0+14+j*12:.0f}" font-size="9" fill="#28324a" text-anchor="middle">{ln}</text>')
+        e.append(f'<text x="{x+bw2/2:.0f}" y="{b0+40:.0f}" font-size="9" fill="{c}" text-anchor="middle">{tag}</text>')
+    e.append(f'<text x="{oxB}" y="{oy+14}" font-size="9" fill="#7787a6">object-frame grid code error vs object displacement &#916;</text>')
     e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     open(out, "w").write("\n".join(e))

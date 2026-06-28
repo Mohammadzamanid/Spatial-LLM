@@ -1220,6 +1220,39 @@ with consistent direction). The harder **egocentric homing-vector** readout (a n
 combination, atan2(−position) − heading) was **null** in the first attempt and is left as documented future
 work. (`results/deadreckoning_llm_agg.json`.)
 
+**The map is multi-reference-frame — object-vector cells + grid reanchoring** (`src/eval/reference_frame.py`,
+n=5). An external neuroscience review flagged the deepest remaining gap: the map so far is a *global
+allocentric* metric, but the entorhinal code also carries **egocentric object-vector cells** (Høydal et al.,
+*Nature* 2019) and can **reanchor** — translating the grid pattern to a task-relevant object/landmark/reward
+(Butler 2019; Boccara 2019), estimating position in multiple *local* reference frames (a 2025 frontier).
+(The review's other ask — reliability-weighted cue integration — was already built this session in
+`agent_cue_integration`.) We added the missing capability — a new `EgocentricObjectVectorCells` organ — and
+measured it:
+
+- **(A) The object-vector code works.** The OVC population encodes a landmark in self-centred polar
+  coordinates (distance, *egocentric* bearing); a readout recovers the object vector to **0.030** (arena
+  half-width 2.5) — and it's egocentric (rotates with heading), the defining contrast with allocentric
+  boundary cells.
+- **(B) Reference-frame dissociation (the headline).** On an **object-relative goal whose object *moves*
+  every episode**, an **object-frame** agent (object-vector cue → HD egocentric→allocentric transform →
+  navigate to object+offset) reaches it **100%**, while a **global-frame** agent (path integration only)
+  is stuck at **17%** (it can't track a goal that moves with the object), and **lesioning HD** drops it to
+  **15%** (the egocentric→allocentric transform is gone). So object-relative behavior needs **both** the
+  object-vector cue **and** the HD frame-transform — neither alone, and not the global map.
+- **(C) Grid reanchoring signature.** The object-frame grid code is `grid_code_at(agent − object)`; when the
+  object moves by **Δ**, the code matches the grid **translated by Δ** (err **0.000**), *not* the un-shifted
+  grid (err **0.073**) — grid cells **reanchoring by translating the pattern** with the object, exactly the
+  2025 finding.
+- **(D) Robustness (honest).** Object-relative success is *flat at 100%* up to object-cue noise 0.4 — the
+  agent re-senses and **temporally averages** the unbiased cue, so it's *robust*, **not** a graceful
+  reliability down-weighting (which, as in `agent_cue_integration`, would need biased/single-shot cues; left
+  open).
+
+This turns the model from a global path-integrator into an **entorhinal reference-frame transformer**: the
+grid is not only path-integrated globally but dynamically reanchored to egocentric objects, under the HD
+frame-transform — the single most current-neuroscience-faithful extension. (`results/reference_frame.json`,
+`results/reference_frame.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action

@@ -340,6 +340,19 @@ intact (0.35) and is abolished by lesioning HD (2.79) or grid (3.11). The cleane
 dead-reckoning brain — heading and position both inferred from self-motion through emergent organs, with two
 distinct allothetic corrections, one per organ. `results/agent_deadreckoning.{json,svg}`.
 
+*A multi-reference-frame map — object-vector cells + grid reanchoring (`src/eval/reference_frame.py`, n=5).*
+The map so far is a global allocentric metric, but the entorhinal code also carries egocentric object-vector
+cells (Høydal et al., Nature 2019) and reanchors to task-relevant objects (Butler 2019; Boccara 2019),
+estimating position in multiple local frames (a 2025 frontier). We add a new `EgocentricObjectVectorCells`
+organ and measure: (A) the OVC population encodes the egocentric object vector (decode err 0.030); (B) on an
+object-relative goal whose object MOVES each episode, an object-frame agent (object-vector cue → HD
+egocentric→allocentric transform) reaches it 100%, a global-frame agent only 17%, and lesioning HD drops it
+to 15% — object-relative behavior needs both the object cue and the HD transform, not the global map; (C) the
+object-frame grid code translates by the object displacement (match 0.000 vs un-shifted 0.073) — grid cells
+reanchoring by translating the pattern. (Honest: object-relative nav is robust to unbiased object-cue noise
+via temporal averaging, not a graceful down-weighting.) This turns the model from a global path-integrator
+into an entorhinal reference-frame transformer. `results/reference_frame.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
