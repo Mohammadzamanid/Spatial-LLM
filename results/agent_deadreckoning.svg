@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="804" height="350" font-family="Segoe UI, Arial">
+<rect width="804" height="350" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">The dead-reckoning brain: one HD&#8594;grid&#8594;place stack from self-motion alone</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">heading drift (HD) propagates to position drift (grid); BOTH allothetic corrections (visual&#8594;HD, boundary&#8594;grid) are needed</text>
+<text x="58" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(1) localization error of the stack</text>
+<line x1="54" y1="270" x2="388" y2="270" stroke="#33415c"/>
+<rect x="58.0" y="267.5" width="35.1" height="2.5" fill="#2ca25f" opacity="0.88"/>
+<text x="75.6" y="265" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.04</text>
+<text x="75.6" y="283" font-size="8" fill="#28324a" text-anchor="middle">oracle</text>
+<rect x="105.1" y="130.3" width="35.1" height="139.7" fill="#e6a000" opacity="0.88"/>
+<text x="122.7" y="127" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">2.41</text>
+<text x="122.7" y="283" font-size="8" fill="#28324a" text-anchor="middle">no corr</text>
+<rect x="152.3" y="123.5" width="35.1" height="146.5" fill="#e6a000" opacity="0.88"/>
+<text x="169.9" y="121" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">2.52</text>
+<text x="169.9" y="283" font-size="8" fill="#28324a" text-anchor="middle">+vis</text>
+<rect x="199.4" y="244.5" width="35.1" height="25.5" fill="#e6a000" opacity="0.88"/>
+<text x="217.0" y="241" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.44</text>
+<text x="217.0" y="283" font-size="8" fill="#28324a" text-anchor="middle">+bnd</text>
+<rect x="246.6" y="263.2" width="35.1" height="6.8" fill="#2ca25f" opacity="0.88"/>
+<text x="264.1" y="260" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.12</text>
+<text x="264.1" y="283" font-size="8" fill="#28324a" text-anchor="middle">+both</text>
+<rect x="293.7" y="82.5" width="35.1" height="187.5" fill="#c9341a" opacity="0.88"/>
+<text x="311.3" y="80" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">3.23</text>
+<text x="311.3" y="283" font-size="8" fill="#28324a" text-anchor="middle">−HD</text>
+<rect x="340.9" y="89.6" width="35.1" height="180.4" fill="#c9341a" opacity="0.88"/>
+<text x="358.4" y="87" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">3.11</text>
+<text x="358.4" y="283" font-size="8" fill="#28324a" text-anchor="middle">−grid</text>
+<text x="484" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(2) homing (path-integration return)</text>
+<rect x="484" y="60" width="230" height="230" fill="none" stroke="#c7d0e0"/>
+<circle cx="599" cy="175" r="4" fill="#0b1324"/><text x="606" y="170" font-size="8.5" fill="#0b1324">home</text>
+<polyline points="599.0,175.0 607.2,174.7 615.4,173.6 623.5,172.0 629.8,166.7 634.2,159.8 637.2,152.1 637.5,143.9 634.8,136.0 630.9,128.8 625.2,122.8 620.2,116.3 616.7,108.8 613.6,101.2 612.3,93.0 612.6,84.8 614.3,76.7 618.6,72.0 625.8,72.0 633.6,72.0 641.8,72.0 649.8,72.0 658.0,72.0 665.7,72.0 672.6,72.0 678.1,72.0 680.5,72.0 679.4,72.0 674.9,72.0 668.6,72.0 661.8,72.0 654.4,72.0 647.2,72.0 639.9,72.0 632.4,72.0 625.8,72.0 620.8,72.0 619.2,72.0 621.8,72.0 626.7,72.0 633.2,72.0 640.7,72.0 648.5,72.0 656.2,72.0 661.9,72.0 667.0,72.0 669.6,72.0 671.2,72.0 671.4,72.0 668.1,72.0 662.6,72.0 656.5,72.0 651.7,72.0 648.4,72.0 646.2,72.0 645.9,72.0 647.1,72.0 649.9,72.0 654.6,72.0 659.9,72.0 667.9,72.0 675.9,74.3 681.7,80.1 684.1,88.0 682.4,96.0 681.1,104.2 676.1,110.7 673.7,118.6 667.9,124.4 662.1,130.3 654.9,134.3 647.4,137.6 639.5,140.1 631.4,141.5 623.4,143.7 617.5,149.4 612.1,155.6 605.8,161.0 599.1,165.8" fill="none" stroke="#2ca25f" stroke-width="1.8" opacity="0.85"/>
+<circle cx="599.1" cy="165.8" r="3.5" fill="#2ca25f"/>
+<polyline points="599.0,175.0 606.9,172.7 613.8,168.3 620.7,163.7 627.2,158.6 632.3,152.2 637.4,145.7 640.6,138.1 642.0,130.0 641.8,121.7 641.4,113.5 640.2,105.4 641.1,97.2 644.0,89.4 648.8,82.7 655.6,78.1 663.2,74.9 671.2,73.1 679.2,75.0 687.0,77.7 692.5,83.8 697.7,90.2 702.0,96.7 702.0,101.8 702.0,106.1 702.0,106.4 702.0,102.8 702.0,95.9 702.0,88.9 702.0,80.8 702.0,72.6 702.0,72.0 701.3,72.0 700.8,72.0 701.6,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,75.3 702.0,76.6 702.0,79.4 702.0,82.3 702.0,82.2 702.0,79.3 702.0,74.1 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 701.4,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 702.0,73.1 702.0,77.0 702.0,78.6 702.0,77.7 702.0,74.4 702.0,72.0 702.0,72.0 702.0,72.0 702.0,72.0 700.2,72.0 696.5,72.0 691.1,72.0 684.8,72.0 678.0,72.0 671.2,72.0 664.8,72.0 659.3,72.0 655.6,72.0 654.2,72.0 655.6,72.0 659.4,72.0 665.0,72.0 672.0,72.0 679.9,72.0 688.1,72.0 695.9,74.7 701.8,80.4 702.0,88.3 700.5,96.3 695.2,102.7 687.6,105.8 679.4,104.9 672.7,100.1" fill="none" stroke="#c9341a" stroke-width="1.8" opacity="0.85"/>
+<circle cx="672.7" cy="100.1" r="3.5" fill="#c9341a"/>
+<rect x="484" y="298" width="12" height="4" fill="#2ca25f"/><text x="500" y="303" font-size="9" fill="#28324a">intact &#8594; returns home (err 0.35)</text>
+<rect x="484" y="314" width="12" height="4" fill="#c9341a"/><text x="500" y="319" font-size="9" fill="#28324a">lesion HD &#8594; lost (err 2.79)</text>
+</svg>

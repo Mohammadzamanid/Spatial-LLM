@@ -1149,6 +1149,46 @@ This makes the drift in the agent loop *mechanistically* right: the dominant err
 a faithful head-direction organ whose HD cells and attractor function *emerged*. (`results/head_direction.json`,
 `results/head_direction.svg`.)
 
+**The dead-reckoning brain — one closed HD → grid → place stack from self-motion alone** (the culmination)
+(`src/eval/agent_deadreckoning.py`, n=3). The spatial organs are now unified into a single self-localization
+loop. Instead of being *given* its heading (as the earlier grid agent was), the agent estimates **both**
+heading and position from its own motor commands:
+
+> motor (turn, step) → **HD ring attractor** (heading, drifts) → **grid cortex** path-integrates position
+> *using that heading* (drifts more) → **place** read-out → behaviour.
+
+The path integrator accumulates each actual displacement **rotated by the heading error** (θ_est − θ_true) —
+so drift originates as *heading* error in the HD organ and propagates into *position* error, exactly as in
+the brain. Two allothetic corrections fix two organs: a **visual landmark** resets the HD ring bump;
+**boundary** input resets the grid phase.
+
+| localization condition | position error |
+|---|---|
+| oracle heading (floor) | **0.04** |
+| HD in loop, no correction | 2.41 |
+| + visual reset (HD only) | 2.52 |
+| + boundary reset (grid only) | 0.44 |
+| **+ BOTH corrections** | **0.12** |
+| lesion HD organ | 3.23 |
+| lesion grid organ | 3.11 |
+
+- **The stack closes, and drift is heading-originated.** With true heading the stack localizes near-perfectly
+  (oracle **0.04**); putting the **HD organ in the loop** inflates position error to **2.41** — the heading
+  drift propagates into position.
+- **Both corrections are needed — each for a different organ.** Correcting **heading alone** (visual,
+  **2.52**) does *not* rescue position: the grid integrator's accumulated error persists. The **grid**
+  correction (boundary, **0.44**) is what fixes position directly, and adding the HD correction on top
+  (**both, 0.12**) slows the drift *between* boundary resets — so the lowest error needs **both**. Lesioning
+  either organ is catastrophic (HD **3.23**, grid **3.11**).
+- **Homing (path-integration return; Wehner's desert ants).** The agent wanders out and returns to the
+  origin using *only* its integrated position estimate: **intact 0.35**, abolished by lesioning **HD (2.79)**
+  or **grid (3.11)** — the canonical dead-reckoning behaviour, on a fully emergent organ stack.
+
+This is the cleanest single embodiment of a dead-reckoning brain: heading and position both inferred from
+self-motion through emergent organs (HD ring attractor + grid cortex), drift that is mechanistically correct
+(heading-originated), and two distinct allothetic corrections — one per organ. (`results/agent_deadreckoning.json`,
+`results/agent_deadreckoning.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action

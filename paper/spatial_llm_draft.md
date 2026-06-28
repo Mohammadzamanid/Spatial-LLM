@@ -326,6 +326,20 @@ drives position drift (13.4); a visual landmark pinning the ring bump bounds bot
 — the biologically-correct heading-dominated drift and its allothetic correction (Knierim 1995). This makes
 drift in the agent loop mechanistically right. `results/head_direction.{json,svg}`.
 
+*The dead-reckoning brain — one closed HD→grid→place stack (`src/eval/agent_deadreckoning.py`, n=3).* The
+spatial organs unify into a single self-localization loop: the agent estimates BOTH heading and position
+from its own motor commands — motor → HD ring attractor (heading, drifts) → grid cortex path-integrates
+position using that heading (drifts more) → place read-out. The integrator accumulates each actual
+displacement rotated by the heading error, so drift originates as heading error and propagates into
+position. With true heading the stack is near-perfect (oracle 0.04); the HD organ in the loop inflates
+position error (2.41), and — an honest, instructive finding — correcting heading ALONE (visual reset, 2.52)
+does not rescue position (the grid integrator's accumulated error persists): only the grid (boundary)
+correction fixes position (0.44), and adding the HD correction on top bounds it best (both 0.12). Lesioning
+HD (3.23) or grid (3.11) is catastrophic. Homing (path-integration return; Wehner's desert ants) works
+intact (0.35) and is abolished by lesioning HD (2.79) or grid (3.11). The cleanest single embodiment of a
+dead-reckoning brain — heading and position both inferred from self-motion through emergent organs, with two
+distinct allothetic corrections, one per organ. `results/agent_deadreckoning.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.
