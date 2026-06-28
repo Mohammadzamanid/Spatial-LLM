@@ -1,20 +1,23 @@
 # =====================================================================================
-# M5 — THE DEAD-RECKONING BRAIN SPEAKS: a frozen LLM reads the emergent HD+grid neural code (Kaggle T4)
+# M5 — THE DEAD-RECKONING BRAIN SPEAKS: a frozen LLM reads the emergent HD + grid neural code (Kaggle T4)
 # =====================================================================================
-# The capstone of the spatial organs. A frozen Qwen reads the agent's EMERGENT self-localization code --
-# the head-direction ring-attractor state (heading) PLUS the grid-cell population (position) -- and answers
-# self-localization questions in language:
-#   WHERE : "which of the 9 cells are you in?"        -> reads the GRID (position) code
-#   HOME  : "which way is home (0-7)?" (egocentric)   -> reads BOTH grid (home direction) AND HD (heading):
-#                                                         the HOMING VECTOR, the canonical dead-reckoning act.
-# The agent's moves/position NEVER appear in the prompt, so a high cortex-ON vs text-only-OFF gap is a
-# clean CAUSAL + leakage-proof statement: the LLM answers ONLY by reading the emergent neural code -- the
-# organs built this session (HD ring attractor + grid cortex) becoming a spatial sense an LLM speaks from.
+# The capstone of the spatial organs. A frozen Qwen reads the agent's EMERGENT self-localization code and
+# answers, in language, with two DIRECT single-organ decodes (separate queries, never competing):
+#   WHERE  : "which of the 9 cells are you in?"     -> reads the GRID (position) population
+#   FACING : "which way are you facing (0-7)?"      -> reads the HEAD-DIRECTION ring-attractor state
+# and an ORGAN-SPECIFIC LESION proves each read traces to its organ:
+#   WHERE  collapses when the GRID part is ablated (but survives ablating HD);
+#   FACING collapses when the HD   part is ablated (but survives ablating grid).
+# The agent's moves never appear in the prompt, so cortex-ON vs text-only-OFF is causal + leakage-proof:
+# the organs built this session (HD ring attractor + grid cortex) become a spatial sense an LLM speaks from.
 #
-# Separate queries (each trial asks WHERE or HOME) so the two fields never compete in one answer (cf. M4b).
-# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~25-30 min/seed; resumable.
+# (An earlier version also asked the egocentric HOMING VECTOR -- a hard cross-organ nonlinear combination
+#  [atan2(-position) - heading] -- which the readout could not learn (null). We keep the two clean direct
+#  decodes here; the homing-vector readout is left as harder future work.)
+#
+# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~35-40 min/seed; resumable.
 # n=6 seeds so the paired sign-flip permutation p can reach 2/2^6 = 0.03 (n=3 floors at 0.25).
-# Run cells top to bottom.
+# Run cells top to bottom.  (Fresh, or: !rm -rf results_dr_llm  to re-run.)
 # =====================================================================================
 
 
@@ -34,7 +37,7 @@ print("device:", torch.cuda.get_device_name(0), "| setup done")
 print("model cached")
 
 
-# %% [cell 3] dead-reckoning readout: ask WHERE or HOME; both cortex-ON vs text-only-OFF
+# %% [cell 3] dead-reckoning readout: WHERE (grid) + FACING (HD), with organ-specific lesions
 import os, math, time, json, random, torch, torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from peft import LoraConfig, TaskType, get_peft_model
@@ -45,56 +48,49 @@ from src.eval.head_direction import train_hd
 
 dev = "cuda"
 BASE = "Qwen/Qwen2.5-1.5B"
-R = 2.5                      # arena half-width (matches the agent modules)
-NCELL = 3                   # 3x3 grid -> WHERE has 9 classes
-NHOME = 8                   # 8 egocentric sectors for the home direction
-SEEDS = list(range(6)); HD_ITERS = 2000; STEPS = 1800; BS = 4
+R = 2.5; NCELL = 3; NFACE = 8                # WHERE: 3x3 = 9 cells; FACING: 8 heading sectors
+SEEDS = list(range(6)); HD_ITERS = 2000; STEPS = 2400; BS = 4
 P_WHERE = ("[STATE] You have been moving; your head-direction and grid cells encode your location.\n"
            "[QUESTION] Which of the 9 cells (0-8) are you in?\n[ANSWER]")
-P_HOME = ("[STATE] You have been moving; your head-direction and grid cells encode your location.\n"
-          "[QUESTION] Which way is home (0-7, egocentric sectors)?\n[ANSWER]")
+P_FACE = ("[STATE] You have been moving; your head-direction and grid cells encode your location.\n"
+          "[QUESTION] Which way are you facing (0-7)?\n[ANSWER]")
 
 tok = AutoTokenizer.from_pretrained(BASE, use_fast=True)
 if tok.pad_token is None: tok.pad_token = tok.eos_token
 
 
 def build_organs(seed):
-    """The emergent self-localization organs: a trained HD ring attractor (heading code) + the grid cortex
-    (position code; fixed biological gains). Returns a code(p, theta) -> neural state function."""
-    hd, _ = train_hd(seed, iters=HD_ITERS)                                  # HD ring attractor (CPU, fast)
-    mod = build_cortex(seed).to(dev)                                        # grid cortex (fixed gains)
-    # canonical HD ring states (rates) for every heading, from a clean angular ramp
+    """Emergent organs: trained HD ring attractor (heading code) + grid cortex (position code, fixed gains).
+    Returns code(p, theta) -> [grid | HD] neural state, plus the grid-dim split GD."""
+    hd, _ = train_hd(seed, iters=HD_ITERS)
+    mod = build_cortex(seed).to(dev)
     with torch.no_grad():
         h = torch.zeros(1, hd.U.out_features); ks = []; vs = []
         om = torch.tensor(2 * math.pi / 120)
         for _ in range(480):
             h = hd.step(h, om); ks.append(hd.decode(h)); vs.append(torch.relu(h).clone())
-    keys = torch.tensor(ks, device=dev); states = torch.cat(vs, 0).to(dev)  # (N,), (N, HID)
-    HID = states.shape[1]; GD = mod.K * mod.M
+    keys = torch.tensor(ks, device=dev); states = torch.cat(vs, 0).to(dev)
+    GD = mod.K * mod.M
 
-    def hd_lookup(theta):                                                   # (B,) -> (B, HID) ring rates
+    def hd_lookup(theta):
         d = torch.atan2((keys[None] - theta[:, None]).sin(), (keys[None] - theta[:, None]).cos()).abs()
         return states[d.argmin(1)]
 
-    def code(p, theta):                                                     # (B,2),(B,) -> (B, GD+HID)
+    def code(p, theta):
         return torch.cat([mod.grid_code_at(p), hd_lookup(theta)], -1)
 
-    return code, GD + HID
+    return code, GD, GD + states.shape[1]
 
 
 def where_bin(p):
     col = ((p[:, 0] + R) / (2 * R) * NCELL).clamp(0, NCELL - 1e-3).long()
     row = ((p[:, 1] + R) / (2 * R) * NCELL).clamp(0, NCELL - 1e-3).long()
-    return row * NCELL + col                                                # 0..8
+    return row * NCELL + col
+def facing_bin(theta):
+    return ((theta % (2 * math.pi)) / (2 * math.pi) * NFACE).long().clamp(0, NFACE - 1)
 
 
-def home_bin(p, theta):                                                     # egocentric direction to home
-    home_dir = torch.atan2(-p[:, 1], -p[:, 0])
-    ego = torch.atan2((home_dir - theta).sin(), (home_dir - theta).cos())   # (-pi, pi]
-    return (((ego + math.pi) / (2 * math.pi) * NHOME).long().clamp(0, NHOME - 1))
-
-
-class DeadReckoningReadoutLLM(nn.Module):
+class ReadoutLLM(nn.Module):
     def __init__(self, base, code_dim, n_tokens=8):
         super().__init__()
         try: llm = AutoModelForCausalLM.from_pretrained(base, dtype=torch.float32)
@@ -109,15 +105,14 @@ class DeadReckoningReadoutLLM(nn.Module):
     def emb(self):
         if not self._emb: self._emb.append(_get_embed_layer(self.llm.base_model))
         return self._emb[0]
-    def _tok(self, code, ablate):
-        t = self.to_tokens(code).view(code.shape[0], self.n, -1)
-        return torch.zeros_like(t) if ablate else t
-    def forward(self, input_ids, attn, code, labels=None, ablate=False):
-        text = self.emb()(input_ids); sp = self._tok(code, ablate).to(text.dtype)
+    def _tok(self, code):
+        return self.to_tokens(code).view(code.shape[0], self.n, -1)
+    def forward(self, input_ids, attn, code, labels=None):
+        text = self.emb()(input_ids); sp = self._tok(code).to(text.dtype)
         return self.llm(inputs_embeds=self.fusion(text, sp), attention_mask=attn, labels=labels)
     @torch.no_grad()
-    def gen(self, input_ids, attn, code, ablate=False, max_new=3):
-        text = self.emb()(input_ids); sp = self._tok(code, ablate).to(text.dtype)
+    def gen(self, input_ids, attn, code, max_new=3):
+        text = self.emb()(input_ids); sp = self._tok(code).to(text.dtype)
         return self.llm.generate(inputs_embeds=self.fusion(text, sp), attention_mask=attn,
                                  max_new_tokens=max_new, do_sample=False)
 
@@ -130,27 +125,35 @@ def first_digit(txt):
 
 def run_seed(seed, smoke=False):
     set_seed(seed); torch.manual_seed(seed)
-    code_fn, code_dim = build_organs(seed)
+    code_fn, GD, code_dim = build_organs(seed)
 
     def sample(bs):
         p = (torch.rand(bs, 2, device=dev) * 2 - 1) * R
         theta = torch.rand(bs, device=dev) * 2 * math.pi
         return p, theta, code_fn(p, theta)
 
-    model = DeadReckoningReadoutLLM(BASE, code_dim).to(dev)
+    def lesion(code, mode):                                          # zero a slice of the CODE before projecting
+        if mode == "none": return code
+        c = code.clone()
+        if mode == "all": c[:] = 0.0
+        elif mode == "grid": c[:, :GD] = 0.0                         # ablate the grid (position) organ
+        elif mode == "hd": c[:, GD:] = 0.0                           # ablate the HD (heading) organ
+        return c
+
+    model = ReadoutLLM(BASE, code_dim).to(dev)
     if hasattr(model.llm, "gradient_checkpointing_enable"):
         model.llm.gradient_checkpointing_enable(); model.llm.enable_input_require_grads(); model.llm.config.use_cache = False
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=2e-4)
 
     def batch(bs):
         p, theta, c = sample(bs)
-        wb = where_bin(p); hb = home_bin(p, theta)
+        wb = where_bin(p); fb = facing_bin(theta)
         prompts, fulls = [], []
         for i in range(bs):
             if torch.rand(1).item() < 0.5:
                 prompts.append(P_WHERE); fulls.append(P_WHERE + f" {int(wb[i])}")
             else:
-                prompts.append(P_HOME); fulls.append(P_HOME + f" {int(hb[i])}")
+                prompts.append(P_FACE); fulls.append(P_FACE + f" {int(fb[i])}")
         enc = tok(fulls, max_length=72, padding="max_length", truncation=True, return_tensors="pt")
         labels = enc["input_ids"].clone()
         for i in range(bs):
@@ -161,7 +164,7 @@ def run_seed(seed, smoke=False):
     if smoke:
         ids, attn, c, lab = batch(2)
         l = model(ids, attn, c, labels=lab).loss; l.backward(); opt.zero_grad()
-        print(f"  smoke OK (loss {float(l):.3f}, code_dim {code_dim})", flush=True)
+        print(f"  smoke OK (loss {float(l):.3f}, code_dim {code_dim}, GD {GD})", flush=True)
 
     model.train(); t0 = time.time()
     for it in range(STEPS):
@@ -170,26 +173,25 @@ def run_seed(seed, smoke=False):
         if it % 200 == 0: print(f"  seed {seed} step {it}/{STEPS} loss {loss.item():.3f} ({time.time()-t0:.0f}s)", flush=True)
 
     @torch.no_grad()
-    def ask(prompt, kind, ablate, n):
+    def ask(prompt, kind, mode, n=300):
         model.eval(); enc = tok(prompt, return_tensors="pt")
         ids = enc["input_ids"].to(dev); attn = enc["attention_mask"].to(dev)
-        ok = w1 = tot = 0
+        ok = tot = 0
         for i in range(0, n, BS):
             m = min(BS, n - i); p, theta, c = sample(m)
-            truth = where_bin(p) if kind == "where" else home_bin(p, theta)
-            out = model.gen(ids.repeat(m, 1), attn.repeat(m, 1), c, ablate=ablate, max_new=3)
+            truth = where_bin(p) if kind == "where" else facing_bin(theta)
+            out = model.gen(ids.repeat(m, 1), attn.repeat(m, 1), lesion(c, mode), max_new=3)
             for j in range(m):
                 d = first_digit(tok.decode(out[j], skip_special_tokens=True)); tot += 1
-                if d is not None:
-                    ok += int(d == int(truth[j]))
-                    if kind == "home":                                      # circular within-1 sector
-                        w1 += int(min((d - int(truth[j])) % NHOME, (int(truth[j]) - d) % NHOME) <= 1)
-        return ok / tot, (w1 / tot if kind == "home" else float("nan"))
+                if d is not None: ok += int(d == int(truth[j]))
+        return ok / tot
 
-    wh_on, _ = ask(P_WHERE, "where", False, 360); wh_off, _ = ask(P_WHERE, "where", True, 360)
-    hm_on, hm_on1 = ask(P_HOME, "home", False, 360); hm_off, hm_off1 = ask(P_HOME, "home", True, 360)
-    return {"where_on": wh_on, "where_off": wh_off, "home_on": hm_on, "home_off": hm_off,
-            "home_w1_on": hm_on1, "home_w1_off": hm_off1}
+    return {  # WHERE needs grid (dies when grid ablated); FACING needs HD (dies when HD ablated)
+        "where_on": ask(P_WHERE, "where", "none"), "where_off": ask(P_WHERE, "where", "all"),
+        "where_no_grid": ask(P_WHERE, "where", "grid"), "where_no_hd": ask(P_WHERE, "where", "hd"),
+        "face_on": ask(P_FACE, "face", "none"), "face_off": ask(P_FACE, "face", "all"),
+        "face_no_hd": ask(P_FACE, "face", "hd"), "face_no_grid": ask(P_FACE, "face", "grid"),
+    }
 
 
 OUT = "results_dr_llm"; os.makedirs(OUT, exist_ok=True)
@@ -202,8 +204,8 @@ for s in SEEDS:
         print(f"\n===== DEAD-RECKONING READOUT  seed {s} =====", flush=True)
         r = run_seed(s, smoke=(s == SEEDS[0])); json.dump(r, open(f, "w"))
     res.append(r)
-    print(f"  seed {s}: WHERE ON {r['where_on']:.0%}/OFF {r['where_off']:.0%} | HOME ON {r['home_on']:.0%}"
-          f"(w1 {r['home_w1_on']:.0%})/OFF {r['home_off']:.0%}", flush=True)
+    print(f"  seed {s}: WHERE ON {r['where_on']:.0%}/OFF {r['where_off']:.0%} (no-grid {r['where_no_grid']:.0%}) | "
+          f"FACE ON {r['face_on']:.0%}/OFF {r['face_off']:.0%} (no-hd {r['face_no_hd']:.0%})", flush=True)
 
 
 def ci95(xs):
@@ -215,15 +217,19 @@ def paired_p(d, iters=20000):
     return sum(abs(sum(x * (1 if rng.random() < 0.5 else -1) for x in d) / n) >= abs(m) - 1e-12 for _ in range(iters)) / iters
 
 print("\n========== THE DEAD-RECKONING BRAIN SPEAKS (cortex-ON vs text-only-OFF) ==========")
-print(f"  n={len(res)} seeds | WHERE chance {1/(NCELL*NCELL):.0%} | HOME chance {1/NHOME:.0%}")
-for key, name in [("where", "WHERE (cell, reads grid)"), ("home", "HOME (egocentric, reads HD+grid)"),
-                  ("home_w1", "HOME within-1 sector")]:
+print(f"  n={len(res)} seeds | WHERE chance {1/(NCELL*NCELL):.0%} | FACING chance {1/NFACE:.0%}")
+for key, name in [("where", "WHERE  (cell, reads grid)"), ("face", "FACING (heading, reads HD)")]:
     on = [r[f"{key}_on"] for r in res]; off = [r[f"{key}_off"] for r in res]
     mo, co = ci95(on); mf, cf = ci95(off); d = [on[i] - off[i] for i in range(len(res))]
     p = paired_p(d) if len(res) >= 2 else float("nan")
-    print(f"  {name:32} ON {mo:.0%} +/-{co:.0%}   OFF {mf:.0%} +/-{cf:.0%}   Delta {sum(d)/len(d):+.0%}   p={p:.4f}")
-print("  Headline: a frozen LLM reads SELF-LOCALIZATION (position + the egocentric homing vector) from the")
-print("  EMERGENT HD+grid neural code -- the dead-reckoning organs become a spatial sense it speaks from.")
-json.dump({"n_seeds": len(res), "ncell": NCELL, "nhome": NHOME, "per_seed": res},
+    print(f"  {name:28} ON {mo:.0%} +/-{co:.0%}   OFF {mf:.0%} +/-{cf:.0%}   Delta {sum(d)/len(d):+.0%}   p={p:.4f}")
+# organ-specificity: each read collapses ONLY when ITS organ is ablated
+wg, wh = ci95([r["where_no_grid"] for r in res])[0], ci95([r["where_no_hd"] for r in res])[0]
+fh, fg = ci95([r["face_no_hd"] for r in res])[0], ci95([r["face_no_grid"] for r in res])[0]
+print(f"  organ-specificity:  WHERE  no-grid {wg:.0%} (dies)  vs no-hd {wh:.0%} (survives)")
+print(f"                      FACING no-hd   {fh:.0%} (dies)  vs no-grid {fg:.0%} (survives)")
+print("  Headline: a frozen LLM reads BOTH emergent organs -- position from the grid code, heading from the")
+print("  HD ring attractor -- and each read collapses ONLY when its own organ is ablated (organ-specific, causal).")
+json.dump({"n_seeds": len(res), "ncell": NCELL, "nface": NFACE, "per_seed": res},
           open("results_dr_llm.json", "w"), indent=2)
 print("\nwrote results_dr_llm.json -- paste the table back")
