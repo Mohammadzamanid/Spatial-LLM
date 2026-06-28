@@ -45,6 +45,7 @@ run src.eval.agent_unified     --seeds 3            # BEHAVING AGENT: ONE task n
 run src.eval.agent_grid_cortex --seeds 3            # BEHAVING AGENT on the REAL grid cortex: velocity-driven hex grid modules path-integrate -> nonlinear readout -> vector nav; triple dissociation on the grid substrate
 run src.eval.agent_grid_drift  --seeds 3            # GRID DRIFT + CORRECTION: noisy self-motion drifts the grid estimate (unbounded); boundary-vector cells reset it near walls (Hardcastle 2015) -> localization bounded + foraging rescued
 run src.eval.agent_cue_integration --seeds 3        # OPTIMAL CUE INTEGRATION: a learned fuser (no hand-coded gate) discovers near-optimal Bayesian combination of grid-PI + boundary cues -> beats either cue alone, sits on the optimal bound (Nardini 2008)
+run src.eval.head_direction    --seeds 5            # HEAD-DIRECTION ORGAN: HD cells + a ring attractor EMERGE from angular path integration; heading-dominated drift driven by the HD system, bounded by a visual reset (Knierim 1995)
 run src.eval.basal_ganglia     --seeds 3            # TIER-2 SYSTEM: basal-ganglia Go/NoGo action selection; dopamine lesion abolishes learning (100->35%)
 run src.eval.grid_capacity     --seeds 5            # WHY GRID CELLS: coding capacity (Fiete) via Fisher info -- grid resolution flat vs arena, place linear (33x at scale); + honest linear-decode caveat
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
