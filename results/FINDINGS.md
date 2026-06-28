@@ -1277,6 +1277,43 @@ So the grid cortex the agent already runs on is not a stylistic choice: at scale
 two codes whose precision survives a fixed budget — and the caveat tells us *why* a place-cell read-out
 sits downstream of it. (`results/grid_capacity.json`, `results/grid_capacity.svg`.)
 
+### The other half of the trade-off — catastrophic errors, and why the code is multi-module
+
+The grid code's capacity has a price (Sreenivasan & Fiete 2011; Fiete et al. 2008). It is a **residue code**:
+position is read from the joint phases of several modules. Under noise a phase can slip so the residue
+combination lands on a *different* consistent position — a **catastrophic error**: not a small drift but a
+large jump to an aliased location. We maximum-likelihood-decode a noisy 1-D grid code (the nonlinear decoder
+that actually exploits the combinatorial structure — a linear reader can't, per the caveat above) and
+measure (`src/eval/grid_catastrophe.py`, n=5):
+
+| #modules K | dim | catastrophic rate | local (median) error |
+|---|---|---|---|
+| 2 | 4 | **75%** | 0.25 |
+| 3 | 6 | 23% | 0.003 |
+| 4 | 8 | 8% | 0.002 |
+| 5 | 10 | 1.5% | 0.002 |
+| 6 | 12 | **1%** | 0.002 |
+
+- **(A) Modules suppress catastrophes *exponentially*, at constant precision.** From K=2 to K=6 the
+  catastrophic rate falls **75% → 1%**, while the local (median) error barely moves (0.003 → 0.002): adding
+  modules buys **catastrophe-safety, not resolution**. This is precisely *why the entorhinal code is
+  multi-module* (several modules at geometric scale ratios; Stensola 2012) — each module is another
+  constraint an alias must satisfy, so catastrophes become exponentially unlikely.
+- **(B) The error law is bimodal.** At K=2 the errors split **25% local / 75% catastrophic** with almost
+  nothing between — the signature of a residue code failing; by K=5 the catastrophic tail is gone (98%
+  local). 
+- **(C) An honest correction to my own first framing.** I expected a *trade-off* "place is catastrophe-safe
+  but coarse" — but the data refuted it: a place code **also** makes catastrophic wrong-bump errors under
+  noise. At matched budget the grid code is **~19× finer *and* no more catastrophe-prone** (grid 19% vs
+  place 25% at the highest noise). So the catastrophe-risk is **intrinsic to noisy decoding**, not a
+  grid-vs-place deficit — and multi-module redundancy (A) is exactly what lets the high-capacity grid code
+  *also* be catastrophe-robust, so **grid dominates place at matched budget** (consistent with the capacity
+  result: the grid advantage is real once a nonlinear decoder unlocks it).
+
+Together with the capacity result, this is the complete Fiete picture: the grid code's exponential capacity
+*and* its catastrophic-error vulnerability, with the brain's multi-module organization the resolution of
+both. (`results/grid_catastrophe.json`, `results/grid_catastrophe.svg`.)
+
 ## Emergent neuroscience signatures — measured, not designed
 
 Like the 7±2 working-memory limit (which fell out of theta-gamma), other brain signatures emerge

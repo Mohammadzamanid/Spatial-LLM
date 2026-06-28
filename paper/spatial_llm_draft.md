@@ -360,6 +360,19 @@ coarsely) — the grid advantage **grows to 33×** (exponential-vs-linear capaci
 the capacity is real but requires a nonlinear/Bayesian decoder, which is exactly why downstream place cells
 (a nonlinear conjunction of grid inputs) exist. `results/grid_capacity.{json,svg}`.
 
+*Catastrophic errors — the other half of the trade-off (`src/eval/grid_catastrophe.py`, n=5).* The grid code
+is a residue code, so its capacity has a price: under noise a phase slip can land the residue combination on
+a far-off aliased position — a catastrophic error (Sreenivasan & Fiete 2011). ML-decoding a noisy grid code,
+(A) adding modules suppresses the catastrophic rate exponentially (K=2→6: 75%→1%) at constant local
+precision (median 0.003→0.002): modules buy catastrophe-safety, not resolution — why the entorhinal code is
+multi-module (Stensola 2012); (B) the error law is bimodal (K=2: 25% local / 75% catastrophic, almost
+nothing between; gone by K=5). (C) Honest correction to my own first framing: I expected "place is
+catastrophe-safe but coarse", but the data refuted it — a place code also makes catastrophic wrong-bump
+errors, and at matched budget the grid is ~19× finer AND no more catastrophe-prone (grid 19% vs place 25% at
+the highest noise). So the catastrophe-risk is intrinsic to noisy decoding, settled within the grid by
+multi-module redundancy, and the grid dominates place once a nonlinear decoder unlocks its capacity. With the
+capacity result this is the complete Fiete picture. `results/grid_catastrophe.{json,svg}`.
+
 *Content-binding (what-where-when).* The temporal code also binds content, reproducing a 2023 hippocampal
 result (bat CA1; Shimbo et al., *Nat Neurosci*; *Neuron* 2024): given one of K events at t=0 and asked to
 report both elapsed time and which event, the substrate grows **two coexisting populations** — **pure**

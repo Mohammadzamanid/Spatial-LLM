@@ -49,6 +49,7 @@ run src.eval.head_direction    --seeds 5            # HEAD-DIRECTION ORGAN: HD c
 run src.eval.agent_deadreckoning --seeds 3          # DEAD-RECKONING BRAIN: unified HD->grid->place stack from self-motion alone; heading drift propagates to position drift; both allothetic corrections needed; homing abolished by lesioning HD or grid
 run src.eval.basal_ganglia     --seeds 3            # TIER-2 SYSTEM: basal-ganglia Go/NoGo action selection; dopamine lesion abolishes learning (100->35%)
 run src.eval.grid_capacity     --seeds 5            # WHY GRID CELLS: coding capacity (Fiete) via Fisher info -- grid resolution flat vs arena, place linear (33x at scale); + honest linear-decode caveat
+run src.eval.grid_catastrophe   --seeds 5            # CATASTROPHIC ERRORS (Fiete other half): multi-module grid code suppresses catastrophic decode jumps exponentially with module count; bimodal error law; grid dominates place at matched budget
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="966" height="328" font-family="Segoe UI, Arial">
+<rect width="966" height="328" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">Catastrophic errors in the grid code: the multi-module code suppresses them (Fiete 2011)</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">ML-decoding a noisy residue code; adding modules removes catastrophic jumps without changing local precision</text>
+<text x="52" y="56" font-size="11" font-weight="700" fill="#0b1324">(A) catastrophic rate vs #modules</text>
+<line x1="52" y1="256" x2="302" y2="256" stroke="#33415c"/><line x1="52" y1="60" x2="52" y2="256" stroke="#33415c"/>
+<line x1="52" y1="205" x2="302" y2="205" stroke="#eef1f6"/><text x="47" y="208" font-size="8" fill="#5b6b8c" text-anchor="end">1%</text>
+<line x1="52" y1="133" x2="302" y2="133" stroke="#eef1f6"/><text x="47" y="136" font-size="8" fill="#5b6b8c" text-anchor="end">10%</text>
+<line x1="52" y1="60" x2="302" y2="60" stroke="#eef1f6"/><text x="47" y="63" font-size="8" fill="#5b6b8c" text-anchor="end">100%</text>
+<polyline points="52.0,68.9 114.5,106.8 177.0,140.8 239.5,192.2 302.0,205.6" fill="none" stroke="#c9341a" stroke-width="2.6"/>
+<circle cx="52.0" cy="68.9" r="2.6" fill="#c9341a"/>
+<text x="52" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">2</text>
+<circle cx="114.5" cy="106.8" r="2.6" fill="#c9341a"/>
+<text x="114" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">3</text>
+<circle cx="177.0" cy="140.8" r="2.6" fill="#c9341a"/>
+<text x="177" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">4</text>
+<circle cx="239.5" cy="192.2" r="2.6" fill="#c9341a"/>
+<text x="240" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">5</text>
+<circle cx="302.0" cy="205.6" r="2.6" fill="#c9341a"/>
+<text x="302" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">6</text>
+<text x="177" y="284" font-size="9" fill="#5b6b8c" text-anchor="middle"># modules &#8594;</text>
+<text x="58" y="72" font-size="8.5" fill="#c9341a">catastrophic rate (log) &#8595; with modules</text>
+<text x="372" y="56" font-size="11" font-weight="700" fill="#0b1324">(B) error distribution (bimodal)</text>
+<line x1="372" y1="256" x2="622" y2="256" stroke="#33415c"/><line x1="372" y1="60" x2="372" y2="256" stroke="#33415c"/>
+<rect x="372.0" y="210.6" width="11.2" height="45.4" fill="#c9341a" opacity="0.5"/>
+<rect x="384.5" y="253.9" width="11.2" height="2.1" fill="#c9341a" opacity="0.5"/>
+<rect x="397.0" y="255.8" width="11.2" height="0.2" fill="#c9341a" opacity="0.5"/>
+<rect x="409.5" y="254.0" width="11.2" height="2.0" fill="#c9341a" opacity="0.5"/>
+<rect x="422.0" y="221.9" width="11.2" height="34.1" fill="#c9341a" opacity="0.5"/>
+<rect x="434.5" y="222.7" width="11.2" height="33.3" fill="#c9341a" opacity="0.5"/>
+<rect x="447.0" y="254.5" width="11.2" height="1.5" fill="#c9341a" opacity="0.5"/>
+<rect x="459.5" y="255.9" width="11.2" height="0.1" fill="#c9341a" opacity="0.5"/>
+<rect x="472.0" y="254.8" width="11.2" height="1.2" fill="#c9341a" opacity="0.5"/>
+<rect x="484.5" y="233.3" width="11.2" height="22.7" fill="#c9341a" opacity="0.5"/>
+<rect x="497.0" y="234.7" width="11.2" height="21.3" fill="#c9341a" opacity="0.5"/>
+<rect x="509.5" y="255.1" width="11.2" height="0.9" fill="#c9341a" opacity="0.5"/>
+<rect x="522.0" y="255.8" width="11.2" height="0.2" fill="#c9341a" opacity="0.5"/>
+<rect x="534.5" y="255.2" width="11.2" height="0.8" fill="#c9341a" opacity="0.5"/>
+<rect x="547.0" y="244.4" width="11.2" height="11.6" fill="#c9341a" opacity="0.5"/>
+<rect x="559.5" y="244.4" width="11.2" height="11.6" fill="#c9341a" opacity="0.5"/>
+<rect x="572.0" y="255.7" width="11.2" height="0.3" fill="#c9341a" opacity="0.5"/>
+<rect x="584.5" y="256.0" width="11.2" height="0.0" fill="#c9341a" opacity="0.5"/>
+<rect x="597.0" y="255.9" width="11.2" height="0.1" fill="#c9341a" opacity="0.5"/>
+<rect x="609.5" y="255.7" width="11.2" height="0.3" fill="#c9341a" opacity="0.5"/>
+<rect x="372.0" y="69.3" width="11.2" height="186.7" fill="#2ca25f" opacity="0.5"/>
+<rect x="384.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="397.0" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="409.5" y="255.9" width="11.2" height="0.1" fill="#2ca25f" opacity="0.5"/>
+<rect x="422.0" y="255.5" width="11.2" height="0.5" fill="#2ca25f" opacity="0.5"/>
+<rect x="434.5" y="255.9" width="11.2" height="0.1" fill="#2ca25f" opacity="0.5"/>
+<rect x="447.0" y="255.6" width="11.2" height="0.4" fill="#2ca25f" opacity="0.5"/>
+<rect x="459.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="472.0" y="255.6" width="11.2" height="0.4" fill="#2ca25f" opacity="0.5"/>
+<rect x="484.5" y="255.2" width="11.2" height="0.8" fill="#2ca25f" opacity="0.5"/>
+<rect x="497.0" y="255.8" width="11.2" height="0.2" fill="#2ca25f" opacity="0.5"/>
+<rect x="509.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="522.0" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="534.5" y="255.8" width="11.2" height="0.2" fill="#2ca25f" opacity="0.5"/>
+<rect x="547.0" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="559.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="572.0" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="584.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="597.0" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<rect x="609.5" y="256.0" width="11.2" height="0.0" fill="#2ca25f" opacity="0.5"/>
+<text x="497" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">error magnitude (0 &#8594; 1) &#8594;</text>
+<rect x="530" y="66" width="10" height="4" fill="#c9341a" opacity="0.6"/><text x="543" y="70" font-size="8.5" fill="#28324a">K=2 (tail)</text>
+<rect x="530" y="80" width="10" height="4" fill="#2ca25f" opacity="0.6"/><text x="543" y="84" font-size="8.5" fill="#28324a">K=5 (local)</text>
+<text x="692" y="56" font-size="11" font-weight="700" fill="#0b1324">(C) grid vs place (matched budget)</text>
+<line x1="692" y1="256" x2="942" y2="256" stroke="#33415c"/><line x1="692" y1="60" x2="692" y2="256" stroke="#33415c"/>
+<text x="687" y="259" font-size="8" fill="#5b6b8c" text-anchor="end">0%</text>
+<text x="687" y="210" font-size="8" fill="#5b6b8c" text-anchor="end">25%</text>
+<text x="687" y="161" font-size="8" fill="#5b6b8c" text-anchor="end">50%</text>
+<polyline points="692.0,256.0 775.3,253.3 858.7,240.7 942.0,217.9" fill="none" stroke="#c9341a" stroke-width="2.4"/>
+<circle cx="692.0" cy="256.0" r="2.4" fill="#c9341a"/>
+<circle cx="775.3" cy="253.3" r="2.4" fill="#c9341a"/>
+<circle cx="858.7" cy="240.7" r="2.4" fill="#c9341a"/>
+<circle cx="942.0" cy="217.9" r="2.4" fill="#c9341a"/>
+<polyline points="692.0,255.2 775.3,245.0 858.7,226.5 942.0,207.6" fill="none" stroke="#3182bd" stroke-width="2.4"/>
+<circle cx="692.0" cy="255.2" r="2.4" fill="#3182bd"/>
+<circle cx="775.3" cy="245.0" r="2.4" fill="#3182bd"/>
+<circle cx="858.7" cy="226.5" r="2.4" fill="#3182bd"/>
+<circle cx="942.0" cy="207.6" r="2.4" fill="#3182bd"/>
+<text x="692" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">0.2</text>
+<text x="775" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">0.3</text>
+<text x="859" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">0.4</text>
+<text x="942" y="270" font-size="9" fill="#5b6b8c" text-anchor="middle">0.5</text>
+<text x="817" y="284" font-size="9" fill="#5b6b8c" text-anchor="middle">noise &#8594;</text>
+<rect x="814" y="66" width="10" height="4" fill="#c9341a"/><text x="827" y="70" font-size="8" fill="#28324a">grid catastrophic%</text>
+<rect x="814" y="80" width="10" height="4" fill="#3182bd"/><text x="827" y="84" font-size="8" fill="#28324a">place catastrophic% (wrong-bump)</text>
+<text x="698" y="250" font-size="8" fill="#5b6b8c">grid ~19&#215; finer &amp; no more catastrophe-prone</text>
+</svg>
