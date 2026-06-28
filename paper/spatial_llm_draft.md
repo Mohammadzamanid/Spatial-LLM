@@ -436,6 +436,22 @@ quality varies seed to seed). So a frozen LLM reads an **emergent time-cell code
 text** — both axes of the predictive-spatiotemporal map, space (torus) and time (elapsed), now transfer
 to language, all emergent. (`results/elapsed_time_llm.json`.)
 
+**The dead-reckoning brain speaks — a frozen LLM reads BOTH emergent organs, organ-specifically**
+(`notebooks/m5_deadreckoning_llm_kaggle.py`, n=6). The founding-goal capstone: a frozen LoRA-Qwen reads the
+unified dead-reckoning agent's emergent self-localization code — the grid-cell population (position) and the
+head-direction ring-attractor state (heading) — and answers in language (moves never in the prompt; cortex-ON
+vs text-only-OFF, causal + leakage-proof). Two *direct single-organ* decodes: **WHERE** (which of 9 cells)
+reads the grid code — ON **38% ± 32** vs OFF **8%**, **significant (p=0.033**, all 6 seeds ON>OFF); **FACING**
+(heading, 8 sectors) reads the HD code — ON **40% ± 26** vs OFF **12%** (Δ+28), a strong trend not clearing
+0.05 at n=6 (**p=0.095**). The decisive evidence is an **organ-specific double dissociation**: each read
+collapses *only* when its own organ is ablated — WHERE no-grid **8%** (dies) vs no-HD **39%** (survives);
+FACING no-HD **10%** (dies) vs no-grid **33%** (survives). So the LLM reads position *specifically* from the
+grid cortex and heading *specifically* from the head-direction ring — the emergent organs become a spatial
+sense an LLM speaks from, each causally traced to its organ. *Honest scope:* FACING's ON-vs-OFF is a trend
+(its organ-specific lesion independently confirms it reads HD); the harder egocentric **homing-vector**
+readout (a nonlinear cross-organ combination) was null and is left as future work; ON magnitude is
+seed-variable (as in torus/time). (`results/deadreckoning_llm_agg.json`.)
+
 ## 9. Related work ✎
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators

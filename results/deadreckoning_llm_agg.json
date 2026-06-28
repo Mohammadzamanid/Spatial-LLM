@@ -1,0 +1,23 @@
+{
+  "experiment": "M5 dead-reckoning LLM readout (frozen Qwen2.5-1.5B + LoRA + fusion reads the emergent HD+grid code)",
+  "notebook": "notebooks/m5_deadreckoning_llm_kaggle.py",
+  "n_seeds": 6,
+  "chance": {"where": 0.11, "facing": 0.125},
+  "where": {
+    "_reads": "grid (position) code; 3x3 cell, 9 classes",
+    "on": [0.38, 0.32], "off": [0.08, 0.05], "delta": 0.30, "p": 0.0328,
+    "no_grid_lesion": 0.08, "no_hd_lesion": 0.39
+  },
+  "facing": {
+    "_reads": "HD ring-attractor (heading) code; 8 sectors",
+    "on": [0.40, 0.26], "off": [0.12, 0.05], "delta": 0.28, "p": 0.0954,
+    "no_hd_lesion": 0.10, "no_grid_lesion": 0.33
+  },
+  "organ_specificity": "double dissociation: WHERE collapses only when grid is ablated (8% vs 39%); FACING collapses only when HD is ablated (10% vs 33%) -- each LLM read traces to its own emergent organ.",
+  "honest_notes": [
+    "WHERE ON>>OFF is significant (p=0.033; all 6 seeds ON>OFF).",
+    "FACING ON>>OFF is a strong trend (delta +28%) but not significant at n=6 (p=0.095); the organ-specific lesion (no-HD 10% vs no-grid 33%) independently confirms FACING reads the HD code.",
+    "Wide cross-seed CIs reflect readout-convergence magnitude variance, not direction (direction is consistent).",
+    "The harder egocentric HOMING-VECTOR readout (a nonlinear cross-organ combination atan2(-position) - heading) was NULL in the first run and is left as documented future work."
+  ]
+}

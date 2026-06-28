@@ -1189,6 +1189,37 @@ self-motion through emergent organs (HD ring attractor + grid cortex), drift tha
 (heading-originated), and two distinct allothetic corrections — one per organ. (`results/agent_deadreckoning.json`,
 `results/agent_deadreckoning.svg`.)
 
+**…and the dead-reckoning brain *speaks* — a frozen LLM reads the emergent code** (the founding-goal capstone)
+(`notebooks/m5_deadreckoning_llm_kaggle.py`, n=6 seeds on a T4). A frozen Qwen2.5-1.5B (LoRA + gated fusion)
+reads the agent's **emergent self-localization code** — the grid-cell population (position) and the
+head-direction ring-attractor state (heading) — and answers in language, with two *direct single-organ*
+decodes (the agent's moves never appear in the prompt, so cortex-ON vs text-only-OFF is causal +
+leakage-proof):
+
+| readout (cortex-ON vs text-only-OFF) | ON | OFF | Δ | p | reads |
+|---|---|---|---|---|---|
+| **WHERE** (which of 9 cells) | **38% ± 32** | 8% | +30 | **0.033** | grid (position) |
+| **FACING** (heading, 8 sectors) | **40% ± 26** | 12% | +28 | 0.095 | HD (heading) |
+
+- **WHERE is significant** (p=0.033 — all 6 seeds ON>OFF): the LLM reads **position** from the grid code.
+- **FACING is a strong trend** (Δ+28%, p=0.095 — not significant at n=6): the LLM reads **heading** from the
+  HD code.
+- **The gem — an organ-specific double dissociation** (the strongest causal evidence, cleaner than the ON/OFF
+  p's): each read collapses **only** when *its own* organ is ablated.
+  - **WHERE**: no-grid **8%** (dies, = chance) vs no-HD **39%** (survives, ≈ ON).
+  - **FACING**: no-HD **10%** (dies) vs no-grid **33%** (survives, ≈ ON).
+
+  So the LLM reads position *specifically* from the grid cortex and heading *specifically* from the
+  head-direction ring — the emergent organs built this session become a spatial sense an LLM speaks from,
+  each causally traced to its organ.
+
+*Honest scope.* WHERE is significant; FACING is a strong trend whose organ-specific lesion (no-HD 10% vs
+no-grid 33%) independently confirms it reads HD, though its ON-vs-OFF p (0.095) does not clear 0.05 at n=6
+(wide cross-seed *magnitude* variance — the readout converges to 60–90% on some seeds, 20–30% on others —
+with consistent direction). The harder **egocentric homing-vector** readout (a nonlinear cross-organ
+combination, atan2(−position) − heading) was **null** in the first attempt and is left as documented future
+work. (`results/deadreckoning_llm_agg.json`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action
