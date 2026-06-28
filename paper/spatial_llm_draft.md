@@ -298,6 +298,21 @@ drift compounds (no-anchor 66%→15% as noise grows 0.05→0.20) and BVC anchori
 Nothing is hard-coded — the localizer is learned from the BVC population and the drift/correction dynamic
 emerges from combining the noisy integrator with the gated boundary sense. `results/agent_grid_drift.{json,svg}`.
 
+*A self-correction: near-optimal cue integration (`src/eval/agent_cue_integration.py`, n=3).* On review, the
+anchoring above uses a hand-coded fixed gate — not how the brain combines cues. The brain integrates
+idiothetic (PI) and allothetic (boundary) cues near-optimally, with combined precision better than either
+alone (Ernst & Banks 2002; Nardini 2008); the fixed gate is ~3–4× worse than optimal. We replaced it with a
+generic learned recurrent fuser (a GRU; no hand-coded gate, no Kalman structure) reading only the drifting
+grid-PI estimate + the boundary-cell observation, trained only to localize. (A) It beats both single cues
+AND the old fixed gate and tracks/beats the Kalman optimum (noise 0.15: learned 0.85 vs PI 1.69, boundary
+1.04, fixed 1.40, Kalman 1.07) — near-optimal integration, emergent. (B) Ablating the boundary collapses it
+to ~PI-only (0.54→1.05) — genuine integration, not PI denoising. (C, honest) error stays bounded as the
+boundary degrades (noise 0.05→3.0: 0.54→0.58) because the recurrent fuser averages unbiased observations; we
+therefore claim near-optimal *integration* but NOT the strict reliability-weighting law (confounded by
+temporal averaging — left open). A record of method as much as result: the right phenomenon (drift +
+boundary correction) had been reproduced with the wrong mechanism (a fixed gate), and was corrected.
+`results/agent_cue_integration.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.

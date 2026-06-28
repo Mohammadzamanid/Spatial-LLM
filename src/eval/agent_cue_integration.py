@@ -21,13 +21,16 @@ cannot merely denoise — beating PI-only REQUIRES using the boundary. We then M
       fuser should beat both single cues AND the old gate, and track the Kalman bound.
   (B) IT GENUINELY INTEGRATES THE BOUNDARY (ablation). zeroing the boundary input collapses the learned
       fuser back to ~PI-only error — so the win is real cue integration, not PI denoising.
-  (C) IT WEIGHTS BY RELIABILITY (the qualitative Bayesian signature). as the boundary is made noisier, the
-      boundary's *contribution* (error increase when ablated) SHRINKS — the fuser relies on the boundary in
-      proportion to its reliability, exactly as optimal integration prescribes.
+  (C) IT INTEGRATES THE BOUNDARY ROBUSTLY. across a wide range of boundary-observation noise the fuser's
+      error stays bounded — it averages many unbiased observations over time — with the boundary's
+      contribution (error increase when ablated) declining only modestly as the cue degrades.
 
-(Honest scope: we show near-optimal integration and reliability-dependent reliance; we do NOT claim the
-exact analytic weighting law w = sigma_PI^2/(sigma_PI^2+sigma_B^2) — a single-cue-conflict probe of a
-temporal fuser is confounded by its integration window, so that stronger claim is left open.)
+(Honest scope: we show near-optimal INTEGRATION — the learned fuser beats both single cues AND the old
+fixed gate and matches the Kalman optimum, and it genuinely uses the boundary (ablation). We do NOT claim
+the strict reliability-weighting law w = sigma_PI^2/(sigma_PI^2+sigma_B^2): both a cue-conflict probe and an
+ablation sweep are confounded because a recurrent fuser temporally averages *unbiased* observations, so even
+a noisy boundary stays useful (full error ~flat as boundary noise grows). Clean Bayesian down-weighting
+would require biased or single-shot cues — left open.)
 
 Multi-seed, mean +/- 95% CI. Writes results/agent_cue_integration.json + .svg.
 
@@ -194,7 +197,7 @@ def main():
     print(f"    {'noise':>6} | " + " ".join(f"{lab[s]:>26}" for s in schemes), flush=True)
     for sm in NOISES:
         print(f"    {sm:>6.2f} | " + " ".join(f"{A[sm][s][0]:>26.3f}" for s in schemes), flush=True)
-    print("\n(B/C) does it genuinely USE the boundary, and weight it by reliability?", flush=True)
+    print("\n(B/C) does it genuinely USE the boundary, and integrate it robustly as the cue degrades?", flush=True)
     print(f"      (self-motion noise {SM_MID}; boundary contribution = ablated - full)", flush=True)
     print(f"    {'b_noise':>7} | {'learned(full)':>13} {'boundary-ablated':>16} {'PI-only':>8} {'boundary contribution':>22}", flush=True)
     for bn in BNS:
@@ -207,10 +210,12 @@ def main():
           f"Kalman optimum (noise {hi}: learned {A[hi]['learned'][0]:.2f} vs PI {A[hi]['pi'][0]:.2f}, boundary "
           f"{A[hi]['boundary'][0]:.2f}, Kalman {A[hi]['kalman'][0]:.2f}); the OLD fixed gate "
           f"({A[hi]['fixed'][0]:.2f}) does not. (B) it GENUINELY integrates the boundary -- ablating it "
-          f"collapses to ~PI-only. (C) it WEIGHTS BY RELIABILITY: the boundary's contribution shrinks "
-          f"{contrib_lo:.2f}->{contrib_hi:.2f} as the boundary gets noisier (0.05->0.60) -- near-optimal "
-          f"cue integration EMERGED from training to localize (Ernst & Banks 2002), the faithful correction "
-          f"to the hand-coded gate.", flush=True)
+          f"collapses to ~PI-only. (C) it integrates the boundary ROBUSTLY -- full error stays bounded "
+          f"({C[BNS[0]]['full'][0]:.2f}->{C[BNS[-1]]['full'][0]:.2f}) across boundary noise {BNS[0]}->{BNS[-1]} "
+          f"(temporal averaging of unbiased cues), contribution declining modestly "
+          f"({contrib_lo:.2f}->{contrib_hi:.2f}). Near-optimal cue INTEGRATION emerged from training to "
+          f"localize -- the faithful correction to the hand-coded gate. (We do NOT claim the strict "
+          f"reliability-weighting law; see module docstring.)", flush=True)
 
     out = {"n_seeds": a.seeds, "noises": NOISES, "b_noises": BNS, "bn_low": BN_LOW, "sm_mid": SM_MID,
            "localization": {str(sm): A[sm] for sm in NOISES}, "reliability": {str(bn): C[bn] for bn in BNS}}
@@ -228,7 +233,7 @@ def svg(A, C, lab, out):
     e.append('<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">'
              'Near-optimal cue integration emerges from a learned fuser (Ernst &amp; Banks 2002)</text>')
     e.append('<text x="26" y="42" font-size="10.5" fill="#5b6b8c">a generic GRU (no hand-coded gate) reading '
-             'grid-PI + boundary cells beats either cue alone, and weights the boundary by its reliability</text>')
+             'grid-PI + boundary cells beats either cue alone and matches Kalman, and integrates the boundary robustly</text>')
     oy = 64
     # Panel A: error vs self-motion noise
     oxA = pad
@@ -255,7 +260,7 @@ def svg(A, C, lab, out):
     allc = [C[bn][k][0] for bn in BNS for k in ("full", "ablated")]; hc = max(allc) * 1.1
     def XC(i): return oxC + (i / (len(BNS) - 1)) * pw
     def YC(v): return oy + ph - (v / hc) * ph
-    e.append(f'<text x="{oxC}" y="{oy-6}" font-size="11.5" font-weight="700" fill="#0b1324">(C) reliability weighting (self-motion {SM_MID})</text>')
+    e.append(f'<text x="{oxC}" y="{oy-6}" font-size="11.5" font-weight="700" fill="#0b1324">(C) robust integration vs boundary noise (self-motion {SM_MID})</text>')
     e.append(f'<line x1="{oxC}" y1="{oy+ph}" x2="{oxC+pw}" y2="{oy+ph}" stroke="#33415c"/>'
              f'<line x1="{oxC}" y1="{oy}" x2="{oxC}" y2="{oy+ph}" stroke="#33415c"/>')
     # shaded boundary contribution (between full and ablated)
@@ -272,7 +277,7 @@ def svg(A, C, lab, out):
     e.append(f'<text x="{oxC+pw/2:.0f}" y="{oy+ph+30:.0f}" font-size="9.5" fill="#5b6b8c" text-anchor="middle">boundary-observation noise &#8594;</text>')
     e.append(f'<text x="{oxC+pw-150}" y="{oy+12}" font-size="8.5" fill="#2ca25f">learned (uses boundary)</text>')
     e.append(f'<text x="{oxC+pw-150}" y="{oy+26}" font-size="8.5" fill="#c9341a">boundary ablated</text>')
-    e.append(f'<text x="{oxC+8}" y="{oy+ph-8}" font-size="8.5" fill="#5b6b8c">shaded = boundary contribution (shrinks as it gets noisier)</text>')
+    e.append(f'<text x="{oxC+8}" y="{oy+ph-8}" font-size="8.5" fill="#5b6b8c">shaded = boundary contribution (used across all noise; full error stays bounded)</text>')
     e.append('</svg>')
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     open(out, "w").write("\n".join(e))
