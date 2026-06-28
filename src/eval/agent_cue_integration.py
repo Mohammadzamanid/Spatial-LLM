@@ -45,7 +45,8 @@ from src.eval.agent_grid_cortex import build_cortex, train_decoder, R, STEP
 from src.eval.agent_grid_drift import train_bvc, sense_wall
 
 NOISES = [0.05, 0.10, 0.15]      # self-motion noise levels (panel A)
-BNS = [0.05, 0.15, 0.30, 0.60]   # boundary-observation noise levels (panel C / reliability)
+BNS = [0.05, 0.5, 1.5, 3.0]      # boundary-observation noise levels (panel C / reliability): spans from
+                                 # far more reliable than PI to far less, so down-weighting is testable
 BN_LOW = 0.05                    # boundary noise used for panel A (a good allothetic fix)
 SM_MID = 0.10                    # self-motion noise used for panel C
 WALK_STEPS = 120
