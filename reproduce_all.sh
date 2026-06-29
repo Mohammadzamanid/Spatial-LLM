@@ -53,6 +53,7 @@ run src.eval.grid_catastrophe   --seeds 5            # CATASTROPHIC ERRORS (Fiet
 run src.eval.reference_frame   --seeds 5            # MULTI-REFERENCE-FRAME MAP: egocentric object-vector cells (Hoydal 2019) + grid REANCHORING to an object frame; object-relative goal (moving object) solved by object-frame agent, not global; grid translates with the object
 run src.eval.plane_of_motion  --seeds 5            # 3D PLANE-OF-MOTION (bat 2026): 2D grid aligned to the PCA-estimated motion plane + off-plane code; orientation-invariant 3D localization; fixed-plane grid fails at steep tilt (honest: no clean win vs naive 3D grid)
 run src.eval.landmark_anchoring --seeds 3        # DYNAMIC REFERENCE-FRAME ANCHORING: reliability-gated reanchoring of the grid phase to a landmark (anchor - R(heading)@ego); corrects allocentric drift; allocentric + egocentric codes coexist (MEC 2025)
+run src.eval.agent_multiframe  --seeds 3         # UNIFIED MULTI-REFERENCE-FRAME AGENT: ONE brain navigates GLOBAL (grid) AND OBJECT (object-vector+HD) frames; clean double dissociation (-grid kills global, -object kills object, -HD kills both)
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then
