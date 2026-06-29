@@ -376,6 +376,17 @@ no robust 3D-decode advantage over a naive isotropic 3D grid (decoder-masked), s
 faithful, orientation-invariant mechanism + the alignment necessity, not a decode win over a 3D lattice.
 `results/plane_of_motion.{json,svg}`.
 
+*The unified multi-reference-frame navigating brain (`src/eval/agent_multiframe.py`, n=3).* The functional
+consolidation: not five reference-frame demos but ONE closed-loop agent navigating in both a global
+(allocentric) frame via the grid position code and an object-centred (egocentric) frame via object-vector
+cells + the HD transform, sharing one organ stack (steering is egocentric, so HD is needed either way). A
+clean DOUBLE DISSOCIATION: intact reaches both goals (100%/100%); lesioning the grid kills the global frame
+only (20% vs object 100%); lesioning the object-vector cells kills the object frame only (12% vs global
+100%); lesioning head-direction kills both (10%/10%). One brain holding and acting in two reference frames —
+the functional embodiment of the reference-frame transformer. (Its language counterpart, a frozen LLM
+answering in both frames from the combined code, is notebooks/m6_multiframe_llm_kaggle.py.)
+`results/agent_multiframe.{json,svg}`.
+
 *A basal-ganglia action-selection organ (`src/eval/basal_ganglia.py`, n=3).* The first system beyond the
 hippocampal core: a cortico-striatal Go(D1)/NoGo(D2) opponent circuit selecting actions by softmax(Go −
 NoGo) and learning by **local dopamine-RPE-gated** three-factor plasticity (Frank OpAL) — no backprop.

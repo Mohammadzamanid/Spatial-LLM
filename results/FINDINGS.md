@@ -1301,6 +1301,32 @@ this regime). So the contribution is the **faithful, orientation-invariant mecha
 estimated motion plane — the bat scheme, replacing the `z`-stub) and the **alignment necessity**, *not* a
 decode win over a 3-D lattice. (`results/plane_of_motion.json`, `results/plane_of_motion.svg`.)
 
+**The unified multi-reference-frame navigating brain — one agent, two frames** (the functional
+consolidation) (`src/eval/agent_multiframe.py`, n=3). The pieces above (grid cortex, head-direction ring,
+object-vector cells) are not five demos but **one brain**: a single closed-loop agent that navigates in
+*both* a global (allocentric) frame and an object-centred (egocentric) frame, sharing one organ stack.
+GLOBAL goals (a room location) are reached via the **grid** position code; OBJECT goals (an offset from a
+per-episode landmark) via the **object-vector cells** transformed to allocentric by the **HD** organ; and
+steering is egocentric, so HD is needed to turn either way. The result is a clean **double dissociation**:
+
+| lesion | GLOBAL goal (grid) | OBJECT goal (object-vector + HD) |
+|---|---|---|
+| intact | **100%** | **100%** |
+| − grid cortex | **20%** | 100% |
+| − object-vector cells | 100% | **12%** |
+| − head-direction | **10%** | **10%** |
+
+- One agent navigates in **both frames** intact (100% / 100%).
+- Lesioning the **grid** kills the **global** frame only (20% vs object 100%); lesioning the
+  **object-vector** cells kills the **object** frame only (12% vs global 100%) — a clean double dissociation.
+- Lesioning **head-direction** kills **both** (10% / 10%) — it supplies the egocentric steering and the
+  ego→allo transform shared by both frames.
+
+So the reference-frame organs are unified in **one navigating brain** that holds, and acts in, two reference
+frames at once — the functional embodiment of the "reference-frame transformer." (Its language counterpart —
+a frozen LLM answering in *both* frames from the combined code — is `notebooks/m6_multiframe_llm_kaggle.py`,
+a single-T4 run.) (`results/agent_multiframe.json`, `results/agent_multiframe.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action
