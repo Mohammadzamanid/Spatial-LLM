@@ -1323,9 +1323,31 @@ steering is egocentric, so HD is needed to turn either way. The result is a clea
   ego→allo transform shared by both frames.
 
 So the reference-frame organs are unified in **one navigating brain** that holds, and acts in, two reference
-frames at once — the functional embodiment of the "reference-frame transformer." (Its language counterpart —
-a frozen LLM answering in *both* frames from the combined code — is `notebooks/m6_multiframe_llm_kaggle.py`,
-a single-T4 run.) (`results/agent_multiframe.json`, `results/agent_multiframe.svg`.)
+frames at once — the functional embodiment of the "reference-frame transformer."
+(`results/agent_multiframe.json`, `results/agent_multiframe.svg`.)
+
+**…and the map speaks BOTH frames — a frozen LLM answers allocentric *and* egocentric**
+(`notebooks/m6_multiframe_llm_kaggle.py`, n=6 on a T4). The language counterpart of the unified agent: a
+frozen Qwen2.5-1.5B (LoRA + gated fusion) reads the **combined** code — the grid-cell population (global) plus
+the egocentric object-vector cells (landmark-relative) — and answers in **either frame on demand** (moves
+never in the prompt, so cortex-ON vs text-only-OFF is causal):
+
+| readout (ON vs OFF) | ON | OFF | Δ | p | reads |
+|---|---|---|---|---|---|
+| **WHERE** (which room cell) | **52% ± 34** | 11% | +42 | 0.094 | grid (allocentric) |
+| **LANDMARK** (which way, egocentric) | **36% ± 25** | 10% | +26 | 0.123 | object-vector (egocentric) |
+
+- Both frames read **far above chance** (Δ+42 / +26), strong trends not quite clearing p<0.05 at n=6 (wide
+  cross-seed *magnitude* variance, as in the torus/time/dead-reckoning readouts).
+- **The decisive evidence — a clean organ-specific DOUBLE dissociation** (a within-condition contrast,
+  cleaner than the ON/OFF p's): **WHERE** collapses *only* when the **grid** is ablated (no-grid **9%** vs
+  no-object-vector **53%**); **LANDMARK** collapses *only* when the **object-vector** cells are ablated
+  (no-object-vector **10%** vs no-grid **35%**). So the LLM reads the **allocentric** frame *specifically*
+  from the grid and the **egocentric** frame *specifically* from the object-vector cells.
+
+This is the review's vision realized at the language level: a map that answers "where am I globally?" **and**
+"where am I relative to the landmark?", the two reference frames coexisting and each *causally traced to its
+organ*. (`results/multiframe_llm_agg.json`.)
 
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 

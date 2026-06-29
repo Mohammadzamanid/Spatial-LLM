@@ -512,6 +512,18 @@ sense an LLM speaks from, each causally traced to its organ. *Honest scope:* FAC
 readout (a nonlinear cross-organ combination) was null and is left as future work; ON magnitude is
 seed-variable (as in torus/time). (`results/deadreckoning_llm_agg.json`.)
 
+**The map speaks BOTH reference frames — allocentric and egocentric, organ-specifically**
+(`notebooks/m6_multiframe_llm_kaggle.py`, n=6). The language counterpart of the unified multi-reference-frame
+agent: a frozen Qwen reads the combined code — grid (global) + egocentric object-vector cells
+(landmark-relative) — and answers in either frame. WHERE (which room cell ← grid) ON 52% vs OFF 11% (Δ+42,
+p=0.094); LANDMARK (egocentric direction ← object-vector) ON 36% vs OFF 10% (Δ+26, p=0.123) — both strong
+trends, seed-variable in magnitude (as torus/time). The decisive evidence is a clean organ-specific DOUBLE
+dissociation: WHERE collapses only when the grid is ablated (9% vs 53%); LANDMARK only when the object-vector
+cells are ablated (10% vs 35%) — the LLM reads the allocentric frame specifically from the grid and the
+egocentric frame specifically from the object-vector cells. The review's vision at the language level: a map
+that answers "where am I globally?" and "where am I relative to the landmark?", both frames coexisting and
+each causally traced to its organ. (`results/multiframe_llm_agg.json`.)
+
 ## 9. Related work ✎
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
