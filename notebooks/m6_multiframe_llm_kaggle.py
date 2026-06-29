@@ -13,9 +13,12 @@
 # This is exactly the review's point: a map that answers "where am I globally?" AND "where am I relative to
 # the landmark?" -- allocentric and egocentric frames coexisting, read out in language.
 #
-# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~35-40 min/seed; resumable.
-# n=6 seeds for the paired sign-flip permutation p (reaches 0.03).  Run cells top to bottom.
-# (Fresh, or: !rm -rf results_mf_llm  to re-run.)
+# FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  ~45 min/seed; resumable (skips done seeds).
+# n=8 seeds + LR warmup: the warmup eliminates the early-training instability that left ~1 seed's readout at
+# chance at n=6 (which capped the paired sign-flip p at 0.09); with all 8 seeds ON>OFF the floor is
+# 2/2^8 = 0.008.  ~6 hours fresh, so run it in chunks if needed (resumable).  Run cells top to bottom.
+# (Re-run from scratch: !rm -rf results_mf_llm  -- REQUIRED if you already ran the n=6 version, since the
+#  per-seed json schema is unchanged but you want the new seeds 6,7 and the warmup-trained seeds 0-5.)
 # =====================================================================================
 
 
@@ -46,7 +49,9 @@ from src.eval.agent_grid_cortex import build_cortex, R
 
 dev = "cuda"; BASE = "Qwen/Qwen2.5-1.5B"
 NCELL = 3; NLM = 8                              # WHERE: 3x3 room cells; LANDMARK: 8 egocentric sectors
-SEEDS = list(range(6)); STEPS = 2400; BS = 4
+SEEDS = list(range(8)); STEPS = 2800; BS = 4    # n=8 (sign-flip floor 2/2^8=0.008); +steps for convergence
+LR = 2e-4; WARMUP = 150                          # LR warmup: kills the early-training instability that left
+#                                                  ~1 seed's readout stuck at chance (the n=6 p=0.09 cause)
 P_WHERE = ("[STATE] You have been moving; grid and object-vector cells encode your location and a landmark.\n"
            "[QUESTION] Which of the 9 room cells (0-8) are you in?\n[ANSWER]")
 P_LM = ("[STATE] You have been moving; grid and object-vector cells encode your location and a landmark.\n"
@@ -130,7 +135,7 @@ def run_seed(seed, smoke=False):
     model = ReadoutLLM(BASE, code_dim).to(dev)
     if hasattr(model.llm, "gradient_checkpointing_enable"):
         model.llm.gradient_checkpointing_enable(); model.llm.enable_input_require_grads(); model.llm.config.use_cache = False
-    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=2e-4)
+    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=LR)
 
     def batch(bs):
         c, wb, lb = sample(bs)
@@ -154,6 +159,7 @@ def run_seed(seed, smoke=False):
 
     model.train(); t0 = time.time()
     for it in range(STEPS):
+        for g in opt.param_groups: g["lr"] = LR * min(1.0, (it + 1) / WARMUP)   # linear warmup -> stable convergence
         ids, attn, c, lab = batch(BS)
         opt.zero_grad(); loss = model(ids, attn, c, labels=lab).loss; loss.backward(); opt.step()
         if it % 200 == 0: print(f"  seed {seed} step {it}/{STEPS} loss {loss.item():.3f} ({time.time()-t0:.0f}s)", flush=True)
