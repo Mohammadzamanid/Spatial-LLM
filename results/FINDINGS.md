@@ -1276,6 +1276,35 @@ So the grid is path-integrated *globally* and dynamically *reanchored* to landma
 reference frames coexisting — the entorhinal map as a **reference-frame transformer**, exactly the review's
 "multi-reference-frame" framing. (`results/landmark_anchoring.json`, `results/landmark_anchoring.svg`.)
 
+**…and object reanchoring is now INSIDE the core grid cortex — a load-bearing integration, not an eval loop**
+(`src/eval/agent_grid_reanchor.py`, n=5). A neuroscience review noted, fairly, that the reanchoring above
+lived only in a *standalone* eval loop: the core path-integrator (`_HexGridModules`) could reset its phase
+only at **boundaries**, and the object-vector cells were not wired into it. We fixed that. The egocentric
+object-vector organ now drives a phase correction **from within** `_HexGridModules.forward(object_obs=…)`,
+through the **same egocentric→allocentric transform** the boundary path uses — a single shared bridge
+(`_ego_to_allo` → `_apply_phase_fix`) reused by boundary, object, and centre anchors: `p_hat = anchor −
+R(heading)·ego; φ ← (1−w)·φ + w·gains·p_hat`. An ablation contrasts a **local** cue (boundaries) against a
+**global** one (an object/landmark, a fix anywhere it is visible), with a **shuffled-anchor control**
+(allocentric decode error, lower=better):
+
+| regime | path-int | boundary | object | shuffled object |
+|---|---|---|---|---|
+| **open field** (walls far) | 0.96 | 0.71 | **0.13** | 2.37 |
+| **near a wall** | 2.43 | **0.80** | 0.09 | 3.62 |
+
+- **(A) Object reanchoring is load-bearing.** In the **open field**, every wall is distant so boundary
+  anchoring barely helps (0.71, vs path-int 0.96); the **object** cue reanchors the grid and bounds the drift
+  **~6× better (0.13)** — a capability the boundary-only module did not have.
+- **(B) It's the true geometry, not just extra input.** A **shuffled-anchor** control (object cue present but
+  its world position scrambled) *fails* (2.37 / 3.62, worse than path integration) — the rescue comes from the
+  egocentric→allocentric transform, not from "some signal".
+- **(C) The local capability is preserved.** **Near a wall**, boundary anchoring still bounds the drift (0.80
+  vs path-int 2.43). Each allothetic cue rescues its regime, both through one transform in one module.
+
+So the object-vector cells genuinely **reanchor the grid phase inside the core cortex** now — the grid is
+path-integrated globally and reanchored to whichever allothetic cue (boundary *or* object) is available.
+(`results/agent_grid_reanchor.json`, `results/agent_grid_reanchor.svg`.)
+
 **3D navigation via a plane-aligned 2D grid — the bat scheme** (`src/eval/plane_of_motion.py`, n=5). The
 review's last item: the repo claimed `(x,y,z,t)` but coded height as a 1-D place stub. Freely-flying bats
 appear to use a **2-D toroidal grid aligned to the behaviorally-relevant plane of motion** + an off-plane

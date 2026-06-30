@@ -57,6 +57,7 @@ run src.eval.agent_multiframe  --seeds 3         # UNIFIED MULTI-REFERENCE-FRAME
 run src.eval.theta_sweep     --seeds 5            # THETA-CYCLE LOOK-AROUND (Vollan 2025): online grid sweeps as active look-ahead (alternating L/R, ~20%-spacing, multi-scale); sampling space AHEAD avoids dead-ends a reactive agent enters (76->100%)
 run src.eval.egocentric_anchors --seeds 5         # COEXISTING EGOCENTRIC ANCHORS (Nat Commun 2025): egocentric center + object + boundary frames coexist (decode all from the combined population), each specific to its own cells; adds EgocentricCenterCells
 run src.eval.local_3d_order   --seeds 5            # LOCAL 3D ORDER not a global lattice (bat MEC): a local-order (blue-noise) field code has high local order but low global lattice -- separable from a true 3D lattice and from random
+run src.eval.agent_grid_reanchor --seeds 5         # OBJECT REANCHORING IN THE CORE CORTEX: object-vector cells reanchor the grid phase from INSIDE _HexGridModules.forward(object_obs=) via a shared ego->allo transform; object cue rescues open-field drift where boundaries can't; shuffled-anchor control fails (load-bearing integration)
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then

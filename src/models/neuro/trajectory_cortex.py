@@ -23,7 +23,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .spatial_cells import ConjunctiveSpatialCells, BoundaryVectorCells
+from .spatial_cells import ConjunctiveSpatialCells, BoundaryVectorCells, EgocentricObjectVectorCells
 from .oscillations import ThetaGammaCoupling, ThetaGammaMemory
 from .microcircuits import CorticalColumn, LateralInhibition
 
@@ -112,7 +112,8 @@ class _HexGridModules(nn.Module):
     def __init__(self, embed_dim: int, n_modules: int = 4, side: int = 8,
                  base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0,
                  z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6,
-                 noise_std: float = 0.0, boundary_anchor: bool = False, learned_loc: bool = False):
+                 noise_std: float = 0.0, boundary_anchor: bool = False, learned_loc: bool = False,
+                 object_anchor: bool = False, obj_reanchor_w: float = 0.7):
         super().__init__()
         self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
         ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
@@ -144,6 +145,17 @@ class _HexGridModules(nn.Module):
                 self.bvc_to_pos = nn.Sequential(nn.Linear(32, 32), nn.ReLU(), nn.Linear(32, 2))
             else:
                 nn.init.constant_(self.bvc_gate.bias, 2.0)   # geometric fix: start with anchoring ON
+        # OBJECT / LANDMARK / CENTRE reanchoring (Nature Neurosci 2025: grid cells reanchor to a
+        # task-relevant object by TRANSLATING the pattern; Nat Commun 2025: ego & allo codes coexist).
+        # Egocentric object-vector cells supply an allothetic fix ANYWHERE the anchor is seen (not only at
+        # walls), via the SAME egocentric->allocentric transform as boundaries (see _ego_to_allo /
+        # _apply_phase_fix). The object's world position can move between trials -> the grid reanchors to it.
+        self.object_anchor = object_anchor
+        self.obj_reanchor_w = obj_reanchor_w
+        if object_anchor:
+            self.ovc = EgocentricObjectVectorCells(num_cells=24, embed_dim=32, max_distance=6.0)
+            self.ovc_gate = nn.Linear(32, 1)        # learned scalar trust (down-weight a far/ambiguous object)
+            nn.init.constant_(self.ovc_gate.bias, 2.0)   # start with object anchoring ON
 
     def _grid_code(self, phi):                       # phi (K,B,2) -> (B, K*M)
         K, B, _ = phi.shape
@@ -166,16 +178,37 @@ class _HexGridModules(nn.Module):
     def _z_code(self, z):                            # z (B,) -> (B, z_cells)
         return torch.exp(-((z.unsqueeze(1) - self.z_centers.unsqueeze(0)) ** 2) / (2 * self.z_sigma ** 2))
 
-    def forward(self, v3d, boundary_obs=None, return_sequence: bool = False, return_cells: bool = False):
-        """v3d (B,T,3) = (vx, vy, vz). boundary_obs (B,T,2) = (dist, bearing) to nearest wall, used
-        for boundary anchoring. Returns the integrated rep; return_cells also yields the GRID-cell
-        population (B, K*M) (the 2D grid code, excluding the z place code)."""
+    @staticmethod
+    def _ego_to_allo(ego_dist, ego_bearing, heading):
+        """General egocentric->allocentric transform. An anchor seen at egocentric (distance, bearing)
+        relative to the agent's `heading` -> its WORLD-frame offset from the agent: R(heading)·(d·cos b, d·sin b).
+        This is the single bridge used for every anchor (boundary, object, centre): the agent's implied world
+        position is then `anchor_world_pos - ego_to_allo(...)`. ego_dist/ego_bearing/heading are (B,)."""
+        ex = ego_dist * torch.cos(ego_bearing); ey = ego_dist * torch.sin(ego_bearing)   # agent frame
+        c, s = torch.cos(heading), torch.sin(heading)
+        return torch.stack([c * ex - s * ey, s * ex + c * ey], dim=-1)                    # (B,2) world offset
+
+    def _apply_phase_fix(self, phi, p_hat, w):
+        """Gated reanchoring of the grid phase to an allothetic position estimate `p_hat` (B,2):
+        phi <- (1-w)·phi + w·gains·p_hat. `w` broadcasts over (K,B,2). Shared by boundary & object anchoring."""
+        target = self.gains.view(self.K, 1, 1) * p_hat.unsqueeze(0)                       # (K,B,2)
+        return (1 - w) * phi + w * target
+
+    def forward(self, v3d, boundary_obs=None, object_obs=None, heading=None,
+                return_sequence: bool = False, return_cells: bool = False, return_grid_seq: bool = False):
+        """v3d (B,T,3) = (vx, vy, vz). boundary_obs (B,T,2) = (dist, bearing) to nearest wall.
+        object_obs (B,T,4|5) = (ego_dist, ego_bearing, anchor_x, anchor_y[, reliability]) to a task-relevant
+        OBJECT / LANDMARK / CENTRE — the grid phase reanchors to it via object-vector cells (anywhere it is
+        seen, not only at walls). heading (B,T) is the agent's heading for the ego->allo transform; if None it
+        is taken from the instantaneous self-motion direction. Returns the integrated rep; return_cells also
+        yields the final GRID-cell population (B, K*M); return_grid_seq yields the per-step grid code (B,T,K*M)."""
         B, T, _ = v3d.shape
         phi = torch.zeros(self.K, B, 2, device=v3d.device, dtype=v3d.dtype)
         z = torch.zeros(B, device=v3d.device, dtype=v3d.dtype)
-        outs, last_grid, last_full = [], None, None
+        outs, grids, last_grid, last_full = [], [], None, None
         for t in range(T):
             vxy = v3d[:, t, :2]
+            head_t = heading[:, t] if heading is not None else torch.atan2(vxy[:, 1], vxy[:, 0])
             if self.noise_std > 0:                                                   # noisy path integration -> drift
                 vxy = vxy + torch.randn_like(vxy) * self.noise_std
             phi = phi + self.gains.view(self.K, 1, 1) * vxy.unsqueeze(0)             # integrate xy velocity
@@ -194,12 +227,25 @@ class _HexGridModules(nn.Module):
                                          bearing.sin() * (self.arena_R - dist)], dim=-1)
                     w = (torch.stack([bearing.cos().abs(), bearing.sin().abs()], -1)  # constrained axis only
                          * prox.unsqueeze(1) * g).unsqueeze(0)                        # (1,B,2)
-                target = self.gains.view(self.K, 1, 1) * p_hat.unsqueeze(0)          # (K,B,2) boundary phase
-                phi = (1 - w) * phi + w * target                                     # correct perpendicular drift
+                phi = self._apply_phase_fix(phi, p_hat, w)                            # correct perpendicular drift
+            if self.object_anchor and object_obs is not None:                        # reanchor to an object/landmark
+                od = object_obs[:, t, 0]; ob = object_obs[:, t, 1]                    # egocentric distance, bearing
+                apos = object_obs[:, t, 2:4]                                          # anchor's WORLD position
+                rel = object_obs[:, t, 4] if object_obs.shape[-1] > 4 else torch.ones_like(od)
+                emb = self.ovc(od, ob)                                                # egocentric object-vector cells
+                g = torch.sigmoid(self.ovc_gate(emb)).squeeze(-1)                     # (B,) learned trust in the object
+                p_hat = apos - self._ego_to_allo(od, ob, head_t)                      # anchor - R(heading)·ego
+                w = (self.obj_reanchor_w * rel * g).clamp(0, 1).view(1, -1, 1)        # (1,B,1) reliability-gated
+                phi = self._apply_phase_fix(phi, p_hat, w)                            # TRANSLATE the grid to the object frame
             last_grid = self._grid_code(phi)
             last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
+            if return_grid_seq:
+                grids.append(last_grid)
             if return_sequence:
                 outs.append(self.readout(last_full))
+        if return_grid_seq:
+            grid_seq = torch.stack(grids, dim=1)                                      # (B,T,K*M)
+            return (torch.stack(outs, dim=1), grid_seq) if return_sequence else grid_seq
         if return_sequence:
             seq = torch.stack(outs, dim=1)
             return (seq, last_grid) if return_cells else seq

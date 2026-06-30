@@ -365,6 +365,17 @@ combiner is the learned fuser of agent_cue_integration; a hand-coded Kalman gate
 report the reliability dependence, not optimal weighting. The grid is path-integrated globally and reanchored
 to landmarks on demand, both frames coexisting. `results/landmark_anchoring.{json,svg}`.
 
+*Object reanchoring INSIDE the core grid cortex — load-bearing, not an eval loop (`src/eval/agent_grid_reanchor.py`,
+n=5).* The reanchoring above lived only in a standalone loop; the core path-integrator (`_HexGridModules`) reset
+its phase only at boundaries. We wired the egocentric object-vector organ into the module itself —
+`_HexGridModules.forward(object_obs=…)` corrects the grid phase through the SAME egocentric→allocentric transform
+the boundary path uses (one shared `_ego_to_allo`→`_apply_phase_fix` bridge for boundary/object/centre anchors).
+Allocentric decode error (lower=better): in the OPEN FIELD (walls far) boundary anchoring barely helps (0.71, vs
+path-int 0.96) but the OBJECT cue reanchors the grid ~6× better (0.13) — a capability the boundary-only module
+lacked; a SHUFFLED-anchor control fails (2.37), so the rescue is the true geometry, not extra input; and NEAR A
+WALL the local boundary capability is preserved (0.80 vs 2.43). The grid is path-integrated globally and
+reanchored to whichever allothetic cue is available, from within one module. `results/agent_grid_reanchor.{json,svg}`.
+
 *3D navigation via a plane-aligned 2D grid — the bat scheme (`src/eval/plane_of_motion.py`, n=5).* Bats
 appear to use a 2D toroidal grid aligned to the behaviorally-relevant plane of motion + an off-plane code,
 not a full 3D lattice (2026); the repo's `(x,y,z,t)` had coded height as a 1D stub. We implement it with the
