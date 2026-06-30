@@ -187,6 +187,79 @@ class EgocentricCenterCells(nn.Module):
         return self.proj(torch.exp(-(dist_term + ang_term)))
 
 
+def _periodic_cdist3(a, b):
+    d = (a.unsqueeze(1) - b.unsqueeze(0)).abs(); d = torch.minimum(d, 1 - d)
+    return d.norm(dim=2)
+
+
+def _blue_noise_pool(n, rmin, gen, max_tries: int = 150000):
+    """Poisson-disk (blue-noise) packing in the unit cube: points at least ``rmin`` apart (toroidal). Gives a
+    regular nearest-neighbor spacing (LOCAL order) with NO global lattice — the bat 3D field arrangement."""
+    pts = torch.empty(0, 3); t = 0
+    while pts.shape[0] < n and t < max_tries:
+        c = torch.rand(1, 3, generator=gen)
+        if pts.shape[0] == 0 or _periodic_cdist3(c, pts).min().item() > rmin:
+            pts = torch.cat([pts, c], 0)
+        t += 1
+    return pts
+
+
+class LocalOrder3DGrid(nn.Module):
+    """
+    3D grid-cell population with LOCAL order but NO global lattice — the bat MEC regime (Ginosar, Aljadeff,
+    Las, Derdikman & Ulanovsky, *Nature* 2021). Freely-flying bats have 3D multi-field "grid-like" MEC neurons
+    whose fields sit at a characteristic nearest-neighbor distance (local order) but do NOT form a periodic 3D
+    crystal (no long-range lattice) — unlike a naive cubic/FCC lattice. We realize that faithfully: a shared
+    blue-noise (Poisson-disk) packing supplies the field centers (local order, no lattice), and each cell fires
+    at a random subset of them (multiple fields → grid-like, not place-like). The population PATH-INTEGRATES 3D
+    self-motion and localizes in full 3D — a biologically-grounded 3D entorhinal code that replaces the 1D
+    vertical place-code stub. ``lattice=True`` builds the cubic-lattice control (a global lattice — non-bat).
+    """
+
+    def __init__(self, embed_dim: int = 64, n_cells: int = 128, fields_per_cell: int = 15,
+                 pool_size: int = 350, rmin: float = 0.095, sigma: float = 0.3, box: float = 3.0,
+                 seed: int = 0, lattice: bool = False):
+        super().__init__()
+        gen = torch.Generator().manual_seed(seed)
+        if lattice:
+            side = max(2, round(pool_size ** (1.0 / 3.0)))
+            g = (torch.arange(side).float() + 0.5) / side
+            pool = torch.stack(torch.meshgrid(g, g, g, indexing="ij"), -1).reshape(-1, 3)   # cubic lattice (control)
+        else:
+            pool = _blue_noise_pool(pool_size, rmin, gen)                                    # blue-noise (bat-like)
+        self.register_buffer("pool_unit", pool)                                             # [0,1]^3, for the metric
+        centers = (pool * 2 - 1) * box                                                       # world coords [-box,box]
+        P = pool.shape[0]; fpc = min(fields_per_cell, P)
+        idx = torch.stack([torch.randperm(P, generator=gen)[:fpc] for _ in range(n_cells)])  # each cell: a subset
+        self.register_buffer("centers", centers[idx])                                       # (n_cells, fpc, 3)
+        self.sigma = sigma; self.n_cells = n_cells; self.box = box
+        self.readout = nn.Linear(n_cells, embed_dim)
+
+    def code_at(self, p3d: torch.Tensor) -> torch.Tensor:
+        """Population activity at 3D position(s) ``p3d`` (B,3) -> (B, n_cells). Each cell sums Gaussian bumps
+        over its field centers (multi-field, grid-like)."""
+        d2 = ((p3d.unsqueeze(1).unsqueeze(2) - self.centers.unsqueeze(0)) ** 2).sum(-1)     # (B, n_cells, fpc)
+        return torch.exp(-d2 / (2 * self.sigma ** 2)).sum(-1)
+
+    def forward(self, v3d: torch.Tensor, return_sequence: bool = False, noise_std: float = 0.0) -> torch.Tensor:
+        """Path-integrate 3D self-motion v3d (B,T,3) -> embed_dim readout of the population code (at the final
+        position, or per-step with return_sequence). noise_std adds self-motion noise (3D drift)."""
+        B, T, _ = v3d.shape
+        p = torch.zeros(B, 3, device=v3d.device, dtype=v3d.dtype); outs = []
+        for t in range(T):
+            step = v3d[:, t]
+            if noise_std > 0:
+                step = step + torch.randn_like(step) * noise_std
+            p = p + step
+            if return_sequence:
+                outs.append(self.readout(self.code_at(p)))
+        return torch.stack(outs, 1) if return_sequence else self.readout(self.code_at(p))
+
+    def field_centers_unit(self) -> torch.Tensor:
+        """The field centers in the unit cube — pass to the local-order / global-lattice metric."""
+        return self.pool_unit
+
+
 class SpeedCells(nn.Module):
     """
     Speed cells — firing rate proportional to running speed. They provide the

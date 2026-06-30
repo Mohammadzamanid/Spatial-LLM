@@ -59,6 +59,7 @@ run src.eval.theta_sweep_readout --seeds 5         # THETA-SWEEP TOKENS ARE LOAD
 run src.eval.egocentric_anchors --seeds 5         # COEXISTING EGOCENTRIC ANCHORS (Nat Commun 2025): egocentric center + object + boundary frames coexist (decode all from the combined population), each specific to its own cells; adds EgocentricCenterCells
 run src.eval.local_3d_order   --seeds 5            # LOCAL 3D ORDER not a global lattice (bat MEC): a local-order (blue-noise) field code has high local order but low global lattice -- separable from a true 3D lattice and from random
 run src.eval.agent_grid_reanchor --seeds 5         # OBJECT REANCHORING IN THE CORE CORTEX: object-vector cells reanchor the grid phase from INSIDE _HexGridModules.forward(object_obs=) via a shared ego->allo transform; object cue rescues open-field drift where boundaries can't; shuffled-anchor control fails (load-bearing integration)
+run src.eval.grid_3d          --seeds 5            # BIOLOGICALLY-GROUNDED 3D GRID CODE (bat MEC; Ginosar 2021): LocalOrder3DGrid wired into _HexGridModules(grid_3d=True) replaces the 1D-z stub -- fields in the bat regime (local order, NO global lattice) vs a cubic-lattice control; path-integrates + localizes in full 3D
 run src.eval.content_binding   --seeds 6           # §7 content-binding (what-where-when): conjunctive vs pure time cells + decode what & when (bat CA1 2023)
 
 if [ "${1:-}" = "exploratory" ]; then

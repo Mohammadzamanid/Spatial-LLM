@@ -23,7 +23,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .spatial_cells import ConjunctiveSpatialCells, BoundaryVectorCells, EgocentricObjectVectorCells
+from .spatial_cells import (ConjunctiveSpatialCells, BoundaryVectorCells, EgocentricObjectVectorCells,
+                            LocalOrder3DGrid)
 from .oscillations import ThetaGammaCoupling, ThetaGammaMemory
 from .microcircuits import CorticalColumn, LateralInhibition
 
@@ -113,7 +114,8 @@ class _HexGridModules(nn.Module):
                  base_spacing: float = 1.0, ratio: float = 1.42, sigma: float = 1.0,
                  z_cells: int = 16, z_range: float = 3.0, z_sigma: float = 0.6,
                  noise_std: float = 0.0, boundary_anchor: bool = False, learned_loc: bool = False,
-                 object_anchor: bool = False, obj_reanchor_w: float = 0.7):
+                 object_anchor: bool = False, obj_reanchor_w: float = 0.7,
+                 grid_3d: bool = False, grid3d_seed: int = 0):
         super().__init__()
         self.K, self.side, self.M, self.sigma = n_modules, side, side * side, sigma
         ii, jj = torch.meshgrid(torch.arange(side), torch.arange(side), indexing="ij")
@@ -124,10 +126,18 @@ class _HexGridModules(nn.Module):
                                                     for m in (-1, 0, 1) for n in (-1, 0, 1)]))     # (9,2)
         spacings = base_spacing * (ratio ** torch.arange(n_modules).float())
         self.register_buffer("gains", side / spacings)                                            # (K,) FIXED
-        # vertical height is NOT grid-coded in cortex — a simple 1D place code over integrated z
-        self.z_sigma = z_sigma
-        self.register_buffer("z_centers", torch.linspace(-z_range, z_range, z_cells))
-        self.readout = nn.Linear(self.K * self.M + z_cells, embed_dim)
+        # VERTICAL / 3D code. Default: a simple 1D place code over integrated z (height not grid-coded).
+        # grid_3d=True swaps that stub for a biologically-grounded 3D grid code with LOCAL order but NO global
+        # lattice (the bat MEC regime; Ginosar et al. 2021) — it path-integrates full 3D self-motion and
+        # localizes in 3D, rather than treating height as a 1-D place stub.
+        self.grid_3d = grid_3d
+        if grid_3d:
+            self.grid3d = LocalOrder3DGrid(embed_dim=embed_dim, box=3.0, seed=grid3d_seed)
+            self.readout = nn.Linear(self.K * self.M + self.grid3d.n_cells, embed_dim)
+        else:
+            self.z_sigma = z_sigma
+            self.register_buffer("z_centers", torch.linspace(-z_range, z_range, z_cells))
+            self.readout = nn.Linear(self.K * self.M + z_cells, embed_dim)
         # integration noise (real path integration is noisy -> drift) and BOUNDARY anchoring:
         # boundary cells provide an allothetic position fix that gated-resets the grid phase
         # (Hardcastle, Ganguli & Giocomo 2015 — boundaries correct accumulated grid error).
@@ -205,6 +215,7 @@ class _HexGridModules(nn.Module):
         B, T, _ = v3d.shape
         phi = torch.zeros(self.K, B, 2, device=v3d.device, dtype=v3d.dtype)
         z = torch.zeros(B, device=v3d.device, dtype=v3d.dtype)
+        p_xy = torch.zeros(B, 2, device=v3d.device, dtype=v3d.dtype)                 # integrated xy (for the 3D code)
         outs, grids, last_grid, last_full = [], [], None, None
         for t in range(T):
             vxy = v3d[:, t, :2]
@@ -213,6 +224,8 @@ class _HexGridModules(nn.Module):
                 vxy = vxy + torch.randn_like(vxy) * self.noise_std
             phi = phi + self.gains.view(self.K, 1, 1) * vxy.unsqueeze(0)             # integrate xy velocity
             z = z + v3d[:, t, 2]                                                     # integrate height
+            if self.grid_3d:
+                p_xy = p_xy + vxy                                                    # integrate xy position
             if self.boundary_anchor and boundary_obs is not None:                    # phase reset at walls
                 dist = boundary_obs[:, t, 0]; bearing = boundary_obs[:, t, 1]
                 emb = self.bvc(dist, bearing)                                        # boundary-vector cells
@@ -238,7 +251,11 @@ class _HexGridModules(nn.Module):
                 w = (self.obj_reanchor_w * rel * g).clamp(0, 1).view(1, -1, 1)        # (1,B,1) reliability-gated
                 phi = self._apply_phase_fix(phi, p_hat, w)                            # TRANSLATE the grid to the object frame
             last_grid = self._grid_code(phi)
-            last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
+            if self.grid_3d:
+                p3d = torch.cat([p_xy, z.unsqueeze(1)], dim=-1)                       # integrated 3D position
+                last_full = torch.cat([last_grid, self.grid3d.code_at(p3d)], dim=-1)  # 3D local-order grid code
+            else:
+                last_full = torch.cat([last_grid, self._z_code(z)], dim=-1)
             if return_grid_seq:
                 grids.append(last_grid)
             if return_sequence:

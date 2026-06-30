@@ -1369,6 +1369,32 @@ lattice** — cleanly separable from a crystal (high on both) and random points 
 without a global lattice" is a well-defined, measurable third regime, and the repo's 3D story is the
 bat-faithful one rather than a naive cubic lattice. (`results/local_3d_order.json`, `results/local_3d_order.svg`.)
 
+**…and a biologically-grounded 3D grid code now REPLACES the 1-D z stub in the core cortex**
+(`src/eval/grid_3d.py`, n=5; `LocalOrder3DGrid`; `_HexGridModules(grid_3d=True)`). The metric above made the
+bat regime measurable; the review's last item was that the core integrator still coded *height* as a 1-D
+place stub (so "4D" was really 2D-grid + 1D-z + time). We built the real thing. `LocalOrder3DGrid` gives each
+cell **multiple** 3D firing fields drawn from a shared **blue-noise** packing — so the fields have a regular
+nearest-neighbor spacing (local order) with **no** global lattice (the bat MEC regime; Ginosar, Aljadeff, Las,
+Derdikman & Ulanovsky, *Nature* 2021) — and it path-integrates 3D self-motion. Wired into the cortex via
+`grid_3d=True`, it replaces the z-stub:
+
+| 3D field code | local order | global lattice | 3D decode err | vertical err |
+|---|---|---|---|---|
+| **LOCAL-order (bat-like)** | **0.90** | **0.01** | **0.21** | **0.11** |
+| cubic lattice (control) | 1.00 | **1.00** | 0.16 | 0.08 |
+| random | 0.64 | 0.02 | — | — |
+
+- **(A) Bat regime.** The code's field centers score **high local order (0.90)** but **~zero global lattice
+  (0.01)** — cleanly apart from a cubic crystal (high on both: the **non-biological** lattice) and from random
+  points. This is the *grid code's own fields*, measured with the same structure-factor metric.
+- **(B) It is metric, not a stub.** The population **path-integrates and localizes in full 3D** (decode error
+  **0.21**, vertical **0.11**), about as well as the cubic lattice (0.16) — so biological faithfulness costs
+  **~nothing**; only the local-order code matches bats. Run through `_HexGridModules(grid_3d=True)`, the **core
+  cortex** path-integrates 3D self-motion and localizes (err **0.19**) — height is now grid-coded, not a stub.
+
+So the 3D representation is the bat-faithful one (local order, no global lattice) and lives **inside** the grid
+cortex, not as a 1-D vertical place-code afterthought. (`results/grid_3d.json`, `results/grid_3d.svg`.)
+
 **The unified multi-reference-frame navigating brain — one agent, two frames** (the functional
 consolidation) (`src/eval/agent_multiframe.py`, n=3). The pieces above (grid cortex, head-direction ring,
 object-vector cells) are not five demos but **one brain**: a single closed-loop agent that navigates in

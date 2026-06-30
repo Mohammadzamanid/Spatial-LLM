@@ -423,6 +423,16 @@ scores high local (0.95) / low global (0.05) — the bat regime — cleanly sepa
 (0.94/0.88) and random (0.65/0.05). So the repo's 3D story is the bat-faithful "local order, not a lattice",
 not a naive cubic grid. `results/local_3d_order.{json,svg}`.
 
+*A biologically-grounded 3D grid code replaces the 1-D z stub in the core cortex (`src/eval/grid_3d.py`, n=5;
+`LocalOrder3DGrid`; `_HexGridModules(grid_3d=True)`).* The core integrator coded height as a 1-D place stub;
+we replace it with a real 3D code. `LocalOrder3DGrid` gives each cell multiple 3D fields from a shared
+blue-noise packing -> local order, NO global lattice (the bat MEC regime; Ginosar et al., Nature 2021), and
+path-integrates 3D self-motion. (A) Its field centers are in the bat regime: local order 0.90, global lattice
+0.01 -- vs a cubic lattice (1.00/1.00, the non-biological crystal) and random (0.64/0.02). (B) It is metric:
+the population localizes in full 3D (decode err 0.21, vertical 0.11), about as well as the lattice (0.16) --
+faithfulness costs ~nothing. Wired in via grid_3d=True, the core cortex path-integrates 3D self-motion and
+localizes (err 0.19) -- height is grid-coded, not a stub. `results/grid_3d.{json,svg}`.
+
 *The unified multi-reference-frame navigating brain (`src/eval/agent_multiframe.py`, n=3).* The functional
 consolidation: not five reference-frame demos but ONE closed-loop agent navigating in both a global
 (allocentric) frame via the grid position code and an object-centred (egocentric) frame via object-vector

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="574" height="396" font-family="Segoe UI, Arial">
+<rect width="574" height="396" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">A biologically-grounded 3D grid code: local order, no global lattice</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">the bat MEC regime; the 3D code path-integrates and localizes (3D decode err in the labels)</text>
+<rect x="64" y="58" width="280" height="280" fill="none" stroke="#33415c"/>
+<text x="58" y="341" font-size="9" fill="#5b6b8c" text-anchor="end">0.0</text>
+<text x="64" y="352" font-size="9" fill="#5b6b8c" text-anchor="middle">0.0</text>
+<text x="58" y="201" font-size="9" fill="#5b6b8c" text-anchor="end">0.5</text>
+<text x="204" y="352" font-size="9" fill="#5b6b8c" text-anchor="middle">0.5</text>
+<text x="58" y="61" font-size="9" fill="#5b6b8c" text-anchor="end">1.0</text>
+<text x="344" y="352" font-size="9" fill="#5b6b8c" text-anchor="middle">1.0</text>
+<text x="204" y="366" font-size="10" fill="#28324a" text-anchor="middle">LOCAL order (regular spacing) &#8594;</text>
+<text x="20" y="198" font-size="10" fill="#28324a" text-anchor="middle" transform="rotate(-90 20 198)">GLOBAL lattice (periodicity) &#8594;</text>
+<circle cx="315.2" cy="334.1" r="8" fill="#2ca25f" opacity="0.9"/>
+<text x="327.2" y="335.1" font-size="10" font-weight="700" fill="#2ca25f">LOCAL-order (bat)</text>
+<text x="327.2" y="347.1" font-size="8.5" fill="#7787a6">3D err 0.21</text>
+<circle cx="344.0" cy="58.0" r="8" fill="#3182bd" opacity="0.9"/>
+<text x="356.0" y="59.0" font-size="10" font-weight="700" fill="#3182bd">cubic lattice (control)</text>
+<text x="356.0" y="71.0" font-size="8.5" fill="#7787a6">3D err 0.16</text>
+<circle cx="244.0" cy="332.1" r="8" fill="#c9341a" opacity="0.9"/>
+<text x="256.0" y="333.1" font-size="10" font-weight="700" fill="#c9341a">random</text>
+<text x="294" y="293" font-size="8.5" fill="#2ca25f" text-anchor="middle">bat: local, no lattice</text>
+<text x="64" y="378" font-size="9" fill="#28324a">core cortex (grid_3d=True) path-integrates 3D self-motion -> localizes, err 0.19</text>
+</svg>
