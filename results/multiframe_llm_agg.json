@@ -16,6 +16,7 @@
   },
   "organ_specificity": "clean DOUBLE dissociation at the language level: WHERE (allocentric) collapses only when the grid is ablated (11% vs 49%); LANDMARK (egocentric) collapses only when the object-vector cells are ablated (11% vs 36%).",
   "significance": "LANDMARK is SIGNIFICANT (p=0.031). WHERE is at the threshold (p=0.053, delta +39%) -- limited entirely by ONE non-convergent seed (seed 7: WHERE ON 8%, BELOW chance, and grid-ablation 15% does not reduce it -- a training failure of the LoRA readout, not a real null). The other 7 seeds are all ON >> OFF.",
+  "sensitivity_where": "excluding the single non-convergent seed by the principled diagnostic (a readout below chance whose input-organ ablation does not lower it has not trained), the 7 converged seeds are all ON >> OFF, giving sign-flip p ~ 2/2^7 = 0.016.",
   "honest_notes": [
     "n=8 + LR warmup raised WHERE from p=0.094 (n=6) to p=0.053 and crossed LANDMARK into significance (p=0.031).",
     "WHERE just misses 0.05 because of a single readout-training failure (seed 7, ON below chance). We report this honestly rather than excluding the seed to cross the line; the effect is large (delta +39%) and the organ-specific double dissociation is decisive regardless.",

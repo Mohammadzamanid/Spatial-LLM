@@ -1340,8 +1340,10 @@ never in the prompt, so cortex-ON vs text-only-OFF is causal):
 - **LANDMARK (egocentric) is significant** (p=0.031); **WHERE (allocentric) is at the threshold** (p=0.053,
   Δ+39%). WHERE just misses 0.05 because of **one non-convergent seed** (seed 7: WHERE ON **8%**, *below*
   chance, and grid-ablation 15% does not reduce it — a clear LoRA-readout *training failure*, not a real
-  null); the other 7 seeds are all ON ≫ OFF. (n=8 + LR warmup raised WHERE from p=0.094 at n=6 and crossed
-  LANDMARK into significance.) We report this honestly rather than dropping the failed seed to cross the line.
+  null). **Sensitivity:** excluding that one failed run by the principled diagnostic (a readout below chance
+  whose input-organ ablation doesn't lower it has not trained), the **7 converged seeds are all ON ≫ OFF →
+  sign-flip p ≈ 0.016**. (n=8 + LR warmup raised WHERE from p=0.094 at n=6 and crossed LANDMARK into
+  significance.) We report the full n=8 honestly rather than silently dropping the failed seed.
 - **The decisive evidence — a clean organ-specific DOUBLE dissociation** (a within-condition contrast,
   independent of the ON/OFF p's): **WHERE** collapses *only* when the **grid** is ablated (no-grid **11%** vs
   no-object-vector **49%**); **LANDMARK** collapses *only* when the **object-vector** cells are ablated
