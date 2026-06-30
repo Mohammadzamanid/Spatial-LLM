@@ -1301,6 +1301,45 @@ this regime). So the contribution is the **faithful, orientation-invariant mecha
 estimated motion plane — the bat scheme, replacing the `z`-stub) and the **alignment necessity**, *not* a
 decode win over a 3-D lattice. (`results/plane_of_motion.json`, `results/plane_of_motion.svg`.)
 
+**Coexisting egocentric anchors — center, object, boundary** (`src/eval/egocentric_anchors.py`, n=5). A 2025
+Nat Commun result: allocentric and egocentric codes coexist in MEC, including cells for egocentric bearing &
+distance to the geometric **center** and to **boundaries**. We had egocentric object-vector cells; the
+missing sliver was the **center** anchor, now added as `EgocentricCenterCells` (egocentric bearing+distance to
+the room center, computed from pos+heading). Three egocentric anchor frames are represented at once and read
+out specifically (egocentric-vector decode error):
+
+| anchor | from **combined** population | from **own** cells | from **other** cells |
+|---|---|---|---|
+| center | 0.24 | 0.25 | 1.37 |
+| object | 0.62 | 0.60 | 1.95 |
+| boundary | 0.10 | 0.10 | 0.42 |
+
+The **combined** population decodes the egocentric vector to all three anchors simultaneously (coexistence),
+and each frame is **specific to its organ** — it decodes from its own cells but *not* from another anchor's
+(≥0.42, up to 1.95). So MEC is a **multi-anchor egocentric↔allocentric transformer** with a stable center
+anchor, not a single global frame. (The object's absolute error is larger than the center's/boundary's
+because its egocentric vector spans ~2× the range — up to 2·R·√2 vs R·√2 for the center — so the claim, and
+the locked test, is the *relative* structure: combined ≈ own and other ≫ own, which is magnitude-independent;
+no single absolute threshold is meaningful across anchors of different range.)
+(`results/egocentric_anchors.json`, `results/egocentric_anchors.svg`.)
+
+**Local 3D order, not a global lattice — the bat 3D-grid regime** (`src/eval/local_3d_order.py`, n=5). Bat
+MEC 3D grid cells show *local* order (regular nearest-neighbor field spacing) but **not** a global 3D lattice
+(no long-range periodicity). We make that measurable on two independent axes — **local order** = 1−CV of the
+nearest-neighbor distance; **global lattice** = max structure factor S(q)/N (Bragg-peak height; periodic
+distances, boundary-free):
+
+| 3D field code | local order | global lattice |
+|---|---|---|
+| true 3D lattice | 0.94 | **0.88** |
+| **local-order (bat-like)** | **0.95** | **0.05** |
+| random | 0.65 | 0.05 |
+
+A local-order (blue-noise) field code sits exactly in the **bat regime — high local order, ~zero global
+lattice** — cleanly separable from a crystal (high on both) and random points (low on both). So "local order
+without a global lattice" is a well-defined, measurable third regime, and the repo's 3D story is the
+bat-faithful one rather than a naive cubic lattice. (`results/local_3d_order.json`, `results/local_3d_order.svg`.)
+
 **The unified multi-reference-frame navigating brain — one agent, two frames** (the functional
 consolidation) (`src/eval/agent_multiframe.py`, n=3). The pieces above (grid cortex, head-direction ring,
 object-vector cells) are not five demos but **one brain**: a single closed-loop agent that navigates in

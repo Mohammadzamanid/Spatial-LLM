@@ -155,6 +155,38 @@ class EgocentricObjectVectorCells(nn.Module):
         return self.proj(act)
 
 
+class EgocentricCenterCells(nn.Module):
+    """
+    Egocentric center-bearing / center-distance cells (medial entorhinal cortex; Nat Commun 2025). Encode the
+    geometric CENTRE of the environment in self-centred polar coordinates (distance + egocentric bearing).
+    Unlike object-vector cells (a movable object) the anchor is the FIXED room centre (in vivo inferred from
+    boundary geometry), giving a stable egocentric reference that coexists with the allocentric grid and with
+    object / boundary egocentric frames — evidence that MEC transforms between self-centred and world-centred
+    codes. Computes the egocentric centre vector internally from the agent's position and heading.
+    """
+
+    def __init__(self, num_cells: int = 32, embed_dim: int = 64,
+                 max_distance: float = 3.0, center=(0.0, 0.0)):
+        super().__init__()
+        self.register_buffer("center", torch.tensor(center, dtype=torch.float))
+        self.pref_dist = nn.Parameter(torch.rand(num_cells) * max_distance)
+        self.pref_bearing = nn.Parameter(torch.rand(num_cells) * 2 * math.pi)   # EGOCENTRIC preferred bearing
+        self.log_sigma_d = nn.Parameter(torch.zeros(num_cells))
+        self.log_sigma_b = nn.Parameter(torch.zeros(num_cells))
+        self.proj = nn.Linear(num_cells, embed_dim)
+
+    def forward(self, pos: torch.Tensor, heading: torch.Tensor) -> torch.Tensor:
+        """pos (B,2), heading (B,) -> (B, embed_dim). Egocentric (distance, bearing) to the room centre."""
+        vrel = self.center.unsqueeze(0) - pos                                   # (B,2) vector to centre
+        dist = vrel.norm(dim=1).unsqueeze(1)
+        bearing = (torch.atan2(vrel[:, 1], vrel[:, 0]) - heading).unsqueeze(1)  # egocentric bearing to centre
+        sig_d = self.log_sigma_d.exp().clamp(min=0.05); sig_b = self.log_sigma_b.exp().clamp(min=0.05)
+        dist_term = ((dist - self.pref_dist) ** 2) / (2 * sig_d ** 2)
+        ang = torch.atan2(torch.sin(bearing - self.pref_bearing), torch.cos(bearing - self.pref_bearing))
+        ang_term = (ang ** 2) / (2 * sig_b ** 2)
+        return self.proj(torch.exp(-(dist_term + ang_term)))
+
+
 class SpeedCells(nn.Module):
     """
     Speed cells — firing rate proportional to running speed. They provide the

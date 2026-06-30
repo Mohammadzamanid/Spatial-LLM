@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="658" height="334" font-family="Segoe UI, Arial">
+<rect width="658" height="334" fill="#ffffff"/>
+<text x="28" y="26" font-size="15" font-weight="800" fill="#0b1324">Coexisting egocentric anchor frames: centre, object, boundary</text>
+<text x="28" y="44" font-size="10.5" fill="#5b6b8c">egocentric-vector decode error (lower=better): combined decodes ALL (coexist); each frame decodes from its OWN cells, not another&#8217;s</text>
+<line x1="62" y1="256" x2="638" y2="256" stroke="#33415c"/>
+<rect x="70" y="234.8" width="45" height="21.2" fill="#2ca25f" opacity="0.88"/>
+<text x="92" y="231" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.24</text>
+<rect x="121" y="233.4" width="45" height="22.6" fill="#3182bd" opacity="0.88"/>
+<text x="143" y="229" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.25</text>
+<rect x="171" y="134.2" width="45" height="121.8" fill="#c9341a" opacity="0.88"/>
+<text x="194" y="130" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">1.37</text>
+<text x="134" y="271" font-size="10.5" fill="#28324a" text-anchor="middle">center</text>
+<rect x="256" y="200.4" width="45" height="55.6" fill="#2ca25f" opacity="0.88"/>
+<text x="278" y="196" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.62</text>
+<rect x="307" y="202.5" width="45" height="53.5" fill="#3182bd" opacity="0.88"/>
+<text x="329" y="199" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.60</text>
+<rect x="357" y="82.1" width="45" height="173.9" fill="#c9341a" opacity="0.88"/>
+<text x="380" y="78" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">1.95</text>
+<text x="320" y="271" font-size="10.5" fill="#28324a" text-anchor="middle">object</text>
+<rect x="442" y="246.9" width="45" height="9.1" fill="#2ca25f" opacity="0.88"/>
+<text x="464" y="243" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.10</text>
+<rect x="493" y="246.7" width="45" height="9.3" fill="#3182bd" opacity="0.88"/>
+<text x="515" y="243" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.10</text>
+<rect x="543" y="218.8" width="45" height="37.2" fill="#c9341a" opacity="0.88"/>
+<text x="566" y="215" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.42</text>
+<text x="506" y="271" font-size="10.5" fill="#28324a" text-anchor="middle">boundary</text>
+<rect x="70" y="282" width="12" height="6" fill="#2ca25f"/><text x="86" y="288" font-size="9.5" fill="#28324a">combined (coexist)</text>
+<rect x="220" y="282" width="12" height="6" fill="#3182bd"/><text x="236" y="288" font-size="9.5" fill="#28324a">own cells</text>
+<rect x="370" y="282" width="12" height="6" fill="#c9341a"/><text x="386" y="288" font-size="9.5" fill="#28324a">other cells</text>
+</svg>

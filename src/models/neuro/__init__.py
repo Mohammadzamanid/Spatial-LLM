@@ -27,7 +27,7 @@ from .microcircuits import (
 )
 from .spatial_cells import (
     HeadDirectionCells, BoundaryVectorCells, SpeedCells, ConjunctiveSpatialCells,
-    EgocentricObjectVectorCells,
+    EgocentricObjectVectorCells, EgocentricCenterCells,
 )
 from .oscillations import (
     ThetaOscillator, PhasePrecession, ThetaGammaCoupling, SharpWaveRipple,
@@ -39,7 +39,7 @@ __all__ = [
     "LIFNeuron", "AdaptiveLIFNeuron", "DendriticNeuron",
     "HebbianLayer", "STDPLayer", "ShortTermPlasticity",
     "DivisiveNormalization", "LateralInhibition", "EIBalanceLayer", "CorticalColumn",
-    "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells",
+    "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells", "EgocentricCenterCells",
     "ThetaOscillator", "PhasePrecession", "ThetaGammaCoupling", "SharpWaveRipple",
     "ContinuousAttractorNetwork", "GridAttractorNetwork", "ThetaSweepSampler",
 ]

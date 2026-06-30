@@ -387,6 +387,21 @@ multi-scale per module with r=1, module-aligned), and emits grid codes along the
 Honest: the sweep statistics are constructed to match Vollan (an added mechanism, like the boundary/
 object-vector cells); the new result is the mechanism + its look-ahead function. `results/theta_sweep.{json,svg}`.
 
+*Coexisting egocentric anchors — center, object, boundary (`src/eval/egocentric_anchors.py`, n=5).* MEC holds
+allocentric and egocentric codes at once, including egocentric bearing/distance to the geometric center and
+to boundaries (Nat Commun 2025). We add the missing center anchor (`EgocentricCenterCells`) and show three
+egocentric anchor frames coexist: the combined population decodes the egocentric vector to the center (0.24),
+an object (0.62), and the nearest boundary (0.10) simultaneously, and each frame decodes from its own cells
+but not from another's (≥0.42) — a multi-anchor egocentric↔allocentric transformer, not a single frame.
+`results/egocentric_anchors.{json,svg}`.
+
+*Local 3D order, not a global lattice (`src/eval/local_3d_order.py`, n=5).* Bat MEC 3D grid cells show local
+order (regular nearest-neighbor field spacing) but no global 3D lattice. We make this measurable: local order
+(1−CV of NN distance) vs global lattice (max structure factor S(q)/N). A local-order (blue-noise) field code
+scores high local (0.95) / low global (0.05) — the bat regime — cleanly separable from a true 3D lattice
+(0.94/0.88) and random (0.65/0.05). So the repo's 3D story is the bat-faithful "local order, not a lattice",
+not a naive cubic grid. `results/local_3d_order.{json,svg}`.
+
 *The unified multi-reference-frame navigating brain (`src/eval/agent_multiframe.py`, n=3).* The functional
 consolidation: not five reference-frame demos but ONE closed-loop agent navigating in both a global
 (allocentric) frame via the grid position code and an object-centred (egocentric) frame via object-vector
