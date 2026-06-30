@@ -33,6 +33,7 @@ from .oscillations import (
     ThetaOscillator, PhasePrecession, ThetaGammaCoupling, SharpWaveRipple,
 )
 from .attractor import ContinuousAttractorNetwork, GridAttractorNetwork
+from .theta_sweep import ThetaSweepSampler
 
 __all__ = [
     "LIFNeuron", "AdaptiveLIFNeuron", "DendriticNeuron",
@@ -40,5 +41,5 @@ __all__ = [
     "DivisiveNormalization", "LateralInhibition", "EIBalanceLayer", "CorticalColumn",
     "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells",
     "ThetaOscillator", "PhasePrecession", "ThetaGammaCoupling", "SharpWaveRipple",
-    "ContinuousAttractorNetwork", "GridAttractorNetwork",
+    "ContinuousAttractorNetwork", "GridAttractorNetwork", "ThetaSweepSampler",
 ]
