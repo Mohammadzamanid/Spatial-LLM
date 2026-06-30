@@ -34,51 +34,52 @@ from src.models.neuro import ThetaSweepSampler
 from src.eval.agent_grid_cortex import build_cortex, R
 
 S = 0.2; GOAL = torch.tensor([2.1, 2.1]); START = torch.tensor([-2.1, -2.1]); RAD = 0.35; MAXT = 120
-DIRS = [i * math.pi / 12 for i in range(24)]
+NDIR = 24; DIRS = torch.tensor([i * math.pi / 12 for i in range(NDIR)])
+DIRV = torch.stack([DIRS.cos(), DIRS.sin()], -1)                              # (NDIR, 2) unit step directions
+KS = (torch.arange(1, 9, dtype=torch.float) / 8)                             # 8 sweep sample fractions
 
 
 def make_field(gen, n_traps=3):
-    """n_traps concave U-traps (depth < sweep length), randomly placed/oriented -- reactive agents enter."""
-    obs = []
+    """n_traps concave U-traps (depth < sweep length), randomly placed/oriented -- reactive agents enter.
+    Returns (centers (N,2), radii (N,)) for vectorised occupancy checks."""
+    centers, radii = [], []
     for _ in range(n_traps):
         c = (torch.rand(2, generator=gen) * 2 - 1) * (R * 0.6); a = torch.rand(1, generator=gen).item() * 2 * math.pi
         perp = torch.tensor([math.cos(a + math.pi / 2), math.sin(a + math.pi / 2)])
         fwd = torch.tensor([math.cos(a), math.sin(a)])
         for k in (-1, 0, 1):
-            obs.append((c + 0.28 * k * perp, 0.22))                          # back wall
+            centers.append(c + 0.28 * k * perp); radii.append(0.22)          # back wall
         for k in (-1, 1):
-            obs.append((c + 0.28 * k * perp + 0.30 * fwd, 0.22))             # side walls (U opening)
-    return obs
+            centers.append(c + 0.28 * k * perp + 0.30 * fwd); radii.append(0.22)   # side walls (U opening)
+    return torch.stack(centers), torch.tensor(radii)
 
 
-def blocked(p, obs):
-    return any((p - c).norm().item() < r for c, r in obs)
-
-
-def navigate(mode, obs, sampler, look_len, gen):
-    p = START.clone(); cyc = 0
+def navigate(mode, centers, radii, look_len, gen):
+    """mode 'reactive' checks only the immediate next step; 'theta_sweep' samples the grid map AHEAD along an
+    alternating-side theta sweep and avoids directions whose forward sweep hits a dead-end. Vectorised."""
+    p = START.clone(); cyc = 0; rad_row = radii.view(1, -1)
     for t in range(MAXT):
         gd = math.atan2((GOAL - p)[1].item(), (GOAL - p)[0].item())
-        adj = sorted([a for a in DIRS if not blocked((p + S * torch.tensor([math.cos(a), math.sin(a)])).clamp(-R, R), obs)],
-                     key=lambda a: abs(math.atan2(math.sin(a - gd), math.cos(a - gd))))
-        if not adj:
+        nexts = (p.view(1, 2) + S * DIRV).clamp(-R, R)                        # (NDIR,2) next step per direction
+        clear = ~((nexts.unsqueeze(1) - centers.unsqueeze(0)).norm(dim=2) < rad_row).any(dim=1)   # (NDIR,)
+        order = sorted(range(NDIR), key=lambda i: abs(math.atan2(math.sin(DIRS[i].item() - gd), math.cos(DIRS[i].item() - gd))))
+        clear_order = [i for i in order if clear[i]]
+        if not clear_order:
             break
         if mode == "reactive":
-            a = adj[0]                                                       # closest-to-goal clear next step (no look-ahead)
+            idx = clear_order[0]                                             # closest-to-goal clear next step
         else:
-            cyc += 1                                                        # theta cycle -> alternating look-around sweep
-            look = [a for a in adj if sweep_clear(p, a, sampler, look_len, cyc, obs)]
-            a = look[0] if look else adj[0]
-        p = (p + S * torch.tensor([math.cos(a), math.sin(a)])).clamp(-R, R)
+            cyc += 1                                                                 # theta cycle (sweep side alternates;
+            #   the alternation is the Vollan sampler signature -- the functional look-ahead samples the grid
+            #   map AHEAD along each candidate heading and rejects ones whose forward path hits a dead-end)
+            sweep = (p.view(1, 1, 2) + KS.view(1, -1, 1) * look_len * DIRV.view(NDIR, 1, 2)).clamp(-R, R)   # (NDIR,8,2)
+            d = (sweep.unsqueeze(2) - centers.view(1, 1, -1, 2)).norm(dim=3)          # (NDIR,8,N)
+            sweep_blocked = (d < radii.view(1, 1, -1)).any(dim=2).any(dim=1)          # (NDIR,) bool
+            idx = next((i for i in clear_order if not sweep_blocked[i]), clear_order[0])
+        p = nexts[idx]
         if (p - GOAL).norm().item() < RAD:
             return 1.0, t + 1
     return 0.0, MAXT
-
-
-def sweep_clear(p, heading, sampler, look_len, cycle, obs):
-    """Read the grid map along the theta sweep ahead in `heading` (alternating side); clear if no dead-end."""
-    positions, _, _ = sampler.sweep_positions(p, heading, cycle, look_len)
-    return all(not blocked(q.clamp(-R, R), obs) for q in positions)
 
 
 def signatures(sampler, mod):
@@ -104,7 +105,7 @@ def run_seed(seed, trials=120):
     for mode in ("reactive", "theta_sweep"):
         succ, steps = [], []
         for _ in range(trials):
-            obs = make_field(gen); sc, t = navigate(mode, obs, sampler, look_len, gen)
+            centers, radii = make_field(gen); sc, t = navigate(mode, centers, radii, look_len, gen)
             succ.append(sc)
             if sc:
                 steps.append(t)

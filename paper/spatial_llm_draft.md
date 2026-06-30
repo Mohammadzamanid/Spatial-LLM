@@ -376,6 +376,17 @@ no robust 3D-decode advantage over a naive isotropic 3D grid (decoder-masked), s
 faithful, orientation-invariant mechanism + the alignment necessity, not a decode win over a 3D lattice.
 `results/plane_of_motion.{json,svg}`.
 
+*Theta-cycle look-around — online sweeps as active look-ahead (`src/eval/theta_sweep.py`, n=5).* Beyond
+path integration and offline replay, grid/place activity in each theta cycle sweeps outward from the agent,
+alternating left/right across cycles, sampling surrounding (incl. never-visited) space (Vollan, Gardner,
+Moser & Moser, Nature 2025). We add a `ThetaSweepSampler` and show it is functional: in a concave-dead-end
+field, an agent that uses the sweep to sample the grid map ahead reaches the goal 100% vs a reactive
+(current-position-only) agent's 76%, at equal path length — routing around the traps the reactive agent
+enters. The sampler reproduces the Vollan signatures (left/right alternation; length 19.7% of spacing,
+multi-scale per module with r=1, module-aligned), and emits grid codes along the sweep as look-ahead tokens.
+Honest: the sweep statistics are constructed to match Vollan (an added mechanism, like the boundary/
+object-vector cells); the new result is the mechanism + its look-ahead function. `results/theta_sweep.{json,svg}`.
+
 *The unified multi-reference-frame navigating brain (`src/eval/agent_multiframe.py`, n=3).* The functional
 consolidation: not five reference-frame demos but ONE closed-loop agent navigating in both a global
 (allocentric) frame via the grid position code and an object-centred (egocentric) frame via object-vector

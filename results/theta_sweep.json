@@ -1,0 +1,46 @@
+{
+  "n_seeds": 5,
+  "success": {
+    "reactive": [
+      0.76,
+      0.033
+    ],
+    "theta_sweep": [
+      1.0,
+      0.0
+    ]
+  },
+  "steps": {
+    "reactive": [
+      29.294,
+      0.08
+    ],
+    "theta_sweep": [
+      29.162,
+      0.025
+    ]
+  },
+  "signatures": {
+    "sweep_frac": 0.197,
+    "alternates": true,
+    "multiscale_r": 1.0,
+    "module_aligned": true,
+    "per_module_len": [
+      0.315,
+      0.448,
+      0.636,
+      0.903,
+      1.282,
+      1.82
+    ],
+    "spacings": [
+      1.6,
+      2.272,
+      3.226,
+      4.581,
+      6.505,
+      9.238
+    ]
+  },
+  "look_len": 1.82
+}

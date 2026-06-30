@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="332" font-family="Segoe UI, Arial">
+<rect width="780" height="332" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">Theta-cycle look-around: online sweeps as active look-ahead (Vollan 2025)</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">sampling the grid map AHEAD (alternating left/right each cycle) routes around dead-ends a reactive agent walks into</text>
+<text x="60" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(A) reach-goal in a concave-trap field</text>
+<line x1="52" y1="258" x2="360" y2="258" stroke="#33415c"/>
+<text x="48" y="262" font-size="9" fill="#5b6b8c" text-anchor="end">0%</text>
+<text x="48" y="162" font-size="9" fill="#5b6b8c" text-anchor="end">50%</text>
+<text x="48" y="62" font-size="9" fill="#5b6b8c" text-anchor="end">100%</text>
+<rect x="60" y="106.0" width="90" height="152.0" fill="#c9341a" opacity="0.88"/>
+<text x="105" y="100" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">76%</text>
+<text x="105" y="274" font-size="10" fill="#28324a" text-anchor="middle">reactive</text>
+<text x="105" y="288" font-size="8.5" fill="#7787a6" text-anchor="middle">29 steps</text>
+<rect x="210" y="58.0" width="90" height="200.0" fill="#2ca25f" opacity="0.88"/>
+<text x="255" y="52" font-size="13" font-weight="700" fill="#0b1324" text-anchor="middle">100%</text>
+<text x="255" y="274" font-size="10" fill="#28324a" text-anchor="middle">theta look-ahead</text>
+<text x="255" y="288" font-size="8.5" fill="#7787a6" text-anchor="middle">29 steps</text>
+<text x="456" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(B) Vollan signatures</text>
+<text x="456" y="78" font-size="10" fill="#28324a">&#10003; alternates left/right each theta cycle</text>
+<text x="456" y="95" font-size="10" fill="#28324a">&#10003; sweep length 19.7% of spacing (Vollan 19.7%)</text>
+<text x="456" y="112" font-size="10" fill="#28324a">&#10003; multi-scale (per-module r=1.0), modules aligned</text>
+<text x="456" y="130" font-size="9" fill="#5b6b8c">per-module: sweep length (green) scales with module spacing (grey)</text>
+<line x1="456" y1="230" x2="726.0" y2="230" stroke="#33415c"/>
+<rect x="460" y="216.1" width="20" height="13.9" fill="#9aa6bd" opacity="0.8"/>
+<rect x="482" y="227.3" width="20" height="2.7" fill="#2ca25f" opacity="0.88"/>
+<rect x="505" y="210.3" width="20" height="19.7" fill="#9aa6bd" opacity="0.8"/>
+<rect x="528" y="226.1" width="20" height="3.9" fill="#2ca25f" opacity="0.88"/>
+<rect x="550" y="202.1" width="20" height="27.9" fill="#9aa6bd" opacity="0.8"/>
+<rect x="572" y="224.5" width="20" height="5.5" fill="#2ca25f" opacity="0.88"/>
+<rect x="595" y="190.3" width="20" height="39.7" fill="#9aa6bd" opacity="0.8"/>
+<rect x="618" y="222.2" width="20" height="7.8" fill="#2ca25f" opacity="0.88"/>
+<rect x="640" y="173.7" width="20" height="56.3" fill="#9aa6bd" opacity="0.8"/>
+<rect x="662" y="218.9" width="20" height="11.1" fill="#2ca25f" opacity="0.88"/>
+<rect x="685" y="150.0" width="20" height="80.0" fill="#9aa6bd" opacity="0.8"/>
+<rect x="708" y="214.2" width="20" height="15.8" fill="#2ca25f" opacity="0.88"/>
+</svg>

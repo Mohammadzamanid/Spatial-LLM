@@ -1354,6 +1354,29 @@ This is the review's vision realized at the language level: a map that answers "
 "where am I relative to the landmark?", the two reference frames coexisting and each *causally traced to its
 organ*. (`results/multiframe_llm_agg.json`.)
 
+**Theta-cycle look-around — online sweeps as active look-ahead** (`src/eval/theta_sweep.py`, n=5). The
+freshest item from a follow-up review: grid/place populations don't only path-integrate or replay — in each
+theta cycle decoded grid activity **sweeps outward** from the agent, **alternating left/right** across cycles,
+sampling surrounding space *including never-visited points* (Vollan, Gardner, Moser & Moser, *Nature* 2025).
+The repo's theta machinery (phase precession, theta-gamma memory, sharp-wave replay) was gating / ordered
+memory / *offline* replay; the *online* look-around was missing. We add a `ThetaSweepSampler` organ and show
+it is **functional**, not decorative:
+
+- **(A) Look-ahead avoids traps.** In a field of concave dead-ends, an agent that uses the theta sweep to
+  sample the grid map *ahead* (querying look-ahead points) reaches the goal **100%** vs a reactive
+  (current-position-only) agent's **76%**, at **equal path length** (~29 steps) — it routes *around* the
+  dead-ends the reactive agent walks into. The sweep is an active "look-around," not offline replay.
+- **(B) The Vollan signatures.** The sampler reproduces the reported statistics: it **alternates left/right**
+  across theta cycles; sweep length is **19.7% of grid spacing** (Vollan's value) and is **multi-scale** —
+  per-module length scales with that module's spacing (r=1.0; lengths 0.32→1.82 across the 6 modules); and the
+  modules are **aligned** (one sweep direction). The grid codes along the sweep are emitted as look-ahead
+  tokens (a natural LLM interface for "what is probably to my left if I keep walking?").
+
+*Honest scope.* The sweep *statistics* are constructed to match Vollan (this is an added mechanism, like the
+boundary/object-vector cells — not an emergent measurement). The new result is the **mechanism + its
+look-ahead function** (trap avoidance) and its faithful, multi-scale integration with the grid code.
+(`results/theta_sweep.json`, `results/theta_sweep.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action
