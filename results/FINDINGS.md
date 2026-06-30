@@ -1445,6 +1445,28 @@ boundary/object-vector cells — not an emergent measurement). The new result is
 look-ahead function** (trap avoidance) and its faithful, multi-scale integration with the grid code.
 (`results/theta_sweep.json`, `results/theta_sweep.svg`.)
 
+**…and the sweep is now LOAD-BEARING for the readout/LLM — tokens, with an ablation** (`src/eval/theta_sweep_readout.py`,
+n=5; `TrajectoryLLM(use_theta_sweep=True)`; `notebooks/m7_theta_sweep_llm_kaggle.py`). The same review's
+follow-on: the sweep must not just exist, it must feed the LLM as tokens whose removal hurts. We wired it in.
+`TrajectoryLLM` now optionally concatenates **theta look-ahead tokens** to the current spatial token —
+`_sweep_tokens()` samples the grid map ahead (alternating L/R, ~20%-of-spacing) and projects each swept grid
+code to a token, with `real / shuffled / ablated` modes for the ablation. The decisive CPU test uses a **novel
+per-episode layout**, so the answer is *not* knowable from where the agent stands — it must look. A fixed small
+readout predicts whether the cone ahead is **blocked** (balanced, chance 0.50):
+
+| input to the readout | accuracy |
+|---|---|
+| **real sweep tokens** | **0.90 ± 0.02** |
+| sweep ablated (current cell + heading only) | 0.58 ± 0.02 |
+| shuffled (wrong-heading sweep) | 0.63 ± 0.01 |
+
+With the real sweep the readout reads what is ahead and answers at **90%**; **ablate** the sweep and it falls to
+**58%**, **mis-direct** it (wrong heading) and **63%** — both near chance. In a novel layout *nothing but the
+sweep* can see ahead, so this is a clean, capacity-independent demonstration that the sweep tokens carry the
+look-ahead (Vollan's sweeps extend into never-visited space). The full **frozen-LLM** ablation — cortex-ON vs
+text-only-OFF, and real-sweep vs no-sweep vs shuffled — is the T4 notebook `m7_theta_sweep_llm_kaggle.py`.
+(`results/theta_sweep_readout.json`, `results/theta_sweep_readout.svg`.)
+
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
 The first system added outside the hippocampal–entorhinal core (a Tier-2 gap), and the agent's action

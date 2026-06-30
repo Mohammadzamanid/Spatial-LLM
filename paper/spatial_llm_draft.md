@@ -398,6 +398,16 @@ multi-scale per module with r=1, module-aligned), and emits grid codes along the
 Honest: the sweep statistics are constructed to match Vollan (an added mechanism, like the boundary/
 object-vector cells); the new result is the mechanism + its look-ahead function. `results/theta_sweep.{json,svg}`.
 
+*Theta-sweep tokens are load-bearing for the readout/LLM (`src/eval/theta_sweep_readout.py`, n=5;
+`TrajectoryLLM(use_theta_sweep=True)`; `notebooks/m7_theta_sweep_llm_kaggle.py`).* The sweep must feed the LLM
+and matter. `TrajectoryLLM` now concatenates theta look-ahead tokens to the current spatial token (`_sweep_tokens`
+samples the grid map ahead, alternating L/R, and projects each swept code to a token; real/shuffled/ablated
+modes). In a NOVEL per-episode layout (so the answer is not knowable from position — the agent must look) a
+fixed readout predicts whether the cone ahead is blocked: real sweep 0.90 vs sweep-ablated 0.58 vs
+wrong-heading-shuffled 0.63 (chance 0.50). Only the real sweep can see ahead — a clean, capacity-independent
+ablation that the tokens carry the look-ahead. Full frozen-LLM ablation (ON vs text-only-OFF; sweep vs no-sweep
+vs shuffled): the T4 notebook m7. `results/theta_sweep_readout.{json,svg}`.
+
 *Coexisting egocentric anchors — center, object, boundary (`src/eval/egocentric_anchors.py`, n=5).* MEC holds
 allocentric and egocentric codes at once, including egocentric bearing/distance to the geometric center and
 to boundaries (Nat Commun 2025). We add the missing center anchor (`EgocentricCenterCells`) and show three

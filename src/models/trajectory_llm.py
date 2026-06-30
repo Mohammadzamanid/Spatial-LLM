@@ -14,6 +14,7 @@ Mirrors the proven SpatialLLM fusion path; the only change is the spatial-token 
 (TrajectoryCortex over a move sequence instead of a single coordinate).
 """
 import logging
+import math
 
 import torch
 import torch.nn as nn
@@ -23,6 +24,7 @@ from transformers import AutoModelForCausalLM
 from .fusion import MultiScaleSpatialFusion
 from .llm_wrapper import _get_embed_layer
 from .neuro.trajectory_cortex import TrajectoryCortex
+from .neuro.theta_sweep import ThetaSweepSampler
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,11 @@ class TrajectoryLLM(nn.Module):
         lora_alpha: int = 32,
         lora_target_modules: list[str] | None = None,
         lora_dropout: float = 0.05,
+        use_theta_sweep: bool = False,       # add online theta-cycle look-ahead tokens (Vollan 2025)
+        sweep_frac: float = 0.197,
+        sweep_angle_deg: float = 25.0,
+        sweep_steps: int = 8,
+        n_sweep_cycles: int = 2,             # left + right theta cycles
     ):
         super().__init__()
         logger.info(f"Loading base LLM: {base_llm}")
@@ -76,6 +83,19 @@ class TrajectoryLLM(nn.Module):
         self.fusion = MultiScaleSpatialFusion(
             hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2, gate_init=gate_init
         )
+        # Theta-cycle look-around (Vollan, Gardner, Moser & Moser, Nature 2025): each theta cycle the grid map
+        # sweeps OUTWARD from the agent (alternating left/right, ~20% of module spacing). We turn those swept
+        # grid codes into extra spatial tokens the LLM attends to — an active look-ahead interface, so the LLM
+        # can reason about space AHEAD, not just where it stands. Requires the constrained-velocity hex grid
+        # cortex (the integrator that exposes grid_code_at + module spacings).
+        self.use_theta_sweep = bool(use_theta_sweep)
+        if self.use_theta_sweep:
+            if not cortex_constrained_velocity:
+                raise ValueError("use_theta_sweep requires cortex_constrained_velocity=True (hex grid cortex)")
+            self.theta_sweep = ThetaSweepSampler(sweep_frac=sweep_frac, angle_deg=sweep_angle_deg, steps=sweep_steps)
+            self.n_sweep_cycles = n_sweep_cycles
+            gm = self.cortex.integrator
+            self.sweep_to_tokens = nn.Linear(gm.K * gm.M, llm_dim)   # one token per swept grid code
         self._embed_ref = []   # cache embed layer without registering it as a submodule
 
     def _embed(self) -> nn.Module:
@@ -83,20 +103,54 @@ class TrajectoryLLM(nn.Module):
             self._embed_ref.append(_get_embed_layer(self.llm.base_model))
         return self._embed_ref[0]
 
-    def _spatial_tokens(self, heading, speed, vz, k=None, ablate=False):
-        """Encode the move sequence into (B, n_tokens, llm_dim) spatial tokens.
-        ablate=True zeros the cortex output — the control showing the LLM cannot
-        answer the spatial question from the (question-only) text alone."""
+    @staticmethod
+    def _current_pos_heading(heading, speed, vz):
+        """Agent's current state from the move sequence: final position (path-integrated displacement from the
+        origin) and final heading. (B,T) -> pos (B,2), heading (B,)."""
+        pos = torch.stack([(speed * heading.cos()).sum(dim=1), (speed * heading.sin()).sum(dim=1)], dim=-1)
+        return pos, heading[:, -1]
+
+    def _sweep_tokens(self, heading, speed, vz, mode="real"):
+        """Theta look-around tokens: from the agent's current position/heading, sweep the grid map ahead
+        (alternating L/R cycles, ~sweep_frac of module spacing) and project each swept grid code to a token.
+        mode 'real' = along the heading; 'shuffled' = along a wrong heading (control); 'ablated' = zeros."""
+        gm = self.cortex.integrator
+        pos, head = self._current_pos_heading(heading, speed, vz)
+        B = pos.shape[0]; steps = self.theta_sweep.steps
+        llm_dim = self.sweep_to_tokens.out_features
+        if mode == "ablated":
+            return torch.zeros(B, self.n_sweep_cycles * steps, llm_dim, device=pos.device, dtype=pos.dtype)
+        use_head = head + math.pi if mode == "shuffled" else head          # wrong heading for the control
+        length = self.theta_sweep.sweep_frac * self.theta_sweep.spacings(gm).mean()
+        ks = torch.arange(1, steps + 1, device=pos.device, dtype=pos.dtype) / steps
+        toks = []
+        for cyc in range(self.n_sweep_cycles):
+            side = -1.0 if cyc % 2 == 0 else 1.0
+            direction = use_head + side * self.theta_sweep.angle           # (B,)
+            d = torch.stack([direction.cos(), direction.sin()], -1)        # (B,2)
+            swept = pos.unsqueeze(1) + ks.view(1, -1, 1) * length * d.unsqueeze(1)   # (B,steps,2)
+            codes = gm.grid_code_at(swept.reshape(-1, 2)).view(B, steps, -1)         # (B,steps,K*M)
+            toks.append(self.sweep_to_tokens(codes))                       # (B,steps,llm_dim)
+        return torch.cat(toks, dim=1)                                      # (B, n_cycles*steps, llm_dim)
+
+    def _spatial_tokens(self, heading, speed, vz, k=None, ablate=False, sweep_mode="real"):
+        """Encode the move sequence into (B, n_tokens[, +sweep], llm_dim) spatial tokens.
+        ablate=True zeros ALL spatial channels (cortex + sweep) — the control showing the LLM cannot answer
+        the spatial question from the (question-only) text alone. With use_theta_sweep, theta look-ahead tokens
+        are concatenated; sweep_mode in {real, shuffled, ablated} drives the sweep-specific ablation."""
         h = self.cortex.encode(heading, speed, vz, k=k)          # (B, cortex_dim)
         tok = self.to_tokens(h).view(h.shape[0], self.n_tokens, -1)
         if ablate:
             tok = torch.zeros_like(tok)
+        if self.use_theta_sweep:
+            sweep = self._sweep_tokens(heading, speed, vz, mode=("ablated" if ablate else sweep_mode))
+            tok = torch.cat([tok, sweep], dim=1)
         return tok
 
     def forward(self, input_ids, attention_mask, heading, speed, vz,
-                labels=None, k=None, ablate_cortex=False):
+                labels=None, k=None, ablate_cortex=False, sweep_mode="real"):
         text = self._embed()(input_ids)                          # (B, T, D)
-        spatial = self._spatial_tokens(heading, speed, vz, k, ablate=ablate_cortex)
+        spatial = self._spatial_tokens(heading, speed, vz, k, ablate=ablate_cortex, sweep_mode=sweep_mode)
         if spatial.dtype != text.dtype:
             spatial = spatial.to(text.dtype)
         fused = self.fusion(text, spatial)
@@ -104,9 +158,9 @@ class TrajectoryLLM(nn.Module):
 
     @torch.no_grad()
     def generate_answer(self, input_ids, attention_mask, heading, speed, vz,
-                        k=None, ablate_cortex=False, max_new_tokens: int = 5):
+                        k=None, ablate_cortex=False, sweep_mode="real", max_new_tokens: int = 5):
         text = self._embed()(input_ids)
-        spatial = self._spatial_tokens(heading, speed, vz, k, ablate=ablate_cortex)
+        spatial = self._spatial_tokens(heading, speed, vz, k, ablate=ablate_cortex, sweep_mode=sweep_mode)
         fused = self.fusion(text, spatial.to(text.dtype))
         return self.llm.generate(
             inputs_embeds=fused, attention_mask=attention_mask,
