@@ -15,6 +15,9 @@
 # current-position tokens cannot. (CPU twin: src/eval/theta_sweep_readout.py, real 0.90 vs ablated 0.58.)
 #
 # FIRST enable the GPU: Settings -> Accelerator -> GPU T4 x1.  Resumable (skips done seeds). Run top to bottom.
+# NOTE: this is the convergence-hardened config (2800 steps, warmup 200) that pulls up the seed or two whose
+# LoRA/gate got stuck at chance in the first run. If you already ran the 1600-step version, clear the cache
+# first so the new config actually runs:  !rm -rf results_sweep_llm
 # =====================================================================================
 
 
@@ -44,8 +47,10 @@ from src.models.neuro.theta_sweep import ThetaSweepSampler
 from src.eval.agent_grid_cortex import build_cortex, R
 
 dev = "cuda"; BASE = "Qwen/Qwen2.5-1.5B"
-SEEDS = list(range(8)); STEPS = 1600; BS = 8        # binary task -> fewer steps than m6; n=8 (sign-flip floor 0.008)
-LR = 2e-4; WARMUP = 120
+SEEDS = list(range(8)); STEPS = 2800; BS = 8        # n=8 (sign-flip floor 0.008)
+LR = 2e-4; WARMUP = 200                              # longer warmup + more steps (the m6 lesson): the warmup kills the
+#                                                     early-training instability that left a seed or two stuck at chance
+#                                                     (ON ~ 0.50) in the 1600-step/120-warmup run, widening the ON CI
 OBS_SIG = 0.4; SENSE_NOISE = 0.20                    # obstacle width; noisy look-ahead sense (not an oracle)
 N_CUR = 4                                            # current-cell tokens
 P = ("[STATE] You sense your current cell and a theta-sweep look-ahead of the space in front of you.\n"
