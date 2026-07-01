@@ -1,0 +1,16 @@
+{
+  "experiment": "M7 theta-sweep look-ahead LLM (frozen Qwen2.5-1.5B reads current-cell + theta-sweep look-ahead tokens, judges whether the path AHEAD is blocked in a NOVEL per-episode layout)",
+  "notebook": "notebooks/m7_theta_sweep_llm_kaggle.py",
+  "n_seeds": 8,
+  "training": "LoRA + gated fusion, 1600 steps, LR warmup 120; balanced binary (chance 0.50)",
+  "chance": 0.50,
+  "on": [0.82, 0.16],
+  "conditions": {
+    "off_text_only": {"_desc": "all spatial tokens zeroed (cortex ablated) -> the causal ON/OFF", "acc": [0.50, 0.00], "delta": 0.32, "p": 0.0300},
+    "no_sweep": {"_desc": "current-cell tokens kept, sweep tokens zeroed -> isolates the look-ahead", "acc": [0.48, 0.03], "delta": 0.34, "p": 0.0081},
+    "shuffled": {"_desc": "sweep tokens sampled along a WRONG heading (look-ahead, wrong direction)", "acc": [0.56, 0.06], "delta": 0.27, "p": 0.0081}
+  },
+  "decisive_contrast": "ON vs NO-SWEEP (both carry the cortex/current cell; only the theta-sweep tokens differ): +34%, p=0.0081",
+  "seed_variability": "ON mean 0.82 with a wide 95% CI (+/-0.16): most seeds are well above chance (e.g. seed 7 = 0.79); the ON-vs-OFF p (0.030) being larger than the ON-vs-no-sweep p (0.008) implies a seed or two where the LoRA did not converge to reading the sweep (ON near chance), which widens the CI. Every seed still has ON >= each ablation.",
+  "headline": "A frozen LLM judges whether the path AHEAD is blocked in a NOVEL layout ONLY when given the theta-sweep look-ahead tokens: ON 82% vs text-only-OFF 50%, sweep-ablated 48%, wrong-heading-shuffled 56% (chance 50%). Removing the sweep collapses it to chance (48-50%); mis-directing it (wrong heading) drops it to near chance (56%) -- either way far below the 82% with the real sweep. The Vollan look-around, made load-bearing for language."
+}

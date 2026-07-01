@@ -405,8 +405,16 @@ samples the grid map ahead, alternating L/R, and projects each swept code to a t
 modes). In a NOVEL per-episode layout (so the answer is not knowable from position — the agent must look) a
 fixed readout predicts whether the cone ahead is blocked: real sweep 0.90 vs sweep-ablated 0.58 vs
 wrong-heading-shuffled 0.63 (chance 0.50). Only the real sweep can see ahead — a clean, capacity-independent
-ablation that the tokens carry the look-ahead. Full frozen-LLM ablation (ON vs text-only-OFF; sweep vs no-sweep
-vs shuffled): the T4 notebook m7. `results/theta_sweep_readout.{json,svg}`.
+ablation that the tokens carry the look-ahead. `results/theta_sweep_readout.{json,svg}`. The FROZEN-LLM
+confirmation (`notebooks/m7_theta_sweep_llm_kaggle.py`, n=8 on a T4): a frozen Qwen2.5-1.5B (LoRA + gated
+fusion) judges "blocked ahead?" in a novel layout (moves never in the prompt, so ON vs text-only-OFF is causal)
+at 82% ±16 with the real sweep tokens, falling to chance without them — 48% sweep-ablated and 50% text-only
+(both indistinguishable from 50%), 56% shuffled (barely above chance). The decisive contrast is ON vs NO-SWEEP
+(both carry the cortex; only the sweep differs): +34%, p=0.0081 (the n=8 sign-flip floor). Honest: the ON mean's
+95% CI is ±16% (solidly above chance); the per-seed spread is wider — a seed or two did not converge (near
+chance). At n=8 and seed-variable, the review's demand borne out at the language level — the LLM uses
+theta-sweep tokens, and removing them drops performance to chance.
+`results/theta_sweep_llm_agg.json`.
 
 *Coexisting egocentric anchors — center, object, boundary (`src/eval/egocentric_anchors.py`, n=5).* MEC holds
 allocentric and egocentric codes at once, including egocentric bearing/distance to the geometric center and

@@ -1489,9 +1489,31 @@ readout predicts whether the cone ahead is **blocked** (balanced, chance 0.50):
 With the real sweep the readout reads what is ahead and answers at **90%**; **ablate** the sweep and it falls to
 **58%**, **mis-direct** it (wrong heading) and **63%** — both near chance. In a novel layout *nothing but the
 sweep* can see ahead, so this is a clean, capacity-independent demonstration that the sweep tokens carry the
-look-ahead (Vollan's sweeps extend into never-visited space). The full **frozen-LLM** ablation — cortex-ON vs
-text-only-OFF, and real-sweep vs no-sweep vs shuffled — is the T4 notebook `m7_theta_sweep_llm_kaggle.py`.
-(`results/theta_sweep_readout.json`, `results/theta_sweep_readout.svg`.)
+look-ahead (Vollan's sweeps extend into never-visited space). (`results/theta_sweep_readout.json`,
+`results/theta_sweep_readout.svg`.)
+
+**…and the frozen LLM confirms it — theta-sweep tokens are load-bearing for language** (`notebooks/m7_theta_sweep_llm_kaggle.py`,
+n=8 on a T4). The full ablation, run on a frozen Qwen2.5-1.5B (LoRA + gated fusion). The LLM judges "is the path
+ahead blocked?" in a **novel per-episode layout** (chance 50%), reading current-cell tokens + theta look-ahead
+tokens; the moves never appear in the prompt, so cortex-ON vs text-only-OFF is causal:
+
+| condition | accuracy | Δ vs ON | p (paired sign-flip, n=8) |
+|---|---|---|---|
+| **ON** (current cell + real sweep tokens) | **82% ± 16** | — | — |
+| **OFF** (text-only, cortex ablated) | 50% ± 0 | +32 | 0.030 |
+| **NO-SWEEP** (current cell only, sweep ablated) | 48% ± 3 | +34 | **0.0081** |
+| **SHUFFLED** (wrong-heading sweep) | 56% ± 6 | +27 | **0.0081** |
+
+The frozen LLM answers at **82%** with the real sweep tokens and falls to **chance** without them — **48%** when
+the sweep is ablated and **50%** with no cortex at all (both indistinguishable from 50%), and only **56%**
+(barely above chance) when mis-directed. The **decisive** contrast is **ON vs NO-SWEEP** (both carry the
+cortex/current cell; *only* the theta-sweep tokens differ): **+34%, p=0.0081** — the sign-flip floor for n=8
+(ON > no-sweep in every seed). *Honest:* ON is seed-variable — the mean's **95% CI is ±16%** (so the mean is
+solidly above chance), but the *per-seed* spread is wider: most seeds are well above chance (seed 7 = 79%) while
+a seed or two sit near chance, reflected in the ON-vs-OFF p (0.030 — those seeds tie OFF's exact 0.50) being
+larger than the ON-vs-no-sweep floor (0.008), where the LoRA didn't converge to reading the sweep. So, at n=8
+and seed-variable: on the seeds where the LoRA converges, *the LLM uses theta-sweep tokens, and removing them
+drops performance to chance* — the review's demand borne out at the language level. (`results/theta_sweep_llm_agg.json`.)
 
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
