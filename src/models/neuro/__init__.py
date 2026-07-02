@@ -21,7 +21,7 @@ GRID CELLS (grid_cells.py):
 """
 
 from .spiking_neurons import LIFNeuron, AdaptiveLIFNeuron, DendriticNeuron
-from .synaptic_plasticity import HebbianLayer, STDPLayer, ShortTermPlasticity
+from .synaptic_plasticity import HebbianLayer, STDPLayer, ShortTermPlasticity, BTSPPlasticity
 from .microcircuits import (
     DivisiveNormalization, LateralInhibition, EIBalanceLayer, CorticalColumn,
 )
@@ -37,7 +37,7 @@ from .theta_sweep import ThetaSweepSampler
 
 __all__ = [
     "LIFNeuron", "AdaptiveLIFNeuron", "DendriticNeuron",
-    "HebbianLayer", "STDPLayer", "ShortTermPlasticity",
+    "HebbianLayer", "STDPLayer", "ShortTermPlasticity", "BTSPPlasticity",
     "DivisiveNormalization", "LateralInhibition", "EIBalanceLayer", "CorticalColumn",
     "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells", "EgocentricCenterCells", "LocalOrder3DGrid",
     "ThetaOscillator", "PhasePrecession", "ThetaGammaCoupling", "SharpWaveRipple",

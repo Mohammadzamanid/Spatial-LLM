@@ -15,7 +15,11 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 
 ## Tier 1 — shovel-ready (CPU), high value
 
-### 1. Behavioral-timescale synaptic plasticity (BTSP) — one-shot place fields the *biological* way
+### 1. Behavioral-timescale synaptic plasticity (BTSP) — one-shot place fields the *biological* way ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `BTSPPlasticity` organ + `src/eval/btsp.py` (n=5): one plateau imprints a one-shot
+  field; the field shifts UPSTREAM (predictive, −13) only with the asymmetric seconds-wide kernel; the shift
+  scales with speed (−8→−17); a millisecond STDP kernel imprints ~nothing (0.02). All measured, not trained.
+  See `results/FINDINGS.md` ("One-shot learning the biological way — BTSP"). *Original entry below.*
 - **Neuro basis.** A single dendritic **plateau potential** creates a complete place field in **one trial**,
   via a *seconds-wide, temporally asymmetric* plasticity kernel — and the new field's peak is **shifted
   backward** (predictively) from the plateau location (Bittner, Milstein, Magee 2017; Grienberger & Magee

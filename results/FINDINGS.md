@@ -906,6 +906,38 @@ online plasticity. This is the strongest form of the project's thesis — the *a
 adaptive spiking dynamics) gives rise to the neuroscience, even when the *learning rule* is also
 brain-faithful. (`results/eprop_local_learning.json`, `results/eprop_local_learning.svg`.)
 
+### One-shot learning the biological way — BTSP and its PREDICTIVE place field (n=5)
+
+The first gap closed from the new gap register (`GAPS.md` #1). The model's one-shot memory
+(`agent_memory.py`) writes a place code into an **episodic store** — a functional abstraction. The
+hippocampus does it differently and more interestingly: a single dendritic **plateau potential** imprints a
+complete place field in **one traversal**, through a **seconds-wide, temporally asymmetric** plasticity
+kernel — **behavioral-timescale synaptic plasticity** (BTSP; Bittner, Milstein, Lu, Turi & Magee, *Science*
+2017; Grienberger & Magee 2022), now thought to be the hippocampus's dominant rapid-learning rule. We add a
+`BTSPPlasticity` organ, drive position-tuned inputs along a track at speed *v*, fire **one** plateau at the
+centre, apply the rule **once**, and read out the field. Nothing about the field is trained — we set only the
+kernel (the biology) and **measure**:
+
+| kernel | field strength | predictive shift | field width |
+|---|---|---|---|
+| **BTSP** (asymmetric, seconds) | **1.00** | **−12.96** | 53 |
+| symmetric (seconds) | 0.98 | +0.14 | 52 |
+| STDP (millisecond) | **0.02** | +0.04 | — |
+
+- **(A) One-shot needs a SECONDS-scale kernel.** BTSP and a symmetric-seconds control both imprint a strong,
+  broad field in one pass (strength 1.00, 0.98); a millisecond STDP-scale kernel imprints almost nothing
+  (**0.02**) — STDP is the wrong timescale for one-trial place-field formation.
+- **(B) The PREDICTIVE shift needs the ASYMMETRY.** Only the asymmetric BTSP kernel shifts the field
+  **upstream** of the plateau (**−12.96**, i.e. the cell fires *before* the induction site on the next
+  same-direction lap — anticipatory); the symmetric control sits on the plateau (+0.14). The shift is *not*
+  put in — it emerges because the animal occupied upstream positions in the seconds before the plateau, and the
+  asymmetric kernel potentiates those inputs most.
+- **(C) The shift SCALES WITH RUNNING SPEED** (−8.0 → −12.9 → −16.7 as *v* = 15 → 25 → 40): a *temporal* kernel
+  read out as a *spatial* shift (shift ≈ kernel-offset × speed), a specific Bittner prediction — measured.
+
+So the biological one-shot rule, with its signature predictive field, replaces the episodic-store abstraction
+as an *emergent* result. (`results/btsp.json`, `results/btsp.svg`.)
+
 ### One circuit for space AND time — place, time, and conjunctive cells coexist (n=5)
 
 In hippocampus, place cells, time cells, and **conjunctive space×time** cells share a single population

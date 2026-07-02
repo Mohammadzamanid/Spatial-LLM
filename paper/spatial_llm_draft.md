@@ -226,6 +226,20 @@ time cells** (10% ± 2; fewer than backprop's ~46% but consistent). The time-cel
 require backprop — the architecture gives rise to it even under a brain-faithful local rule.
 `results/eprop_local_learning.{json,svg}`.
 
+*One-shot learning the biological way — BTSP and its predictive place field (`src/eval/btsp.py`, n=5).* The
+model's one-shot memory writes a place code into an episodic store (an abstraction); the hippocampus instead
+imprints a complete place field in ONE traversal from a single dendritic plateau, via a seconds-wide,
+temporally ASYMMETRIC plasticity kernel (behavioral-timescale synaptic plasticity, BTSP; Bittner, Milstein &
+Magee, Science 2017). We add a `BTSPPlasticity` organ, fire one plateau at the track centre, apply it once, and
+MEASURE the field. (A) one-shot field formation needs a SECONDS-scale kernel: BTSP and a symmetric-seconds
+control imprint a strong field in one pass (strength 1.00, 0.98) while a millisecond STDP-scale kernel imprints
+almost nothing (0.02). (B) the PREDICTIVE shift needs the ASYMMETRY: only BTSP shifts the field upstream of the
+plateau (−13, the cell fires before the induction site) while the symmetric control sits on it (+0.1) — the
+shift is not put in, it emerges from potentiating the upstream inputs the animal traversed in the seconds
+before the plateau. (C) the shift scales with running speed (−8 → −17 as v = 15 → 40), a temporal kernel read
+as a spatial shift — a specific Bittner prediction. The biological one-shot rule, with its signature, emergent.
+`results/btsp.{json,svg}`.
+
 *One circuit for space and time.* Hippocampal place, time, and conjunctive space×time cells share a
 single population (Neuron 2024). Feeding ONE recurrent substrate velocity + a start pulse and training it
 to report both position and elapsed time, all three coexist (n=5; classified by η² variance-explained for

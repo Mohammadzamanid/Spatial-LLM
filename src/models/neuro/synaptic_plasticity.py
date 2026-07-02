@@ -175,3 +175,52 @@ class ShortTermPlasticity(nn.Module):
             R = R.clamp(0.0, 1.0)
             out.append(eff)
         return torch.stack(out, dim=1)
+
+
+class BTSPPlasticity(nn.Module):
+    """
+    Behavioral-Timescale Synaptic Plasticity (BTSP) — Bittner, Milstein, Lu, Turi & Magee (*Science* 2017);
+    Grienberger & Magee (2022). A single dendritic PLATEAU potential imprints a COMPLETE place field in ONE
+    traversal, via a SECONDS-WIDE, TEMPORALLY ASYMMETRIC plasticity kernel: input synapses active in a window
+    around the plateau are potentiated, with a LONGER tail for inputs that PRECEDE the plateau. Because the
+    animal occupied UPSTREAM positions in the seconds before reaching the plateau spot, those inputs are
+    potentiated most, so the resulting field peaks UPSTREAM of the induction site — an anticipatory / predictive
+    place field. This is the hippocampus's dominant rapid-learning rule, and is millisecond-STDP's opposite in
+    timescale (seconds, not ~20 ms) and in trials-to-learn (one, not many).
+
+    This organ is a pure plasticity RULE: give it the presynaptic activity over a run and the plateau time, and
+    it returns the one-shot weight vector onto the target cell. The place field, its predictive shift, and its
+    speed-dependence then EMERGE from the kernel — they are measured, not set (see src/eval/btsp.py).
+    """
+
+    def __init__(self, tau_pre: float = 1.3, tau_post: float = 0.55, lr: float = 1.0,
+                 symmetric: bool = False):
+        super().__init__()
+        # eligibility time-constants (seconds). tau_pre > tau_post => a longer tail for inputs BEFORE the
+        # plateau => the field shifts upstream (predictive). symmetric=True sets tau_post=tau_pre (control:
+        # a seconds-wide but SYMMETRIC kernel -> a field centred on the plateau, no predictive shift).
+        self.tau_pre = tau_pre
+        self.tau_post = tau_post if not symmetric else tau_pre
+        self.lr = lr
+        self.symmetric = symmetric
+
+    def kernel(self, dt: torch.Tensor) -> torch.Tensor:
+        """Asymmetric eligibility kernel K(dt), dt = t_input - t_plateau (seconds; dt<0 = input PRECEDES the
+        plateau). Potentiation on both sides, with a longer PAST tail (tau_pre) than FUTURE tail (tau_post)."""
+        # clamp each side's exponent argument to <= 0 so the masked-out side cannot overflow to +inf
+        # (which would make 0 * inf = nan at very small tau, e.g. a millisecond STDP-scale kernel).
+        pre = (dt <= 0).float() * torch.exp(dt.clamp(max=0.0) / self.tau_pre)     # inputs before the plateau (long tail)
+        post = (dt > 0).float() * torch.exp(-dt.clamp(min=0.0) / self.tau_post)   # inputs after the plateau (short tail)
+        return pre + post
+
+    def induce(self, pre_activity: torch.Tensor, times: torch.Tensor, plateau_time: float) -> torch.Tensor:
+        """One-shot BTSP weight update onto the target cell from ONE plateau.
+        Args:
+            pre_activity: (T, N) presynaptic activity of N input cells over the traversal.
+            times:        (T,) time of each step (seconds).
+            plateau_time: scalar time (seconds) at which the plateau occurred.
+        Returns:
+            (N,) potentiated weights = lr * sum_t K(t - t_plateau) * pre_activity[t].
+        """
+        K = self.kernel(times - plateau_time)                          # (T,)
+        return self.lr * (K.unsqueeze(1) * pre_activity).sum(dim=0)    # (N,)
