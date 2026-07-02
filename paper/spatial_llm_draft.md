@@ -408,12 +408,14 @@ wrong-heading-shuffled 0.63 (chance 0.50). Only the real sweep can see ahead —
 ablation that the tokens carry the look-ahead. `results/theta_sweep_readout.{json,svg}`. The FROZEN-LLM
 confirmation (`notebooks/m7_theta_sweep_llm_kaggle.py`, n=8 on a T4): a frozen Qwen2.5-1.5B (LoRA + gated
 fusion) judges "blocked ahead?" in a novel layout (moves never in the prompt, so ON vs text-only-OFF is causal)
-at 82% ±16 with the real sweep tokens, falling to chance without them — 48% sweep-ablated and 50% text-only
-(both indistinguishable from 50%), 56% shuffled (barely above chance). The decisive contrast is ON vs NO-SWEEP
-(both carry the cortex; only the sweep differs): +34%, p=0.0081 (the n=8 sign-flip floor). Honest: the ON mean's
-95% CI is ±16% (solidly above chance); the per-seed spread is wider — a seed or two did not converge (near
-chance). At n=8 and seed-variable, the review's demand borne out at the language level — the LLM uses
-theta-sweep tokens, and removing them drops performance to chance.
+at 68% ±14 with the real sweep tokens, dropping to chance without them — 41% sweep-ablated, 44% text-only,
+51% wrong-heading-shuffled (all within CI of 50%). The decisive contrast is ON vs NO-SWEEP (both carry the
+cortex; only the sweep differs): +27%, and all three ablations are at p=0.0081 — the n=8 sign-flip floor — so ON
+exceeds every ablation in every one of the 8 seeds (unanimous). Honest: the accuracy is modest (68%; this
+few-token frozen-LLM reader is weaker than the CPU readout's 0.90), and this convergence-hardened config (2800
+steps) is more consistent but lower than a shorter pilot (82% ±16, ON-vs-OFF p=0.030) — hardening bought
+cross-seed robustness, not a higher headline. Either way the review's demand is borne out at the language level:
+the LLM uses theta-sweep tokens, and removing them drops performance to chance, in every seed.
 `results/theta_sweep_llm_agg.json`.
 
 *Coexisting egocentric anchors — center, object, boundary (`src/eval/egocentric_anchors.py`, n=5).* MEC holds

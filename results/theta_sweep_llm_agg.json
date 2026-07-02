@@ -2,15 +2,16 @@
   "experiment": "M7 theta-sweep look-ahead LLM (frozen Qwen2.5-1.5B reads current-cell + theta-sweep look-ahead tokens, judges whether the path AHEAD is blocked in a NOVEL per-episode layout)",
   "notebook": "notebooks/m7_theta_sweep_llm_kaggle.py",
   "n_seeds": 8,
-  "training": "LoRA + gated fusion, 1600 steps, LR warmup 120; balanced binary (chance 0.50)",
+  "training": "LoRA + gated fusion, 2800 steps, LR warmup 200 (convergence-hardened); balanced binary (chance 0.50)",
   "chance": 0.50,
-  "on": [0.82, 0.16],
+  "on": [0.68, 0.14],
   "conditions": {
-    "off_text_only": {"_desc": "all spatial tokens zeroed (cortex ablated) -> the causal ON/OFF", "acc": [0.50, 0.00], "delta": 0.32, "p": 0.0300},
-    "no_sweep": {"_desc": "current-cell tokens kept, sweep tokens zeroed -> isolates the look-ahead", "acc": [0.48, 0.03], "delta": 0.34, "p": 0.0081},
-    "shuffled": {"_desc": "sweep tokens sampled along a WRONG heading (look-ahead, wrong direction)", "acc": [0.56, 0.06], "delta": 0.27, "p": 0.0081}
+    "off_text_only": {"_desc": "all spatial tokens zeroed (cortex ablated) -> the causal ON/OFF", "acc": [0.44, 0.12], "delta": 0.24, "p": 0.0081},
+    "no_sweep": {"_desc": "current-cell tokens kept, sweep tokens zeroed -> isolates the look-ahead", "acc": [0.41, 0.10], "delta": 0.27, "p": 0.0081},
+    "shuffled": {"_desc": "sweep tokens sampled along a WRONG heading (look-ahead, wrong direction)", "acc": [0.51, 0.06], "delta": 0.18, "p": 0.0081}
   },
-  "decisive_contrast": "ON vs NO-SWEEP (both carry the cortex/current cell; only the theta-sweep tokens differ): +34%, p=0.0081",
-  "seed_variability": "ON mean 0.82 with a wide 95% CI (+/-0.16): most seeds are well above chance (e.g. seed 7 = 0.79); the ON-vs-OFF p (0.030) being larger than the ON-vs-no-sweep p (0.008) implies a seed or two where the LoRA did not converge to reading the sweep (ON near chance), which widens the CI. Every seed still has ON >= each ablation.",
-  "headline": "A frozen LLM judges whether the path AHEAD is blocked in a NOVEL layout ONLY when given the theta-sweep look-ahead tokens: ON 82% vs text-only-OFF 50%, sweep-ablated 48%, wrong-heading-shuffled 56% (chance 50%). Removing the sweep collapses it to chance (48-50%); mis-directing it (wrong heading) drops it to near chance (56%) -- either way far below the 82% with the real sweep. The Vollan look-around, made load-bearing for language."
+  "decisive_contrast": "ON vs NO-SWEEP (both carry the cortex/current cell; only the theta-sweep tokens differ): +27%, p=0.0081 (the n=8 sign-flip floor 2/2^8 -> ON > no-sweep in EVERY one of the 8 seeds)",
+  "unanimity": "All three ablations are at the sign-flip floor p=0.0081 = 2/2^8: ON exceeds OFF, NO-SWEEP, and SHUFFLED in every one of the 8 seeds -- the effect is present in all seeds. The convergence-hardened config (2800 steps, warmup 200) fixed the pilot's stuck seeds (whose ON tied OFF at 0.50, giving the pilot's ON-vs-OFF p=0.030).",
+  "magnitude_vs_consistency": "Versus the shorter 1600-step/120-warmup pilot (ON 0.82 +/-0.16; ON-vs-OFF p=0.030), the hardened run is MORE consistent (unanimous across all seeds; all p at the floor) but LOWER in magnitude (ON 0.68; decisive effect +27 vs the pilot's +34). Hardening traded peak accuracy for cross-seed robustness (likely mild overfitting at 2800 steps). The honest converged accuracy of this frozen-LLM+LoRA reader on this hard novel-layout binary task is ~68% -- modest (+18 over chance, +27 over the decisive sweep-ablated control), well below the dedicated CPU readout's 0.90, but robustly above chance and robustly sweep-dependent in every seed.",
+  "headline": "A frozen LLM judges whether the path AHEAD is blocked in a NOVEL layout ONLY when given the theta-sweep look-ahead tokens: ON 68% vs sweep-ablated 41%, wrong-heading-shuffled 51%, text-only-OFF 44% (chance 50%). The effect is present in EVERY one of the 8 seeds (all ablations at the sign-flip floor p=0.0081). Modest in magnitude but robust across seeds -- the Vollan look-around, made load-bearing for language."
 }

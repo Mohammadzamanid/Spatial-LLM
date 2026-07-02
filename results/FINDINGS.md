@@ -1499,21 +1499,24 @@ tokens; the moves never appear in the prompt, so cortex-ON vs text-only-OFF is c
 
 | condition | accuracy | Δ vs ON | p (paired sign-flip, n=8) |
 |---|---|---|---|
-| **ON** (current cell + real sweep tokens) | **82% ± 16** | — | — |
-| **OFF** (text-only, cortex ablated) | 50% ± 0 | +32 | 0.030 |
-| **NO-SWEEP** (current cell only, sweep ablated) | 48% ± 3 | +34 | **0.0081** |
-| **SHUFFLED** (wrong-heading sweep) | 56% ± 6 | +27 | **0.0081** |
+| **ON** (current cell + real sweep tokens) | **68% ± 14** | — | — |
+| **OFF** (text-only, cortex ablated) | 44% ± 12 | +24 | **0.0081** |
+| **NO-SWEEP** (current cell only, sweep ablated) | 41% ± 10 | +27 | **0.0081** |
+| **SHUFFLED** (wrong-heading sweep) | 51% ± 6 | +18 | **0.0081** |
 
-The frozen LLM answers at **82%** with the real sweep tokens and falls to **chance** without them — **48%** when
-the sweep is ablated and **50%** with no cortex at all (both indistinguishable from 50%), and only **56%**
-(barely above chance) when mis-directed. The **decisive** contrast is **ON vs NO-SWEEP** (both carry the
-cortex/current cell; *only* the theta-sweep tokens differ): **+34%, p=0.0081** — the sign-flip floor for n=8
-(ON > no-sweep in every seed). *Honest:* ON is seed-variable — the mean's **95% CI is ±16%** (so the mean is
-solidly above chance), but the *per-seed* spread is wider: most seeds are well above chance (seed 7 = 79%) while
-a seed or two sit near chance, reflected in the ON-vs-OFF p (0.030 — those seeds tie OFF's exact 0.50) being
-larger than the ON-vs-no-sweep floor (0.008), where the LoRA didn't converge to reading the sweep. So, at n=8
-and seed-variable: on the seeds where the LoRA converges, *the LLM uses theta-sweep tokens, and removing them
-drops performance to chance* — the review's demand borne out at the language level. (`results/theta_sweep_llm_agg.json`.)
+With the real sweep tokens the frozen LLM answers at **68%** and falls to **chance** without them — **41%**
+sweep-ablated, **44%** text-only, **51%** wrong-heading-shuffled (all within CI of 50%). The **decisive**
+contrast is **ON vs NO-SWEEP** — both carry the cortex/current cell, *only* the theta-sweep tokens differ:
+**+27%**. And the effect is now **unanimous**: all three ablations sit at **p=0.0081**, the n=8 sign-flip floor
+(2/2⁸), meaning **ON exceeds every ablation in every one of the 8 seeds**. *Honest, two ways.* **(i) Modest
+magnitude:** 68% is +18 over chance and +27 over the decisive sweep-ablated control — real and robust, but not a
+near-ceiling number; this few-token frozen-LLM+LoRA reader is a weaker learner than the dedicated CPU readout
+(0.90). **(ii) Consistency, not a bigger headline:** this convergence-hardened run (2800 steps, warmup 200) is
+*more consistent but lower* than a shorter pilot (1600 steps: ON **82% ±16**, but ON-vs-OFF p=0.030 — a seed or
+two were stuck at chance). Hardening pulled **every** seed onto the effect (all p at the floor) at the cost of
+peak accuracy — it bought cross-seed robustness, not a higher number (likely mild overfitting at 2800 steps).
+Either way the review's demand is borne out at the language level: **the LLM uses theta-sweep tokens, and
+removing them drops performance to chance, in every seed.** (`results/theta_sweep_llm_agg.json`.)
 
 ## Beyond the hippocampal core — a basal-ganglia action-selection organ
 
