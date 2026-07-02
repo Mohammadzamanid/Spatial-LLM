@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="342" font-family="Segoe UI, Arial">
+<rect width="660" height="342" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">Hexadirectional signal: symmetry inherited from the grid lattice</text>
+<text x="26" y="44" font-size="10.5" fill="#5b6b8c">hex grid &#8594; 6-fold; square lattice &#8594; 4-fold; linear read-out &#8594; flat &#8212; the grid code for concepts (Constantinescu 2016)</text>
+<line x1="54" y1="248" x2="186" y2="248" stroke="#33415c"/>
+<rect x="60" y="96.0" width="60" height="152.0" fill="#2ca25f" opacity="0.88"/>
+<text x="90" y="92" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.04</text>
+<rect x="124" y="209.9" width="60" height="38.1" fill="#c9341a" opacity="0.88"/>
+<text x="154" y="206" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.01</text>
+<text x="120" y="264" font-size="10" fill="#28324a" text-anchor="middle">HEX</text>
+<text x="120" y="276" font-size="10" fill="#28324a" text-anchor="middle">nonlinear</text>
+<line x1="222" y1="248" x2="354" y2="248" stroke="#33415c"/>
+<rect x="228" y="232.2" width="60" height="15.8" fill="#2ca25f" opacity="0.88"/>
+<text x="258" y="228" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.00</text>
+<rect x="292" y="99.9" width="60" height="148.1" fill="#c9341a" opacity="0.88"/>
+<text x="322" y="96" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.04</text>
+<text x="288" y="264" font-size="10" fill="#28324a" text-anchor="middle">SQUARE</text>
+<text x="288" y="276" font-size="10" fill="#28324a" text-anchor="middle">nonlinear</text>
+<line x1="390" y1="248" x2="522" y2="248" stroke="#33415c"/>
+<rect x="396" y="229.9" width="60" height="18.1" fill="#2ca25f" opacity="0.88"/>
+<text x="426" y="226" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.00</text>
+<text x="456" y="264" font-size="10" fill="#28324a" text-anchor="middle">HEX</text>
+<text x="456" y="276" font-size="10" fill="#28324a" text-anchor="middle">linear</text>
+<line x1="558" y1="248" x2="690" y2="248" stroke="#33415c"/>
+<rect x="564" y="204.1" width="60" height="43.9" fill="#2ca25f" opacity="0.88"/>
+<text x="594" y="200" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">0.01</text>
+<text x="624" y="264" font-size="10" fill="#28324a" text-anchor="middle">HEX adj</text>
+<text x="624" y="276" font-size="10" fill="#28324a" text-anchor="middle">5/7 ctrl</text>
+<rect x="60" y="288" width="11" height="6" fill="#2ca25f"/><text x="75" y="294" font-size="9" fill="#28324a">6-fold amplitude A6</text>
+<rect x="210" y="288" width="11" height="6" fill="#c9341a"/><text x="225" y="294" font-size="9" fill="#28324a">4-fold amplitude A4</text>
+</svg>

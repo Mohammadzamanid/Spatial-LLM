@@ -36,7 +36,14 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   peak; (c) the asymmetric kernel width (~seconds). Contrast with the STDP rule (no one-shot field) and the
   current episodic store (no shift). CPU.
 
-### 2. A hexadirectional grid code over a **2-D conceptual** space (human abstract cognitive map)
+### 2. A hexadirectional grid code over a **2-D conceptual** space (human abstract cognitive map) ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `ConjunctiveGridDirectionCells` organ + `src/eval/hexadirectional.py` (n=5). The
+  model's hexagonal grid produces a **6-fold** direction signal (A6 0.040, index 80%, above the 4-fold *and* the
+  adjacent 5/7-fold control) via a movement-sensitive nonlinearity — the human hexadirectional signature. Built
+  NON-circularly per the scope note below: preferred directions are **uniform** (nothing 6-fold imposed), the
+  symmetry is **inherited from the lattice** (a square lattice flips it to 4-fold), and a **linear** read-out is
+  direction-invariant. The two axes read as concept features → the grid code for concepts (Constantinescu 2016).
+  See `results/FINDINGS.md`. *Original entry + scope note below.*
 - **Neuro basis.** Humans show a **six-fold (hexadirectional)** entorhinal fMRI signal as they move through
   *abstract 2-D feature spaces* — a grid code for **concepts**, not just places (Constantinescu, O'Keefe &
   Behrens 2016; Bao 2019; Park, Miller, Boorman 2021; Bongioanni 2021; Viganò 2023). The cognitive map is

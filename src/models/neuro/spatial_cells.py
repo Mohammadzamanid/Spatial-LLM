@@ -260,6 +260,42 @@ class LocalOrder3DGrid(nn.Module):
         return self.pool_unit
 
 
+class ConjunctiveGridDirectionCells(nn.Module):
+    """
+    Conjunctive grid × movement-direction cells (Sargolini, Fyhn, Hafting, McNaughton, Witter, Moser & Moser
+    2006) — the cellular substrate of the human HEXADIRECTIONAL entorhinal signal (Doeller, Barry & Burgess
+    2010; Kunz 2019), the read-out by which a grid code becomes visible in fMRI as a 6-fold-symmetric modulation
+    of activity by movement direction — including movement through ABSTRACT 2-D "concept" spaces (Constantinescu,
+    O'Keefe & Behrens 2016; the grid code as the brain's general cognitive-map engine).
+
+    Each cell conjoins a grid cell with a preferred movement direction. CRUCIALLY the preferred directions here
+    are UNIFORM (not clustered at the grid axes): the 6-fold signal is NOT put in. It EMERGES because the
+    population is more strongly DRIVEN — its activity is modulated more — for runs aligned to the hexagonal
+    lattice, read out through a movement-sensitive NONLINEARITY (Bush & Burgess 2015; Stemmler 2015). A LINEAR
+    read-out of the same grid is direction-invariant (flat); a SQUARE lattice yields a 4-fold signal. So the
+    directional symmetry is inherited from the grid's spatial lattice symmetry — measured, not imposed.
+    """
+
+    def __init__(self, n_dir: int = 12, seed: int = 0):
+        super().__init__()
+        g = torch.Generator().manual_seed(seed)
+        self.register_buffer("pref_dir", torch.rand(n_dir, generator=g) * 2 * math.pi)   # UNIFORM preferred dirs
+
+    def conjunctive(self, grid_act: torch.Tensor, move_dir: torch.Tensor) -> torch.Tensor:
+        """Conjunctive population activity: grid rate x rectified movement-direction tuning.
+        grid_act (T, n_grid), move_dir (T,) -> (T, n_grid, n_dir)."""
+        tune = torch.clamp(torch.cos(move_dir.unsqueeze(1) - self.pref_dir.unsqueeze(0)), min=0.0)   # (T, n_dir)
+        return grid_act.unsqueeze(-1) * tune.unsqueeze(1)
+
+    @staticmethod
+    def direction_signal(grid_along_run: torch.Tensor) -> float:
+        """The movement-driven activity POWER a movement-sensitive population signals over one straight run:
+        the per-cell temporal variance of the grid activity along the run, summed. This is the nonlinearity that
+        makes the hexadirectional signal appear; a LINEAR summary (the mean) would be direction-invariant.
+        grid_along_run (T, n_grid) -> scalar."""
+        return grid_along_run.var(dim=0).sum().item()
+
+
 class SpeedCells(nn.Module):
     """
     Speed cells — firing rate proportional to running speed. They provide the

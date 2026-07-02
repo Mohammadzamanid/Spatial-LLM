@@ -272,6 +272,18 @@ vanishes under a symmetric-kernel control (+0.02 ± 0.03); the fields also conce
 yoked random-plateau control (0.8×). The predictive reward map of Hollup 2001 / Gauthier-Tank 2018, from BTSP.
 `results/goal_vector.{json,svg}`, `results/reward_map.{json,svg}`.
 
+*A grid code for concepts — the hexadirectional signal, symmetry inherited from the lattice
+(`src/eval/hexadirectional.py`, n=5).* Humans show a six-fold entorhinal signal moving through space and through
+abstract 2-D concept spaces (Doeller 2010; Constantinescu, O'Keefe & Behrens 2016). Done non-circularly: a
+summed grid rate map is direction-invariant, so the 6-fold lives only in the direction signal, through a
+movement-sensitive nonlinearity (conjunctive grid×direction cells with UNIFORM preferred directions — nothing
+6-fold imposed). Measuring the population's movement-driven activity power vs run direction, the model's
+hexagonal grid gives a 6-fold signal (A6 0.040, index 80%) above the 4-fold (0.010) and the adjacent 5/7-fold
+control (0.011); its symmetry is INHERITED from the lattice — a square lattice flips it to 4-fold (index 10%);
+and a linear read-out is direction-invariant (A6 0.005). Reading the two axes as concept features, the same grid
+metric produces the hexadirectional signature for movement through concept space — the cognitive map from space
+to meaning. `results/hexadirectional.{json,svg}`.
+
 *From reproducing neuroscience to proposing it.* Because the signatures emerge rather than being built
 in, the substrate can be perturbed to generate **falsifiable predictions** (`src/eval/predictions.py`).
 Two standing examples: (P1) content load sets the conjunctive/pure ratio — the share of conjunctive

@@ -1017,6 +1017,39 @@ construction (the plateau fires there), so every reported result is a **differen
 So the model now has a goal-vector code (emergent from navigation) and a **predictive reward map** (reward-gated
 BTSP builds fields that anticipate the goal). (`results/reward_map.json`, `results/reward_map.svg`.)
 
+### A grid code for CONCEPTS — the hexadirectional signal, its symmetry inherited from the lattice (GAPS.md #2)
+
+The last register gap, and the trickiest to do **non-circularly**. Humans show a six-fold (hexadirectional)
+entorhinal signal moving through space *and* through abstract 2-D **concept** spaces — the grid code as the
+brain's general cognitive-map engine (Doeller, Barry & Burgess 2010; **Constantinescu, O'Keefe & Behrens 2016**;
+Kunz 2019). The naive worry — "a hex grid is 6-fold by construction, so measuring 6-fold is circular" — is
+wrong, and *why* it's wrong is the result: a summed grid **rate map is direction-invariant**; the 6-fold lives
+only in the **direction** signal, and only through a movement-sensitive **nonlinearity** (conjunctive grid ×
+direction cells, Sargolini 2006; Bush & Burgess 2015). We add `ConjunctiveGridDirectionCells` (with **uniform**
+preferred directions — nothing 6-fold built in) and measure the population's movement-driven activity **power**
+as the agent runs in each direction, fit to `β0 + A6·cos(6θ) + A4·cos(4θ) (+ 5/7-fold controls)`:
+
+| read-out of the grid | 6-fold A6 | 4-fold A4 | adj. 5/7 | 6-fold index |
+|---|---|---|---|---|
+| **HEX grid, nonlinear** | **0.040** | 0.010 | 0.011 | **80%** |
+| SQUARE grid, nonlinear | 0.004 | **0.038** | — | 10% |
+| HEX grid, LINEAR read-out | 0.005 | — | — | — |
+
+- **(A) The hexadirectional signal emerges.** The model's hexagonal grid gives a **6-fold** direction signal
+  (A6 **0.040**, index **80%**) that sticks out above the 4-fold (0.010) *and* the adjacent 5/7-fold control
+  symmetries (0.011) — the human entorhinal signature, read out through the nonlinearity.
+- **(B) Its symmetry is INHERITED from the lattice, not imposed** (the decisive non-circularity control). A
+  **square** lattice — same construction, 4-fold instead of hex — **flips** the signal to **4-fold** (index
+  **10%**, A4 0.038 ≫ A6 0.004). The directional symmetry *tracks the spatial lattice*.
+- **(C) The nonlinearity is necessary.** A **linear** read-out (the mean, not the movement-power variance) of
+  the same hex grid is direction-invariant (A6 **0.005**) — a raw grid rate map carries no hexadirectional
+  signal; and the cells' preferred directions are **uniform**, so nothing 6-fold is put in.
+
+Reading the two axes as abstract **concept features**, the *same* grid metric produces the hexadirectional
+signal for movement through concept space — the human cognitive map, from space to meaning. So the repo's grid
+code is the bat-faithful/human-faithful one **and** the mechanistic origin of the hexadirectional signature is
+measured, not assumed. (`results/hexadirectional.json`, `results/hexadirectional.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
