@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="368" font-family="Segoe UI, Arial">
+<rect width="640" height="368" fill="#ffffff"/>
+<text x="26" y="26" font-size="15" font-weight="800" fill="#0b1324">Goal-vector cells emerge from navigation</text>
+<text x="26" y="44" font-size="10.5" fill="#5b6b8c">trained vs untrained-baseline vs goal-shuffle-null; distance-to-goal is the clean non-circular axis (magnitude never in the loss)</text>
+<line x1="60" y1="238" x2="180" y2="238" stroke="#33415c"/>
+<text x="120" y="268" font-size="10.5" font-weight="700" fill="#28324a" text-anchor="middle">goal-DISTANCE</text>
+<rect x="64" y="235.3" width="36" height="2.7" fill="#2ca25f" opacity="0.88"/>
+<text x="82" y="231" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">2%</text>
+<rect x="104" y="238.0" width="36" height="0.0" fill="#9aa6bd" opacity="0.88"/>
+<text x="122" y="234" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<rect x="144" y="238.0" width="36" height="0.0" fill="#c9341a" opacity="0.88"/>
+<text x="162" y="234" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<line x1="230" y1="238" x2="350" y2="238" stroke="#33415c"/>
+<text x="290" y="268" font-size="10.5" font-weight="700" fill="#28324a" text-anchor="middle">allo goal-dir</text>
+<rect x="234" y="94.0" width="36" height="144.0" fill="#2ca25f" opacity="0.88"/>
+<text x="252" y="90" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">95%</text>
+<rect x="274" y="234.4" width="36" height="3.6" fill="#9aa6bd" opacity="0.88"/>
+<text x="292" y="230" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">2%</text>
+<rect x="314" y="236.9" width="36" height="1.1" fill="#c9341a" opacity="0.88"/>
+<text x="332" y="233" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">1%</text>
+<line x1="400" y1="238" x2="520" y2="238" stroke="#33415c"/>
+<text x="460" y="268" font-size="10.5" font-weight="700" fill="#28324a" text-anchor="middle">EGO goal-dir</text>
+<rect x="404" y="237.7" width="36" height="0.3" fill="#2ca25f" opacity="0.88"/>
+<text x="422" y="234" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<rect x="444" y="236.3" width="36" height="1.7" fill="#9aa6bd" opacity="0.88"/>
+<text x="462" y="232" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">1%</text>
+<rect x="484" y="237.7" width="36" height="0.3" fill="#c9341a" opacity="0.88"/>
+<text x="502" y="234" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<rect x="60" y="282" width="11" height="6" fill="#2ca25f"/><text x="75" y="288" font-size="9" fill="#28324a">trained</text>
+<rect x="170" y="282" width="11" height="6" fill="#9aa6bd"/><text x="185" y="288" font-size="9" fill="#28324a">untrained</text>
+<rect x="280" y="282" width="11" height="6" fill="#c9341a"/><text x="295" y="288" font-size="9" fill="#28324a">goal-shuffle</text>
+<text x="60" y="310" font-size="10.5" fill="#28324a">navigation: intact <tspan font-weight="700" fill="#2ca25f">100%</tspan> · ablate goal-vector cells <tspan font-weight="700" fill="#c9341a">99%</tspan> · ablate random units <tspan font-weight="700">100%</tspan> (necessity)</text>
+</svg>

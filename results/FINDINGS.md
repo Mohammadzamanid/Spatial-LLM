@@ -981,6 +981,42 @@ is untouched (0.22); lesioning the SELF-place cells does the exact reverse. So t
 distinct, separable population that coexists with the self-map in one circuit — the first social/other-agent
 representation in the model. (`results/social_space.json`, `results/social_space.svg`.)
 
+### Goal & reward coding — a goal-vector code, and reward fields that ANTICIPATE the goal (GAPS.md #3)
+
+Gap #3, closed in two parts (designed with a research + red-team panel to defeat circularity).
+
+**A — A goal-direction code emerges from navigation** (`src/eval/goal_vector.py`, n=5). Neurons encode a vector
+to a remembered goal (Sarel, Finkelstein, Las & Ulanovsky 2017; Ormond & O'Keefe 2022). A generic ReLU policy
+trained ONLY to reach randomized goals from the grid code (goal enters *only* as `grid_code_at(goal)` — never a
+decoded goal-minus-position vector, the cardinal trap) navigates at **99.7%** success; and **95%** of its
+active hidden units then tune to the (allocentric) direction to the goal — **EMERGENT and GOAL-SPECIFIC**: an
+untrained-weights baseline (**2%**) and a goal-label SHUFFLE null (**1%**) both sit at the false-positive floor
+(the Banino-2018 "vector-to-goal codes emerge from navigation" template). *Honest scope, three ways:* the code
+is **allocentric** (it matches the action frame; Chadwick 2015); it is **distributed/redundant** (no small
+subset is necessary — a directional task recruits nearly every unit, so there is no place-vs-goal dissociation
+here); and **egocentric** goal-direction (**0%**) and metric **distance-to-goal** cells (**2%**) do NOT emerge —
+a magnitude-free directional task neither supervises nor requires them, so the code encodes exactly what the
+behaviour needs (Sarel's egocentric + distance cells would need egocentric steering and distance-dependent
+behaviour — a noted extension). (`results/goal_vector.json`, `results/goal_vector.svg`.)
+
+**B — Reward fields that ANTICIPATE the goal, via reward-triggered BTSP** (`src/eval/reward_map.py`, n=5).
+Place fields over-represent reward and peak just *before* it (Hollup 2001; Gauthier & Tank 2018; Boccara 2019).
+We compose the `BTSPPlasticity` organ: reaching a reward triggers one plateau, whose seconds-wide asymmetric
+kernel imprints a one-shot field. *Honesty (per the red-team):* fields piling up **at** the reward is partly by
+construction (the plateau fires there), so every reported result is a **difference vs. a matched control**:
+
+- **The anticipatory shift is the emergent signature.** The field population sits **UPSTREAM** of the reward
+  along the approach (**−0.23 ± 0.03**) — the plateau fires AT the reward; the fields end up BEFORE it, purely
+  from the kernel's asymmetry. It **cleanly vanishes** under a symmetric-kernel control (**+0.02 ± 0.03**; the
+  run passes *through* the reward, so a symmetric kernel centres the field on it). This is the Mehta/Bittner
+  predictive shift, tied to reward — measured, not imposed.
+- **Reward-specific concentration.** Fields concentrate at the reward **43×** vs a yoked control firing the same
+  number of plateaus at **random** locations (**0.8×**) — so the concentration is reward-driven, not "BTSP
+  writes a field wherever it fires."
+
+So the model now has a goal-vector code (emergent from navigation) and a **predictive reward map** (reward-gated
+BTSP builds fields that anticipate the goal). (`results/reward_map.json`, `results/reward_map.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

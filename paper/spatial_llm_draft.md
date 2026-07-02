@@ -259,6 +259,19 @@ other agent (MAE 0.21 → 0.40) while self-decoding survives (0.22), and lesioni
 reverse — a self-map and an other-map coexisting in one circuit, the emergent social place cells.
 `results/social_space.{json,svg}`.
 
+*Goal & reward coding — a goal-vector code and anticipatory reward fields (`src/eval/goal_vector.py`,
+`src/eval/reward_map.py`, n=5; designed with a research+red-team panel).* (A) A generic policy trained ONLY to
+reach randomized goals from the grid code (the goal enters only as grid_code_at(goal), never a decoded goal
+vector) navigates at 99.7% and 95% of its hidden units then tune to the direction to the goal — emergent and
+goal-specific (untrained baseline 2%, goal-shuffle null 1%; the Banino-2018 vector-to-goal template). Honest
+scope: the code is allocentric and redundant, and egocentric/metric-distance cells do not emerge from a
+magnitude-free directional task (a noted extension). (B) Reward-triggered BTSP builds place fields that
+ANTICIPATE the goal: they sit upstream of the reward along the approach (−0.23 ± 0.03) — emergent, since the
+plateau fires AT the reward and only the kernel asymmetry shifts the fields before it — and this cleanly
+vanishes under a symmetric-kernel control (+0.02 ± 0.03); the fields also concentrate at the reward 43× vs a
+yoked random-plateau control (0.8×). The predictive reward map of Hollup 2001 / Gauthier-Tank 2018, from BTSP.
+`results/goal_vector.{json,svg}`, `results/reward_map.{json,svg}`.
+
 *From reproducing neuroscience to proposing it.* Because the signatures emerge rather than being built
 in, the substrate can be perturbed to generate **falsifiable predictions** (`src/eval/predictions.py`).
 Two standing examples: (P1) content load sets the conjunctive/pure ratio — the share of conjunctive

@@ -1,0 +1,66 @@
+{
+  "n_seeds": 5,
+  "hidden": 128,
+  "results": {
+    "nav_success": {
+      "mean": 0.997,
+      "ci95": 0.002
+    },
+    "path_eff": {
+      "mean": 1.098,
+      "ci95": 0.016
+    },
+    "nav_grid_lesion": {
+      "mean": 0.14,
+      "ci95": 0.024
+    },
+    "frac_dist": {
+      "mean": 0.018,
+      "ci95": 0.011
+    },
+    "frac_allo_dir": {
+      "mean": 0.947,
+      "ci95": 0.015
+    },
+    "frac_ego_dir": {
+      "mean": 0.002,
+      "ci95": 0.003
+    },
+    "frac_conj": {
+      "mean": 0.018,
+      "ci95": 0.011
+    },
+    "untr_dist": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "untr_allo": {
+      "mean": 0.024,
+      "ci95": 0.01
+    },
+    "untr_ego": {
+      "mean": 0.011,
+      "ci95": 0.008
+    },
+    "shuf_dist": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "shuf_allo": {
+      "mean": 0.007,
+      "ci95": 0.003
+    },
+    "shuf_ego": {
+      "mean": 0.002,
+      "ci95": 0.003
+    },
+    "nav_lesion_goal": {
+      "mean": 0.987,
+      "ci95": 0.004
+    },
+    "nav_lesion_rand": {
+      "mean": 0.997,
+      "ci95": 0.004
+    }
+  }
+}

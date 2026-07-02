@@ -61,7 +61,14 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   the loss. Falsifier: a shuffled/curved-metric control should destroy the 6-fold signal. CPU. GPU follow-up:
   the LLM answers concept-space "which is closer?" from the grid-of-concepts code.
 
-### 3. Vectorial **goal / reward** cells (direction-and-distance to a remembered goal)
+### 3. Vectorial **goal / reward** cells (direction-and-distance to a remembered goal) ✅ CLOSED (Jul 2026)
+- **Status: implemented (two parts).** (A) `src/eval/goal_vector.py` (n=5): a policy trained ONLY to reach
+  randomized goals develops a goal-DIRECTION code (95% of units; emergent + goal-specific vs untrained 2% /
+  shuffle 1% nulls; Banino-2018 template). Honest scope: allocentric/redundant; egocentric + metric-distance
+  cells do NOT emerge from a magnitude-free directional task. (B) `src/eval/reward_map.py` (n=5): reward-
+  triggered BTSP builds place fields that ANTICIPATE the goal (upstream shift −0.23, vanishing under a
+  symmetric-kernel control +0.02) + reward-specific over-representation (43× vs 0.8× yoked-random). Designed
+  with a research+red-team panel to defeat circularity. See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** Single neurons encode a **vector to a goal** (egocentric/allocentric direction + distance)
   — goal-vector cells in bats (Sarel, Finkelstein, Las, Ulanovsky 2017) and reward/goal coding + reward-biased
   place-field over-representation in rodents and humans (Gauthier & Tank 2018; Boccara 2019).
