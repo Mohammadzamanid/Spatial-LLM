@@ -248,6 +248,17 @@ space vs time, decorrelated in a bounded box): pure place **19% ± 3**, pure tim
 together. Space and time are multiplexed in the same units, not separate modules.
 `results/space_time_circuit.{json,svg}`.
 
+*A self map and an other-agent map in one population — social place cells (`src/eval/social_space.py`, n=5).*
+The hippocampus encodes not only the animal's own position but another individual's, in dedicated social place
+cells (Danjo 2018; Omer, Las & Ulanovsky 2018 in bats), and humans map social variables with the same machinery
+(Tavares 2015; Park 2021) — a representation the model lacked entirely. Feeding ONE recurrent substrate its own
+self-motion AND its observation of another agent's motion, and training it to report both positions, separate
+populations emerge (η² by self- vs other-position, nothing imposed): pure SELF-place 22% ± 4, pure OTHER-place
+20% ± 2, conjunctive 42% ± 6. They dissociate cleanly: lesioning the other-place cells wrecks decoding of the
+other agent (MAE 0.21 → 0.40) while self-decoding survives (0.22), and lesioning the self-place cells does the
+reverse — a self-map and an other-map coexisting in one circuit, the emergent social place cells.
+`results/social_space.{json,svg}`.
+
 *From reproducing neuroscience to proposing it.* Because the signatures emerge rather than being built
 in, the substrate can be perturbed to generate **falsifiable predictions** (`src/eval/predictions.py`).
 Two standing examples: (P1) content load sets the conjunctive/pure ratio — the share of conjunctive

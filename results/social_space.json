@@ -1,0 +1,45 @@
+{
+  "n_seeds": 5,
+  "T": 40,
+  "hidden": 128,
+  "box": 1.0,
+  "iters": 1800,
+  "results": {
+    "frac_self": {
+      "mean": 0.222,
+      "ci95": 0.0442
+    },
+    "frac_other": {
+      "mean": 0.1965,
+      "ci95": 0.0242
+    },
+    "frac_conjunctive": {
+      "mean": 0.4185,
+      "ci95": 0.0618
+    },
+    "self_mae": {
+      "mean": 0.2175,
+      "ci95": 0.0085
+    },
+    "other_mae": {
+      "mean": 0.2124,
+      "ci95": 0.0024
+    },
+    "self_mae_lesion_other": {
+      "mean": 0.2228,
+      "ci95": 0.019
+    },
+    "other_mae_lesion_other": {
+      "mean": 0.396,
+      "ci95": 0.0192
+    },
+    "self_mae_lesion_self": {
+      "mean": 0.3983,
+      "ci95": 0.0318
+    },
+    "other_mae_lesion_self": {
+      "mean": 0.2136,
+      "ci95": 0.0027
+    }
+  }
+}

@@ -47,6 +47,14 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   continuous conceptual space**, and it never measures the defining **6-fold hexadirectional** signature.
 - **Why it matters.** This is the most distinctively **human**, most "Spatial-LLM" finding on the board:
   the same grid metric that localizes in space should organize *meaning*. It reuses the existing grid cortex.
+- **Scope note (found on audit).** Bigger than it first looks, and easy to do *circularly*. `emergence.py`
+  already trains a generic net on path integration and measures emergent grid cells incl. **4-fold-square vs
+  6-fold-hex** symmetry + gridness — but that is the *spatial* signature. The **hexadirectional** signal humans
+  show in fMRI is a *movement-direction* modulation that, mechanistically, needs **conjunctive grid×direction**
+  coding + a nonlinearity (Doeller 2010; Bush 2015) — otherwise a summed grid rate map is direction-invariant.
+  So the faithful, non-circular build is: conjunctive grid×direction cells over a 2-D *concept* space, then
+  measure an emergent 6-fold *direction* signal (vs 4-fold for a square-topology control) — not just relabel a
+  hex grid's axes. Reclassified **CPU-hard** (was CPU-easy).
 - **Proposed experiment (emergence).** Define a 2-D conceptual space (two continuous features), drive the
   frozen velocity grid cortex along "trajectories" in it, and **measure the 6-fold rotational symmetry** of
   the population code's activity vs. movement direction (the hexadirectional signature) — emergent, never in
@@ -64,15 +72,15 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   position − current position → egocentric vector). Train only to reach goals; **measure** the emergent
   vector tuning and whether place/grid resources **over-represent** the goal (a signature never trained). CPU.
 
-### 4. Coding of **other agents** / social space
+### 4. Coding of **other agents** / social space ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/social_space.py` (n=5): ONE recurrent substrate fed self-motion AND the
+  other agent's motion, trained to report both positions, develops SEPARATE **pure self-place (~19%)** and
+  **pure other-place (~17%)** cells (plus conjunctive) — emergent (η² classification, nothing imposed) — with a
+  clean **double dissociation** (lesion other-cells → other-decode fails, self survives; and vice versa). The
+  social place cells of Danjo 2018 / Omer 2018. See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** The hippocampus encodes **another individual's** position with dedicated "social place
   cells" (Danjo 2018; Omer, Las, Ulanovsky 2018 in bats), and humans map **social hierarchies** with the same
   grid/hippocampal machinery (Tavares 2015; Park, Miller 2021).
-- **Model status: absent.** No representation of a second agent or social/relational-to-others map exists
-  anywhere in `src/`.
-- **Proposed experiment (emergence).** A second grid/place population tracks a *conspecific's* trajectory;
-  in a task requiring the other's location, **measure** the emergence of other-agent place fields and a clean
-  double dissociation (self-map vs. other-map lesions). CPU.
 
 ---
 

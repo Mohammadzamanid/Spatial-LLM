@@ -955,6 +955,32 @@ So space and time are not separate modules here — one recurrent circuit multip
 the same units, with the conjunctive code dominant, exactly the hippocampal organisation.
 (`results/space_time_circuit.json`, `results/space_time_circuit.svg`.)
 
+### A SELF map and an OTHER-agent map in one population — social place cells (n=5)
+
+Gap #4 from the register, closed with the same methodology. The hippocampus encodes not only the animal's
+**own** position but **another individual's** — dedicated *social place cells* (Danjo, Toyoizumi & Fujisawa
+2018; Omer, Maimon, Las & Ulanovsky 2018 in bats), and humans map social variables with the same machinery
+(Tavares 2015; Park 2021). The model had **no** representation of a second agent (`GAPS.md` #4). We add
+`src/eval/social_space.py`: ONE recurrent substrate is fed its **own** self-motion **and** its observation of
+**another agent's** motion, and trained to report **both** positions. Then we MEASURE, per unit, the variance
+explained (η²) by self-position vs other-position — nothing imposed:
+
+- **PURE SELF-place** cells (own position): **22% ± 4** · **PURE OTHER-place** cells (the other agent's
+  position): **20% ± 2** · **CONJUNCTIVE self×other**: **42% ± 6**. A self-map and an other-map coexist in one
+  population — the social place cells, emergent.
+- **Clean double dissociation** (decode MAE, box half-width 1.0):
+
+| | decode SELF | decode OTHER |
+|---|---|---|
+| intact | 0.22 | 0.21 |
+| **lesion OTHER cells** | 0.22 (survives) | **0.40** (fails) |
+| **lesion SELF cells** | **0.40** (fails) | 0.21 (survives) |
+
+Lesioning the OTHER-place cells wrecks decoding of the other agent's position (0.21 → 0.40) while self-decoding
+is untouched (0.22); lesioning the SELF-place cells does the exact reverse. So the brain's map of *others* is a
+distinct, separable population that coexists with the self-map in one circuit — the first social/other-agent
+representation in the model. (`results/social_space.json`, `results/social_space.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
