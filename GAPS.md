@@ -288,16 +288,32 @@ learning partners. Every item is a measured-emergence experiment in the house st
   architecture is topologically fixed), and **excitability-based memory allocation** (CREB/excitability engram
   recruitment — distinct from the population reallocation in `predictions.py`).
 
+### Capstone. The CORE itself learns biologically — grid cells under a non-backprop rule ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/emergent_grid_bio.py` (n=5). `emergence.py` shows periodic grid fields
+  EMERGE when a recurrent cortex is trained on self-supervised path integration — but by **backprop** (the very
+  thing #A1 says the cortex cannot do). This closes the loop: the same path-integration net is trained by
+  **RFLO** (Murray 2019) — an **eligibility trace** (e-prop's temporal-credit primitive) × a learning signal
+  through a **fixed random feedback** matrix (#A1's feedback alignment — no weight transport, no BPTT) — and the
+  grid code still forms. (A) RFLO LEARNS path integration (place-loss **0.021 ≈ backprop 0.014**, ≪ untrained
+  0.082) without weight transport; (B) the EMERGENT grid code appears (rate-map periodicity **0.53 ≈ backprop
+  0.50**, **+0.09 ± 0.03** over the untrained floor; **76%** of units periodic vs 47%), never in the loss;
+  (C) FALSIFIER — with the feedback **shuffled** every step the grid code falls to the untrained floor (0.45,
+  **−0.09 ± 0.03**) even though its readout still fits, so it is the CONSISTENT feedback the forward weights
+  align to (#A1), not any feedback, that grows grid cells. Honest scope: periodic multi-field cells, not a
+  hexagonal lattice (gridness stays negative for backprop too — as in `emergence.py`). This moves the model from
+  "biological rules bolted onto a backprop core" to **the core itself learning biologically.** See
+  `results/FINDINGS.md`.
+
 ---
 
 ## Top recommendation
 
-Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation), and the
-learning-substrate tier is now largely closed: **#A1** (deep credit assignment without backprop), **#B3**
-(volatility-adaptive meta-learning), and **#B4** (astrocyte-gated slow plasticity — targeted glial throttling
-beats a matched uniform reduction, needs the slow timescale). Next, the **faithfulness capstone**: fold the
-biological learning rules (A1 feedback alignment / e-prop) into the *real* recurrent grid cortex (`emergence.py`)
-and show **emergent grid cells** form under a non-backprop rule — moving from "biological rules bolted onto a
-backprop core" to "the core itself learns biologically". Then the remaining Tier-5 items: **B2** (Benna–Fusi
-multi-timescale synapse → power-law forgetting), **C6** (representational drift with a conserved-geometry
-read-out), **C7** (sleep triple-coupling). Each yields a clean emergent signature never put into the loss.
+Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation); the
+learning-substrate tier is closed — **#A1** (deep credit assignment without backprop), **#B3** (volatility-adaptive
+meta-learning), **#B4** (astrocyte-gated slow plasticity) — and so is the **faithfulness capstone**: the *real*
+recurrent grid cortex now learns its grid code under a non-backprop rule (RFLO = A1's feedback alignment +
+e-prop), moving the model from "biological rules bolted onto a backprop core" to **the core itself learning
+biologically.** Next, the remaining Tier-5 items, each a clean emergent signature never put into the loss:
+**B2** (Benna–Fusi multi-timescale synapse → power-law forgetting), **C6** (representational drift with a
+conserved-geometry read-out), **C7** (sleep triple-coupling → selective consolidation), and the GPU/language
+capstones **#8/#9** (the LLM reads the concept-grid / social-space maps).

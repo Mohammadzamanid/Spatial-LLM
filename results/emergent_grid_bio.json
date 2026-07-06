@@ -1,0 +1,85 @@
+{
+  "n_seeds": 5,
+  "N": 96,
+  "P": 64,
+  "T": 12,
+  "iters": 1600,
+  "results": {
+    "backprop_place_loss": {
+      "mean": 0.0142,
+      "ci95": 0.0029
+    },
+    "backprop_mean_periodicity": {
+      "mean": 0.5002,
+      "ci95": 0.0162
+    },
+    "backprop_frac_periodic": {
+      "mean": 0.5896,
+      "ci95": 0.0459
+    },
+    "backprop_mean_gridness": {
+      "mean": -0.4604,
+      "ci95": 0.0236
+    },
+    "rflo_place_loss": {
+      "mean": 0.0211,
+      "ci95": 0.0035
+    },
+    "rflo_mean_periodicity": {
+      "mean": 0.5336,
+      "ci95": 0.0211
+    },
+    "rflo_frac_periodic": {
+      "mean": 0.7625,
+      "ci95": 0.059
+    },
+    "rflo_mean_gridness": {
+      "mean": -0.5471,
+      "ci95": 0.0076
+    },
+    "shuffled_place_loss": {
+      "mean": 0.0203,
+      "ci95": 0.0036
+    },
+    "shuffled_mean_periodicity": {
+      "mean": 0.4468,
+      "ci95": 0.0187
+    },
+    "shuffled_frac_periodic": {
+      "mean": 0.4688,
+      "ci95": 0.0949
+    },
+    "shuffled_mean_gridness": {
+      "mean": -0.5212,
+      "ci95": 0.0055
+    },
+    "untrained_place_loss": {
+      "mean": 0.0818,
+      "ci95": 0.0078
+    },
+    "untrained_mean_periodicity": {
+      "mean": 0.4479,
+      "ci95": 0.0181
+    },
+    "untrained_frac_periodic": {
+      "mean": 0.4729,
+      "ci95": 0.0803
+    },
+    "untrained_mean_gridness": {
+      "mean": -0.5222,
+      "ci95": 0.0049
+    },
+    "grid_emerges_rflo": {
+      "mean": 0.0857,
+      "ci95": 0.03
+    },
+    "falsifier_gap": {
+      "mean": 0.0868,
+      "ci95": 0.0309
+    },
+    "task_gap": {
+      "mean": -0.0008,
+      "ci95": 0.0003
+    }
+  }
+}

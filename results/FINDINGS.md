@@ -1209,6 +1209,38 @@ tripartite synapse, not a literal D-serine model; the distinct Benna–Fusi mult
 forgetting) remains an open gap (#B2). The glial learning partner, as an emergent, matched-controlled retention
 signature — measured, not put in the loss. (`results/astrocyte_plasticity.json`, `results/astrocyte_plasticity.svg`.)
 
+### The faithfulness capstone — the CORE itself learns biologically: grid cells under a non-backprop rule (GAPS.md Tier 5 capstone, n=5)
+
+Everything above added biological learning *rules*, but the cortex→fusion→LLM core was still trained by
+**backprop** — the very thing #A1 argued the brain cannot do (weight transport; a global backward pass). The
+landmark emergent result of the whole field is that **grid cells emerge** when a recurrent network is trained on
+self-supervised path integration (`emergence.py`; Cueva & Wei 2018; Banino 2018) — but there, too, by backprop.
+`src/eval/emergent_grid_bio.py` closes the loop: it trains the same path-integration recurrent net by **RFLO**
+(Murray 2019) — an **eligibility trace** (e-prop's temporal-credit primitive) times a learning signal delivered
+through a **fixed random feedback** matrix (#A1's feedback alignment — *no weight transport, no
+backprop-through-time*) — and asks whether the grid code still forms. Four rules from a matched init: backprop
+(the reference), RFLO (the biological rule), a **shuffled-feedback** falsifier (the random feedback re-drawn every
+step), and untrained.
+
+- **(A) RFLO learns path integration without weight transport.** Place-prediction loss (the training objective):
+  RFLO **0.021 ≈ backprop 0.014**, far below the untrained readout's **0.082**.
+- **(B) The grid code emerges under RFLO — and it is never in the loss.** Rate-map **periodicity** (scored by the
+  exact autocorrelogram machinery of `emergence.py`): RFLO **0.53 ≈ backprop 0.50**, **+0.09 ± 0.03** over the
+  untrained floor; **76%** of units become periodic versus **47%** untrained. The loss only ever asked for
+  place-cell prediction; the periodic grid code is a measured, emergent consequence.
+- **(C) Falsifier — it is the *consistent* feedback that grows grid cells.** With the feedback **shuffled** every
+  step, the readout still fits (place-loss 0.020) but the grid code falls to the untrained floor (periodicity
+  **0.45**, **−0.09 ± 0.03** vs RFLO). So the grid code specifically requires the consistent random feedback that
+  the forward weights **align** to (#A1) — not any feedback — to shape the recurrent hidden representation.
+
+Honest scope: as in `emergence.py`'s unconstrained model, the emergent signature is **periodic multi-field**
+spatial tuning, not a clean hexagonal lattice (gridness stays negative for backprop too; hexagonality needs the
+constructed velocity modules, `emergence.py --constrained`). The claim is that this emergent grid code forms
+under a fully local, no-weight-transport rule. This is the capstone: not "biological learning rules bolted onto a
+backprop-trained core", but **the core itself learning biologically** — the grid cells that define the cognitive
+map, grown by the credit-assignment rule the cortex can actually run. (`results/emergent_grid_bio.json`,
+`results/emergent_grid_bio.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
