@@ -237,7 +237,17 @@ learning partners. Every item is a measured-emergence experiment in the house st
   *without being told the block* — the meta-RL signature. Reuses `successor.py` + `neuromodulation.py`. CPU.
   *(Most distinctively-human learning gap on the board.)*
 
-### B4. Astrocyte-gated slow plasticity — *absent* (lowest-effort, extends e-prop)
+### B4. Astrocyte-gated slow plasticity ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/astrocyte_plasticity.py` (n=8): a small recurrent net learns a CONTINUAL
+  stream of cue→target tasks by e-prop (eligibility + broadcast); a **slow per-synapse astrocyte** trace
+  `a ← ρ·a + |Δw|` gates the update `Δw ← Δw/(1+β·a)`, throttling importance-tagged synapses. Retention error on
+  old tasks after the stream: ungated **0.53** → slow-astrocyte **0.44**. Decisively, it beats a **UNIFORM**
+  plasticity reduction of the **matched total ‖Δw‖** (0.47) — targeting-gain **+0.036 ± 0.024** — so the gain is
+  from *where* plasticity is throttled, not from throttling less; and it needs the **SLOW timescale** — a fast
+  astrocyte matches its uniform control (falsifier **+0.000 ± 0.003**). The advantage over full plasticity
+  **+0.091 ± 0.034** grows with task load. Honest trade-off: protecting old costs a little new-task acquisition
+  (recency +0.056). Computationally kin to EWC / synaptic intelligence; the biological content is the SLOW GLIAL
+  importance gate (Williamson 2024). See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** Hippocampal "learning-associated astrocytes" orchestrate encoding/retrieval (Williamson et al.,
   *Nature* 2024); the tripartite synapse regulates efficacy over **slow (seconds)** timescales; LTP depends on
   astrocytic **D-serine**, and activating astrocytes (not neurons) enhances contextual memory. Formalised as
@@ -283,12 +293,11 @@ learning partners. Every item is a measured-emergence experiment in the house st
 ## Top recommendation
 
 Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation), and the
-learning-substrate frontier is advancing: **#A1** (deep credit assignment without backprop — feedback alignment
-reaches backprop's spatial signatures with no weight transport) and **#B3** (volatility-adaptive meta-learning — a
-self-tuned learning rate that rises with volatility and *falls* with stochasticity) are now closed too. Next, for
-maximum payoff per CPU-hour: **B4 (astrocyte-gated slow plasticity)** — the lowest-effort win, a ~two-line
-extension of the e-prop eligibility trace with a landmark 2024 result — and the **faithfulness capstone**: fold
-the biological learning rules (A1 feedback alignment / e-prop) into the *real* recurrent grid cortex
-(`emergence.py`) and show **emergent grid cells** form under a non-backprop rule — moving from "biological rules
-bolted onto a backprop core" to "the core itself learns biologically". Each yields a clean emergent signature
-never put into the loss.
+learning-substrate tier is now largely closed: **#A1** (deep credit assignment without backprop), **#B3**
+(volatility-adaptive meta-learning), and **#B4** (astrocyte-gated slow plasticity — targeted glial throttling
+beats a matched uniform reduction, needs the slow timescale). Next, the **faithfulness capstone**: fold the
+biological learning rules (A1 feedback alignment / e-prop) into the *real* recurrent grid cortex (`emergence.py`)
+and show **emergent grid cells** form under a non-backprop rule — moving from "biological rules bolted onto a
+backprop core" to "the core itself learns biologically". Then the remaining Tier-5 items: **B2** (Benna–Fusi
+multi-timescale synapse → power-law forgetting), **C6** (representational drift with a conserved-geometry
+read-out), **C7** (sleep triple-coupling). Each yields a clean emergent signature never put into the loss.

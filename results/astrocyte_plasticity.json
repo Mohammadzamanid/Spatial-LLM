@@ -1,0 +1,71 @@
+{
+  "n_seeds": 8,
+  "N": 96,
+  "K": 6,
+  "iters_per_task": 120,
+  "beta": 200.0,
+  "rho_slow": 0.999,
+  "rho_fast": 0.5,
+  "results": {
+    "ret_ungated": {
+      "mean": 0.5279,
+      "ci95": 0.0451
+    },
+    "ret_slow": {
+      "mean": 0.4372,
+      "ci95": 0.0483
+    },
+    "ret_fast": {
+      "mean": 0.5245,
+      "ci95": 0.0463
+    },
+    "ret_uniform": {
+      "mean": 0.4728,
+      "ci95": 0.0675
+    },
+    "ret_uniform_fast": {
+      "mean": 0.5245,
+      "ci95": 0.047
+    },
+    "rec_ungated": {
+      "mean": 0.0211,
+      "ci95": 0.0074
+    },
+    "rec_slow": {
+      "mean": 0.1777,
+      "ci95": 0.0401
+    },
+    "rec_uniform": {
+      "mean": 0.1218,
+      "ci95": 0.0316
+    },
+    "dw_ungated": {
+      "mean": 12.96,
+      "ci95": 0.0
+    },
+    "dw_slow": {
+      "mean": 4.5119,
+      "ci95": 0.0218
+    },
+    "dw_uniform": {
+      "mean": 4.5119,
+      "ci95": 0.0218
+    },
+    "targeting_gain": {
+      "mean": 0.0356,
+      "ci95": 0.0242
+    },
+    "falsifier_gain": {
+      "mean": 0.0001,
+      "ci95": 0.0028
+    },
+    "load_gain": {
+      "mean": 0.0907,
+      "ci95": 0.0338
+    },
+    "recency_cost": {
+      "mean": 0.0558,
+      "ci95": 0.0338
+    }
+  }
+}

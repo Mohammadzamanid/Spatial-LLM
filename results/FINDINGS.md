@@ -1170,6 +1170,45 @@ tracking; tying it to the SR / grid reward-location substrate is a follow-up. Th
 rate from inferred volatility — emergent, measured, not in the loss.
 (`results/meta_learning.json`, `results/meta_learning.svg`.)
 
+### The glial learning partner — astrocyte-gated slow plasticity for continual retention (GAPS.md Tier 5, #B4, n=8)
+
+The repo's e-prop already has the two *neuronal* ingredients of a plausible learning rule — an eligibility trace
+and a broadcast learning signal. The missing third is *non-neuronal*: astrocytes gate plasticity over a **slow
+(seconds)** timescale through the tripartite synapse, and hippocampal "learning-associated astrocytes" orchestrate
+memory encoding and retrieval (Williamson et al., *Nature* 2024). `src/eval/astrocyte_plasticity.py` adds a slow
+per-synapse astrocyte trace `a ← ρ·a + |Δw|` that gates the e-prop update `Δw ← Δw/(1+β·a)` — throttling further
+change at synapses it has tagged as important — and MEASURES retention on a continual stream of cue→target tasks.
+
+The confound this must defeat is obvious: *any* plasticity gate "forgets less" by simply learning less. So the
+result is reported **against a matched control** — a UNIFORM plasticity reduction scaled to the **same total
+‖Δw‖** as the astrocyte (4.51 ≈ 4.51, of an ungated 12.96). Retention error on the old tasks (1 − cosine):
+
+| condition | retention error (old tasks) |
+|---|---|
+| ungated e-prop | **0.53** |
+| **matched UNIFORM reduction** | 0.47 |
+| **SLOW astrocyte** | **0.44** |
+| fast astrocyte | 0.52 |
+
+- **(A) Targeting beats a matched uniform reduction.** At the same total plasticity, the astrocyte retains old
+  tasks better than a uniform cut — **+0.036 ± 0.024** — so the gain comes from *where* the glia throttle
+  plasticity (importance-tagged synapses), not from throttling less of it.
+- **(B) It needs the SLOW timescale (falsifier).** A **fast** astrocyte (ρ = 0.5, decays within a task) matches
+  its own uniform control — **+0.000 ± 0.003**. And this falsifier is exactly the control for the recency worry:
+  the fast gate *also* throttles the current task, yet retains no better than uniform — so the retention gain is
+  the **slow cross-task protection of old synapses**, not merely "writing the new task more weakly".
+- **(C) The advantage grows with memory load.** Against full plasticity the gain is **+0.091 ± 0.034** and rises
+  with the number of tasks — the glia matter most when there is forgetting to fight.
+- **(D) Honest trade-off.** Protecting old memories costs a little new-task acquisition (recency +0.056) — the
+  stability–plasticity frontier, reported not hidden.
+
+Honest scope: computationally this per-synapse importance-throttle is kin to EWC (Kirkpatrick 2017) / synaptic
+intelligence (Zenke 2017); the biological content — and what the experiment tests — is that a **slow glial
+process** supplies the importance signal and that it needs the slow timescale. It is a reduced model of the
+tripartite synapse, not a literal D-serine model; the distinct Benna–Fusi multi-timescale *synapse* (power-law
+forgetting) remains an open gap (#B2). The glial learning partner, as an emergent, matched-controlled retention
+signature — measured, not put in the loss. (`results/astrocyte_plasticity.json`, `results/astrocyte_plasticity.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="674" height="336" font-family="Segoe UI, Arial">
+<rect width="674" height="336" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">A slow astrocyte gate cuts forgetting (glial-gated e-prop)</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">throttling plasticity at glia-tagged synapses beats a UNIFORM cut of the same size &#8212; it is WHERE, not how much; needs the SLOW timescale</text>
+<text x="60" y="54" font-size="11.5" font-weight="700" fill="#0b1324">retention error (old tasks)</text>
+<line x1="60" y1="258" x2="320" y2="258" stroke="#33415c"/>
+<rect x="74" y="88.0" width="42" height="170.0" fill="#c9341a" opacity="0.9"/>
+<text x="95" y="82" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.528</text>
+<text x="95" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">ungated</text>
+<rect x="134" y="117.2" width="42" height="140.8" fill="#2ca25f" opacity="0.9"/>
+<text x="155" y="111" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.437</text>
+<text x="155" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">SLOW</text>
+<text x="155" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">astro</text>
+<rect x="194" y="105.7" width="42" height="152.3" fill="#e08214" opacity="0.9"/>
+<text x="215" y="100" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.473</text>
+<text x="215" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">matched</text>
+<text x="215" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">uniform</text>
+<rect x="254" y="89.1" width="42" height="168.9" fill="#9aa6bd" opacity="0.9"/>
+<text x="275" y="83" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.524</text>
+<text x="275" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">fast</text>
+<text x="275" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">astro</text>
+<text x="394" y="54" font-size="11.5" font-weight="700" fill="#0b1324">targeting gain vs falsifier</text>
+<line x1="394" y1="258" x2="654" y2="258" stroke="#33415c"/>
+<rect x="434" y="102.0" width="70" height="156.0" fill="#2ca25f" opacity="0.88"/>
+<text x="469" y="96" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.036</text>
+<text x="469" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">SLOW: targeting</text>
+<text x="469" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">vs uniform</text>
+<rect x="544" y="257.6" width="70" height="0.4" fill="#9aa6bd" opacity="0.88"/>
+<text x="579" y="252" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.000</text>
+<text x="579" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">FAST: targeting</text>
+<text x="579" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">vs uniform</text>
+<text x="394" y="294" font-size="9.5" fill="#5b6b8c">matched ‖Δw‖ 4.5≈4.5; recency cost +0.056 (honest trade-off)</text>
+</svg>
