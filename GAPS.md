@@ -172,11 +172,112 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 
 ---
 
+## Tier 5 — the learning substrate (how the cortex *learns*, not just what it represents)
+
+*The register so far is strong on representation-forming rules bolted onto a backprop-trained core (BTSP, e-prop,
+STDP, Hebbian/Oja, three-factor gating, ripple consolidation). The deepest remaining gaps between this and human
+learning cluster in four places the earlier tiers do not reach: the credit-assignment **substrate** itself, the
+**timescale structure** of the synapse, the brain's ability to **tune its own learning**, and its **non-neuronal**
+learning partners. Every item is a measured-emergence experiment in the house style — never hard-coded into a loss.*
+
+### A1. Deep credit assignment WITHOUT backprop ✅ CLOSED (Jul 2026)
+- **Status: implemented (flagship).** `src/eval/credit_assignment.py` (n=5): one deep cortex module (a
+  coordinate→place-code map, 2→H→H→place) trained THREE ways from a matched init — backprop (weight transport),
+  **feedback alignment** (a FIXED RANDOM backward pathway; no Wᵀ, no forward/backward symmetry — the biological
+  rule), and a **shuffled-feedback** falsifier (feedback re-randomised every step). Measured, not trained:
+  (A) PARITY — feedback alignment reaches backprop's spatial decode (**0.106 vs 0.105**, both ≪ position-blind
+  floor 0.267) and extrapolation; (B) the forward weights **align** to the fixed feedback (weight-align **+0.07**
+  grown from ~0; grad-align **+0.10** vs the true gradient) — the FEEDBACK PATHWAY carries the error, modest but
+  consistently positive vs the shuffled null (**~0.00**); (C) the FALSIFIER — shuffling that pathway cripples
+  learning (decode **0.147 vs 0.106**, gap +0.042 ± 0.015); (D) feedback alignment learns backprop's internal
+  representation (CKA **0.98**). Hand-coded forward/backward (no autograd), like `eprop_local_learning.py`.
+- **Neuro basis.** Backprop's biological objections are concrete: forward/backward **weight symmetry** (a "weight
+  transport" the brain has no mechanism for), a **global** error piped through every layer, and a distinct
+  **backward phase**. Live substitutes: **burst-dependent plasticity** (a neuron's burst-vs-single-spike rate
+  carries a local error-like signal down the hierarchy; Payeur 2021), **dendritic microcircuits** delivering error
+  to apical dendrites (Sacramento 2018; Guerguiev 2017), and **prospective-configuration / predictive-coding**
+  nets. Feedback alignment (Lillicrap 2016; Nøkland 2016) is the tractable instance that removes weight transport.
+- **Why it mattered.** *The* deepest "how the cortex learns" gap. `DendriticNeuron` and `predictive_coding.py`
+  were already present but used as **encoders**, not as the learning substrate. This makes the credit signal
+  itself non-backprop and shows the spatial signatures survive it.
+- **Honest scope / next.** This closes the weight-transport objection on a feedforward module; the burst-dependent
+  (Payeur) and dendritic (Sacramento) realisations, and running feedback alignment inside the recurrent
+  path-integration net of `emergence.py` (to show emergent *grid* cells under a non-backprop rule), are the
+  follow-ups.
+
+### B2. The multi-timescale (metaplastic) synapse — *absent*
+- **Neuro basis.** The modern synapse-level answer to the stability–plasticity dilemma: a single synapse is a
+  chain of coupled variables at many timescales (Benna–Fusi complex/cascade synapse), giving **power-law** (not
+  exponential) forgetting and letting one weight be both fast-learning and stable.
+- **Model status: absent.** No metaplasticity, no hidden per-synapse state (weights are scalars in
+  `place_cell_memory.py` / the Hopfield store). The "no catastrophic forgetting" result rests on the CLS
+  *architecture* (fast hippocampal store + slow neocortex + ripple replay), not the synapse.
+- **Proposed experiment (emergence).** Replace scalar weights in the Hopfield store / place memory with 2–3-var
+  cascade synapses; train a stream of overlapping maps and **measure** the forgetting curve — predict power-law
+  retention vs. exponential for a scalar-weight control at matched capacity. Extends `continual.py` +
+  `grid_catastrophe.py`. CPU.
+
+### B3. Meta-learning — the brain tunes its own learning rate from inferred volatility — *absent*
+- **Neuro basis.** Humans and animals raise the learning rate in **volatile** blocks and lower it in **stable**
+  ones (Behrens 2007), a prefrontal **meta-RL** process; and they dissociate **volatility** (raise LR) from
+  **stochasticity** (lower LR) though both inflate observation variance.
+- **Model status: absent.** Neuromodulators (DA/ACh/NE) exist but none sets a learning rate from inferred
+  volatility; grep finds no volatility/adaptive-LR machinery.
+- **Proposed experiment (emergence).** A small recurrent controller over the grid/SR substrate on alternating
+  stable/volatile blocks; **measure** whether a post-hoc-fit effective learning rate tracks block volatility
+  *without being told the block* — the meta-RL signature. Reuses `successor.py` + `neuromodulation.py`. CPU.
+  *(Most distinctively-human learning gap on the board.)*
+
+### B4. Astrocyte-gated slow plasticity — *absent* (lowest-effort, extends e-prop)
+- **Neuro basis.** Hippocampal "learning-associated astrocytes" orchestrate encoding/retrieval (Williamson et al.,
+  *Nature* 2024); the tripartite synapse regulates efficacy over **slow (seconds)** timescales; LTP depends on
+  astrocytic **D-serine**, and activating astrocytes (not neurons) enhances contextual memory. Formalised as
+  Astrocyte-Gated Multi-Timescale Plasticity = eligibility + broadcast (which the repo has) + a **slow glial gate**
+  (which it lacks).
+- **Proposed experiment (emergence).** Add a slow astrocyte gate on the e-prop eligibility trace; **measure**
+  improved retention on a continual stream vs. the ungated e-prop control at matched plasticity. A ~two-line
+  extension of `eprop_local_learning.py`. CPU.
+
+### C5. Schema-accelerated neocortical learning (beyond schema *transfer*) — *partial*
+- **Neuro basis.** With a compatible neocortical **schema**, new consistent facts are assimilated in **one or two
+  trials, cortically** (Tse et al. 2007) — violating the strict "neocortex is always slow" CLS assumption.
+- **Model status: partial.** `relational.py` / `structural_transfer.py` test whether a frozen metric *generalises*
+  (transfer), not learning **speed**.
+- **Proposed experiment.** Pre-train a structural schema, then **measure** trials-to-criterion for
+  schema-consistent vs. schema-inconsistent new items — predict fast/near-one-shot only for the consistent case. CPU.
+
+### C6. Representational drift with a conserved-geometry read-out — *partial* (promote from Tier 4)
+- **Neuro basis.** Single-cell tuning **drifts** while the **population geometry is preserved**, and a
+  geometry-based reader corrects for drift; a fast process drives activity onto a low-D manifold that shrinks the
+  drift's dimensionality (Morales et al., *PNAS* 2025); excitability is a key stability factor.
+- **Proposed experiment.** Inject slow multiplicative weight fluctuations into a trained place code; **measure**
+  that a fixed decoder degrades to chance while a geometry-based (relational) read-out survives — sharpening the
+  Tier-4 open item into a claim. CPU.
+
+### C7. The sleep triple-coupling — *partial* (upgrade to ripple replay)
+- **Neuro basis.** NREM nests slow-oscillation → spindle → ripple; that phase-locking **selects and times** what
+  consolidates. The repo has a `SharpWaveRipple` organ and replay-that-consolidates, but not the oscillatory
+  nesting that gates it.
+- **Proposed experiment.** Drive replay only within simulated spindle-troughs nested in slow oscillations;
+  **measure** stronger, more selective consolidation than ungated replay at matched replay count. CPU.
+
+### D8. Cerebellar supervised learning / internal forward models — *absent* (whole system; lowest priority here)
+- **Neuro basis.** A third learning system: supervised, error-corrective, climbing-fiber teaching signals learning
+  forward models for prediction/timing. The biggest single-system omission, but least aligned with the Spatial-LLM
+  thesis (grep: only a "climbing the value gradient" metaphor).
+- Also briefly absent (lower priority): **structural plasticity** (spine turnover / synaptogenesis — the
+  architecture is topologically fixed), and **excitability-based memory allocation** (CREB/excitability engram
+  recruitment — distinct from the population reallocation in `predictions.py`).
+
+---
+
 ## Top recommendation
 
-Build **#2 (hexadirectional grid over a 2-D conceptual space)** and **#1 (BTSP one-shot plasticity)** next —
-they are the two most cutting-edge, most human, and most measurable gaps, one on the "how the brain **works**"
-axis (a grid code for *concepts*, the human cognitive-map signature) and one on the "how the brain **learns**"
-axis (the real one-shot learning rule, replacing the episodic-store abstraction). Both are CPU, both reuse the
-existing grid cortex, and both yield a clean emergent signature (6-fold symmetry; predictive field shift) that
-is never put into the loss.
+Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation), and the
+deepest **learning-substrate** gap — #A1, deep credit assignment without backprop — is now closed too (feedback
+alignment reaches backprop's spatial signatures with no weight transport). The frontier has moved to **Tier 5**.
+For maximum scientific payoff per CPU-hour next: **B3 (volatility-adaptive meta-learning)** — the most
+distinctively *human* learning capability on the board, reusing `successor.py` + `neuromodulation.py` — and **B4
+(astrocyte-gated slow plasticity)** — the lowest-effort win, a ~two-line extension of the e-prop eligibility
+trace with a landmark 2024 result behind it. Each yields a clean emergent signature (a post-hoc learning rate
+that tracks volatility; a glial retention gain) never put into the loss.

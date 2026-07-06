@@ -1106,6 +1106,33 @@ Moser 2008), and we test only that a surprise-gated reset is novelty-locked and 
 wired into the cortex (`BrainSpatialCortex(ach=…)` routes ACh to the grid attractor's recall).
 (`results/neuromodulation.json`, `results/neuromodulation.svg`.)
 
+### Learning without backprop — credit assignment via feedback alignment (GAPS.md Tier 5, #A1, n=5)
+
+The deepest "how the cortex learns" gap: everything else here is trained by backprop, whose least biological
+requirement is **weight transport** — the backward pass multiplies by Wᵀ, a forward/backward symmetry the brain
+has no mechanism for. `src/eval/credit_assignment.py` trains one deep cortex module (a coordinate→place-code map,
+2→H→H→place) THREE ways from a matched init and MEASURES, never trains, whether the biological rule matches
+backprop: **backprop** (Wᵀ), **FEEDBACK ALIGNMENT** (a fixed RANDOM backward matrix B — no weight transport, no
+symmetry; Lillicrap 2016; the abstraction the dendritic/burst rules of Sacramento 2018 and Payeur 2021 make
+biophysical), and a **shuffled-feedback** falsifier (B re-randomised every step).
+
+- **(A) PARITY.** Feedback alignment reaches backprop's spatial decode — **0.106 ± 0.009 vs 0.105 ± 0.010** (both
+  far below the position-blind floor **0.267**) — and its extrapolation, with **no weight transport**.
+- **(B) ALIGNMENT EMERGES.** It works because the forward weights **rotate to align** with the fixed random
+  feedback: weight-align `cos(W3, B3ᵀ)` **+0.07**, grown from ~0; the feedback-delivered error aligns with the
+  true gradient at **+0.10** — modest but consistently positive versus the shuffled null at **~0.00**. The feedback
+  *pathway* carries the error, not Wᵀ.
+- **(C) FALSIFIER.** Shuffling that pathway every step prevents alignment and cripples learning — decode
+  **0.147 vs 0.106** (gap **+0.042 ± 0.015**): it is the *consistent* feedback, not any random matrix, that
+  assigns credit.
+- **(D) SAME CODE.** Feedback alignment learns backprop's internal representation (hidden-layer **CKA 0.98**).
+
+Honest scope: this removes backprop's weight-transport objection on a feedforward module; the burst-dependent
+(Payeur) and dendritic-microcircuit (Sacramento) realisations, and running feedback alignment inside the
+recurrent path-integration net to grow emergent *grid* cells under a non-backprop rule, are the follow-ups. The
+credit signal, made biological — and the spatial signatures survive it. (`results/credit_assignment.json`,
+`results/credit_assignment.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
