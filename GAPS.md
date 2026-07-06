@@ -217,7 +217,16 @@ learning partners. Every item is a measured-emergence experiment in the house st
   retention vs. exponential for a scalar-weight control at matched capacity. Extends `continual.py` +
   `grid_catastrophe.py`. CPU.
 
-### B3. Meta-learning — the brain tunes its own learning rate from inferred volatility — *absent*
+### B3. Meta-learning — the brain tunes its own learning rate from inferred volatility ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/meta_learning.py` (n=5): a GRU meta-trained ONLY to predict the next
+  observation, across episodes whose hazard/noise are drawn per-episode and **never given as input**, develops in
+  its **frozen recurrent dynamics** (Wang 2018 meta-RL) a learning rate that adapts online. Post-hoc-fit revealed
+  α (delta-rule slope): **STABLE 0.49, VOLATILE 0.59, STOCHASTIC 0.34**. (A) tracks volatility — α_volatile −
+  α_stable = **+0.10 ± 0.03**; (B) the **dissociation** (the non-circular signature a "learn faster on big errors"
+  account cannot make) — α *drops* under pure stochasticity (**+0.25 ± 0.05** below volatile) even though that
+  block has the **highest** observation variance; (C) an untrained net is flat (**+0.00**); (D) it beats the best
+  single fixed α (error ratio **0.93**). Emergent, measured, never in the loss. See `results/FINDINGS.md`.
+  *Original entry below.*
 - **Neuro basis.** Humans and animals raise the learning rate in **volatile** blocks and lower it in **stable**
   ones (Behrens 2007), a prefrontal **meta-RL** process; and they dissociate **volatility** (raise LR) from
   **stochasticity** (lower LR) though both inflate observation variance.
@@ -274,10 +283,12 @@ learning partners. Every item is a measured-emergence experiment in the house st
 ## Top recommendation
 
 Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation), and the
-deepest **learning-substrate** gap — #A1, deep credit assignment without backprop — is now closed too (feedback
-alignment reaches backprop's spatial signatures with no weight transport). The frontier has moved to **Tier 5**.
-For maximum scientific payoff per CPU-hour next: **B3 (volatility-adaptive meta-learning)** — the most
-distinctively *human* learning capability on the board, reusing `successor.py` + `neuromodulation.py` — and **B4
-(astrocyte-gated slow plasticity)** — the lowest-effort win, a ~two-line extension of the e-prop eligibility
-trace with a landmark 2024 result behind it. Each yields a clean emergent signature (a post-hoc learning rate
-that tracks volatility; a glial retention gain) never put into the loss.
+learning-substrate frontier is advancing: **#A1** (deep credit assignment without backprop — feedback alignment
+reaches backprop's spatial signatures with no weight transport) and **#B3** (volatility-adaptive meta-learning — a
+self-tuned learning rate that rises with volatility and *falls* with stochasticity) are now closed too. Next, for
+maximum payoff per CPU-hour: **B4 (astrocyte-gated slow plasticity)** — the lowest-effort win, a ~two-line
+extension of the e-prop eligibility trace with a landmark 2024 result — and the **faithfulness capstone**: fold
+the biological learning rules (A1 feedback alignment / e-prop) into the *real* recurrent grid cortex
+(`emergence.py`) and show **emergent grid cells** form under a non-backprop rule — moving from "biological rules
+bolted onto a backprop core" to "the core itself learns biologically". Each yields a clean emergent signature
+never put into the loss.

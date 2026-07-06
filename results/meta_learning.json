@@ -1,0 +1,64 @@
+{
+  "n_seeds": 5,
+  "blocks": {
+    "stable": [
+      0.03,
+      0.1
+    ],
+    "volatile": [
+      0.25,
+      0.1
+    ],
+    "stochastic": [
+      0.03,
+      0.24
+    ]
+  },
+  "iters": 2500,
+  "results": {
+    "alpha_stable": {
+      "mean": 0.4891,
+      "ci95": 0.0663
+    },
+    "alpha_volatile": {
+      "mean": 0.5858,
+      "ci95": 0.0846
+    },
+    "alpha_stochastic": {
+      "mean": 0.3402,
+      "ci95": 0.0477
+    },
+    "untr_stable": {
+      "mean": 0.0002,
+      "ci95": 0.0007
+    },
+    "untr_volatile": {
+      "mean": 0.0006,
+      "ci95": 0.0021
+    },
+    "untr_stochastic": {
+      "mean": 0.001,
+      "ci95": 0.0027
+    },
+    "vol_gain": {
+      "mean": 0.0966,
+      "ci95": 0.0251
+    },
+    "dissoc": {
+      "mean": 0.2456,
+      "ci95": 0.0501
+    },
+    "stable_vs_stoch": {
+      "mean": 0.149,
+      "ci95": 0.032
+    },
+    "untr_vol_gain": {
+      "mean": 0.0004,
+      "ci95": 0.0014
+    },
+    "perf_ratio": {
+      "mean": 0.9319,
+      "ci95": 0.0084
+    }
+  }
+}

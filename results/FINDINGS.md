@@ -1133,6 +1133,43 @@ recurrent path-integration net to grow emergent *grid* cells under a non-backpro
 credit signal, made biological — and the spatial signatures survive it. (`results/credit_assignment.json`,
 `results/credit_assignment.svg`.)
 
+### A self-tuned learning rate — meta-learning inferred volatility (GAPS.md Tier 5, #B3, n=5)
+
+The most distinctively *human* learning capability still missing: people **tune their own learning rate** to the
+world — raising it when things are volatile, lowering it when they are merely noisy — and, the subtle part,
+**dissociate volatility from stochasticity** even though both inflate observation variance (Behrens et al. 2007;
+Piray & Daw 2020). The mechanism is a prefrontal **meta-reinforcement-learning** process (Wang et al. 2018): the
+adaptive rule lives in recurrent *dynamics*, not synapses. `src/eval/meta_learning.py` reproduces it and MEASURES
+the signature, never trains it. A GRU is meta-trained ONLY to predict the next observation, across change-point
+episodes whose hazard (volatility) and noise (stochasticity) are drawn per-episode and **never given as input** —
+it must infer them from the stream. Then, **weights frozen**, we run it through one session of concatenated
+`[stable | volatile | stochastic]` blocks and fit its *revealed* learning rate per block (the delta-rule slope
+`ŝ_t = ŝ_{t-1} + α·(o_t − ŝ_{t-1})` — a rate, invariant to error magnitude):
+
+| block | hazard / noise | revealed learning rate α |
+|---|---|---|
+| STABLE | low / moderate | **0.49 ± 0.07** |
+| VOLATILE | high / moderate | **0.59 ± 0.08** |
+| STOCHASTIC | low / **high** | **0.34 ± 0.05** |
+
+- **(A) It tracks volatility.** α is higher when the world jumps than when it is stable — `α_volatile − α_stable`
+  = **+0.10 ± 0.03** (every seed positive).
+- **(B) The dissociation — the non-circular signature.** Under pure **stochasticity** the network *lowers* its
+  learning rate (`α_volatile − α_stochastic` = **+0.25 ± 0.05**; `α_stable − α_stochastic` = **+0.15**) — even
+  though the stochastic block has the **highest observation variance**. A naive "learn faster when errors are big"
+  account predicts the opposite; the network has inferred, from temporal *structure* (a jump is a persistent step;
+  noise is uncorrelated wiggle), that this variance is noise, not change. Volatility ↑α, stochasticity ↓α.
+- **(C) Learned, not architectural.** An untrained (random-weight) GRU is flat across blocks (**+0.00 ± 0.00**) —
+  the adaptation requires meta-training.
+- **(D) Functional.** The adaptive network's next-observation error is **0.93×** the best *single fixed* learning
+  rate on the mixed session — no static α matches it.
+
+Honest scope: the outer (meta) loop is backprop — the meta-RL standard; the biological claim is the emergent
+*inner-loop* learning rate that lives in the frozen-weight recurrent dynamics (Wang 2018). The latent is 1-D
+tracking; tying it to the SR / grid reward-location substrate is a follow-up. The brain tuning its own learning
+rate from inferred volatility — emergent, measured, not in the loss.
+(`results/meta_learning.json`, `results/meta_learning.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
