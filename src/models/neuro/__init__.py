@@ -32,7 +32,7 @@ from .spatial_cells import (
 from .oscillations import (
     ThetaOscillator, PhasePrecession, ThetaGammaCoupling, SharpWaveRipple,
 )
-from .attractor import ContinuousAttractorNetwork, GridAttractorNetwork
+from .attractor import ContinuousAttractorNetwork, GridAttractorNetwork, HopfieldAssociativeMemory
 from .theta_sweep import ThetaSweepSampler
 
 __all__ = [
@@ -41,5 +41,5 @@ __all__ = [
     "DivisiveNormalization", "LateralInhibition", "EIBalanceLayer", "CorticalColumn",
     "HeadDirectionCells", "BoundaryVectorCells", "SpeedCells", "ConjunctiveSpatialCells", "EgocentricObjectVectorCells", "EgocentricCenterCells", "LocalOrder3DGrid", "ConjunctiveGridDirectionCells",
     "ThetaOscillator", "PhasePrecession", "ThetaGammaCoupling", "SharpWaveRipple",
-    "ContinuousAttractorNetwork", "GridAttractorNetwork", "ThetaSweepSampler",
+    "ContinuousAttractorNetwork", "GridAttractorNetwork", "HopfieldAssociativeMemory", "ThetaSweepSampler",
 ]

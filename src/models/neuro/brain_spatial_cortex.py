@@ -33,6 +33,7 @@ from .spatial_cells import ConjunctiveSpatialCells, BoundaryVectorCells
 from .oscillations import PhasePrecession
 from .microcircuits import CorticalColumn, DivisiveNormalization, LateralInhibition
 from .spiking_neurons import DendriticNeuron
+from ..neuromodulation import AcetylcholineGate
 
 
 class BrainSpatialCortex(nn.Module):
@@ -48,6 +49,13 @@ class BrainSpatialCortex(nn.Module):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_tokens = num_tokens
+
+        # ── Neuromodulation ─────────────────────────────────────────────
+        # Tonic acetylcholine encode/retrieve set-point (Hasselmo 2006). High ACh (a novel place)
+        # suppresses the grid attractor's recurrent recall so the code follows the afferent drive;
+        # low ACh lets recurrent dynamics dominate (retrieval). See models/neuromodulation.py and
+        # src/eval/neuromodulation.py for the measured encode/retrieve signatures.
+        self.acetylcholine = AcetylcholineGate()
 
         # ── Cell-type encoders ──────────────────────────────────────────
         self.grid_attractor = GridAttractorNetwork(grid_size=16, embed_dim=embed_dim)
@@ -73,17 +81,22 @@ class BrainSpatialCortex(nn.Module):
         coords: torch.Tensor,
         heading: torch.Tensor | None = None,
         speed: torch.Tensor | None = None,
+        ach: float | None = None,
     ) -> torch.Tensor:
         """
         Args:
             coords:  (B, 2) lat/lon in degrees
             heading: (B,) optional heading in radians (default 0)
             speed:   (B,) optional normalised speed (default 0)
+            ach:     optional acetylcholine level in [0, 1]. None (default) leaves the grid attractor
+                     unmodulated (recurrent_gain=1); 1.0 = encoding (recurrent recall suppressed),
+                     0.0 = retrieval. Routed to the grid attractor via AcetylcholineGate.
         Returns:
             (B, num_tokens, embed_dim) spatial cortex tokens
         """
         B = coords.shape[0]
         device = coords.device
+        rec_gain = 1.0 if ach is None else self.acetylcholine(ach)[0]
 
         if heading is None:
             heading = torch.zeros(B, device=device)
@@ -101,7 +114,7 @@ class BrainSpatialCortex(nn.Module):
         pos_in_field = frac_lon
 
         # ── Encode via each cell type ───────────────────────────────────
-        g = self.grid_attractor(coords)                       # (B, D)
+        g = self.grid_attractor(coords, recurrent_gain=rec_gain)   # (B, D) — ACh-gated recall
         c = self.conjunctive(heading, speed)                  # (B, D)
         p = self.phase(pos_in_field)                          # (B, D)
         b = self.boundary(bdist, bangle)                      # (B, D)

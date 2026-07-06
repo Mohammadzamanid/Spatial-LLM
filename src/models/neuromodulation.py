@@ -138,3 +138,88 @@ class PredictionErrorGate(nn.Module):
         gate_input = torch.cat([spatial_repr, err], dim=-1)
         gate = self.gate(gate_input)           # (B, D)
         return self.norm(spatial_repr * gate)
+
+
+class AcetylcholineGate(nn.Module):
+    """
+    Acetylcholine encode/retrieve set-point — Hasselmo (2006); Hasselmo, Bodelón & Wyble (2002).
+
+    A single tonic scalar ``ach`` in [0, 1] sets the hippocampus's dynamical MODE by doing two
+    things AT ONCE to the recurrent (CA3 collateral / Schaffer) synapses:
+
+      HIGH ACh  → ENCODING (a novel environment; Acquas 1996; Giovannini 2001 tie novelty→ACh):
+                  SUPPRESS recurrent transmission (so already-stored patterns do not dominate and
+                  intrude on the one being written) while ENHANCING the write-rate (plasticity) into
+                  those same synapses. The two opposing actions on the SAME weights are the
+                  non-obvious core of Hasselmo's account.
+      LOW ACh   → RETRIEVAL (a familiar environment): strong recurrent dynamics complete a partial
+                  or noisy cue back to a stored memory.
+
+    Scope (honest): this models the TONIC cholinergic set-point only. The fast within-theta-cycle
+    separation of encoding and retrieval (Hasselmo, Bodelón & Wyble 2002) is out of scope. The
+    afferent (perforant-path) input is, by default, only RELATIVELY spared (recurrent is suppressed
+    while afferent gain stays 1); set ``afferent_boost`` > 0 to also model absolute afferent
+    enhancement.
+
+    This is a mechanistic control signal, not a trained block — there are no learnable parameters,
+    so any downstream signature EMERGES from the mode switch rather than being fit.
+    """
+
+    def __init__(self, recurrent_gain_max: float = 1.0, afferent_boost: float = 0.0):
+        super().__init__()
+        self.recurrent_gain_max = recurrent_gain_max
+        self.afferent_boost = afferent_boost
+
+    def forward(self, ach):
+        """
+        Args:
+            ach: scalar (float) or tensor in [0, 1]. 1 = full encoding mode, 0 = full retrieval mode.
+        Returns:
+            (recurrent_gain, plasticity_scale, feedforward_gain)
+              recurrent_gain  = (1 - ach) * recurrent_gain_max   — recall gain (DOWN in encoding)
+              plasticity_scale = ach                             — write rate  (UP in encoding)
+              feedforward_gain = 1 + afferent_boost * ach        — afferent drive (spared/boosted)
+            These are three SEPARATE knobs; an experiment may hold one fixed while sweeping another to
+            decouple "what was stored" from "how much was stored".
+        """
+        recurrent_gain = (1.0 - ach) * self.recurrent_gain_max
+        plasticity_scale = ach
+        feedforward_gain = 1.0 + self.afferent_boost * ach
+        return recurrent_gain, plasticity_scale, feedforward_gain
+
+
+class LocusCoeruleusReset(nn.Module):
+    """
+    Locus-coeruleus noradrenaline as a surprise / "unexpected uncertainty" signal (Yu & Dayan 2005)
+    that drives a phasic network RESET (Bouret & Sara 2005; Sara 2009). Here that reset triggers
+    global remapping of the spatial code.
+
+    HONEST SCOPE: a *causal* LC-NE → hippocampal-remapping link is a HYPOTHESIZED bridge, not an
+    established fact. Global/rate remapping is classically driven by contextual/sensory change
+    (Muller & Kubie 1987; Leutgeb et al. 2005; Colgin, Moser & Moser 2008), studied without
+    reference to NE. This module implements the hypothesis that a phasic-NE reset is what SWITCHES
+    the map — and an experiment must then show the switch is (a) gated by genuine novelty, not mere
+    input change, and (b) adaptive.
+
+    Surprise is a mechanistic MODEL-MISMATCH between predicted and actual afferent input (no learned
+    parameters). The reset is all-or-none above ``threshold`` — a phasic burst.
+    """
+
+    def __init__(self, threshold: float = 0.5):
+        super().__init__()
+        self.threshold = threshold
+
+    def surprise(self, predicted: torch.Tensor, actual: torch.Tensor) -> torch.Tensor:
+        """(B, D), (B, D) -> (B,) in [0, 2]: 1 - cosine(predicted, actual). High = unpredicted input."""
+        return (1.0 - F.cosine_similarity(predicted, actual, dim=-1)).clamp(min=0.0)
+
+    def forward(self, predicted: torch.Tensor, actual: torch.Tensor):
+        """Returns (surprise (B,), reset_flag (B,) bool) — reset fires where surprise exceeds threshold."""
+        s = self.surprise(predicted, actual)
+        return s, s > self.threshold
+
+    @staticmethod
+    def remap(num_units: int, generator: Optional[torch.Generator] = None,
+              device=None) -> torch.Tensor:
+        """A fresh random assignment of code units — a global remap. Returns a permutation index (num_units,)."""
+        return torch.randperm(num_units, generator=generator, device=device)

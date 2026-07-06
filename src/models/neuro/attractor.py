@@ -51,10 +51,14 @@ class ContinuousAttractorNetwork(nn.Module):
         kernel = exc - 0.5 * inh
         self.register_buffer("W", kernel)
 
-    def forward(self, external_input: torch.Tensor) -> torch.Tensor:
+    def forward(self, external_input: torch.Tensor, recurrent_gain: float = 1.0) -> torch.Tensor:
         """
         Args:
             external_input: (B, num_units) drive to the network
+            recurrent_gain: scalar gate on the RECURRENT term only (afferent `external_input`
+                is spared). 1.0 = default; an acetylcholine-style encode/retrieve switch sets it
+                to ~0 during ENCODING (suppress recall so the bump follows the raw input) and ~1
+                during RETRIEVAL (Hasselmo 2006). See AcetylcholineGate in models/neuromodulation.
         Returns:
             (B, num_units) settled bump activity
         """
@@ -62,7 +66,7 @@ class ContinuousAttractorNetwork(nn.Module):
         u = external_input.clone()
         for _ in range(self.steps):
             recurrent = F.linear(u, self.W)                    # (B, N)
-            u = u + self.dt * (-u + F.relu(recurrent + external_input))
+            u = u + self.dt * (-u + F.relu(recurrent_gain * recurrent + external_input))
             u = F.relu(u)
             # Normalize to prevent runaway
             denom = u.sum(dim=-1, keepdim=True) + 1e-6
@@ -105,10 +109,12 @@ class GridAttractorNetwork(nn.Module):
 
         self.readout = nn.Linear(self.num_units, embed_dim)
 
-    def forward(self, coords: torch.Tensor) -> torch.Tensor:
+    def forward(self, coords: torch.Tensor, recurrent_gain: float = 1.0) -> torch.Tensor:
         """
         Args:
             coords: (B, 2) lat/lon
+            recurrent_gain: scalar gate on the RECURRENT term only (afferent `drive` spared) — the
+                acetylcholine encode/retrieve hook (see ContinuousAttractorNetwork.forward).
         Returns:
             (B, embed_dim) grid-attractor embedding
         """
@@ -116,6 +122,82 @@ class GridAttractorNetwork(nn.Module):
         u = drive.clone()
         for _ in range(self.steps):
             recurrent = F.linear(u, self.W)
-            u = F.relu(0.5 * u + 0.5 * (recurrent + drive))
+            u = F.relu(0.5 * u + 0.5 * (recurrent_gain * recurrent + drive))
             u = u / (u.sum(dim=-1, keepdim=True) + 1e-6) * self.num_units * 0.1
         return self.readout(u)
+
+
+class HopfieldAssociativeMemory(nn.Module):
+    """
+    Discrete AUTO-ASSOCIATIVE (Hopfield / Marr-Willshaw / Treves-Rolls CA3) memory.
+
+    Unlike the CONTINUOUS attractor networks above — whose stable states are a fixed continuum of
+    bump positions set by a Mexican-hat kernel — this network stores a SET OF DISCRETE PATTERNS in a
+    Hebbian-written recurrent weight matrix. A partial or noisy cue is then pattern-completed to the
+    nearest stored pattern by recurrent settling, and overlapping patterns INTERFERE (proactive /
+    retroactive) — the CA3 auto-associator that Hasselmo's acetylcholine encode/retrieve switch acts
+    upon. It shares only the relu-settle FORM with ContinuousAttractorNetwork, not its (continuous)
+    attractor structure.
+
+    References:
+      Marr (1971) "Simple memory: a theory for archicortex"
+      Hopfield (1982) "Neural networks and physical systems with emergent collective computational
+        abilities", PNAS
+      Treves & Rolls (1994) "Computational analysis of the role of the hippocampus in memory"
+    """
+
+    def __init__(self, num_units: int, steps: int = 8):
+        super().__init__()
+        self.num_units = num_units
+        self.steps = steps
+        # Recurrent auto-associative weights, written by a one-shot Hebbian rule (a buffer, not
+        # backprop-trained — it is written by `store`, exactly like a plateau writes BTSP weights).
+        self.register_buffer("W", torch.zeros(num_units, num_units))
+
+    def reset(self):
+        """Clear all stored patterns (W -> 0). A locus-coeruleus reset re-seeds the code on top of this."""
+        self.W.zero_()
+
+    def store(self, pattern: torch.Tensor, rate: float = 1.0) -> float:
+        """One-shot Hebbian outer-product write of a pattern into the recurrent weights.
+
+        Args:
+            pattern: (N,) or (B, N) activity pattern(s) to imprint as attractor(s).
+            rate:    plasticity rate (an acetylcholine-enhanced encoding gain scales THIS, leaving the
+                     recurrent transmission gain in `settle` as a separate knob — the two are decoupled).
+        Returns:
+            ||ΔW|| — the synaptic change this write induced (the storage-energy control: it lets an
+            experiment prove a pattern was written with EQUAL strength across conditions, so that a
+            recall difference reflects WHAT was stored, not HOW MUCH).
+        """
+        p = pattern if pattern.dim() == 2 else pattern.unsqueeze(0)
+        dW = rate * torch.einsum("bi,bj->ij", p, p) / p.shape[0]   # symmetric outer product
+        dW = dW - torch.diag(torch.diagonal(dW))                   # no self-connections (Hopfield)
+        self.W += dW
+        return dW.norm().item()
+
+    def settle(self, drive: torch.Tensor, recurrent_gain: float = 1.0,
+               steps: int | None = None, drive_decay: float = 1.0) -> torch.Tensor:
+        """Recurrent settling from an afferent drive. Mirrors the CAN update form; the RECURRENT term
+        is gated by `recurrent_gain` (the acetylcholine hook) while the afferent `drive` is spared.
+
+        Args:
+            drive:          (B, N) afferent input (the cue, or the to-be-encoded pattern).
+            recurrent_gain: gate on recurrent recall. ~0 => ENCODING (state follows the raw drive, not
+                            pulled toward stored attractors); ~1 => RETRIEVAL (recurrent completion).
+            drive_decay:    per-step multiplier on the afferent drive. 1.0 clamps the cue on throughout
+                            (the cue keeps re-injecting itself); <1.0 makes the cue TRANSIENT so that
+                            any cleanup of the state is attributable to the recurrent weights, not to
+                            the cue echoing itself (the completion-requires-W_rec control).
+        Returns:
+            (B, N) settled activity.
+        """
+        steps = steps or self.steps
+        x = F.relu(drive.clone())
+        d = drive.clone()
+        for _ in range(steps):
+            recurrent = F.linear(x, self.W)                         # x @ W^T (W symmetric)
+            x = F.relu(recurrent_gain * recurrent + d)
+            x = x / (x.sum(dim=-1, keepdim=True) + 1e-6) * self.num_units * 0.1
+            d = d * drive_decay
+        return x

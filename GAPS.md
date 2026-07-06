@@ -100,7 +100,19 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 
 ## Tier 2 — CPU, integration / harder
 
-### 5. Neuromodulatory control of **encoding vs. retrieval** and **surprise-driven reset** — made faithful & emergent
+### 5. Neuromodulatory control of **encoding vs. retrieval** and **surprise-driven reset** — made faithful & emergent ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `AcetylcholineGate` + `LocusCoeruleusReset` organs + `HopfieldAssociativeMemory`
+  (CA3 auto-associator; Marr 1971 / Hopfield 1982 / Treves-Rolls 1994) + `src/eval/neuromodulation.py` (n=5).
+  ACh sets a tonic encode/retrieve mode by SUPPRESSING recurrent recall while ENHANCING plasticity (Hasselmo
+  2006): high-ACh encoding blocks intrusion of an overlapping stored memory — **overlap-specific** (excess over a
+  far-pattern floor **+0.78**), and it is **recurrent contamination, not non-storage** (intrusion grows with the
+  encode recurrent gain, **+0.38**, at MATCHED write energy ‖ΔW‖); the same recurrent weights **complete** a
+  degraded cue in retrieval (**+0.29**, gone with W_rec off). NE surprise (Yu & Dayan 2005; Bouret & Sara 2005)
+  = **novelty not change** (AUC **1.00**; a big EXPECTED jump stays at the familiar floor) and a surprise remap
+  is **adaptive two-sided** vs a matched no-reset+re-encode control — learns the new env (**+0.29**) AND protects
+  the old map (**+0.27**). Designed against a circularity red-team (headline = differences vs matched controls,
+  not the by-construction knob). Also wired into `BrainSpatialCortex(ach=…)`. See `results/FINDINGS.md`.
+  *Original entry below.*
 - **Neuro basis.** **Acetylcholine** sets the hippocampus into an *encoding* vs. *retrieval* mode (high ACh →
   encode new, suppress recall; Hasselmo 2006); **noradrenaline / locus coeruleus** signals surprise/uncertainty
   and drives network reset & remapping (Yu & Dayan 2005; recent LC work 2022-2024).

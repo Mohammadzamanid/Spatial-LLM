@@ -1050,6 +1050,62 @@ signal for movement through concept space — the human cognitive map, from spac
 code is the bat-faithful/human-faithful one **and** the mechanistic origin of the hexadirectional signature is
 measured, not assumed. (`results/hexadirectional.json`, `results/hexadirectional.svg`.)
 
+### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
+
+Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)
+but wired only into `diagnose.py`/`accuracy.py` — never into the hippocampal dynamics, and with no
+acetylcholine encode/retrieve switch. We add two mechanistic organs — `AcetylcholineGate` and
+`LocusCoeruleusReset` — acting on a CA3-style auto-associator `HopfieldAssociativeMemory` (Marr 1971;
+Hopfield 1982; Treves & Rolls 1994), and **MEASURE** the classic signatures. Nothing is trained; the mode is
+set and the consequences are read out. The design was hardened against a circularity **red-team**: because a
+single recurrent-gain knob *trades* encode-cleanliness for retrieval-completion **BY CONSTRUCTION**, and a reset
+decorrelates the code **BY CONSTRUCTION**, *neither is reported*. Every number below is a **DIFFERENCE against a
+matched control, at matched storage energy** — the reward_map standard.
+
+**Acetylcholine (Hasselmo 2006): high ACh = encoding suppresses recurrent recall while enhancing plasticity.**
+
+| encoding a new field near a stored one | intrusion on the old memory |
+|---|---|
+| near / overlapping, **low ACh** (recall on) | **+0.81 ± 0.00** |
+| near / overlapping, **high ACh** (recall off) | **+0.42 ± 0.00** |
+| **FAR / non-overlapping** floor | **+0.02 ± 0.00** |
+
+- **(A1) Intrusion is OVERLAP-SPECIFIC** — the genuine signal, reported as excess over the far floor exactly as
+  reward_map reports over-representation over a yoked floor: encoding a field that OVERLAPS a stored memory is
+  pulled toward it (**+0.81**), while a distant field is not (**+0.02**) → **excess +0.78 ± 0.00**. Recurrence
+  only misdirects when there is a nearby attractor to be captured by.
+- **(A2) It is RECURRENT CONTAMINATION, not non-storage.** Intrusion grows with the encoding recurrent gain
+  (**+0.42 → +0.81**, effect **+0.38 ± 0.00**) while the write energy ‖ΔW‖ is held **MATCHED** (3.59 vs 3.66) —
+  so the difference is *what* was written (a representation pulled onto the old memory), not *how much*. High ACh
+  suppresses the recall so the new field is written where it belongs.
+- **(A3) Retrieval completion REQUIRES the recurrent weights.** A 50%-dropped, **transient** cue (cosine
+  **0.68** to the target) is completed to **0.96** with W_rec but stays at **0.68** with W_rec off (recovery
+  **+0.29 ± 0.04**) — the same recurrent synapses ACh suppresses for clean encoding are what pattern-complete a
+  degraded cue during retrieval. The cue is transient, so this is completion, not the cue echoing itself.
+
+**Noradrenaline (Yu & Dayan 2005; Bouret & Sara 2005): a phasic surprise burst gates remapping.**
+
+- **(B1) Surprise is NOVELTY, not change magnitude.** Mean prediction-error surprise is **0.16** for familiar
+  input+noise, **0.16** for a *large but EXPECTED* position jump (‖Δsensory‖ large — a change detector would
+  fire here), and **0.99** for genuinely novel input; θ-independent **AUC 1.00 ± 0.00** separating novel from
+  familiar. So NE tracks unpredicted-ness, not raw input change.
+- **(B2) A surprise-triggered remap is ADAPTIVE on BOTH sides**, vs a **matched no-reset+re-encode** control
+  (the control also re-encodes the new world, but onto the stale map): remap **learns the new environment**
+  (prediction error 0.34 → 0.05, benefit **+0.29 ± 0.01**, the stale attractor causes proactive interference)
+  **and protects the old map** from overwrite (old-env recall error 0.32 → 0.05, benefit **+0.27 ± 0.00**,
+  retroactive interference). This **unifies** the two systems: NE clears/re-indexes the map so the ACh-gated
+  encoder can write the new one without interference.
+
+**Honest scope.** Only the *tonic* cholinergic set-point is modeled — the fast within-theta-cycle
+encode/retrieve alternation (Hasselmo, Bodelón & Wyble 2002) is out of scope; the afferent input is *relatively*
+spared (recurrent suppressed) rather than absolutely boosted. The recurrent store is a Hopfield/Marr–Willshaw
+autoassociator (not BTSP — BTSP is millisecond-asymmetric and feedforward; it composes here only as the
+afferent one-shot write). And the LC-NE → hippocampal-**remapping** link is a **hypothesized bridge**: remapping
+itself is classically driven by contextual/sensory change (Muller & Kubie 1987; Leutgeb 2005; Colgin, Moser &
+Moser 2008), and we test only that a surprise-gated reset is novelty-locked and adaptive. The organs are also
+wired into the cortex (`BrainSpatialCortex(ach=…)` routes ACh to the grid attractor's recall).
+(`results/neuromodulation.json`, `results/neuromodulation.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
