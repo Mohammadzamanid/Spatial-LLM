@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="654" height="336" font-family="Segoe UI, Arial">
+<rect width="654" height="336" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">The multi-timescale synapse forgets as a POWER LAW</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">Benna-Fusi chain: straight on log-log (~1/&#8730;t); a leaky scalar is exponential (curved on log-log) &#8212; measured, not fit</text>
+<text x="60" y="54" font-size="11.5" font-weight="700" fill="#0b1324">(A) SNR vs age (log-log)</text>
+<line x1="60" y1="218" x2="310" y2="218" stroke="#9aa6bd" stroke-dasharray="4 3"/>
+<text x="310" y="215" font-size="8.5" fill="#7787a6" text-anchor="end">SNR=1 (memory lost)</text>
+<polyline points="68.3,68.0 85.0,92.8 101.7,97.2 118.3,105.4 135.0,122.2 151.7,134.3 168.3,165.5 185.0,169.8 201.7,184.3 218.3,200.7 235.0,219.5 251.7,237.1 268.3,241.1 285.0,255.9" fill="none" stroke="#2ca25f" stroke-width="2.4" opacity="0.9"/>
+<polyline points="68.3,69.9 85.0,77.3 101.7,74.1 118.3,80.6 135.0,89.5 151.7,99.4 168.3,129.8 185.0,162.3 201.7,229.3" fill="none" stroke="#c9341a" stroke-width="2.4" opacity="0.9"/>
+<rect x="160" y="58" width="12" height="4" fill="#2ca25f"/><text x="176" y="62" font-size="9" fill="#28324a">Benna-Fusi (power law)</text>
+<rect x="160" y="72" width="12" height="4" fill="#c9341a"/><text x="176" y="76" font-size="9" fill="#28324a">leaky scalar (exp)</text>
+<text x="185" y="274" font-size="9.5" fill="#5b6b8c" text-anchor="middle">memory age (log) &#8594;</text>
+<text x="384" y="54" font-size="11.5" font-weight="700" fill="#0b1324">(B) memory lifetime vs chain depth</text>
+<line x1="384" y1="258" x2="634" y2="258" stroke="#33415c"/>
+<rect x="400" y="206.3" width="42" height="51.7" fill="#c9341a" opacity="0.9"/>
+<text x="421" y="200" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">84</text>
+<text x="421" y="272" font-size="9" fill="#28324a" text-anchor="middle">scalar</text>
+<rect x="460" y="224.5" width="42" height="33.5" fill="#8fbf9f" opacity="0.9"/>
+<text x="481" y="218" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">55</text>
+<text x="481" y="272" font-size="9" fill="#28324a" text-anchor="middle">N=3</text>
+<rect x="520" y="136.8" width="42" height="121.2" fill="#4ca66f" opacity="0.9"/>
+<text x="541" y="131" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">198</text>
+<text x="541" y="272" font-size="9" fill="#28324a" text-anchor="middle">N=5</text>
+<rect x="580" y="88.0" width="42" height="170.0" fill="#2ca25f" opacity="0.9"/>
+<text x="601" y="82" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">278</text>
+<text x="601" y="272" font-size="9" fill="#28324a" text-anchor="middle">N=7</text>
+<text x="384" y="288" font-size="9.5" fill="#5b6b8c">age at SNR=1; grows with beaker count</text>
+</svg>

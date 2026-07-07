@@ -1241,6 +1241,35 @@ backprop-trained core", but **the core itself learning biologically** — the gr
 map, grown by the credit-assignment rule the cortex can actually run. (`results/emergent_grid_bio.json`,
 `results/emergent_grid_bio.svg`.)
 
+### Graceful forgetting from the synapse — the multi-timescale (Benna–Fusi) weight (GAPS.md Tier 5, #B2, n=5)
+
+Every weight in the repo is a **scalar**, and a scalar synapse is caught in the stability–plasticity dilemma: a
+leaky/bounded weight forgets **exponentially** — fast-learning *or* stable, never both. Benna & Fusi
+(*Nat. Neurosci.* 2016) resolve it *inside* the synapse: one synapse is a **chain of coupled hidden variables at
+geometrically-spaced timescales** (a cascade of "beakers" joined by "tubes"); a plasticity event enters the
+visible weight and slowly diffuses into deeper, slower beakers, so memory decays as a **power law (~1/√t)** —
+one weight both fast-learning *and* long-remembering. `src/eval/complex_synapse.py` reproduces Benna & Fusi's own
+memory benchmark and MEASURES the forgetting curve (never fits it): over S synapses a stream of M random ±1
+memories is stored; the visible weights are then read out and each memory's signal-to-noise ratio is measured
+against its age. Three models at matched initial SNR: a leaky scalar, a Benna–Fusi chain (N=7), and the chain at
+N=3/5/7.
+
+- **(A) Power law vs exponential — the *shape* is measured, not imposed.** The Benna–Fusi SNR(age) is a straight
+  line on **log-log** axes — power-law fit R² **0.99** versus an exponential fit's 0.73 — with slope **−0.47 ±
+  0.01**, the 1/√t law falling out of the diffusion. The leaky scalar is the opposite: a straight line on
+  **semilog** axes (exponential fit R² **0.99** versus a power-law fit's 0.81). Which fit wins flips between the
+  two synapses.
+- **(B) Longer memory at matched initial SNR.** The age at which SNR crosses 1 (signal = noise) is **278** for
+  the complex synapse versus **84** for the scalar — **3.3×** longer, with the same initial signal per memory.
+- **(C) Dose-response.** Memory lifetime grows geometrically with the number of beakers: **55 → 198 → 278** for
+  N = 3 → 5 → 7 — the Benna–Fusi prediction (a 1-beaker chain is just the scalar).
+
+Honest scope: a linear-chain reduced model of the Benna–Fusi synapse on the canonical random-memory benchmark; it
+drops into any store (including the spatial / Hopfield ones). It is distinct from #B4 — B4 is a *glial gate on the
+learning rule*, B2 is the *intrinsic multi-timescale synapse*; together they are two independent routes to
+graceful forgetting. The stability–plasticity dilemma, dissolved at the synapse — measured, not put in the loss.
+(`results/complex_synapse.json`, `results/complex_synapse.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

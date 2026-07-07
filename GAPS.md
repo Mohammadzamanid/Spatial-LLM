@@ -205,7 +205,16 @@ learning partners. Every item is a measured-emergence experiment in the house st
   path-integration net of `emergence.py` (to show emergent *grid* cells under a non-backprop rule), are the
   follow-ups.
 
-### B2. The multi-timescale (metaplastic) synapse — *absent*
+### B2. The multi-timescale (metaplastic) synapse ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/complex_synapse.py` (n=5). A synapse built as a Benna–Fusi CHAIN of coupled
+  variables at geometric timescales, on Benna & Fusi's own random-memory benchmark. Measured, never fit:
+  (A) the complex synapse forgets as a **POWER LAW** — log-log R² **0.99** ≫ semilog R² 0.73, slope **−0.47 ±
+  0.01** (≈ the −0.5 / 1/√t law) — whereas a leaky **SCALAR** synapse forgets **EXPONENTIALLY** (semilog R²
+  **0.99** ≫ log-log 0.81); (B) at MATCHED initial SNR the complex synapse's memory lifetime (age at SNR=1) is
+  **3.3×** longer (278 vs 84); (C) dose-response — lifetime grows geometrically with chain depth (**55 → 198 →
+  278** for N=3 → 5 → 7). One weight both fast-learning and long-remembering — graceful forgetting from the
+  synapse itself. Distinct from #B4 (a glial gate on the learning rule); B2 is the intrinsic multi-timescale
+  synapse. See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** The modern synapse-level answer to the stability–plasticity dilemma: a single synapse is a
   chain of coupled variables at many timescales (Benna–Fusi complex/cascade synapse), giving **power-law** (not
   exponential) forgetting and letting one weight be both fast-learning and stable.
@@ -313,7 +322,7 @@ learning-substrate tier is closed — **#A1** (deep credit assignment without ba
 meta-learning), **#B4** (astrocyte-gated slow plasticity) — and so is the **faithfulness capstone**: the *real*
 recurrent grid cortex now learns its grid code under a non-backprop rule (RFLO = A1's feedback alignment +
 e-prop), moving the model from "biological rules bolted onto a backprop core" to **the core itself learning
-biologically.** Next, the remaining Tier-5 items, each a clean emergent signature never put into the loss:
-**B2** (Benna–Fusi multi-timescale synapse → power-law forgetting), **C6** (representational drift with a
-conserved-geometry read-out), **C7** (sleep triple-coupling → selective consolidation), and the GPU/language
-capstones **#8/#9** (the LLM reads the concept-grid / social-space maps).
+biologically.** **#B2** (Benna–Fusi multi-timescale synapse — power-law vs exponential forgetting) is closed too. Next, the
+remaining Tier-5 items, each a clean emergent signature never put into the loss: **C6** (representational drift
+with a conserved-geometry read-out), **C7** (sleep triple-coupling → selective consolidation), and the
+GPU/language capstones **#8/#9** (the LLM reads the concept-grid / social-space maps).
