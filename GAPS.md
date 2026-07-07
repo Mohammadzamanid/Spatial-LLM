@@ -274,7 +274,21 @@ learning partners. Every item is a measured-emergence experiment in the house st
 - **Proposed experiment.** Pre-train a structural schema, then **measure** trials-to-criterion for
   schema-consistent vs. schema-inconsistent new items — predict fast/near-one-shot only for the consistent case. CPU.
 
-### C6. Representational drift with a conserved-geometry read-out — *partial* (promote from Tier 4)
+### C6. Representational drift with a conserved-geometry read-out ✅ CLOSED (Jul 2026)
+- **Status: implemented (and hardened against a red-team that killed a first, circular version).** `src/eval/
+  representational_drift.py` (n=5). The naive version (a fixed decoder fails, a re-fit reader survives) was
+  **rejected as circular** — RSA over a Gaussian tiling is blind to remapping (a full remap gives *higher* RSA),
+  and the "geometry reader" was within-day recalibration. The corrected, non-circular test: at **MATCHED
+  single-cell drift** (cell-corr +0.15 vs +0.13), compare geometry-PRESERVING drift (field relocation) to
+  geometry-DESTROYING drift (independent high-D noise), read out by a **LABEL-FREE** manifold decoder (Fiedler /
+  kNN-Laplacian 1-D coordinate — no current labels). (A) the geometry read-out recovers position under preserving
+  drift (**0.001**) but fails under destroying drift (**0.30** ≈ chance), gap **+0.30 ± 0.02**; (A′) a **held-out
+  supervised** decoder confirms it (**0.02 vs 0.44** — even with labels, position does not generalise once the
+  geometry is gone; an all-position fit would overfit and hide this); (B) a FIXED decoder degrades under any
+  drift (**0.28**) while the geometry read-out survives; (C) the read-out survives even a **FULL remap** (0% cells
+  conserved, **0.002**) — it reads the environment's GEOMETRY, not cell identity. Since single-cell drift is
+  matched, the difference is the drift STRUCTURE (whether geometry is conserved), not how much cells changed
+  (Morales 2025). See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** Single-cell tuning **drifts** while the **population geometry is preserved**, and a
   geometry-based reader corrects for drift; a fast process drives activity onto a low-D manifold that shrinks the
   drift's dimensionality (Morales et al., *PNAS* 2025); excitability is a key stability factor.
@@ -322,7 +336,8 @@ learning-substrate tier is closed — **#A1** (deep credit assignment without ba
 meta-learning), **#B4** (astrocyte-gated slow plasticity) — and so is the **faithfulness capstone**: the *real*
 recurrent grid cortex now learns its grid code under a non-backprop rule (RFLO = A1's feedback alignment +
 e-prop), moving the model from "biological rules bolted onto a backprop core" to **the core itself learning
-biologically.** **#B2** (Benna–Fusi multi-timescale synapse — power-law vs exponential forgetting) is closed too. Next, the
-remaining Tier-5 items, each a clean emergent signature never put into the loss: **C6** (representational drift
-with a conserved-geometry read-out), **C7** (sleep triple-coupling → selective consolidation), and the
+biologically.** **#B2** (Benna–Fusi multi-timescale synapse) and **#C6** (representational drift — a label-free geometry read-out
+survives geometry-preserving drift, even a full remap, but fails geometry-destroying drift at matched single-cell
+drift; the circular first attempt was caught and rebuilt) are closed too. Next, the remaining items, each a clean
+emergent signature never put into the loss: **C7** (sleep triple-coupling → selective consolidation), and the
 GPU/language capstones **#8/#9** (the LLM reads the concept-grid / social-space maps).

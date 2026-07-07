@@ -1,0 +1,70 @@
+{
+  "n_seeds": 5,
+  "N": 200,
+  "P": 60,
+  "days": 30,
+  "relocate": 0.06,
+  "noise_sd": 0.4,
+  "results": {
+    "cell_corr_relocate": {
+      "mean": 0.1511,
+      "ci95": 0.0235
+    },
+    "cell_corr_noise": {
+      "mean": 0.1304,
+      "ci95": 0.0046
+    },
+    "cell_corr_remap": {
+      "mean": 0.0162,
+      "ci95": 0.0227
+    },
+    "manifold_relocate": {
+      "mean": 0.0014,
+      "ci95": 0.0007
+    },
+    "manifold_noise": {
+      "mean": 0.301,
+      "ci95": 0.0141
+    },
+    "manifold_remap": {
+      "mean": 0.0018,
+      "ci95": 0.0002
+    },
+    "heldout_relocate": {
+      "mean": 0.0172,
+      "ci95": 0.0287
+    },
+    "heldout_noise": {
+      "mean": 0.4443,
+      "ci95": 0.0386
+    },
+    "heldout_remap": {
+      "mean": 0.0132,
+      "ci95": 0.0158
+    },
+    "fixed_relocate": {
+      "mean": 0.2787,
+      "ci95": 0.0465
+    },
+    "fixed_noise": {
+      "mean": 0.6496,
+      "ci95": 0.1872
+    },
+    "geometry_gap": {
+      "mean": 0.2997,
+      "ci95": 0.0147
+    },
+    "heldout_gap": {
+      "mean": 0.4271,
+      "ci95": 0.055
+    },
+    "reader_vs_fixed": {
+      "mean": 0.2773,
+      "ci95": 0.0465
+    },
+    "drift_match": {
+      "mean": 0.0309,
+      "ci95": 0.0137
+    }
+  }
+}

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="654" height="336" font-family="Segoe UI, Arial">
+<rect width="654" height="336" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">Representational drift: the population GEOMETRY survives it</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">at matched single-cell drift, a label-free geometry read-out survives geometry-preserving drift (even a full remap) but fails when the drift destroys geometry</text>
+<text x="60" y="54" font-size="11.5" font-weight="700" fill="#0b1324">(A) geometry read-out error (lower=better)</text>
+<line x1="60" y1="258" x2="310" y2="258" stroke="#33415c"/>
+<line x1="60" y1="117" x2="310" y2="117" stroke="#9aa6bd" stroke-dasharray="4 3"/>
+<rect x="80" y="257.2" width="52" height="0.8" fill="#2ca25f" opacity="0.9"/>
+<text x="106" y="251" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.001</text>
+<text x="106" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">relocate</text>
+<text x="106" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">(geom kept)</text>
+<rect x="154" y="257.0" width="52" height="1.0" fill="#4ca66f" opacity="0.9"/>
+<text x="180" y="251" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.002</text>
+<text x="180" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">remap</text>
+<text x="180" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">(geom kept)</text>
+<rect x="228" y="88.0" width="52" height="170.0" fill="#c9341a" opacity="0.9"/>
+<text x="254" y="82" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.301</text>
+<text x="254" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">noise</text>
+<text x="254" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">(geom lost)</text>
+<text x="60" y="292" font-size="9" fill="#5b6b8c">dashed = chance; single-cell drift matched across all</text>
+<text x="384" y="54" font-size="11.5" font-weight="700" fill="#0b1324">(B) fixed decoder vs geometry read-out</text>
+<line x1="384" y1="258" x2="634" y2="258" stroke="#33415c"/>
+<rect x="428" y="88.0" width="64" height="170.0" fill="#c9341a" opacity="0.9"/>
+<text x="460" y="82" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.279</text>
+<text x="460" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">fixed</text>
+<text x="460" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">decoder</text>
+<rect x="528" y="257.1" width="64" height="0.9" fill="#2ca25f" opacity="0.9"/>
+<text x="560" y="251" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.001</text>
+<text x="560" y="271" font-size="8.5" fill="#28324a" text-anchor="middle">GEOMETRY</text>
+<text x="560" y="281" font-size="8.5" fill="#28324a" text-anchor="middle">read-out</text>
+<text x="384" y="292" font-size="9.5" fill="#5b6b8c">under geometry-preserving drift (relocate); the fixed decoder is bound to cells that moved</text>
+</svg>

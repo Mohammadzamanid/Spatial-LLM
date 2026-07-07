@@ -1270,6 +1270,40 @@ learning rule*, B2 is the *intrinsic multi-timescale synapse*; together they are
 graceful forgetting. The stability–plasticity dilemma, dissolved at the synapse — measured, not put in the loss.
 (`results/complex_synapse.json`, `results/complex_synapse.svg`.)
 
+### Representational drift — the population GEOMETRY is what survives, not the cells (GAPS.md Tier 5, #C6, n=5)
+
+Place cells change their tuning over days even in a fixed environment with stable behavior — representational
+drift (Ziv 2013; Rule 2019). What supports stable behavior? The population-geometry answer (Morales 2025; 2025
+CA1 coordinated-drift work): read the *environment's geometry* carried by the population manifold, not the
+identity of particular cells. `src/eval/representational_drift.py` tests this — and it is worth stating plainly
+that a **first version of this eval was circular and was killed by an adversarial red-team**: RSA over a Gaussian
+tiling is blind to remapping (a *full remap* gives *higher* RSA), and the "geometry reader" there was just
+within-day recalibration. The rebuilt, non-circular test compares, **at matched single-cell drift**, a
+geometry-**preserving** drift (a fraction of place fields relocate each day) to a geometry-**destroying** drift
+(independent high-D noise of the *same* single-cell magnitude), read by a **label-free** geometry read-out (it
+recovers position from the current day's manifold *ordering* — the Fiedler / kNN-Laplacian 1-D coordinate — using
+no current position labels).
+
+- **(A) Geometry, not cells, is what survives.** At matched single-cell drift (cell-corr **+0.15 vs +0.13**), the
+  label-free geometry read-out recovers position almost perfectly under geometry-preserving drift (**0.001 ±
+  0.001**) but fails under geometry-destroying drift (**0.30 ± 0.01** ≈ chance 0.25) — gap **+0.30 ± 0.02**. Since
+  the single-cell drift is *matched*, the difference is the drift's **structure** (whether the geometry is
+  conserved), not how much the cells changed.
+- **(A′) Supervised confirmation (not an overfit artifact).** A *held-out* linear decoder shows the same:
+  preserving **0.02** vs destroying **0.44**. Even *with* labels, position does not generalise once the geometry
+  is gone. (An all-position fit overfits — N > P — and hides this; held-out exposes it.)
+- **(B) Fixed vs geometry.** A **fixed** decoder, bound to specific cells, degrades under drift (**0.28**) while
+  the geometry read-out survives.
+- **(C) Robust to remapping — the honest resolution.** The geometry read-out survives even a **full remap** (all
+  cells re-tile the track, **0% cell identity conserved**, error **0.002**). It reads the environment's geometry,
+  not which cells carry it — so the claim is about *geometry* conservation, not *cell* conservation (this is the
+  point the red-team's full-remap critique forced into the open).
+
+Honest scope: a phenomenological place-code drift model; the geometry read-out is label-free unsupervised
+manifold decoding, which fails precisely when the manifold is corrupted — that failure is the signal. Stable
+read-out rides on the conserved population geometry, not on single-cell stability (Morales 2025) — measured, not
+put in the loss. (`results/representational_drift.json`, `results/representational_drift.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
