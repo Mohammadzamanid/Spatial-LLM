@@ -296,7 +296,17 @@ learning partners. Every item is a measured-emergence experiment in the house st
   that a fixed decoder degrades to chance while a geometry-based (relational) read-out survives — sharpening the
   Tier-4 open item into a claim. CPU.
 
-### C7. The sleep triple-coupling — *partial* (upgrade to ripple replay)
+### C7. The sleep triple-coupling ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/sleep_consolidation.py` (n=5). Replay nested in the SO→spindle windows,
+  with M memories half TAGGED (strong trace) / half untagged. Measured, at matched count: (A) **SELECTIVITY** —
+  the coupled regime sends **99%** of consolidation to the TAGGED memories vs a **77% proportional floor**
+  (gap **+0.21 ± 0.04**); this is EMERGENT — winner-take-all competition for the scarce spindle windows selects
+  the strong traces, nothing is told to prefer tags (both regimes draw reactivations ∝ trace strength). (B)
+  **COORDINATION** — at matched replay count coupled replay consolidates **every** event vs uncoupled's **50%**
+  (the rest wasted in cortical DOWN states). (C) **FALSIFIER** — remove the SO structure and selectivity falls to
+  the proportional floor (**0.76**, gap +0.23 ± 0.01): the *nesting*, not replay, is what selects and times.
+  Guarded against the by-construction trap with matched count + the emergent-selectivity framing + the no-SO
+  falsifier (Latchoumane 2017; Diekelmann & Born 2010). See `results/FINDINGS.md`. *Original entry below.*
 - **Neuro basis.** NREM nests slow-oscillation → spindle → ripple; that phase-locking **selects and times** what
   consolidates. The repo has a `SharpWaveRipple` organ and replay-that-consolidates, but not the oscillatory
   nesting that gates it.
@@ -336,8 +346,9 @@ learning-substrate tier is closed — **#A1** (deep credit assignment without ba
 meta-learning), **#B4** (astrocyte-gated slow plasticity) — and so is the **faithfulness capstone**: the *real*
 recurrent grid cortex now learns its grid code under a non-backprop rule (RFLO = A1's feedback alignment +
 e-prop), moving the model from "biological rules bolted onto a backprop core" to **the core itself learning
-biologically.** **#B2** (Benna–Fusi multi-timescale synapse) and **#C6** (representational drift — a label-free geometry read-out
+biologically.** **#B2** (Benna–Fusi multi-timescale synapse), **#C6** (representational drift — a label-free geometry read-out
 survives geometry-preserving drift, even a full remap, but fails geometry-destroying drift at matched single-cell
-drift; the circular first attempt was caught and rebuilt) are closed too. Next, the remaining items, each a clean
-emergent signature never put into the loss: **C7** (sleep triple-coupling → selective consolidation), and the
-GPU/language capstones **#8/#9** (the LLM reads the concept-grid / social-space maps).
+drift; the circular first attempt was caught and rebuilt), and **#C7** (sleep triple-coupling — SO→spindle→ripple
+nesting selects and times consolidation) are closed too. **The entire CPU register — every Tier-1/2/5 item — is
+now closed.** The only remaining items are the **GPU/language capstones #8/#9** (a frozen LLM reads the
+concept-grid / social-space maps, cortex-ON vs text-only-OFF), which need a T4 and live in `notebooks/`.

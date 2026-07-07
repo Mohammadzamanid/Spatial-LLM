@@ -1,0 +1,50 @@
+{
+  "n_seeds": 5,
+  "M": 40,
+  "K": 6,
+  "windows": 200,
+  "R": 400,
+  "p_up": 0.5,
+  "results": {
+    "sel_coupled": {
+      "mean": 0.989,
+      "ci95": 0.0072
+    },
+    "sel_uncoupled": {
+      "mean": 0.778,
+      "ci95": 0.0298
+    },
+    "sel_noso": {
+      "mean": 0.764,
+      "ci95": 0.0156
+    },
+    "proportional": {
+      "mean": 0.7692,
+      "ci95": 0.0
+    },
+    "coord_coupled": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "coord_uncoupled": {
+      "mean": 0.5,
+      "ci95": 0.0202
+    },
+    "coord_noso": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "selectivity_gap": {
+      "mean": 0.211,
+      "ci95": 0.035
+    },
+    "coordination_gap": {
+      "mean": 0.5,
+      "ci95": 0.0202
+    },
+    "falsifier_gap": {
+      "mean": 0.225,
+      "ci95": 0.0149
+    }
+  }
+}

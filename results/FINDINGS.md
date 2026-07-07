@@ -1304,6 +1304,39 @@ manifold decoding, which fails precisely when the manifold is corrupted — that
 read-out rides on the conserved population geometry, not on single-cell stability (Morales 2025) — measured, not
 put in the loss. (`results/representational_drift.json`, `results/representational_drift.svg`.)
 
+### Sleep triple-coupling — SELECTIVE consolidation emerges from competition for scarce windows (GAPS.md Tier 5, #C7, n=5)
+
+NREM sleep nests three rhythms: slow oscillations (SO, ~1 Hz) gate spindles (~12 Hz), whose troughs gate
+hippocampal ripples (replay). This SO→spindle→ripple coupling *times* replay to arrive at cortex during the brief
+plastic UP-state windows, and behaviourally sleep consolidates **tagged / relevant** memories preferentially
+(Latchoumane 2017; Maingret 2016; Diekelmann & Born 2010). `src/eval/sleep_consolidation.py` asks whether that
+**selectivity** is a *consequence* of the architecture rather than something imposed. M = 40 traces, half TAGGED
+(strength s≈1.0), half untagged (s≈0.3); sleep offers a **limited** number of spindle windows. C6 taught the
+by-construction trap, so the guards are explicit: consolidation count is **matched** across conditions (the claim
+is selectivity *per event*, not more events); the drive is s-proportional in *both* conditions (tags are never
+told to win); and a **no-SO falsifier** removes the scarce-window bottleneck.
+
+- **(A) Selectivity is emergent, not imposed (headline).** With the coupling, each scarce window consolidates the
+  *winner* of a noisy competition among reactivated traces (winner-take-all over K reactivations). This amplifies
+  the trace-strength difference into a tagged fraction of **0.989 ± 0.007** — far above the **uncoupled** condition
+  (**0.778 ± 0.030**, which consolidates ∝ s, so untagged memories get their proportional share) and well above
+  the **proportional floor 0.769**. Selectivity gap **+0.21 ± 0.04**. Nothing in the mechanism prefers tags; the
+  selectivity falls out of competition for *limited* windows on noisy traces.
+- **(B) Coordination — timing, at matched replay count.** Coupled replay is timed to the plastic UP-state windows,
+  so **every** replay consolidates (coord **1.00**); random-timed (uncoupled) replay wastes events that land in
+  DOWN states (coord **0.50 ± 0.02**) — gap **+0.50**. Same number of replays; the sleep architecture's *timing*
+  is what converts them to plasticity.
+- **(C) Falsifier — the selectivity needs the SO structure.** Remove the scarce-window bottleneck (cortex always
+  plastic, no SO nesting) and the competition disappears: selectivity collapses to **0.764 ± 0.016 ≈ the
+  proportional floor 0.769** (drop **−0.23 ± 0.01** from coupled). So the selectivity is a property of the
+  SO/spindle *nesting*, not of "more replay" — with unlimited windows replay is indiscriminate.
+
+Honest scope: a phenomenological triple-coupling model (traces + scarce windows + noisy competition), not a
+spiking SO/spindle/ripple simulator. The measured signature — that coupling *selects* tagged memories above the
+proportional floor and *collapses* to that floor without the SO bottleneck — is never in any loss; it emerges
+from competition for scarce, timed windows (Latchoumane 2017; Diekelmann & Born 2010).
+(`results/sleep_consolidation.json`, `results/sleep_consolidation.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
