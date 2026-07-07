@@ -21,6 +21,7 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["HF_HUB_DISABLE_XET"] = "1"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"   # reduce T4 fragmentation OOM
 !if [ -d Spatial-LLM ]; then cd Spatial-LLM && git pull origin main; else git clone https://github.com/Mohammadzamanid/Spatial-LLM.git; fi
 %cd Spatial-LLM
 !pip -q install -U "transformers>=4.40" peft accelerate
@@ -46,7 +47,7 @@ for seed in [0, 1, 2]:
     if os.path.exists(out):
         print(f"skip seed={seed} (exists)"); continue
     cmd = ["python", "-u", "-m", "src.training.train_social", "--task", "dominance",
-           "--G", "6", "--spacing", "0.8", "--steps", "1500", "--seed", str(seed), "--out", out]
+           "--G", "6", "--spacing", "0.8", "--steps", "1500", "--bs", "8", "--seed", str(seed), "--out", out]
     print(f"\n>>> social seed={seed}  (watch the 'step N: loss' lines)", flush=True); t0 = time.time()
     subprocess.run(cmd, check=True); print(f"    done in {(time.time()-t0)/60:.1f} min", flush=True)
 print("\nsocial sweep pass complete")

@@ -136,8 +136,9 @@ def collate(triples, labels, tok, device, max_len=56):
 
 
 @torch.no_grad()
-def evaluate(model, head, tok, triples, labels, grid, device, ablate=False, shuffle_perm=None, bs=32):
-    """Candidate-NLL scoring: for each triple, model's NLL of ' Yes.' vs ' No.' given the concept codes."""
+def evaluate(model, head, tok, triples, labels, grid, device, ablate=False, shuffle_perm=None, bs=8):
+    """Candidate-NLL scoring: for each triple, model's NLL of ' Yes.' vs ' No.' given the concept codes.
+    Small default bs: the LM-head logits are (bs, seq, ~152k vocab) — the dominant memory term on a T4."""
     plen = len(tok(PROMPT)["input_ids"]); cands = [" Yes.", " No."]; cor = tot = 0
     pos = grid if shuffle_perm is None else grid[shuffle_perm]     # shuffled: concept<->position permuted
     for k in range(0, len(triples), bs):
@@ -170,7 +171,7 @@ def main():
     ap.add_argument("--steps", type=int, default=1800)
     ap.add_argument("--jitter", type=float, default=0.12)          # < spacing/2 keeps the geometry
     ap.add_argument("--lr", type=float, default=2e-4)
-    ap.add_argument("--bs", type=int, default=16)
+    ap.add_argument("--bs", type=int, default=8)                   # T4-safe (LM-head logits over ~152k vocab)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -184,6 +185,15 @@ def main():
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
     head = nn.Linear(3 * model.cortex.embed_dim, llm_dim * model.n_tokens).to(device)   # joint triple readout
+    # T4 memory: gradient-checkpoint the LLM (frees transformer-layer activations to make room for the
+    # (bs, seq, ~152k vocab) LM-head logits). inputs_embeds carry grad from the trainable fusion/head, so
+    # checkpointing is transparent to the trainable params. Guarded — degrades gracefully if unavailable.
+    try:
+        model.llm.config.use_cache = False
+        model.llm.gradient_checkpointing_enable()
+        print("gradient checkpointing: ON", flush=True)
+    except Exception as e:
+        print(f"gradient checkpointing unavailable ({e}); relying on small --bs", flush=True)
 
     grid = build_grid(a.G, a.spacing); N = grid.shape[0]
     near_r = 2.1 * a.spacing; margin = 0.2 * a.spacing        # near = local (<= ~2-step) with a resolvable margin
@@ -208,6 +218,9 @@ def main():
             print(f"step {step}: loss {out.loss.item():.3f}", flush=True)
 
     model.eval()
+    del opt
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()                                   # free training grads/optimizer before eval
     perm = torch.randperm(N, generator=torch.Generator().manual_seed(a.seed + 7))
     res = {
         "closer_far": round(evaluate(model, head, tok, far, labels, grid, device), 4),
