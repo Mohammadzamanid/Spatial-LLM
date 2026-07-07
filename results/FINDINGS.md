@@ -1337,6 +1337,43 @@ proportional floor and *collapses* to that floor without the SO bottleneck — i
 from competition for scarce, timed windows (Latchoumane 2017; Diekelmann & Born 2010).
 (`results/sleep_consolidation.json`, `results/sleep_consolidation.svg`.)
 
+### The map goes abstract — 2-D CONCEPTUAL and SOCIAL grids, de-risked on CPU before the T4 (GAPS.md Tier 3, #8/#9, n=5)
+
+The cognitive-map hypothesis says the hippocampal–entorhinal grid is not just for physical space — it maps
+**conceptual** spaces (Constantinescu, Behrens 2016; Bellmund 2018) and **social** ones (Tavares 2015;
+Park, Miller 2021) with the same machinery. Gaps #8/#9 test this at the *language* level: a frozen LLM reads the
+grid code and answers "which concept is closer?" / "who is more dominant?" — cortex-ON vs text-only-OFF. That
+headline needs a T4 (frozen Qwen-1.5B + LoRA) and is scaffolded in `notebooks/m8_…`, `notebooks/m9_…` +
+`src/training/train_conceptual.py`, `train_social.py`. But — exactly as the 1-D structural-transfer headline was
+de-risked on CPU (`structural_transfer_cortex.py`) before its T4 cell — the **design is validated first, on the
+actual frozen `cortex.encode` pipeline the LLM reads**, so no T4 is spent on an unsound cell. A cortex pretrained
+**only on physical Euclidean space** is FROZEN; a concept/agent at 2-D coord (x,y) enters by its *own* directed
+path (heading = atan2(y,x); never a relative displacement → no leak). The sharp, non-circular 2-D signature is
+**OFF-AXIS** queries: triples where the 1-D x-projection ordering *disagrees* with the true 2-D answer — a 1-D
+(rank) code is ≤0.5 there **by construction**, so beating chance there is un-fakeable.
+
+- **(#8) A genuine 2-D conceptual metric — `conceptual_grid_cortex.py`.** Read-out-free (parameter-free, so it
+  cannot be circular): OFF-AXIS "closer" by raw code-distance **0.65 ± 0.03** vs shuffled positions **0.50**
+  (gap **+0.15 ± 0.03**); distance-correlation Spearman **0.53** vs shuffled **−0.03**. Held-out linear decode
+  (concepts the probe *never saw*): position recovered at **0.63** spacing vs **3.4** under the shuffled refit
+  (a 5× collapse), with held-out off-axis "closer" **0.77**. The absolute strength is modest on CPU with these
+  simple read-outs — the honest expectation (grounded in the 1-D precedent, whose CPU de-risk 1.0 sharpened to
+  the LLM's 0.99) is that the trained frozen-LLM read-out *sharpens* it; the de-risk's job is only to show the
+  2-D metric is **present and control-clean**, which it is.
+- **(#9) A dissociable 2-D social map — `social_grid_cortex.py`.** Agents in a POWER × AFFILIATION space. (A)
+  **DOMINANCE** is a clean 1-D read of the power axis — held-out pairwise dominance **0.96 ± 0.02** (the social
+  transitive-inference result). (B) **SOCIAL DISTANCE** is a genuine 2-D metric — OFF-AXIS "socially closer"
+  **0.65** (>chance, where a power-only read is ≤0.5). (C) **AXIS DISSOCIATION** — decoding dominance from the
+  power axis gives **0.96** but from the affiliation axis only **0.45** (gap **+0.51 ± 0.07**): the two social
+  axes are *separately* readable, gap #4's self/other double dissociation now reappearing at the abstract-map
+  level. FALSIFIER: shuffle the agent↔position map and dominance collapses to **0.44** (chance).
+
+Honest status: gaps #8/#9 are **de-risked on CPU and scaffolded for the T4, not yet closed** — the cortex-ON-vs-
+text-only-OFF headline is produced by running the two notebook cells on a GPU. What the CPU proves, and proves
+non-circularly, is that the frozen *space* map already carries the 2-D conceptual and social structure the LLM
+cell will read (measured on the exact `encode` pipeline, never put in any loss).
+(`results/conceptual_grid_cortex.json`/`.svg`, `results/social_grid_cortex.json`/`.svg`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

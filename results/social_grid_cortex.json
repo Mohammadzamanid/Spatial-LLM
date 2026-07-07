@@ -1,0 +1,45 @@
+{
+  "n_seeds": 5,
+  "G": 6,
+  "spacing": 0.8,
+  "chance": 0.5,
+  "results": {
+    "dominance_power": {
+      "mean": 0.9617,
+      "ci95": 0.0156
+    },
+    "dominance_affil": {
+      "mean": 0.4506,
+      "ci95": 0.0719
+    },
+    "dominance_power_shuffled": {
+      "mean": 0.438,
+      "ci95": 0.0518
+    },
+    "social_offaxis_free": {
+      "mean": 0.6491,
+      "ci95": 0.0266
+    },
+    "social_offaxis_free_shuffled": {
+      "mean": 0.4973,
+      "ci95": 0.0106
+    },
+    "social_offaxis_decoded": {
+      "mean": 0.7656,
+      "ci95": 0.0863
+    },
+    "dominance_metric_spearman": {
+      "mean": 0.5257,
+      "ci95": 0.0579
+    },
+    "dissociation_gap": {
+      "mean": 0.5111,
+      "ci95": 0.0699
+    },
+    "social_gap": {
+      "mean": 0.1518,
+      "ci95": 0.0316
+    }
+  },
+  "verdict": "SOUND \u2014 the frozen space code exposes a DISSOCIABLE 2-D social map (dominance from the power axis; social-distance a genuine 2-D metric a 1-D read cannot produce); build the T4 LLM cell (train_social.py / m9 notebook). Absolute 2-D strength is modest on CPU; the trained LLM readout is expected to sharpen it (1-D precedent: 1.0 -> 0.99)."
+}
