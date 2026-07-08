@@ -52,7 +52,9 @@ def pair_spatial(model, head, pa, pb, ablate=False):
 
 
 def collate(pairs, ymore, tok, device, max_len=48):
-    full = [DOM_PROMPT + (" Yes." if ymore[k] else " No.") for k in range(len(pairs))]
+    # SINGLE-token answer (" Yes"/" No", no period): the entire loss is then the Yes/No decision, and training
+    # targets EXACTLY the one token the single-token eval reads (no "." to dilute or misalign).
+    full = [DOM_PROMPT + (" Yes" if ymore[k] else " No") for k in range(len(pairs))]
     enc = tok(full, max_length=max_len, padding="max_length", truncation=True, return_tensors="pt")
     lab = enc["input_ids"].clone(); plen = len(tok(DOM_PROMPT)["input_ids"])
     lab[:, :plen] = -100; lab[enc["attention_mask"] == 0] = -100
@@ -60,10 +62,12 @@ def collate(pairs, ymore, tok, device, max_len=48):
                                          "attention_mask": enc["attention_mask"], "labels": lab}.items()}
 
 
-def _yes_no_ids(tok):
-    y = tok(" Yes", add_special_tokens=False)["input_ids"][0]
-    n = tok(" No", add_special_tokens=False)["input_ids"][0]
-    return y, n
+def _yes_no_ids(tok, prompt=DOM_PROMPT):
+    """First-answer token ids IN CONTEXT (robust to context-dependent tokenization): the token at position
+    plen in `prompt + " Yes"` / `prompt + " No"` is EXACTLY what training teacher-forces, so the eval reads
+    the same token the model learned to boost (standalone tok(' Yes')[0] can differ after '[ANSWER]')."""
+    plen = len(tok(prompt)["input_ids"])
+    return tok(prompt + " Yes")["input_ids"][plen], tok(prompt + " No")["input_ids"][plen]
 
 
 @torch.no_grad()
@@ -71,7 +75,7 @@ def evaluate(model, head, tok, pairs, grid, device, ablate=False, shuffle_perm=N
     """PADDING-IMMUNE single-next-token scoring: after the (identical) DOM_PROMPT + the two agent codes,
     compare the model's next-token logit for ' Yes' vs ' No' at the last prompt position (the token
     teacher-forced in training). One forward per pair; no answer-token masking (robust to padding side)."""
-    yes_id, no_id = _yes_no_ids(tok)
+    yes_id, no_id = _yes_no_ids(tok, DOM_PROMPT)
     prompt_ids = torch.tensor(tok(DOM_PROMPT)["input_ids"], device=device); T = prompt_ids.shape[0]
     pos = grid if shuffle_perm is None else grid[shuffle_perm]
     cor = tot = 0
@@ -206,11 +210,12 @@ def main():
                 gn = sum(p.grad.detach().float().norm().item() ** 2 for p in train_params if p.grad is not None) ** 0.5
                 tgt = tok.decode([t for t in b["labels"][0].tolist() if t != -100])
                 print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e} (>0 required)", flush=True)
-                print(f"  [diag] pad_side={tok.padding_side}; loss TARGETS (must be ' Yes.'/' No.', not prompt/pad): {tgt!r}", flush=True)
+                print(f"  [diag] pad_side={tok.padding_side}; loss TARGETS (must be ' Yes'/' No', not prompt/pad): {tgt!r}", flush=True)
             opt.step(); final_loss = out.loss.item()
             if step % 200 == 0 or step == a.steps - 1:
                 model.eval()
-                tacc = evaluate(model, head, tok, adj_e[:240], grid, device, bs=a.bs * 2)   # honest tell of learning
+                hm = len(adj_e) // 2                                # adj_e = pos[:m]+neg[:m]; take a BALANCED slice
+                tacc = evaluate(model, head, tok, adj_e[:80] + adj_e[hm:hm + 80], grid, device, bs=a.bs * 2)
                 model.train()
                 print(f"step {step}: loss {out.loss.item():.3f}  train_acc {tacc:.3f}", flush=True)
         del opt
@@ -218,6 +223,20 @@ def main():
             torch.cuda.empty_cache()
 
     model.eval()
+    # decisive: does the model's Yes-vs-No preference actually VARY with the spatial input? (std~0 => the
+    # readout ignores the map -> constant predictor -> exactly 50% on balanced sets.)
+    with torch.no_grad():
+        yid, nid = _yes_no_ids(tok, DOM_PROMPT)
+        pr = torch.tensor(tok(DOM_PROMPT)["input_ids"], device=device); Tt = pr.shape[0]
+        smp = adj_e[:64]
+        ia = torch.tensor([p[0] for p in smp]); ib = torch.tensor([p[1] for p in smp])
+        spd = pair_spatial(model, head, walk_2d(grid[ia], device), walk_2d(grid[ib], device))
+        txt = model._embed()(pr.unsqueeze(0).expand(len(smp), Tt))
+        lg = model.llm(inputs_embeds=model.fusion(txt, spd.to(txt.dtype)),
+                       attention_mask=torch.ones(len(smp), Tt, device=device)).logits[:, -1, :]
+        gap = (lg[:, yid] - lg[:, nid]).float()
+        print(f"  [diag] yes-minus-no logit gap over inputs: mean={gap.mean():.3f} std={gap.std():.3f} "
+              f"frac_yes={(gap > 0).float().mean():.3f}  (std~0 => readout ignores the map)", flush=True)
     perm = torch.randperm(N, generator=torch.Generator().manual_seed(a.seed + 7))
     res = {
         "dominance_far": round(evaluate(model, head, tok, far_e, grid, device, bs=a.bs * 2), 4),

@@ -126,7 +126,8 @@ def make_triples(grid, near_r, margin):
 
 
 def collate(triples, labels, tok, device, max_len=56):
-    full = [PROMPT + (" Yes." if labels[t] else " No.") for t in triples]
+    # SINGLE-token answer (" Yes"/" No", no period): entire loss is the decision, aligned with the single-token eval.
+    full = [PROMPT + (" Yes" if labels[t] else " No") for t in triples]
     enc = tok(full, max_length=max_len, padding="max_length", truncation=True, return_tensors="pt")
     lab = enc["input_ids"].clone()
     plen = len(tok(PROMPT)["input_ids"]); lab[:, :plen] = -100
@@ -135,11 +136,12 @@ def collate(triples, labels, tok, device, max_len=56):
                                          "attention_mask": enc["attention_mask"], "labels": lab}.items()}
 
 
-def _yes_no_ids(tok):
-    """Single leading-space ' Yes' / ' No' token ids (the first answer token the model predicts)."""
-    y = tok(" Yes", add_special_tokens=False)["input_ids"][0]
-    n = tok(" No", add_special_tokens=False)["input_ids"][0]
-    return y, n
+def _yes_no_ids(tok, prompt=PROMPT):
+    """First-answer token ids IN CONTEXT (robust to context-dependent tokenization): the token at position plen
+    in `prompt + " Yes"` / `prompt + " No"` is EXACTLY what training teacher-forces (standalone tok(' Yes')[0]
+    can differ after '[ANSWER]'), so the eval reads the same token the model learned to boost."""
+    plen = len(tok(prompt)["input_ids"])
+    return tok(prompt + " Yes")["input_ids"][plen], tok(prompt + " No")["input_ids"][plen]
 
 
 @torch.no_grad()
@@ -148,7 +150,7 @@ def evaluate(model, head, tok, triples, labels, grid, device, ablate=False, shuf
     model's next-token logit for ' Yes' vs ' No' at the last prompt position — exactly the token teacher-forced
     in training. One forward per triple (fast), no answer-token masking, so it is robust to the tokenizer's
     padding side (the old candidate-NLL scheme mis-masked under left padding and could read a constant)."""
-    yes_id, no_id = _yes_no_ids(tok)
+    yes_id, no_id = _yes_no_ids(tok, PROMPT)
     prompt_ids = torch.tensor(tok(PROMPT)["input_ids"], device=device)
     T = prompt_ids.shape[0]
     pos = grid if shuffle_perm is None else grid[shuffle_perm]     # shuffled: concept<->position permuted
@@ -260,13 +262,14 @@ def main():
                 gn = sum(p.grad.detach().float().norm().item() ** 2 for p in train_params if p.grad is not None) ** 0.5
                 tgt = tok.decode([t for t in b["labels"][0].tolist() if t != -100])
                 print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e} (>0 required)", flush=True)
-                print(f"  [diag] pad_side={tok.padding_side}; loss TARGETS (must be ' Yes.'/' No.', not prompt/pad): {tgt!r}", flush=True)
+                print(f"  [diag] pad_side={tok.padding_side}; loss TARGETS (must be ' Yes'/' No', not prompt/pad): {tgt!r}", flush=True)
             opt.step(); final_loss = out.loss.item()
             if step % 200 == 0 or step == a.steps - 1:
-                # periodic TRAIN accuracy on a small slice: the honest tell of whether the readout is learning
+                # periodic TRAIN accuracy on a BALANCED slice: the honest tell of whether the readout is learning
                 # (loss alone can drop toward the class prior without conditioning on the spatial input).
                 model.eval()
-                tacc = evaluate(model, head, tok, tr_e[:240], labels, grid, device, bs=a.bs * 2)
+                hm = len(tr_e) // 2                                 # tr_e = pos[:m]+neg[:m]; take a BALANCED slice
+                tacc = evaluate(model, head, tok, tr_e[:80] + tr_e[hm:hm + 80], labels, grid, device, bs=a.bs * 2)
                 model.train()
                 print(f"step {step}: loss {out.loss.item():.3f}  train_acc {tacc:.3f}", flush=True)
         del opt
@@ -275,6 +278,19 @@ def main():
             torch.cuda.empty_cache()                               # free training grads/optimizer before eval
 
     model.eval()
+    # decisive: does the model's Yes-vs-No preference actually VARY with the spatial input?
+    with torch.no_grad():
+        yid, nid = _yes_no_ids(tok, PROMPT)
+        pr = torch.tensor(tok(PROMPT)["input_ids"], device=device); Tt = pr.shape[0]
+        smp = tr_e[:64]
+        ia = torch.tensor([t[0] for t in smp]); ib = torch.tensor([t[1] for t in smp]); ic = torch.tensor([t[2] for t in smp])
+        spd = triple_spatial(model, head, walk_2d(grid[ia], device), walk_2d(grid[ib], device), walk_2d(grid[ic], device))
+        txt = model._embed()(pr.unsqueeze(0).expand(len(smp), Tt))
+        lg = model.llm(inputs_embeds=model.fusion(txt, spd.to(txt.dtype)),
+                       attention_mask=torch.ones(len(smp), Tt, device=device)).logits[:, -1, :]
+        gap = (lg[:, yid] - lg[:, nid]).float()
+        print(f"  [diag] yes-minus-no logit gap over inputs: mean={gap.mean():.3f} std={gap.std():.3f} "
+              f"frac_yes={(gap > 0).float().mean():.3f}  (std~0 => readout ignores the map)", flush=True)
     perm = torch.randperm(N, generator=torch.Generator().manual_seed(a.seed + 7))
     res = {
         "closer_far": round(evaluate(model, head, tok, far_e, labels, grid, device, bs=a.bs * 2), 4),
