@@ -218,7 +218,12 @@ def main():
     model = TrajectoryLLM(base_llm=a.base_llm, cortex_constrained_velocity=True).to(device)
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
-    head = nn.Linear(3 * model.cortex.embed_dim, llm_dim * model.n_tokens).to(device)   # joint triple readout
+    # NONLINEAR (MLP) triple readout: "closer" is a DISTANCE comparison (quadratic in the codes: ||A-B||^2 has
+    # the cross-term A.B), which a LINEAR head cannot compute. A GELU MLP can form the distance features and
+    # encode "B closer" into the spatial tokens (dominance in #9 was LINEAR, so a linear head sufficed there).
+    _hid = 1024
+    head = nn.Sequential(nn.Linear(3 * model.cortex.embed_dim, _hid), nn.GELU(),
+                         nn.Linear(_hid, llm_dim * model.n_tokens)).to(device)
     # T4 memory: gradient checkpointing is OFF by default. On a PEFT model with a FROZEN base fed via
     # inputs_embeds, plain gradient_checkpointing_enable() silently drops gradients to the LoRA adapters
     # (reentrant checkpointing needs an input that requires grad) -> the model trains NOTHING and reads as a

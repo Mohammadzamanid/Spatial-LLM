@@ -46,7 +46,7 @@ for seed in [0, 1, 2]:
     if os.path.exists(out):
         print(f"skip seed={seed} (exists)"); continue
     cmd = ["python", "-u", "-m", "src.training.train_conceptual",
-           "--G", "6", "--spacing", "0.8", "--steps", "2400", "--bs", "4", "--seed", str(seed), "--out", out]
+           "--G", "6", "--spacing", "0.8", "--steps", "3500", "--bs", "6", "--seed", str(seed), "--out", out]
     print(f"\n>>> conceptual seed={seed}  (watch the 'step N: loss' lines)", flush=True); t0 = time.time()
     subprocess.run(cmd, check=True); print(f"    done in {(time.time()-t0)/60:.1f} min", flush=True)
 print("\nconceptual sweep pass complete")
