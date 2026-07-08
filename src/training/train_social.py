@@ -41,13 +41,23 @@ DOM_PROMPT = ("[SOCIAL] Two people were shown as places on a social map.\n"
               "[QUESTION] Is the first person more dominant than the second?\n[ANSWER]")
 
 
+def _norm_code(model, e):
+    """GAIN CONTROL / normalization between the cortex and the readout (divisive normalization, ubiquitous in
+    cortex). The frozen code is ~98% a position-INDEPENDENT constant + ~2% the position-varying signal; the
+    downstream LayerNorm strips the per-token feature mean but NOT that across-agent constant, so without this
+    the tiny signal is invisible to the LLM (fusion output std ~0). Standardizing per-dim (stats over the whole
+    agent set, so no label leak) removes the constant and lifts the signal to unit scale — a linear decode is
+    unchanged (still 1.0), but now the LLM can actually see it."""
+    return (e - model._code_mean) / model._code_std
+
+
 def pair_spatial(model, head, pa, pb, ablate=False):
-    """Concat the two FROZEN agent codes -> trainable head -> spatial tokens (the proven train_relational
-    readout). Cortex frozen; each agent enters by its own social position -> no leak."""
+    """Concat the two FROZEN, gain-normalized agent codes -> trainable head -> spatial tokens. Cortex frozen;
+    each agent enters by its own social position -> no leak."""
     B = pa[0].shape[0]; llm_dim = model.to_tokens.out_features // model.n_tokens
     if ablate:
         return torch.zeros(B, model.n_tokens, llm_dim, device=pa[0].device)
-    code = torch.cat([model.cortex.encode(*pa), model.cortex.encode(*pb)], -1)
+    code = torch.cat([_norm_code(model, model.cortex.encode(*pa)), _norm_code(model, model.cortex.encode(*pb))], -1)
     return head(code).view(B, model.n_tokens, llm_dim)
 
 
@@ -174,6 +184,9 @@ def main():
         print("gradient checkpointing: ON (non-reentrant, input grads enabled)", flush=True)
 
     grid = build_grid(a.G, a.spacing); N = grid.shape[0]
+    with torch.no_grad():                    # gain-control stats over the WHOLE agent set (per-dim; no label leak)
+        ac = model.cortex.encode(*walk_2d(grid, device))
+        model._code_mean = ac.mean(0); model._code_std = ac.std(0) + 1e-6
     adj, far, diss = dominance_pairs(grid, a.G)
     print(f"dominance pairs: train(adj power)={len(adj)} far={len(far)} dissociation={len(diss)}", flush=True)
     if len(adj) == 0 or len(diss) == 0:

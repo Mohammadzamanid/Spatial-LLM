@@ -58,8 +58,17 @@ def triple_spatial(model, head, pa, pb, pc, ablate=False):
     llm_dim = model.to_tokens.out_features // model.n_tokens
     if ablate:
         return torch.zeros(B, model.n_tokens, llm_dim, device=pa[0].device)
-    code = torch.cat([model.cortex.encode(*pa), model.cortex.encode(*pb), model.cortex.encode(*pc)], -1)
+    nc = lambda p: _norm_code(model, model.cortex.encode(*p))   # gain-control (see _norm_code)
+    code = torch.cat([nc(pa), nc(pb), nc(pc)], -1)
     return head(code).view(B, model.n_tokens, llm_dim)
+
+
+def _norm_code(model, e):
+    """Gain control / normalization between the frozen cortex and the readout (divisive normalization). The
+    code is ~98% a position-independent constant + ~2% signal; the downstream LayerNorm cannot remove that
+    across-concept constant, so the signal is invisible (fusion std ~0) without this. Standardizing per-dim
+    (stats over the whole concept set -> no label leak) lifts the signal to unit scale; linear decode unchanged."""
+    return (e - model._code_mean) / model._code_std
 
 
 def triple_out(model, head, ids, attn, pa, pb, pc, labels=None, ablate=False):
@@ -225,6 +234,9 @@ def main():
         print("gradient checkpointing: ON (non-reentrant, input grads enabled)", flush=True)
 
     grid = build_grid(a.G, a.spacing); N = grid.shape[0]
+    with torch.no_grad():                    # gain-control stats over the WHOLE concept set (per-dim; no label leak)
+        ac = model.cortex.encode(*walk_2d(grid, device))
+        model._code_mean = ac.mean(0); model._code_std = ac.std(0) + 1e-6
     near_r = 2.1 * a.spacing; margin = 0.2 * a.spacing        # near = local (<= ~2-step) with a resolvable margin
     tr, far, faroff, labels = make_triples(grid, near_r, margin)
     print(f"triples: train(near)={len(tr)} far={len(far)} far-offaxis={len(faroff)}", flush=True)
