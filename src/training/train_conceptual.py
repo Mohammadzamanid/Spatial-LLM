@@ -202,6 +202,8 @@ def main():
     tok = AutoTokenizer.from_pretrained(a.base_llm, use_fast=True)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
+    tok.padding_side = "right"   # CRITICAL: collate masks the first plen tokens as the prompt; left padding
+                                 # (some Qwen defaults) would put padding there and mis-target the loss.
     model = TrajectoryLLM(base_llm=a.base_llm, cortex_constrained_velocity=True).to(device)
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
@@ -254,10 +256,11 @@ def main():
             b = collate([tuple(t.tolist()) for t in sel], labels, tok, device)
             out = triple_out(model, head, b["input_ids"], b["attention_mask"], pa, pb, pc, labels=b["labels"])
             opt.zero_grad(); out.loss.backward()
-            if step == 0:                                          # decisive: are gradients reaching the adapters?
+            if step == 0:                                          # decisive diagnostics
                 gn = sum(p.grad.detach().float().norm().item() ** 2 for p in train_params if p.grad is not None) ** 0.5
-                print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e}  (>0 required; ~0 => grads NOT reaching "
-                      "the LoRA/fusion/head -> model won't learn)", flush=True)
+                tgt = tok.decode([t for t in b["labels"][0].tolist() if t != -100])
+                print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e} (>0 required)", flush=True)
+                print(f"  [diag] pad_side={tok.padding_side}; loss TARGETS (must be ' Yes.'/' No.', not prompt/pad): {tgt!r}", flush=True)
             opt.step(); final_loss = out.loss.item()
             if step % 200 == 0 or step == a.steps - 1:
                 # periodic TRAIN accuracy on a small slice: the honest tell of whether the readout is learning
