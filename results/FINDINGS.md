@@ -1388,6 +1388,24 @@ rather than driving the loss toward the class prior. A `--reeval` mode re-scores
 Whether the frozen-LLM readout can *extract* the modest 2-D signal (the CPU shows the code *carries* it, ~0.64)
 remains **open pending a clean T4 run** — reported here rather than buried, in the register's standard.
 
+**#9 CLOSED on the T4 — and the deeper bug the debug loop exposed.** After the run-#1 fixes, #9 still read a
+flat 50% everywhere, and the decisive probe (does the yes-vs-no logit *vary* across inputs?) returned **std =
+0.000** across all seeds — the spatial input had *literally no effect* on the output. The cause, verified on
+CPU: the frozen cortex code is **~98% a position-independent constant** (magnitude 0.53) and only **~2% the
+position-varying signal** (0.009). A linear probe decodes dominance at **1.000** because it amplifies that 2%
+with large weights, but in the LLM path `head(code) → LayerNorm(spatial)` strips each token's *feature* mean and
+**not** the across-agent constant, so every pair normalized to near-identical spatial tokens → an
+input-independent forward → the model could only predict the prior (exactly 50%). The fix is a **gain-control /
+divisive-normalization** stage between cortex and readout (per-dim standardization of the code over the concept
+set — no label leak), which is itself a ubiquitous cortical computation and the "missing module" the failure
+pointed to. With it, the signal lifts to unit scale (linear decode unchanged at 1.0) and the frozen LLM finally
+reads it: **dominance_far 100%, dissociation 100%, adjacent(trained) 99%** vs **cortex-OFF 50%** and
+**shuffled 47.5%** (n=3; the permutation p floors at 0.25 for 3 seeds — the effect is maximal at ~0 variance,
+so ≥6 seeds are needed only to push the *statistic* below 0.05). So a language model, reading a brain-like
+spatial code trained **only on physical space**, performs abstract **social-hierarchy transitive inference**
+(Kumaran 2016; Park-Miller 2021) it cannot do text-only — the cognitive-map claim, from space to social
+meaning, at the language level. (`results/social_llm.json`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.

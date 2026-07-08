@@ -175,8 +175,21 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   grid-of-concepts code — cortex-ON vs text-only-OFF — extending the cognitive-map claim from space to
   meaning at the language level. (Notebook, T4.)
 
-### 9. LLM reasoning over **social / other-agent** space ✅ DE-RISKED ON CPU + T4 CELL SCAFFOLDED (Jul 2026)
-- **Status: CPU design validated, GPU run pending.** Extends gap #4 (self/other place cells) to the SOCIAL map
+### 9. LLM reasoning over **social / other-agent** space ✅ CLOSED — DEMONSTRATED ON A T4 (Jul 2026)
+- **Status: RUN ON GPU, headline confirmed.** A frozen Qwen-1.5B + LoRA, reading ONLY the frozen space-cortex's
+  code for two agents' positions on a POWER×AFFILIATION social map (never the coordinates), trained on
+  power-ADJACENT pairs, answers "who is more dominant?" (n=3 seeds): **dominance_far 100%**, transitive
+  inference on never-seen FAR pairs; **dissociation 100%** — on pairs whose affiliation ordering OPPOSES power
+  it still reads POWER; **adjacent(trained) 99%**. Falsifiers collapse: **cortex-OFF 50%** (same LoRA budget, no
+  code → it cannot answer without the map) and **shuffled-positions 47.5%** (scrambled agent↔position → chance).
+  (n=3 → the permutation p floors at 0.25; the effect is maximal with ~0 variance, run ≥6 seeds for p<0.05.)
+  **Root cause that had to be fixed first (a genuine finding):** the frozen code is ~98% a position-INDEPENDENT
+  constant + ~2% signal, so the readout's LayerNorm washed the signal out (the LLM saw an input-independent
+  constant → 50%). A **gain-control / divisive-normalization stage** (per-dim standardization of the code over
+  the concept set — the "missing module") makes the 2% visible; a linear decode is unchanged (1.0) but the LLM
+  can now read it. `notebooks/m9_social_grid_llm_kaggle.py` + `src/training/train_social.py`. See
+  `results/FINDINGS.md`. *Original entry below.*
+- **CPU de-risk (still valid):** Extends gap #4 (self/other place cells) to the SOCIAL map
   at the language level: agents in a 2-D social space (POWER × AFFILIATION; Tavares 2015; Park-Miller 2021).
   The T4 headline (a frozen Qwen+LoRA answers "who is more dominant?" / "who is socially closer?" cortex-ON vs
   text-only-OFF) is scaffolded in `notebooks/m9_social_grid_llm_kaggle.py` + `src/training/train_social.py`.
