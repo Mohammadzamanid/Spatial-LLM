@@ -56,19 +56,27 @@ def _spearman(a, b):
     return torch.corrcoef(torch.stack([ra, rb]))[0, 1].item()
 
 
-def _offaxis_closer(posd, refd, grid, near_r, gen, n=5000):
-    """Fraction of OFF-AXIS 'closer' triples answered correctly using distances `refd`. Off-axis = the 1-D
-    x-projection ordering disagrees with the true 2-D answer (so a 1-D code is wrong here by construction)."""
-    N = grid.shape[0]; tot = cor = 0
+def _offaxis_closer(posd, refd, grid, near_r, gen, n=12000):
+    """BALANCED off-axis 'closer' accuracy using distances `refd` (chance = 0.5). Off-axis = the 1-D
+    x-projection ordering disagrees with the true 2-D answer (a 1-D code is <=0.5 here by construction).
+    The raw off-axis set is label-imbalanced (~0.67 one class), so a *constant* predictor would score ~0.67
+    on it — we therefore BALANCE to equal true-label 0/1 counts so a constant predictor scores exactly 0.5
+    and the reported number is the frozen code's genuine skill against an honest baseline."""
+    N = grid.shape[0]; pos, neg = [], []
     for _ in range(n):
         a, b, c = torch.randint(N, (3,), generator=gen).tolist()
         if len({a, b, c}) < 3:
             continue
-        tb = posd[a, b] < posd[a, c]
+        tb = bool(posd[a, b] < posd[a, c])
         x1 = (grid[a, 0] - grid[b, 0]).abs() < (grid[a, 0] - grid[c, 0]).abs()
-        if bool(x1) != bool(tb) and (posd[a, b] > near_r or posd[a, c] > near_r):   # off-axis, non-local
-            tot += 1; cor += int((refd[a, b] < refd[a, c]) == tb)
-    return cor / max(tot, 1), tot
+        if bool(x1) != tb and (posd[a, b] > near_r or posd[a, c] > near_r):         # off-axis, non-local
+            correct = int((refd[a, b] < refd[a, c]) == tb)
+            (pos if tb else neg).append(correct)
+    m = min(len(pos), len(neg))
+    if m == 0:
+        return 0.5, 0
+    bal = pos[:m] + neg[:m]
+    return sum(bal) / len(bal), 2 * m
 
 
 def run_seed(seed, G=6, spacing=0.8):
@@ -108,18 +116,19 @@ def run_seed(seed, G=6, spacing=0.8):
     held_err = ((dec - grid[te]).norm(dim=1).mean() / spacing).item()            # in units of spacing
     dec_sh = fit_decode(codes[perm])
     held_err_sh = ((dec_sh - grid[te]).norm(dim=1).mean() / spacing).item()
-    # off-axis closer among HELD-OUT concepts, in the DECODED space
+    # off-axis closer among HELD-OUT concepts, in the DECODED space (BALANCED -> chance 0.5)
     decd = torch.cdist(dec, dec); truen = torch.cdist(grid[te], grid[te]); gte = grid[te]
-    gen3 = torch.Generator().manual_seed(seed + 200); M = len(te); ho_t = ho_c = 0
-    for _ in range(4000):
+    gen3 = torch.Generator().manual_seed(seed + 200); M = len(te); ho_pos, ho_neg = [], []
+    for _ in range(12000):
         a, b, c = torch.randint(M, (3,), generator=gen3).tolist()
         if len({a, b, c}) < 3:
             continue
-        tb = truen[a, b] < truen[a, c]
+        tb = bool(truen[a, b] < truen[a, c])
         x1 = (gte[a, 0] - gte[b, 0]).abs() < (gte[a, 0] - gte[c, 0]).abs()
-        if bool(x1) != bool(tb):
-            ho_t += 1; ho_c += int((decd[a, b] < decd[a, c]) == tb)
-    held_off = ho_c / max(ho_t, 1)
+        if bool(x1) != tb:
+            (ho_pos if tb else ho_neg).append(int((decd[a, b] < decd[a, c]) == tb))
+    hm = min(len(ho_pos), len(ho_neg))
+    held_off = (sum(ho_pos[:hm] + ho_neg[:hm]) / (2 * hm)) if hm else 0.5
 
     return {
         "metric_spearman": round(spear, 4),

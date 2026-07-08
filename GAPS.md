@@ -159,13 +159,18 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   cortex.encode pipeline the LLM reads**: a cortex pretrained ONLY on physical Euclidean space, then FROZEN,
   encodes a concept at 2-D coord (x,y) such that the code carries a **genuine 2-D metric**. The sharp,
   non-circular signature is **OFF-AXIS "closer"** (triples where the 1-D x-projection ordering disagrees with
-  the true 2-D answer — a 1-D/rank code is ≤0.5 there by construction): **0.65 ± 0.03** (>chance), collapsing
-  to **0.50** under shuffled positions (gap **+0.15 ± 0.03**); a **held-out** linear decode (concepts the probe
-  never saw) recovers position at **0.63** spacing vs **3.4** shuffled (5×), with held-out off-axis "closer"
-  **0.77**. Absolute strength is modest on CPU (as the 1-D precedent was before its LLM readout sharpened TI
-  1.0→0.99); the de-risk's job is to show the 2-D metric is present and control-clean, which it is. The T4 cell
-  swaps the read-out for the frozen LLM (trained on NEAR triples, tested on FAR/OFF-AXIS; cortex-OFF & shuffled
-  falsifiers). (Constantinescu, Behrens 2016; Bellmund 2018.) See `results/FINDINGS.md`. *Original entry below.*
+  the true 2-D answer — a 1-D/rank code is ≤0.5 there by construction): on a **label-BALANCED** off-axis set
+  (chance exactly 0.5) **0.64 ± 0.03** (>chance), collapsing to **0.49** under shuffled positions (gap
+  **+0.15 ± 0.03**); a **held-out** linear decode (concepts the probe never saw) recovers position at **0.63**
+  spacing vs **3.3** shuffled (5×), with held-out off-axis "closer" **0.76**. Absolute strength is modest on CPU
+  (as the 1-D precedent was before its LLM readout sharpened TI 1.0→0.99); the de-risk's job is to show the 2-D
+  metric is present and control-clean, which it is. **T4 status (honest): the first GPU run of the LLM cell
+  collapsed to a constant predictor** (it read chance on its own training set; the "66.8%" it showed on off-axis
+  was purely that set's label imbalance, since fixed — the off-axis eval is now BALANCED and the candidate-NLL
+  scorer replaced with a padding-immune single-token scorer + a periodic train-accuracy read-out that exposes
+  under-fitting). Whether the readout can learn the modest 2-D signal is **still open pending a clean T4 run**;
+  the CPU claim (the frozen code *carries* the 2-D metric) stands. (Constantinescu, Behrens 2016; Bellmund
+  2018.) See `results/FINDINGS.md`. *Original entry below.*
 - After gap #2, a frozen-LLM readout answers abstract "which concept is closer / between?" from the
   grid-of-concepts code — cortex-ON vs text-only-OFF — extending the cognitive-map claim from space to
   meaning at the language level. (Notebook, T4.)
@@ -178,12 +183,14 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   `src/eval/social_grid_cortex.py` (n=5) validates the design non-circularly on the frozen cortex.encode
   pipeline and finds a **dissociable** 2-D social map: (A) **DOMINANCE** — held-out pairwise dominance from the
   decoded POWER axis **0.96 ± 0.02** (the social transitive-inference result); (B) **SOCIAL DISTANCE** — a
-  genuine 2-D metric, OFF-AXIS "socially closer" **0.65** (>chance, where a power-only read is ≤0.5); (C) **AXIS
-  DISSOCIATION** — power→dominance **0.96** vs affiliation→dominance **0.45** (gap **+0.51 ± 0.07**): the two
+  genuine 2-D metric, balanced OFF-AXIS "socially closer" **0.64** (>chance 0.5, where a power-only read is
+  ≤0.5); (C) **AXIS DISSOCIATION** — power→dominance **0.96** vs affiliation→dominance **0.45** (gap
+  **+0.51 ± 0.07**): the two
   social axes are separately readable (gap #4's double dissociation, now at the abstract-map level). FALSIFIER:
   shuffled agent↔position → dominance **0.44** (chance). The T4 cell reads this through the frozen LLM
-  (dominance reuses the proven two-item train_relational forward). See `results/FINDINGS.md`. *Original entry
-  below.*
+  (dominance reuses the proven two-item train_relational forward, so it is the more tractable of the two GPU
+  cells). T4 status: not yet run to success; the eval was hardened alongside #8 (balanced sets + padding-immune
+  single-token scorer + periodic train-accuracy). See `results/FINDINGS.md`. *Original entry below.*
 - LLM reasoning over **social / other-agent** space (after gap #4).
 
 ---
@@ -383,7 +390,7 @@ now closed.** The last items are the **GPU/language capstones #8/#9** (a frozen 
 social-space maps, cortex-ON vs text-only-OFF): both are now **de-risked on CPU and scaffolded for the T4** —
 `src/eval/conceptual_grid_cortex.py` and `src/eval/social_grid_cortex.py` (n=5) prove, on the *actual frozen
 cortex.encode pipeline the LLM reads*, that the space map carries a control-clean 2-D metric a 1-D code cannot
-produce (OFF-AXIS "closer" 0.65>chance; held-out decode 5× shuffled; social DOMINANCE 0.96 with a power/
+produce (balanced OFF-AXIS "closer" 0.64>chance 0.5; held-out decode 5× shuffled; social DOMINANCE 0.96 with a power/
 affiliation dissociation of +0.51), and `notebooks/m8_…`, `notebooks/m9_…` + `src/training/train_conceptual.py`,
 `train_social.py` carry the frozen-Qwen+LoRA cells. All that remains is to **run those two cells on a T4** — the
 only step in the whole register that needs a GPU. Everything a CPU can prove is proven.

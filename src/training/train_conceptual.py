@@ -135,32 +135,50 @@ def collate(triples, labels, tok, device, max_len=56):
                                          "attention_mask": enc["attention_mask"], "labels": lab}.items()}
 
 
+def _yes_no_ids(tok):
+    """Single leading-space ' Yes' / ' No' token ids (the first answer token the model predicts)."""
+    y = tok(" Yes", add_special_tokens=False)["input_ids"][0]
+    n = tok(" No", add_special_tokens=False)["input_ids"][0]
+    return y, n
+
+
 @torch.no_grad()
-def evaluate(model, head, tok, triples, labels, grid, device, ablate=False, shuffle_perm=None, bs=8):
-    """Candidate-NLL scoring: for each triple, model's NLL of ' Yes.' vs ' No.' given the concept codes.
-    Small default bs: the LM-head logits are (bs, seq, ~152k vocab) — the dominant memory term on a T4."""
-    plen = len(tok(PROMPT)["input_ids"]); cands = [" Yes.", " No."]; cor = tot = 0
+def evaluate(model, head, tok, triples, labels, grid, device, ablate=False, shuffle_perm=None, bs=16):
+    """PADDING-IMMUNE single-next-token scoring: after the (identical) PROMPT + the concept codes, compare the
+    model's next-token logit for ' Yes' vs ' No' at the last prompt position — exactly the token teacher-forced
+    in training. One forward per triple (fast), no answer-token masking, so it is robust to the tokenizer's
+    padding side (the old candidate-NLL scheme mis-masked under left padding and could read a constant)."""
+    yes_id, no_id = _yes_no_ids(tok)
+    prompt_ids = torch.tensor(tok(PROMPT)["input_ids"], device=device)
+    T = prompt_ids.shape[0]
     pos = grid if shuffle_perm is None else grid[shuffle_perm]     # shuffled: concept<->position permuted
+    cor = tot = 0
     for k in range(0, len(triples), bs):
         tb = triples[k:k + bs]; B = len(tb)
         ia = torch.tensor([t[0] for t in tb]); ib = torch.tensor([t[1] for t in tb]); ic = torch.tensor([t[2] for t in tb])
         pa = walk_2d(pos[ia], device); pbp = walk_2d(pos[ib], device); pcp = walk_2d(pos[ic], device)
         sp = triple_spatial(model, head, pa, pbp, pcp, ablate)
-        nlls = []
-        for cand in cands:
-            enc = tok([PROMPT + cand] * B, max_length=56, padding="max_length", truncation=True, return_tensors="pt")
-            ids = enc["input_ids"].to(device); attn = enc["attention_mask"].to(device)
-            lab = ids.clone(); lab[:, :plen] = -100; lab[attn == 0] = -100
-            text = model._embed()(ids); fused = model.fusion(text, sp.to(text.dtype))
-            logits = model.llm(inputs_embeds=fused, attention_mask=attn).logits
-            lp = logits[:, :-1, :]; ll = lab[:, 1:]
-            nll = F.cross_entropy(lp.reshape(-1, lp.size(-1)), ll.reshape(-1),
-                                  reduction="none", ignore_index=-100).reshape(B, -1).sum(1)
-            nlls.append(nll)
-        pred = (nlls[0] < nlls[1]).long().cpu()
+        ids = prompt_ids.unsqueeze(0).expand(B, T)
+        attn = torch.ones(B, T, device=device)
+        text = model._embed()(ids)
+        fused = model.fusion(text, sp.to(text.dtype))
+        logits = model.llm(inputs_embeds=fused, attention_mask=attn).logits     # (B, T, V)
+        final = logits[:, -1, :]                                                # last prompt token -> answer
+        pred = (final[:, yes_id] > final[:, no_id]).long().cpu()                # 1 => ' Yes' => first closer
         for r, t in enumerate(tb):
             cor += int(int(pred[r]) == labels[t]); tot += 1
     return cor / max(tot, 1)
+
+
+def balance_cap(triples, labels, n, seed):
+    """Subsample `triples` to a label-BALANCED, size-capped list (equal label 0/1, total <= n). Makes the
+    reported accuracy honest (chance = 0.5) and keeps the T4 eval to minutes instead of scoring all ~37k."""
+    g = torch.Generator().manual_seed(seed)
+    order = torch.randperm(len(triples), generator=g).tolist()
+    pos = [triples[i] for i in order if labels[triples[i]] == 1]
+    neg = [triples[i] for i in order if labels[triples[i]] == 0]
+    m = min(len(pos), len(neg), n // 2)
+    return pos[:m] + neg[:m]
 
 
 def main():
@@ -172,6 +190,8 @@ def main():
     ap.add_argument("--jitter", type=float, default=0.12)          # < spacing/2 keeps the geometry
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--bs", type=int, default=8)                   # T4-safe (LM-head logits over ~152k vocab)
+    ap.add_argument("--eval_cap", type=int, default=1200)          # balanced+capped eval set size (fast on T4)
+    ap.add_argument("--reeval", default=None)                      # path to a .pt checkpoint: load + eval, skip training
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -202,39 +222,62 @@ def main():
     if len(tr) == 0 or len(faroff) == 0:
         raise SystemExit("empty train or off-axis set — adjust --G/--spacing/near_r/margin")
 
-    train_params = [p for p in model.parameters() if p.requires_grad] + list(head.parameters())
-    opt = torch.optim.AdamW(train_params, lr=a.lr); model.train()
-    g = torch.Generator().manual_seed(a.seed); tr_t = torch.tensor(tr)
-    for step in range(a.steps):
-        sel = tr_t[torch.randint(len(tr_t), (a.bs,), generator=g)]
-        # jitter each of the three positions (keeps the closer-ordering: jitter < spacing/2)
-        def jit(ix):
-            return grid[ix] + a.jitter * torch.randn(a.bs, 2, generator=g)
-        pa = walk_2d(jit(sel[:, 0]), device); pb = walk_2d(jit(sel[:, 1]), device); pc = walk_2d(jit(sel[:, 2]), device)
-        b = collate([tuple(t.tolist()) for t in sel], labels, tok, device)
-        out = triple_out(model, head, b["input_ids"], b["attention_mask"], pa, pb, pc, labels=b["labels"])
-        opt.zero_grad(); out.loss.backward(); opt.step()
-        if step % 200 == 0 or step == a.steps - 1:
-            print(f"step {step}: loss {out.loss.item():.3f}", flush=True)
+    # balanced+capped eval sets (chance = 0.5 exactly; keeps the T4 eval to minutes, not ~37k triples)
+    far_e = balance_cap(far, labels, a.eval_cap, a.seed + 1)
+    faroff_e = balance_cap(faroff, labels, a.eval_cap, a.seed + 2)
+    tr_e = balance_cap(tr, labels, a.eval_cap, a.seed + 3)
+    print(f"eval sets (balanced, capped): far={len(far_e)} off-axis={len(faroff_e)} near={len(tr_e)}", flush=True)
+
+    final_loss = None
+    if a.reeval:                                                   # load a checkpoint and skip training
+        ck = torch.load(a.reeval, map_location=device)
+        msd = {k[len("model."):]: v for k, v in ck.items() if k.startswith("model.")}
+        hsd = {k[len("head."):]: v for k, v in ck.items() if k.startswith("head.")}
+        missing, unexpected = model.load_state_dict(msd, strict=False)
+        head.load_state_dict(hsd)
+        print(f"re-eval: loaded {a.reeval} (trainable tensors: {len(msd)+len(hsd)}); skipping training", flush=True)
+    else:
+        train_params = [p for p in model.parameters() if p.requires_grad] + list(head.parameters())
+        opt = torch.optim.AdamW(train_params, lr=a.lr); model.train()
+        g = torch.Generator().manual_seed(a.seed); tr_t = torch.tensor(tr)
+        for step in range(a.steps):
+            sel = tr_t[torch.randint(len(tr_t), (a.bs,), generator=g)]
+            # jitter each of the three positions (keeps the closer-ordering: jitter < spacing/2)
+            def jit(ix):
+                return grid[ix] + a.jitter * torch.randn(a.bs, 2, generator=g)
+            pa = walk_2d(jit(sel[:, 0]), device); pb = walk_2d(jit(sel[:, 1]), device); pc = walk_2d(jit(sel[:, 2]), device)
+            b = collate([tuple(t.tolist()) for t in sel], labels, tok, device)
+            out = triple_out(model, head, b["input_ids"], b["attention_mask"], pa, pb, pc, labels=b["labels"])
+            opt.zero_grad(); out.loss.backward(); opt.step(); final_loss = out.loss.item()
+            if step % 200 == 0 or step == a.steps - 1:
+                # periodic TRAIN accuracy on a small slice: the honest tell of whether the readout is learning
+                # (loss alone can drop toward the class prior without conditioning on the spatial input).
+                model.eval()
+                tacc = evaluate(model, head, tok, tr_e[:240], labels, grid, device, bs=a.bs * 2)
+                model.train()
+                print(f"step {step}: loss {out.loss.item():.3f}  train_acc {tacc:.3f}", flush=True)
+        del opt
+        model.eval()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()                               # free training grads/optimizer before eval
 
     model.eval()
-    del opt
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()                                   # free training grads/optimizer before eval
     perm = torch.randperm(N, generator=torch.Generator().manual_seed(a.seed + 7))
     res = {
-        "closer_far": round(evaluate(model, head, tok, far, labels, grid, device), 4),
-        "closer_far_OFFAXIS": round(evaluate(model, head, tok, faroff, labels, grid, device), 4),
-        "closer_near_trained": round(evaluate(model, head, tok, tr, labels, grid, device), 4),
-        "closer_far_cortex_OFF": round(evaluate(model, head, tok, far, labels, grid, device, ablate=True), 4),
-        "closer_far_shuffled_pos": round(evaluate(model, head, tok, far, labels, grid, device, shuffle_perm=perm), 4),
+        "closer_far": round(evaluate(model, head, tok, far_e, labels, grid, device, bs=a.bs * 2), 4),
+        "closer_far_OFFAXIS": round(evaluate(model, head, tok, faroff_e, labels, grid, device, bs=a.bs * 2), 4),
+        "closer_near_trained": round(evaluate(model, head, tok, tr_e, labels, grid, device, bs=a.bs * 2), 4),
+        "closer_far_cortex_OFF": round(evaluate(model, head, tok, far_e, labels, grid, device, ablate=True, bs=a.bs * 2), 4),
+        "closer_far_shuffled_pos": round(evaluate(model, head, tok, far_e, labels, grid, device, shuffle_perm=perm, bs=a.bs * 2), 4),
     }
-    print("\nCONCEPTUAL GRID through the frozen LLM (chance 50%):", flush=True)
+    print("\nCONCEPTUAL GRID through the frozen LLM (balanced sets; chance 50%):", flush=True)
     for k, v in res.items():
         print(f"  {k:26} {v:.1%}", flush=True)
     print("  (cortex-OFF & shuffled -> ~chance; OFF-AXIS > chance = genuine 2-D reasoning through the map)", flush=True)
     if res["closer_near_trained"] < 0.6:
-        print("  WARNING: near (TRAINED) ~chance despite low loss -> eval/readout mismatch, not a real null.", flush=True)
+        print(f"  DIAGNOSIS: near (TRAINED) at chance (final loss={final_loss}). If loss stayed ~0.69/answer-token"
+              " the readout UNDERFIT (the modest 2-D signal is hard to extract) -> raise --bs/--steps or the LLM"
+              " cannot learn it. If loss dropped but this is still ~0.5 it was the old eval bug (now fixed).", flush=True)
     if a.out:
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         json.dump({"seed": a.seed, "G": a.G, "spacing": a.spacing, "results": res}, open(a.out, "w"), indent=2)

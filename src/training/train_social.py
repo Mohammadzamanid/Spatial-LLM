@@ -60,32 +60,44 @@ def collate(pairs, ymore, tok, device, max_len=48):
                                          "attention_mask": enc["attention_mask"], "labels": lab}.items()}
 
 
+def _yes_no_ids(tok):
+    y = tok(" Yes", add_special_tokens=False)["input_ids"][0]
+    n = tok(" No", add_special_tokens=False)["input_ids"][0]
+    return y, n
+
+
 @torch.no_grad()
-def evaluate(model, head, tok, pairs, grid, device, ablate=False, shuffle_perm=None, bs=8):
-    """Candidate-NLL: 'Yes' (first more dominant) vs 'No'. Correct = sign of the POWER-axis difference.
-    Small default bs: the LM-head logits (bs, seq, ~152k vocab) are the dominant memory term on a T4."""
-    plen = len(tok(DOM_PROMPT)["input_ids"]); cands = [" Yes.", " No."]; cor = tot = 0
+def evaluate(model, head, tok, pairs, grid, device, ablate=False, shuffle_perm=None, bs=16):
+    """PADDING-IMMUNE single-next-token scoring: after the (identical) DOM_PROMPT + the two agent codes,
+    compare the model's next-token logit for ' Yes' vs ' No' at the last prompt position (the token
+    teacher-forced in training). One forward per pair; no answer-token masking (robust to padding side)."""
+    yes_id, no_id = _yes_no_ids(tok)
+    prompt_ids = torch.tensor(tok(DOM_PROMPT)["input_ids"], device=device); T = prompt_ids.shape[0]
     pos = grid if shuffle_perm is None else grid[shuffle_perm]
+    cor = tot = 0
     for k in range(0, len(pairs), bs):
         pb_ = pairs[k:k + bs]; B = len(pb_)
         ia = torch.tensor([p[0] for p in pb_]); ib = torch.tensor([p[1] for p in pb_])
         pa = walk_2d(pos[ia], device); pbp = walk_2d(pos[ib], device)
         sp = pair_spatial(model, head, pa, pbp, ablate)
-        nlls = []
-        for cand in cands:
-            enc = tok([DOM_PROMPT + cand] * B, max_length=48, padding="max_length", truncation=True, return_tensors="pt")
-            ids = enc["input_ids"].to(device); attn = enc["attention_mask"].to(device)
-            lab = ids.clone(); lab[:, :plen] = -100; lab[attn == 0] = -100
-            text = model._embed()(ids); fused = model.fusion(text, sp.to(text.dtype))
-            logits = model.llm(inputs_embeds=fused, attention_mask=attn).logits
-            lp = logits[:, :-1, :]; ll = lab[:, 1:]
-            nll = F.cross_entropy(lp.reshape(-1, lp.size(-1)), ll.reshape(-1),
-                                  reduction="none", ignore_index=-100).reshape(B, -1).sum(1)
-            nlls.append(nll)
-        pred = (nlls[0] < nlls[1]).long().cpu()                                   # 1 => "Yes" (first dominant)
+        ids = prompt_ids.unsqueeze(0).expand(B, T); attn = torch.ones(B, T, device=device)
+        text = model._embed()(ids); fused = model.fusion(text, sp.to(text.dtype))
+        logits = model.llm(inputs_embeds=fused, attention_mask=attn).logits
+        final = logits[:, -1, :]
+        pred = (final[:, yes_id] > final[:, no_id]).long().cpu()                   # 1 => "Yes" (first dominant)
         for r, (i, j) in enumerate(pb_):
-            cor += int(int(pred[r]) == int(grid[i, 0] > grid[j, 0])); tot += 1    # truth = POWER (axis 0)
+            cor += int(int(pred[r]) == int(grid[i, 0] > grid[j, 0])); tot += 1     # truth = POWER (axis 0)
     return cor / max(tot, 1)
+
+
+def balance_cap_pairs(pairs, grid, n, seed):
+    """Balance dominance pairs by label (first-more-dominant = grid[i,0]>grid[j,0]) and cap to n."""
+    g = torch.Generator().manual_seed(seed)
+    order = torch.randperm(len(pairs), generator=g).tolist()
+    pos = [pairs[i] for i in order if bool(grid[pairs[i][0], 0] > grid[pairs[i][1], 0])]
+    neg = [pairs[i] for i in order if not bool(grid[pairs[i][0], 0] > grid[pairs[i][1], 0])]
+    m = min(len(pos), len(neg), n // 2)
+    return pos[:m] + neg[:m]
 
 
 def dominance_pairs(grid, G):
@@ -123,6 +135,8 @@ def main():
     ap.add_argument("--jitter", type=float, default=0.12)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--bs", type=int, default=8)                   # T4-safe (LM-head logits over ~152k vocab)
+    ap.add_argument("--eval_cap", type=int, default=1200)
+    ap.add_argument("--reeval", default=None)                      # path to a .pt checkpoint: load + eval, skip training
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -156,41 +170,58 @@ def main():
     if len(adj) == 0 or len(diss) == 0:
         raise SystemExit("empty train or dissociation set — adjust --G/--spacing")
 
-    train_params = [p for p in model.parameters() if p.requires_grad] + list(head.parameters())
-    opt = torch.optim.AdamW(train_params, lr=a.lr); model.train()
-    g = torch.Generator().manual_seed(a.seed); adj_t = torch.tensor(adj)
-    for step in range(a.steps):
-        sel = adj_t[torch.randint(len(adj_t), (a.bs,), generator=g)]
-        ii, jj = sel[:, 0], sel[:, 1]
-        pa = walk_2d(grid[ii] + a.jitter * torch.randn(a.bs, 2, generator=g), device)
-        pb = walk_2d(grid[jj] + a.jitter * torch.randn(a.bs, 2, generator=g), device)
-        ymore = [bool(grid[i, 0] > grid[j, 0]) for i, j in zip(ii.tolist(), jj.tolist())]
-        b = collate(list(zip(ii.tolist(), jj.tolist())), ymore, tok, device)
-        text = model._embed()(b["input_ids"])
-        fused = model.fusion(text, pair_spatial(model, head, pa, pb).to(text.dtype))
-        out = model.llm(inputs_embeds=fused, attention_mask=b["attention_mask"], labels=b["labels"])
-        opt.zero_grad(); out.loss.backward(); opt.step()
-        if step % 200 == 0 or step == a.steps - 1:
-            print(f"step {step}: loss {out.loss.item():.3f}", flush=True)
+    far_e = balance_cap_pairs(far, grid, a.eval_cap, a.seed + 1)
+    diss_e = balance_cap_pairs(diss, grid, a.eval_cap, a.seed + 2)
+    adj_e = balance_cap_pairs(adj, grid, a.eval_cap, a.seed + 3)
+    print(f"eval sets (balanced, capped): far={len(far_e)} diss={len(diss_e)} adj={len(adj_e)}", flush=True)
+
+    final_loss = None
+    if a.reeval:
+        ck = torch.load(a.reeval, map_location=device)
+        msd = {k[len("model."):]: v for k, v in ck.items() if k.startswith("model.")}
+        hsd = {k[len("head."):]: v for k, v in ck.items() if k.startswith("head.")}
+        model.load_state_dict(msd, strict=False); head.load_state_dict(hsd)
+        print(f"re-eval: loaded {a.reeval} (trainable tensors: {len(msd)+len(hsd)}); skipping training", flush=True)
+    else:
+        train_params = [p for p in model.parameters() if p.requires_grad] + list(head.parameters())
+        opt = torch.optim.AdamW(train_params, lr=a.lr); model.train()
+        g = torch.Generator().manual_seed(a.seed); adj_t = torch.tensor(adj)
+        for step in range(a.steps):
+            sel = adj_t[torch.randint(len(adj_t), (a.bs,), generator=g)]
+            ii, jj = sel[:, 0], sel[:, 1]
+            pa = walk_2d(grid[ii] + a.jitter * torch.randn(a.bs, 2, generator=g), device)
+            pb = walk_2d(grid[jj] + a.jitter * torch.randn(a.bs, 2, generator=g), device)
+            ymore = [bool(grid[i, 0] > grid[j, 0]) for i, j in zip(ii.tolist(), jj.tolist())]
+            b = collate(list(zip(ii.tolist(), jj.tolist())), ymore, tok, device)
+            text = model._embed()(b["input_ids"])
+            fused = model.fusion(text, pair_spatial(model, head, pa, pb).to(text.dtype))
+            out = model.llm(inputs_embeds=fused, attention_mask=b["attention_mask"], labels=b["labels"])
+            opt.zero_grad(); out.loss.backward(); opt.step(); final_loss = out.loss.item()
+            if step % 200 == 0 or step == a.steps - 1:
+                model.eval()
+                tacc = evaluate(model, head, tok, adj_e[:240], grid, device, bs=a.bs * 2)   # honest tell of learning
+                model.train()
+                print(f"step {step}: loss {out.loss.item():.3f}  train_acc {tacc:.3f}", flush=True)
+        del opt
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     model.eval()
-    del opt
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()                                   # free training grads/optimizer before eval
     perm = torch.randperm(N, generator=torch.Generator().manual_seed(a.seed + 7))
     res = {
-        "dominance_far": round(evaluate(model, head, tok, far, grid, device), 4),
-        "dominance_dissociation": round(evaluate(model, head, tok, diss, grid, device), 4),
-        "dominance_adj_trained": round(evaluate(model, head, tok, adj, grid, device), 4),
-        "dominance_far_cortex_OFF": round(evaluate(model, head, tok, far, grid, device, ablate=True), 4),
-        "dominance_far_shuffled_pos": round(evaluate(model, head, tok, far, grid, device, shuffle_perm=perm), 4),
+        "dominance_far": round(evaluate(model, head, tok, far_e, grid, device, bs=a.bs * 2), 4),
+        "dominance_dissociation": round(evaluate(model, head, tok, diss_e, grid, device, bs=a.bs * 2), 4),
+        "dominance_adj_trained": round(evaluate(model, head, tok, adj_e, grid, device, bs=a.bs * 2), 4),
+        "dominance_far_cortex_OFF": round(evaluate(model, head, tok, far_e, grid, device, ablate=True, bs=a.bs * 2), 4),
+        "dominance_far_shuffled_pos": round(evaluate(model, head, tok, far_e, grid, device, shuffle_perm=perm, bs=a.bs * 2), 4),
     }
-    print("\nSOCIAL DOMINANCE through the frozen LLM (chance 50%):", flush=True)
+    print("\nSOCIAL DOMINANCE through the frozen LLM (balanced sets; chance 50%):", flush=True)
     for k, v in res.items():
         print(f"  {k:28} {v:.1%}", flush=True)
     print("  (cortex-OFF & shuffled -> ~chance; dissociation > chance = reads POWER, not affiliation)", flush=True)
     if res["dominance_adj_trained"] < 0.6:
-        print("  WARNING: adjacent (TRAINED) ~chance despite low loss -> eval/readout mismatch, not a real null.", flush=True)
+        print(f"  DIAGNOSIS: adjacent (TRAINED) at chance (final loss={final_loss}). Loss ~0.69/answer-token =>"
+              " underfit (raise --bs/--steps); loss dropped but ~0.5 => old eval bug (now fixed).", flush=True)
     if a.out:
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         json.dump({"seed": a.seed, "G": a.G, "spacing": a.spacing, "results": res}, open(a.out, "w"), indent=2)

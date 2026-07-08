@@ -1353,26 +1353,40 @@ path (heading = atan2(y,x); never a relative displacement → no leak). The shar
 (rank) code is ≤0.5 there **by construction**, so beating chance there is un-fakeable.
 
 - **(#8) A genuine 2-D conceptual metric — `conceptual_grid_cortex.py`.** Read-out-free (parameter-free, so it
-  cannot be circular): OFF-AXIS "closer" by raw code-distance **0.65 ± 0.03** vs shuffled positions **0.50**
-  (gap **+0.15 ± 0.03**); distance-correlation Spearman **0.53** vs shuffled **−0.03**. Held-out linear decode
-  (concepts the probe *never saw*): position recovered at **0.63** spacing vs **3.4** under the shuffled refit
-  (a 5× collapse), with held-out off-axis "closer" **0.77**. The absolute strength is modest on CPU with these
-  simple read-outs — the honest expectation (grounded in the 1-D precedent, whose CPU de-risk 1.0 sharpened to
-  the LLM's 0.99) is that the trained frozen-LLM read-out *sharpens* it; the de-risk's job is only to show the
-  2-D metric is **present and control-clean**, which it is.
+  cannot be circular): on a **label-BALANCED** off-axis set (chance exactly 0.5) OFF-AXIS "closer" by raw
+  code-distance **0.64 ± 0.03** vs shuffled positions **0.49** (gap **+0.15 ± 0.03**); distance-correlation
+  Spearman **0.53** vs shuffled **−0.03**. Held-out linear decode (concepts the probe *never saw*): position
+  recovered at **0.63** spacing vs **3.3** under the shuffled refit (a 5× collapse), with held-out off-axis
+  "closer" **0.76**. (Balancing matters: the raw off-axis set is ~0.67 one class, so an *unbalanced* metric
+  would credit a constant predictor 0.67 — we report the balanced number so chance is honestly 0.5.) The
+  absolute strength is modest on CPU with these simple read-outs; the de-risk's job is only to show the 2-D
+  metric is **present and control-clean**, which it is.
 - **(#9) A dissociable 2-D social map — `social_grid_cortex.py`.** Agents in a POWER × AFFILIATION space. (A)
   **DOMINANCE** is a clean 1-D read of the power axis — held-out pairwise dominance **0.96 ± 0.02** (the social
-  transitive-inference result). (B) **SOCIAL DISTANCE** is a genuine 2-D metric — OFF-AXIS "socially closer"
-  **0.65** (>chance, where a power-only read is ≤0.5). (C) **AXIS DISSOCIATION** — decoding dominance from the
-  power axis gives **0.96** but from the affiliation axis only **0.45** (gap **+0.51 ± 0.07**): the two social
-  axes are *separately* readable, gap #4's self/other double dissociation now reappearing at the abstract-map
-  level. FALSIFIER: shuffle the agent↔position map and dominance collapses to **0.44** (chance).
+  transitive-inference result; an order-preservation accuracy, unaffected by class balance). (B) **SOCIAL
+  DISTANCE** is a genuine 2-D metric — balanced OFF-AXIS "socially closer" **0.64** (>chance 0.5, where a
+  power-only read is ≤0.5). (C) **AXIS DISSOCIATION** — decoding dominance from the power axis gives **0.96** but
+  from the affiliation axis only **0.45** (gap **+0.51 ± 0.07**): the two social axes are *separately* readable,
+  gap #4's self/other double dissociation now reappearing at the abstract-map level. FALSIFIER: shuffle the
+  agent↔position map and dominance collapses to **0.44** (chance).
 
 Honest status: gaps #8/#9 are **de-risked on CPU and scaffolded for the T4, not yet closed** — the cortex-ON-vs-
 text-only-OFF headline is produced by running the two notebook cells on a GPU. What the CPU proves, and proves
 non-circularly, is that the frozen *space* map already carries the 2-D conceptual and social structure the LLM
 cell will read (measured on the exact `encode` pipeline, never put in any loss).
 (`results/conceptual_grid_cortex.json`/`.svg`, `results/social_grid_cortex.json`/`.svg`.)
+
+**T4 run #1 — an honest failure, and what it taught.** The first GPU run of the #8 LLM cell **collapsed to a
+constant predictor**: it read **50%** on its own *training* set while showing **66.8%** on the off-axis set —
+which turned out to be *exactly* that set's label imbalance (0.668), i.e. the trivial "always answer the
+majority" baseline, not 2-D reasoning. Two lessons, both now fixed in the trainers: (i) the off-axis eval must
+be **label-balanced** so a constant predictor scores 0.5 (the imbalanced version would have paraded a constant
+predictor as a 67% "result"); (ii) the multi-token candidate-NLL scorer was replaced with a **padding-immune
+single-next-token** scorer, the eval sets **balanced and capped** (37k triples/seed → 1.2k, minutes not hours),
+and a **periodic train-accuracy** read-out added so a run reveals *whether the readout is actually learning*
+rather than driving the loss toward the class prior. A `--reeval` mode re-scores an existing checkpoint for free.
+Whether the frozen-LLM readout can *extract* the modest 2-D signal (the CPU shows the code *carries* it, ~0.64)
+remains **open pending a clean T4 run** — reported here rather than buried, in the register's standard.
 
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document

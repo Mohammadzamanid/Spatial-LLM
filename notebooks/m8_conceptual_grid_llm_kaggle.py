@@ -52,6 +52,17 @@ for seed in [0, 1, 2]:
 print("\nconceptual sweep pass complete")
 
 
+# %% [cell 3b] RE-EVAL an existing checkpoint with the FIXED eval (padding-immune, balanced, capped) — FREE,
+# no retraining. Use this to salvage a prior run: if closer_near_trained >> 50% the model LEARNED and the old
+# candidate-NLL eval was the bug; if it is ~50% the readout genuinely underfit (raise --bs/--steps). Minutes.
+import glob, subprocess
+for pt in sorted(glob.glob("results/conceptual_llm/conceptual_s*.pt")):
+    seed = pt.split("conceptual_s")[1].split(".pt")[0]
+    print(f"\n>>> re-eval {pt} (seed {seed})", flush=True)
+    subprocess.run(["python", "-u", "-m", "src.training.train_conceptual", "--reeval", pt,
+                    "--G", "6", "--spacing", "0.8", "--seed", seed], check=True)
+
+
 # %% [cell 4] aggregate -> mean +/- 95% CI + paired OFF-AXIS-vs-cortex-OFF test (paste this back)
 import os, json, math, random
 OUTDIR = "results/conceptual_llm"; SEEDS = list(range(3))

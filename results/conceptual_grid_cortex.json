@@ -13,32 +13,32 @@
       "ci95": 0.0267
     },
     "offaxis_closer_free": {
-      "mean": 0.6491,
-      "ci95": 0.0266
+      "mean": 0.6388,
+      "ci95": 0.0255
     },
     "offaxis_closer_free_shuffled": {
-      "mean": 0.4973,
-      "ci95": 0.0106
+      "mean": 0.4941,
+      "ci95": 0.0102
     },
     "heldout_decode_err": {
       "mean": 0.6302,
       "ci95": 0.071
     },
     "heldout_decode_err_shuffled": {
-      "mean": 3.3811,
-      "ci95": 0.5724
+      "mean": 3.3194,
+      "ci95": 0.4532
     },
     "heldout_offaxis_closer": {
-      "mean": 0.766,
-      "ci95": 0.0864
+      "mean": 0.7639,
+      "ci95": 0.0857
     },
     "offaxis_gap": {
-      "mean": 0.1518,
-      "ci95": 0.0316
+      "mean": 0.1447,
+      "ci95": 0.0328
     },
     "decode_gap": {
-      "mean": 2.751,
-      "ci95": 0.5909
+      "mean": 2.6893,
+      "ci95": 0.4715
     }
   },
   "verdict": "SOUND \u2014 the frozen space code carries a genuine, CONTROL-CLEAN 2-D metric a 1-D code cannot produce; build the T4 LLM cell (train_conceptual.py / m8 notebook). Absolute strength is modest on CPU; the trained LLM readout is expected to sharpen it (1-D precedent: 1.0 -> 0.99)."

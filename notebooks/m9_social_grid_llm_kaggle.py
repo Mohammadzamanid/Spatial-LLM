@@ -53,6 +53,16 @@ for seed in [0, 1, 2]:
 print("\nsocial sweep pass complete")
 
 
+# %% [cell 3b] RE-EVAL an existing checkpoint with the FIXED eval (padding-immune, balanced, capped) — FREE,
+# no retraining. If dominance_adj_trained >> 50% the model LEARNED (old eval was the bug); ~50% = underfit.
+import glob, subprocess
+for pt in sorted(glob.glob("results/social_llm/social_s*.pt")):
+    seed = pt.split("social_s")[1].split(".pt")[0]
+    print(f"\n>>> re-eval {pt} (seed {seed})", flush=True)
+    subprocess.run(["python", "-u", "-m", "src.training.train_social", "--task", "dominance", "--reeval", pt,
+                    "--G", "6", "--spacing", "0.8", "--seed", seed], check=True)
+
+
 # %% [cell 4] aggregate -> mean +/- 95% CI + paired DISSOCIATION-vs-cortex-OFF test (paste this back)
 import os, json, math, random
 OUTDIR = "results/social_llm"; SEEDS = list(range(3))
