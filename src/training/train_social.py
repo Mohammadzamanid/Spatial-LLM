@@ -135,6 +135,7 @@ def main():
     ap.add_argument("--jitter", type=float, default=0.12)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--bs", type=int, default=8)                   # T4-safe (LM-head logits over ~152k vocab)
+    ap.add_argument("--grad_ckpt", action="store_true")            # OFF by default: it silently killed adapter grads
     ap.add_argument("--eval_cap", type=int, default=1200)
     ap.add_argument("--reeval", default=None)                      # path to a .pt checkpoint: load + eval, skip training
     ap.add_argument("--seed", type=int, default=0)
@@ -157,12 +158,14 @@ def main():
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
     head = nn.Linear(2 * model.cortex.embed_dim, llm_dim * model.n_tokens).to(device)
-    try:                                                          # T4 memory (see train_conceptual)
-        model.llm.config.use_cache = False
-        model.llm.gradient_checkpointing_enable()
-        print("gradient checkpointing: ON", flush=True)
-    except Exception as e:
-        print(f"gradient checkpointing unavailable ({e}); relying on small --bs", flush=True)
+    model.llm.config.use_cache = False                            # grad ckpt OFF by default (see train_conceptual:
+    if a.grad_ckpt:                                               # plain checkpointing kills PEFT adapter grads)
+        model.llm.enable_input_require_grads()
+        try:
+            model.llm.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        except TypeError:
+            model.llm.gradient_checkpointing_enable()
+        print("gradient checkpointing: ON (non-reentrant, input grads enabled)", flush=True)
 
     grid = build_grid(a.G, a.spacing); N = grid.shape[0]
     adj, far, diss = dominance_pairs(grid, a.G)
@@ -196,7 +199,12 @@ def main():
             text = model._embed()(b["input_ids"])
             fused = model.fusion(text, pair_spatial(model, head, pa, pb).to(text.dtype))
             out = model.llm(inputs_embeds=fused, attention_mask=b["attention_mask"], labels=b["labels"])
-            opt.zero_grad(); out.loss.backward(); opt.step(); final_loss = out.loss.item()
+            opt.zero_grad(); out.loss.backward()
+            if step == 0:                                          # decisive: are gradients reaching the adapters?
+                gn = sum(p.grad.detach().float().norm().item() ** 2 for p in train_params if p.grad is not None) ** 0.5
+                print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e}  (>0 required; ~0 => grads NOT reaching "
+                      "the LoRA/fusion/head -> model won't learn)", flush=True)
+            opt.step(); final_loss = out.loss.item()
             if step % 200 == 0 or step == a.steps - 1:
                 model.eval()
                 tacc = evaluate(model, head, tok, adj_e[:240], grid, device, bs=a.bs * 2)   # honest tell of learning

@@ -190,6 +190,7 @@ def main():
     ap.add_argument("--jitter", type=float, default=0.12)          # < spacing/2 keeps the geometry
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--bs", type=int, default=8)                   # T4-safe (LM-head logits over ~152k vocab)
+    ap.add_argument("--grad_ckpt", action="store_true")            # OFF by default: it silently killed adapter grads
     ap.add_argument("--eval_cap", type=int, default=1200)          # balanced+capped eval set size (fast on T4)
     ap.add_argument("--reeval", default=None)                      # path to a .pt checkpoint: load + eval, skip training
     ap.add_argument("--seed", type=int, default=0)
@@ -205,15 +206,19 @@ def main():
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
     head = nn.Linear(3 * model.cortex.embed_dim, llm_dim * model.n_tokens).to(device)   # joint triple readout
-    # T4 memory: gradient-checkpoint the LLM (frees transformer-layer activations to make room for the
-    # (bs, seq, ~152k vocab) LM-head logits). inputs_embeds carry grad from the trainable fusion/head, so
-    # checkpointing is transparent to the trainable params. Guarded — degrades gracefully if unavailable.
-    try:
-        model.llm.config.use_cache = False
-        model.llm.gradient_checkpointing_enable()
-        print("gradient checkpointing: ON", flush=True)
-    except Exception as e:
-        print(f"gradient checkpointing unavailable ({e}); relying on small --bs", flush=True)
+    # T4 memory: gradient checkpointing is OFF by default. On a PEFT model with a FROZEN base fed via
+    # inputs_embeds, plain gradient_checkpointing_enable() silently drops gradients to the LoRA adapters
+    # (reentrant checkpointing needs an input that requires grad) -> the model trains NOTHING and reads as a
+    # constant predictor (exactly what a first T4 run showed). If enabled, do it the correct way:
+    # enable_input_require_grads() + use_reentrant=False. Small --bs fits a T4 without checkpointing at all.
+    model.llm.config.use_cache = False
+    if a.grad_ckpt:
+        model.llm.enable_input_require_grads()
+        try:
+            model.llm.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        except TypeError:                                          # older transformers
+            model.llm.gradient_checkpointing_enable()
+        print("gradient checkpointing: ON (non-reentrant, input grads enabled)", flush=True)
 
     grid = build_grid(a.G, a.spacing); N = grid.shape[0]
     near_r = 2.1 * a.spacing; margin = 0.2 * a.spacing        # near = local (<= ~2-step) with a resolvable margin
@@ -248,7 +253,12 @@ def main():
             pa = walk_2d(jit(sel[:, 0]), device); pb = walk_2d(jit(sel[:, 1]), device); pc = walk_2d(jit(sel[:, 2]), device)
             b = collate([tuple(t.tolist()) for t in sel], labels, tok, device)
             out = triple_out(model, head, b["input_ids"], b["attention_mask"], pa, pb, pc, labels=b["labels"])
-            opt.zero_grad(); out.loss.backward(); opt.step(); final_loss = out.loss.item()
+            opt.zero_grad(); out.loss.backward()
+            if step == 0:                                          # decisive: are gradients reaching the adapters?
+                gn = sum(p.grad.detach().float().norm().item() ** 2 for p in train_params if p.grad is not None) ** 0.5
+                print(f"  [diag] step0 grad-norm(trainable) = {gn:.3e}  (>0 required; ~0 => grads NOT reaching "
+                      "the LoRA/fusion/head -> model won't learn)", flush=True)
+            opt.step(); final_loss = out.loss.item()
             if step % 200 == 0 or step == a.steps - 1:
                 # periodic TRAIN accuracy on a small slice: the honest tell of whether the readout is learning
                 # (loss alone can drop toward the class prior without conditioning on the spatial input).
