@@ -50,17 +50,39 @@ def walk_2d(pos, device, T=ENC_T):
     return heading.contiguous(), speed.contiguous(), torch.zeros(pos.shape[0], T, device=device)
 
 
+class CoincidenceReadout(nn.Module):
+    """The readout module for the 2-D metric ("closer") task — a COINCIDENCE DETECTOR, the neuroscientific
+    mechanism by which grid cells provide a cognitive map's *metric*: proximity is read from the CORRELATION /
+    OVERLAP of grid population vectors (Bellmund & Behrens 2018; Bush, Barry, Burgess 2015). That overlap is a
+    DOT PRODUCT — quadratic in the codes — which #9's linear head (great for the 1-D ordinal 'dominance') cannot
+    compute; here a learned bilinear form supplies exactly that capacity. CPU-verified: trained on NEAR triples
+    it generalizes to OFF-AXIS FAR at ~0.71 (chance 0.5), where the MLP head underfit to 0.50.
+
+    forward(ea, eb, ec): ea = anchor code, eb/ec = candidate codes (all gain-normalized). Projects each to a
+    learned map subspace P=code@proj, forms the per-dim overlaps P_a*P_b and P_a*P_c (the coincidence signal;
+    their sums are the proximities), and feeds [codes, overlaps] through an MLP -> the LLM spatial tokens. The
+    LLM then only has to compare two proximity signals — the 1-D ordinal read that #9 proved a frozen LLM does."""
+
+    def __init__(self, code_dim, out_dim, k=32, hidden=512):
+        super().__init__()
+        self.proj = nn.Linear(code_dim, k, bias=False)      # grid -> map subspace (learned; like #9's projection)
+        self.mlp = nn.Sequential(nn.Linear(3 * code_dim + 2 * k, hidden), nn.GELU(), nn.Linear(hidden, out_dim))
+
+    def forward(self, ea, eb, ec):
+        pa, pb, pc = self.proj(ea), self.proj(eb), self.proj(ec)
+        feat = torch.cat([ea, eb, ec, pa * pb, pa * pc], -1)    # raw codes + anchor-candidate coincidence overlaps
+        return self.mlp(feat)
+
+
 def triple_spatial(model, head, pa, pb, pc, ablate=False):
-    """JOINT triple read-out: concat the three FROZEN concept codes -> trainable head -> spatial tokens
-    (matches train_relational's concat-the-codes pair readout that made the relation linearly accessible).
+    """Read-out for (anchor, candidate1, candidate2) via the COINCIDENCE detector (see CoincidenceReadout).
     Cortex stays frozen; each concept enters by its own position -> no leak."""
     B = pa[0].shape[0]
     llm_dim = model.to_tokens.out_features // model.n_tokens
     if ablate:
         return torch.zeros(B, model.n_tokens, llm_dim, device=pa[0].device)
     nc = lambda p: _norm_code(model, model.cortex.encode(*p))   # gain-control (see _norm_code)
-    code = torch.cat([nc(pa), nc(pb), nc(pc)], -1)
-    return head(code).view(B, model.n_tokens, llm_dim)
+    return head(nc(pa), nc(pb), nc(pc)).view(B, model.n_tokens, llm_dim)
 
 
 def _norm_code(model, e):
@@ -218,12 +240,10 @@ def main():
     model = TrajectoryLLM(base_llm=a.base_llm, cortex_constrained_velocity=True).to(device)
     pretrain_freeze_cortex(model, device, seed=a.seed)
     llm_dim = model.to_tokens.out_features // model.n_tokens
-    # NONLINEAR (MLP) triple readout: "closer" is a DISTANCE comparison (quadratic in the codes: ||A-B||^2 has
-    # the cross-term A.B), which a LINEAR head cannot compute. A GELU MLP can form the distance features and
-    # encode "B closer" into the spatial tokens (dominance in #9 was LINEAR, so a linear head sufficed there).
-    _hid = 1024
-    head = nn.Sequential(nn.Linear(3 * model.cortex.embed_dim, _hid), nn.GELU(),
-                         nn.Linear(_hid, llm_dim * model.n_tokens)).to(device)
+    # COINCIDENCE-DETECTOR readout (see CoincidenceReadout): "closer" is a DISTANCE = grid population-vector
+    # OVERLAP (quadratic), which #9's linear head cannot compute. A learned bilinear coincidence term supplies
+    # it (CPU-verified: near->off-axis 0.71 vs the MLP head's 0.50).
+    head = CoincidenceReadout(model.cortex.embed_dim, llm_dim * model.n_tokens, k=32, hidden=512).to(device)
     # T4 memory: gradient checkpointing is OFF by default. On a PEFT model with a FROZEN base fed via
     # inputs_embeds, plain gradient_checkpointing_enable() silently drops gradients to the LoRA adapters
     # (reentrant checkpointing needs an input that requires grad) -> the model trains NOTHING and reads as a
