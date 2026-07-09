@@ -64,18 +64,22 @@ class CoincidenceReadout(nn.Module):
     (chance 0.5), where a linear head gives 0.50 and the free-MLP joint head could self-answer (rejected here).
     Honest bound: the readout computes the METRIC (proximity); the LLM does only the ORDINAL compare of the two."""
 
-    def __init__(self, code_dim, out_dim, k=32, hidden=256):
+    def __init__(self, code_dim, out_dim, k=32, hidden=256, rep=256):
         super().__init__()
-        assert out_dim % 2 == 0, "need an even token budget to split between the two candidates"
         self.proj = nn.Linear(code_dim, k, bias=False)          # grid -> map subspace (learned)
-        self.prox = nn.Sequential(nn.Linear(2 * code_dim + k, hidden), nn.GELU(), nn.Linear(hidden, out_dim // 2))
+        self.prox = nn.Sequential(nn.Linear(2 * code_dim + k, hidden), nn.GELU(), nn.Linear(hidden, rep))
+        self.combine = nn.Linear(2 * rep, out_dim)              # LINEAR mix -> JOINT tokens (like #9)
 
-    def _one(self, ea, ex):                                     # proximity of candidate X to anchor A (shared)
+    def _one(self, ea, ex):                                     # proximity of candidate X to anchor A (shared, nonlinear)
         pa, px = self.proj(ea), self.proj(ex)
-        return self.prox(torch.cat([ea, ex, pa * px], -1))      # anchor-candidate coincidence overlap -> tokens
+        return self.prox(torch.cat([ea, ex, pa * px], -1))      # anchor-candidate coincidence overlap -> proximity rep
 
     def forward(self, ea, eb, ec):
-        return torch.cat([self._one(ea, eb), self._one(ea, ec)], -1)   # B's proximity tokens ++ C's; LLM compares
+        rb, rc = self._one(ea, eb), self._one(ea, ec)
+        # LINEAR combine of the two per-candidate proximities -> joint tokens: it can encode the graded
+        # difference rb-rc (making it accessible like #9's power difference) but CANNOT threshold it, so the
+        # frozen LLM still does the decision. The only nonlinearity (prox) is per-candidate -> honest.
+        return self.combine(torch.cat([rb, rc], -1))
 
 
 def triple_spatial(model, head, pa, pb, pc, ablate=False):
