@@ -162,6 +162,25 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   independently of synapses — a volume-transmission / non-synaptic computational channel the connectionist
   substrate omits.
 
+### 5d. Non-Euclidean grid deformation — **grid shearing with environmental geometry** ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/grid_shearing.py` (n=5). Grid cells are not a rigid lattice: in
+  polarized/trapezoidal environments they lose hexagonal symmetry and shear (Krupic et al. 2015, Nature;
+  Stensola et al. 2015, Nature). The repo's grid modules were a rigid function of position; here the deformation
+  is **not drawn — it emerges**. The model localizes at walls with a SQUARE-calibrated rule
+  (`p_hat = bearing·(arena_R − wall_distance)`); in a trapezoid the walls are not at arena_R along their normals,
+  so that rule MISLOCALIZES, warping the phase↔position map, and the rate map (over TRUE position) shears.
+  Measured against a clean **double dissociation**: (A) SQUARE+anchoring gridness **+1.00** → TRAPEZOID+anchoring
+  **+0.01** (drop **+0.99 ± 0.01**), with a dose-response (half-shear +0.60 — the deformation grows with the
+  geometry); (B) **falsifier** — the deformation needs BOTH ingredients: TRAPEZOID + NO anchoring stays
+  hexagonal (**+1.14**; the geometry alone does nothing to the rigid path-integrator) and SQUARE + anchoring
+  stays hexagonal (**+1.00**; the square-calibrated fix is correct there) — only trapezoid+anchoring deforms
+  (gap **+1.14 ± 0.01**). The grid deforms *itself* with environmental geometry, never put in a loss. Honest
+  note: this took diagnosing a phase-offset setup bug (trajectories must start at the origin so grid phase tracks
+  true position) before the baseline was cleanly hexagonal — reported, not hidden. See `results/FINDINGS.md`.
+- **Neuro basis.** A grid is a self-organized code anchored to boundaries; when boundary geometry is polarized,
+  the anchoring can no longer tile it hexagonally, so it shears/fragments — the grid is *shaped by* the
+  environment, not a rigid ruler laid over it.
+
 ### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
 - **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;

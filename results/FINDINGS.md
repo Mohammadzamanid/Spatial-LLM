@@ -1115,6 +1115,35 @@ coordination — timing structure that a matched-budget synaptic network does no
 can read — measured against its matched-rate falsifier, never put in a loss. The volume-transmission channel the
 connectionist substrate omits, doing work. (`results/ephaptic_coupling.json`, `results/ephaptic_coupling.svg`.)
 
+### Grid shearing — the hexagonal grid deforms itself with environmental geometry (GAPS.md #5d, n=5)
+
+Grid cells are not a rigid ruler laid over space: in polarized / trapezoidal enclosures they lose hexagonal
+symmetry and **shear** (Krupic, Bauza, Burton, Barry & O'Keefe 2015, *Nature*, "grid cell symmetry is shaped by
+environmental geometry"; Stensola, Stensola, Moser & Moser 2015, *Nature*, boundary-induced shearing). The
+repo's grid modules were a rigid function of position, so this was the one honest gap in the "3-D / non-Euclidean"
+critique. `src/eval/grid_shearing.py` closes it — and the deformation is **not drawn; it emerges**. The model
+localizes at walls with a *square-calibrated* rule (`p_hat = bearing·(arena_R − wall-distance)` — "you are at
+R − d along the wall normal"). In a **trapezoid** the walls are not at arena_R along their normals, so that rule
+**mislocalizes**, warping the phase↔position map — and the rate map, read out over *true* position, shears.
+
+- **(A) Shearing.** In a square arena the finest grid module is cleanly hexagonal (top-cell gridness **+1.00**);
+  in a trapezoid under the *same* anchoring it collapses to **+0.01** — a drop of **+0.99 ± 0.01**. A
+  **dose-response** confirms it tracks the geometry: half the shear gives an intermediate **+0.60**.
+- **(B) Double dissociation — the deformation needs BOTH ingredients.** Trapezoid **without** anchoring stays
+  hexagonal (**+1.14** — the geometry alone does nothing to a rigid path-integrator); square **with** anchoring
+  stays hexagonal (**+1.00** — the square-calibrated fix is *correct* there). **Only** trapezoid + anchoring
+  deforms (falsifier gap **+1.14 ± 0.01**). So the shear is neither a property of the geometry alone nor of the
+  anchoring alone — it is their interaction, exactly as the mechanism predicts.
+
+This is emergence at the strong end of the spectrum: the grid **distorts itself** in a shape it was never told
+about, as a consequence of a boundary rule calibrated for a different geometry — the Krupic/Stensola result,
+measured, never put in a loss. **Honest note on how it was obtained:** the first probes showed *no* gridness at
+all (even in the square), and I nearly concluded the model couldn't shear; the cause was a setup bug — grid
+phase starts at zero while trajectories started at random positions, smearing every rate map. Starting
+trajectories at the origin (so phase tracks true position) exposed the clean baseline and the shear. Diagnosing
+that rather than tuning around it is the difference between a measured result and a manufactured one.
+(`results/grid_shearing.json`, `results/grid_shearing.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

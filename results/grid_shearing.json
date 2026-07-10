@@ -1,0 +1,38 @@
+{
+  "n_seeds": 5,
+  "R": 3.0,
+  "shear": 2.2,
+  "n_walk": 1500,
+  "T": 40,
+  "results": {
+    "grid_square_anchor": {
+      "mean": 0.9962,
+      "ci95": 0.0019
+    },
+    "grid_trapezoid_anchor": {
+      "mean": 0.0068,
+      "ci95": 0.0056
+    },
+    "grid_square_noanchor": {
+      "mean": 0.9962,
+      "ci95": 0.0019
+    },
+    "grid_trapezoid_noanchor": {
+      "mean": 1.1418,
+      "ci95": 0.0031
+    },
+    "grid_trapezoid_half": {
+      "mean": 0.5957,
+      "ci95": 0.0123
+    },
+    "shear_drop": {
+      "mean": 0.9893,
+      "ci95": 0.0063
+    },
+    "falsifier_gap": {
+      "mean": 1.1349,
+      "ci95": 0.0082
+    }
+  },
+  "verdict": "SOUND \u2014 the hexagonal grid stays hexagonal in a square arena but SHEARS in a trapezoid under the same boundary anchoring, and the deformation requires BOTH the polarized geometry and the anchoring (a clean double dissociation). The grid deforms itself with environmental geometry \u2014 measured, never drawn (Krupic 2015; Stensola 2015)."
+}
