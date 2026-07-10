@@ -200,6 +200,25 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   direction, via multiplicative gain-field neurons — the bridge from first-person perception to a world-centred
   cognitive map.
 
+### 5f. Non-synaptic (glial) — **astrocyte syncytium: spatial-density-gated plasticity + heterosynaptic binding** ✅ CLOSED (Jul 2026)
+- **Status: implemented (honest, modest).** `src/eval/astrocyte_syncytium.py` (n=5). The repo already has a
+  POINT-WISE astrocyte organ (#B4, gates each synapse by its own activity). Astrocytes are also gap-junction
+  coupled into a SYNCYTIUM across which Ca²⁺ spreads (Scemes & Giaume 2006; the substrate for Ca²⁺ waves). We
+  asked, honestly, what the *spatial coupling* computes that a point can't. **Reported finding first (not
+  hidden):** a FULLY REGENERATIVE Ca²⁺ wave is all-or-nothing — it FLOODS the whole array once ignited (clustered
+  1.00 ≈ scattered 1.00, no spatial selectivity), so the computation lives in the GRADED diffusive spread, not
+  the regenerative wave. With sub-threshold single-synapse drive (a point can't trigger plasticity alone): (A)
+  **heterosynaptic binding** — a silent-but-surrounded synapse is recruited into the assembly by pooled neighbour
+  Ca²⁺ (gate **0.95 vs 0.00** point-wise; Henneberger 2010); (B) **spatial-density gate** — spatially-CLUSTERED
+  co-activity's core potentiates (**0.40**) where the SAME NUMBER SCATTERED does not (**0.07**, selectivity
+  **+0.33**); (C) **falsifiers** — UNCOUPLED does nothing (0.00, no pooling), the REGENERATIVE WAVE floods (no
+  selectivity). **Honest grade:** a real network computation from glial coupling, but *modest* — only the cluster
+  core binds, and the useful regime is the graded spread, not the wave itself. This is the fuzziest item in the
+  whole register (astrocyte Ca²⁺-wave *computation* is genuinely debated); I flagged it as high-risk up front and
+  kept the claim to exactly what the controls support. See `results/FINDINGS.md`.
+- **Neuro basis.** Gap-junction-coupled astrocytes spread Ca²⁺ across a syncytium, letting one synapse's glial
+  signal reach its neighbours — a spatial, non-synaptic substrate for coordinating plasticity across an ensemble.
+
 ### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
 - **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;

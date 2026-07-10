@@ -1176,6 +1176,50 @@ a deformation it was never built toward. The bridge from first-person perception
 biologically-observed gain-field signature — measured, never imposed. (`results/reference_transform.json`,
 `results/reference_transform.svg`.)
 
+### The glial syncytium computes with space — spatial-density-gated plasticity + heterosynaptic binding (GAPS.md #5f, n=5)
+
+The repo already had a *point-wise* astrocyte (#B4): a slow glial gate that throttles each synapse by **its own**
+activity. But astrocytes are also wired into a gap-junction **syncytium** across which Ca²⁺ physically **spreads**
+(Scemes & Giaume 2006; Cornell-Bell 1990 — the substrate for the astrocytic Ca²⁺ wave). The honest question is
+narrow: what does the *spatial coupling* compute that a single point cannot? `src/eval/astrocyte_syncytium.py`
+answers it — and I want the disappointing part stated **first**, because it is the actual result.
+
+- **The regenerative wave floods — reported, not hidden.** A *fully* regenerative Ca²⁺ wave (Ca²⁺-induced Ca²⁺
+  release) is all-or-nothing: once it ignites anywhere it propagates over the **whole** array. In the eval it
+  potentiates clustered and scattered patterns **identically (1.00 ≈ 1.00, selectivity +0.00)** — it computes
+  *nothing* spatial. So the wave *per se* is not the answer. The computation lives one regime below it, in the
+  **graded diffusive spread**. I found this by building the wave first and watching it flood; I reframed the eval
+  around the diffusive syncytium and kept the flood as a labelled control rather than quietly deleting it.
+
+With single-synapse drive set **sub-threshold** (a lone synapse's Ca²⁺ can't cross the plasticity gate — so the
+point-wise organ is powerless by construction, which is the point), the graded syncytium does two real things at
+**matched total co-activity**:
+
+- **(A) Spatial-density gate.** Spatially-**clustered** co-active synapses pool each other's Ca²⁺ across the
+  syncytium and their core crosses the gate (potentiated fraction **0.40**); the **same number** of **scattered**
+  synapses, too far apart to pool, stay sub-threshold (**0.07**). That is a density selectivity of **+0.33 ± 0.01**
+  — a quantity a point-wise astrocyte has no access to, because density is a *spatial* property of the ensemble,
+  not of any one synapse.
+- **(B) Heterosynaptic binding (the strong signal).** A **silent-but-surrounded** synapse — a gap inside a
+  cluster, active neighbours all around it, itself quiet — is recruited into the assembly by Ca²⁺ pooled from
+  those neighbours: gate **0.95 vs 0.00** point-wise (fill-in **+0.95 ± 0.01**). This is astrocyte-mediated
+  heterosynaptic plasticity (Henneberger 2010; Andrade-Talavera): the glial network binds a synapse the neurons
+  never drove.
+- **(C) Falsifiers.** **Uncouple** the syncytium (no spread) and, at the same total activity, clustered ≈ scattered
+  and the gap stays silent (selectivity **+0.00**, fill-in **0.00**) — so the effect is the *coupling*, not the
+  activity. And the **regenerative-wave** control floods (selectivity **+0.00**) — so the selectivity is the
+  *graded* spread, not an all-or-nothing wave. The two controls fail in *opposite* directions (one too little
+  spread, one too much), and the syncytium is the only regime between them that discriminates.
+
+**Honest grade — the weakest, fuzziest entry in the register, kept deliberately un-inflated.** The
+heterosynaptic fill-in (+0.95) is a strong, clean effect; the density gate (+0.33) is *real but modest* — only the
+cluster **core** pools enough to cross, the edges don't, so the selectivity is a core-vs-scattered contrast, not a
+whole-cluster switch. And the headline honesty is that the *wave*, the thing the critique actually named, floods;
+the computation is the humbler diffusive syncytium underneath it. Whether astrocyte Ca²⁺ signalling performs this
+kind of spatial computation *in vivo* is genuinely debated — this is the one item I flagged as high-risk before
+building, and I held the claim to exactly what the three controls support: a network computation that emerges from
+glial coupling, no more. (`results/astrocyte_syncytium.json`, `results/astrocyte_syncytium.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

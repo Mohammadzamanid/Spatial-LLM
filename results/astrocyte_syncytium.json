@@ -1,0 +1,57 @@
+{
+  "n_seeds": 5,
+  "N": 120,
+  "k_active": 18,
+  "gate_thr": 0.7,
+  "results": {
+    "gate_clustered_syncytium": {
+      "mean": 0.4006,
+      "ci95": 0.0035
+    },
+    "gate_scattered_syncytium": {
+      "mean": 0.0708,
+      "ci95": 0.0073
+    },
+    "gate_fillin_syncytium": {
+      "mean": 0.9463,
+      "ci95": 0.0114
+    },
+    "gate_clustered_uncoupled": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "gate_scattered_uncoupled": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "gate_fillin_uncoupled": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "gate_clustered_regenwave": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "gate_scattered_regenwave": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "density_selectivity_syncytium": {
+      "mean": 0.3297,
+      "ci95": 0.0098
+    },
+    "density_selectivity_uncoupled": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "density_selectivity_regenwave": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "fillin_gap": {
+      "mean": 0.9463,
+      "ci95": 0.0114
+    }
+  },
+  "verdict": "SOUND \u2014 the astrocyte SYNCYTIUM binds a silent-but-surrounded synapse heterosynaptically into an assembly (fill-in the point-wise organ has no access to) and gates plasticity SELECTIVELY by spatial density (clustered co-activity's core potentiates, matched-count scattered does not), where an uncoupled astrocyte does nothing at this sub-threshold drive and a regenerative wave floods indiscriminately. A network computation from glial coupling, against its falsifiers \u2014 the effect is real but modest (only the cluster core binds; the graded spread, not the wave, does the work)."
+}
