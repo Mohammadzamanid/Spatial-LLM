@@ -150,26 +150,26 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 
 ## Tier 3 — GPU / language
 
-### 8. The LLM reads the **conceptual-grid** map ✅ DE-RISKED ON CPU + T4 CELL SCAFFOLDED (Jul 2026)
-- **Status: CPU design validated, GPU run pending.** The headline (a frozen Qwen+LoRA answers "which concept
-  is closer?" cortex-ON vs text-only-OFF) needs a T4 and is scaffolded in
-  `notebooks/m8_conceptual_grid_llm_kaggle.py` + `src/training/train_conceptual.py`. Following the repo's
-  practice (structural_transfer_cortex.py de-risked train_relational.py on CPU *before* the T4 cell),
-  `src/eval/conceptual_grid_cortex.py` (n=5) validates the design NON-CIRCULARLY on the **actual frozen
-  cortex.encode pipeline the LLM reads**: a cortex pretrained ONLY on physical Euclidean space, then FROZEN,
-  encodes a concept at 2-D coord (x,y) such that the code carries a **genuine 2-D metric**. The sharp,
-  non-circular signature is **OFF-AXIS "closer"** (triples where the 1-D x-projection ordering disagrees with
-  the true 2-D answer — a 1-D/rank code is ≤0.5 there by construction): on a **label-BALANCED** off-axis set
-  (chance exactly 0.5) **0.64 ± 0.03** (>chance), collapsing to **0.49** under shuffled positions (gap
-  **+0.15 ± 0.03**); a **held-out** linear decode (concepts the probe never saw) recovers position at **0.63**
-  spacing vs **3.3** shuffled (5×), with held-out off-axis "closer" **0.76**. Absolute strength is modest on CPU
-  (as the 1-D precedent was before its LLM readout sharpened TI 1.0→0.99); the de-risk's job is to show the 2-D
-  metric is present and control-clean, which it is. **T4 status (honest): the first GPU run of the LLM cell
-  collapsed to a constant predictor** (it read chance on its own training set; the "66.8%" it showed on off-axis
-  was purely that set's label imbalance, since fixed — the off-axis eval is now BALANCED and the candidate-NLL
-  scorer replaced with a padding-immune single-token scorer + a periodic train-accuracy read-out that exposes
-  under-fitting). Whether the readout can learn the modest 2-D signal is **still open pending a clean T4 run**;
-  the CPU claim (the frozen code *carries* the 2-D metric) stands. (Constantinescu, Behrens 2016; Bellmund
+### 8. The LLM reads the **conceptual-grid** map ✅ CLOSED — DEMONSTRATED ON A T4 (Jul 2026)
+- **Status: RUN ON GPU, headline confirmed (bounded).** A frozen Qwen-1.5B + LoRA, reading ONLY the frozen
+  space-cortex's code for concepts placed at 2-D coordinates (never the coordinates), trained on NEAR triples,
+  answers "which concept is closer to the anchor?" (n=3 seeds, all converged): **closer_far 77.0% ± 2.8%**
+  (never-seen far pairs); **OFF-AXIS 68.3% ± 3.5%** — the sharp signature (a 1-D/rank code is ≤50% there BY
+  CONSTRUCTION, so this is genuine 2-D); **near(trained) 97%**. Falsifiers collapse: **cortex-OFF 50.0% ± 0.0%**
+  and **shuffled-positions 49.6% ± 0.4%**. (n=3 floors the permutation p at 0.25; the effect is tight and large,
+  ≥6 seeds only needed to push the statistic <0.05.) **The mechanism — the finding.** #9 ("more dominant?") is a
+  1-D ordinal read, so a LINEAR head + the frozen LLM's compare sufficed (100%). "Closer" is a 2-D METRIC =
+  grid population-vector CORRELATION/OVERLAP (Bellmund & Behrens 2018; Bush, Barry, Burgess 2015) — a DOT
+  PRODUCT, QUADRATIC — which a linear head cannot compute (it read 50%). The load-bearing module is a
+  **COINCIDENCE DETECTOR** (`CoincidenceReadout`): a shared per-candidate proximity(anchor,candidate) + a LINEAR
+  combine → the frozen LLM does only the ordinal compare (an adversarial review confirmed the readout cannot
+  self-answer). So the honest bound: the biological readout computes the METRIC; the frozen LLM does the ORDINAL
+  compare — a **dissociation**, 1-D ordinal maps transfer to LLM reasoning cleanly, a 2-D metric needs the
+  coincidence stage first. Ceiling ~0.70 (the code's inherent 2-D quality), below #9's 0.96. Getting here also
+  required (all documented in `results/FINDINGS.md`): gain-control normalization (the code is ~98% a constant),
+  right-padding, a padding-immune single-token scorer, and LR warmup (the weak signal converges late/seed-
+  sensitively). CPU de-risk (`src/eval/conceptual_grid_cortex.py`, n=5): balanced OFF-AXIS **0.64 ± 0.03** vs
+  shuffled **0.49**; held-out decode **0.63** vs **3.3** spacing. (Constantinescu, Behrens 2016; Bellmund
   2018.) See `results/FINDINGS.md`. *Original entry below.*
 - After gap #2, a frozen-LLM readout answers abstract "which concept is closer / between?" from the
   grid-of-concepts code — cortex-ON vs text-only-OFF — extending the cognitive-map claim from space to
@@ -399,11 +399,14 @@ biologically.** **#B2** (Benna–Fusi multi-timescale synapse), **#C6** (represe
 survives geometry-preserving drift, even a full remap, but fails geometry-destroying drift at matched single-cell
 drift; the circular first attempt was caught and rebuilt), and **#C7** (sleep triple-coupling — SO→spindle→ripple
 nesting selects and times consolidation) are closed too. **The entire CPU register — every Tier-1/2/5 item — is
-now closed.** The last items are the **GPU/language capstones #8/#9** (a frozen LLM reads the concept-grid /
-social-space maps, cortex-ON vs text-only-OFF): both are now **de-risked on CPU and scaffolded for the T4** —
-`src/eval/conceptual_grid_cortex.py` and `src/eval/social_grid_cortex.py` (n=5) prove, on the *actual frozen
-cortex.encode pipeline the LLM reads*, that the space map carries a control-clean 2-D metric a 1-D code cannot
-produce (balanced OFF-AXIS "closer" 0.64>chance 0.5; held-out decode 5× shuffled; social DOMINANCE 0.96 with a power/
-affiliation dissociation of +0.51), and `notebooks/m8_…`, `notebooks/m9_…` + `src/training/train_conceptual.py`,
-`train_social.py` carry the frozen-Qwen+LoRA cells. All that remains is to **run those two cells on a T4** — the
-only step in the whole register that needs a GPU. Everything a CPU can prove is proven.
+now closed.** And the **GPU/language capstones #8/#9 are now DEMONSTRATED ON A T4** — a frozen Qwen-1.5B + LoRA,
+reading ONLY the frozen space-cortex's code (never coordinates), reasons over *two* kinds of cognitive map:
+**#9 social hierarchy** (1-D ordinal — "who is more dominant?": far 100%, dissociation 100%, cortex-OFF/shuffled
+50%) and **#8 conceptual space** (2-D metric — "which concept is closer?": off-axis 68% ± 4%, far 77%, cortex-OFF
+50.0%, shuffled 49.6%, n=3). The two differ by exactly the neuroscience: the 1-D ordinal transfers to the LLM
+with a linear read-out, while the 2-D metric needed a **coincidence-detector** read-out (grid population-vector
+correlation) to first turn distances into proximities — the frozen LLM then does the ordinal compare. **Every
+item in the register — CPU and GPU — is now closed**, each an emergent/transfer signature measured against its
+own falsifiers, never put in a loss. See `results/FINDINGS.md` for the full write-ups (including the honest
+multi-bug debugging trail behind #8: gain control, padding, single-token scoring, the coincidence module, and
+LR-warmup stabilization).

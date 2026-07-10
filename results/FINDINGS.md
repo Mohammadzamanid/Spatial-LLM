@@ -1406,6 +1406,29 @@ spatial code trained **only on physical space**, performs abstract **social-hier
 (Kumaran 2016; Park-Miller 2021) it cannot do text-only — the cognitive-map claim, from space to social
 meaning, at the language level. (`results/social_llm.json`.)
 
+**#8 CLOSED on the T4 — and why it needed a *different* module than #9 (the deepest finding).** #8 ("which
+concept is closer to the anchor?") did *not* transfer with #9's read-out, and chasing why produced the most
+interesting result of the pair. #9 is a **1-D ordinal** read ("more dominant" = compare a power projection),
+which is **linear** in the code — a linear head extracts it and the frozen LLM does the compare. #8 is a **2-D
+metric** read, and a distance is the **overlap/correlation of grid population vectors** (Bellmund & Behrens
+2018; Bush, Barry & Burgess 2015) — a **dot product**, hence **quadratic**, which a linear head *cannot* compute
+(it read 50%) and a free MLP either under-fit or (an adversarial red-team caught this) could self-answer,
+sidelining the LLM. The honest, load-bearing module is a **coincidence detector** (`CoincidenceReadout`): a
+*shared* per-candidate `proximity(anchor, candidate)` — the grid-overlap — followed by a **linear** combine into
+joint tokens; the linear combine can encode the graded difference but **cannot threshold it**, so the frozen LLM
+still performs the ordinal compare (CPU-verified the read-out cannot self-decide). With it, n=3 seeds (all
+converged): **closer_far 77.0% ± 2.8%, OFF-AXIS 68.3% ± 3.5%** (chance 0.5, where a 1-D code is ≤0.5 *by
+construction* — genuine 2-D), **near(trained) 97%**, vs **cortex-OFF 50.0%** and **shuffled 49.6%**. The honest
+bound: the biological read-out computes the **metric** (proximity); the frozen LLM does the **ordinal** compare —
+so #8 is real but **weaker (~0.70 ceiling) and less stable** than #9's 0.96, a genuine **ordinal-vs-metric
+dissociation**. Reaching it exposed a chain of real bugs, each fixed and documented rather than buried:
+CUDA-OOM → an off-axis **label-imbalance** that flattered a constant predictor → **gradient checkpointing**
+silently killing the LoRA gradients → **left-padding** mis-targeting the loss → a **context-dependent token id**
+in the eval → the code being **~98% a constant** (needing gain-control normalization) → the metric being
+**quadratic** (needing the coincidence detector) → **split-vs-joint** tokens → **LR-warmup** for the late,
+seed-sensitive convergence. That #8 took eight distinct fixes where #9 took one is itself the measurement of how
+much harder a metric map is to read than an ordinal one. (`results/conceptual_llm.json`.)
+
 Together: the cortex now has a map that is **predictive** (plans detours geometry can't) and
 **temporal** (tells elapsed time with the brain's scalar-timing law) — the two axes the document
 identified as missing, each validated against its own falsifier before any LLM wiring.
