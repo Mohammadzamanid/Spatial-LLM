@@ -219,16 +219,29 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** Gap-junction-coupled astrocytes spread Ca²⁺ across a syncytium, letting one synapse's glial
   signal reach its neighbours — a spatial, non-synaptic substrate for coordinating plasticity across an ensemble.
 
-### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
-- **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
-  model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;
-  Liu 2019 human replay).
-- **Model status: partial.** A `SharpWaveRipple` organ exists, `pillars.py` shows offline experience-replay
-  *consolidating a map*, and `theta_sweep` does *online* look-ahead. But there is no **reverse-replay credit
-  assignment** or **prioritized forward replay for planning** as a core, measured result.
-- **Proposed experiment (emergence).** Prioritized replay of stored trajectories through the SR learner;
-  **measure** faster value propagation vs. no-replay and a reverse-replay credit-assignment signature after a
-  new reward. CPU (extends `successor.py` + `pillars.py`).
+### 6. **Replay** used for planning & credit assignment — not just present as a ripple signature ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/replay_planning.py` (n=8), extends `successor.py`. The repo had a
+  `SharpWaveRipple` organ and offline experience-replay that *consolidates a decode map* (`pillars.py`), but
+  replay never *computed* anything directional. Now it does, both ways the hippocampus uses it, with the
+  direction **emergent** (never encoded) and a falsifier on each:
+  - **(A) REVERSE replay = credit assignment** (Foster & Wilson 2006; Ambrose-Pfeiffer-Foster 2016). Prioritized
+    sweeping — back up the transition with the largest **|TD error|**, a *scalar* priority with **no direction in
+    it** — makes value updates sweep **BACKWARD from the reward**: reverse fraction **1.00** vs **0.50** for
+    RANDOM-order replay (paired p=0.009). The reverse order is a *consequence* of the surprise starting at the
+    reward, not a design choice.
+  - **(B) FORWARD replay = planning** (Pfeiffer-Foster 2013). The **same** learned predictive value, read forward
+    by a greedy value-ascent rollout, routes around the barrier to the goal: forward fraction **1.00**, solves
+    the maze from **100%** of starts vs **1%** on an untrained value (falsifier: no gradient → no plan).
+  - **(C) THE DISSOCIATION** (Diba-Buzsáki 2007; Mattar-Daw 2018): one value function, opposite directions —
+    reverse to assign credit for a past reward, forward to plan a future path.
+  - **(D) PAYOFF:** prioritized replay reaches a plannable map in **16×** fewer backups than random — the data
+    efficiency replay is *for*.
+- **Honest grade:** *expected mechanism, faithful signature* — a person who knows prioritized sweeping would
+  predict reverse order, so this is not a *surprising* emergence like grid shearing. But the direction is
+  genuinely not encoded (random → 0.5 is the proof), and reproducing the reverse/forward dissociation from a
+  single value rule is the real, literature-faithful result. See `results/FINDINGS.md`.
+- **Neuro basis.** Hippocampal **replay** — reverse for credit assignment, forward for planning — supports
+  model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018; Liu 2019).
 
 ### 7. Explicit **uncertainty / confidence** that drives behavior
 - **Neuro basis.** The brain represents **posterior uncertainty** (probabilistic population codes, neural

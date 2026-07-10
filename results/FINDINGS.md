@@ -1220,6 +1220,50 @@ kind of spatial computation *in vivo* is genuinely debated — this is the one i
 building, and I held the claim to exactly what the three controls support: a network computation that emerges from
 glial coupling, no more. (`results/astrocyte_syncytium.json`, `results/astrocyte_syncytium.svg`.)
 
+### Replay that computes — reverse for credit, forward for planning, direction never encoded (GAPS.md #6, n=8)
+
+The repo already had a `SharpWaveRipple` organ and offline experience-replay that *consolidates a decode map*
+(`pillars.py` rehearses a stored buffer uniformly until the map sharpens). But that replay had no **direction**
+and computed nothing *with* the sequence — it was the ripple as a signature, not as a mechanism. The hippocampus
+uses replay two opposite ways: **reverse** replay after a reward (Foster & Wilson 2006; Ambrose, Pfeiffer & Foster
+2016) and **forward** replay before acting (Pfeiffer & Foster 2013), and Mattar & Daw (2018) showed both fall out
+of one utility. `src/eval/replay_planning.py` closes the gap on the barrier gridworld from `successor.py`, and the
+whole point is that **I never encode a direction** — I encode a *scalar*:
+
+- **(A) Reverse replay = credit assignment.** Prioritized sweeping backs up the transition with the largest
+  **|TD error|** — a magnitude, no direction in it. Because the only surprise starts at the reward, the first
+  backup is there, which creates the next surprise one step behind it, and so on: the updates sweep **backward**
+  from the reward. Reverse fraction **1.00 vs 0.50** for random-order replay (paired p=0.009). The reverse *order*
+  is the measured signature and it is never in the rule — random replay proves it (chance direction). This is the
+  Foster-Wilson result: reverse replay because value propagates *from* the reward.
+- **(B) Forward replay = planning.** The **same** learned value, read *forward* by a greedy value-ascent rollout
+  from the far corner, routes around the wall to the goal: forward fraction **1.00**, solves the maze from
+  **100%** of start cells vs **1%** on an untrained value (the falsifier: no value gradient, no plan). The forward
+  direction emerges from *ascending* the map, again not from an instruction.
+- **(C) The dissociation (the honest headline).** One value function produces **opposite** replay directions
+  depending on what is needed — backward to assign credit for a past reward, forward to plan a future path
+  (Diba & Buzsáki 2007). Direction is a *consequence of the computation*, which is exactly why it can't be the
+  thing I hard-coded.
+- **(D) The payoff.** Prioritized replay reaches a plannable map in **110 backups** where random replay needs
+  **~1800** — a **16× speedup**. This is the data-efficiency replay is *for* (Mattar & Daw 2018): a few well-
+  chosen offline updates replace a flood of real experience.
+
+**Honest note on how it was obtained.** The first gridworld run gave reverse fraction **0.49 — dead chance** — and
+I could have called reverse replay a null. The cause was my backup rule: an *expected* (mean-over-neighbours) SR
+backup churns each cell through several out-of-order visits as the value frontier passes, washing the order out.
+A *max* backup with the goal clamped as a reward source settles every cell in one visit, so the replay order
+becomes a clean read of value propagation (reverse fraction 1.00). Diagnosing that the metric was being polluted
+by the backup rule — rather than tuning a threshold until reverse "appeared" — is the same discipline as the
+grid-shearing phase bug and the astrocyte flood.
+
+**Honest grade — expected mechanism, faithful signature.** Someone who knows prioritized sweeping would *predict*
+that value propagates backward from a reward, so this is not a *surprising* emergence the way grid shearing is
+(where the model produced a deformation it was never built toward). What makes it a real result and not a tautology
+is that the **direction** — the experimentally-reported signature — is genuinely not encoded (random → 0.5), and
+reproducing the reverse/forward dissociation from a *single* value rule is faithful to the Diba-Buzsáki / Mattar-
+Daw literature. Replay here computes, in both of the brain's directions. (`results/replay_planning.json`,
+`results/replay_planning.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

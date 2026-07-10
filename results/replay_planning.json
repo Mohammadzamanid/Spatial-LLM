@@ -1,0 +1,42 @@
+{
+  "n_seeds": 8,
+  "G": 11,
+  "gamma": 0.95,
+  "results": {
+    "reverse_frac_prioritized": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "reverse_frac_random": {
+      "mean": 0.4996,
+      "ci95": 0.001
+    },
+    "backups_prioritized": {
+      "mean": 110.0,
+      "ci95": 0.0
+    },
+    "backups_random": {
+      "mean": 1802.625,
+      "ci95": 293.3188
+    },
+    "backup_speedup": {
+      "mean": 16.3875,
+      "ci95": 2.6665
+    },
+    "forward_frac_planning": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "plan_success_trained": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "plan_success_untrained": {
+      "mean": 0.009,
+      "ci95": 0.0
+    }
+  },
+  "direction_paired_p": 0.0086,
+  "planning_paired_p": 0.0086,
+  "verdict": "Replay used the way the hippocampus uses it: a direction-free scalar priority makes value updates sweep BACKWARD from a reward (reverse replay = credit assignment, Foster-Wilson 2006), and the SAME predictive map read forward gives a planning rollout that routes around a barrier (forward replay = planning, Pfeiffer-Foster 2013). Direction emerges from the computation; random replay is chance and untrained value cannot plan. Prioritized replay reaches a plannable map many times faster than random (Mattar-Daw 2018)."
+}
