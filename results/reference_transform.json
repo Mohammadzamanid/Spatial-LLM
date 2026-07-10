@@ -1,0 +1,51 @@
+{
+  "n_seeds": 5,
+  "heldout_band": [
+    1.571,
+    3.142
+  ],
+  "steps": 3000,
+  "results": {
+    "rmse_in_dist": {
+      "mean": 0.0402,
+      "ci95": 0.0214
+    },
+    "rmse_heldout_hd": {
+      "mean": 0.068,
+      "ci95": 0.0087
+    },
+    "rmse_heldout_norm": {
+      "mean": 0.0389,
+      "ci95": 0.005
+    },
+    "rmse_shuffled_hd": {
+      "mean": 0.898,
+      "ci95": 0.0095
+    },
+    "rmse_no_hd": {
+      "mean": 2.2383,
+      "ci95": 0.0207
+    },
+    "gain_extra_r2": {
+      "mean": 0.0795,
+      "ci95": 0.0076
+    },
+    "gain_extra_r2_untrained": {
+      "mean": 0.0145,
+      "ci95": 0.0014
+    },
+    "gain_field_frac": {
+      "mean": 0.2688,
+      "ci95": 0.044
+    },
+    "falsifier_gap": {
+      "mean": 0.83,
+      "ci95": 0.0108
+    },
+    "gain_emergence": {
+      "mean": 0.065,
+      "ci95": 0.0076
+    }
+  },
+  "verdict": "SOUND \u2014 the network learned the egocentric->allocentric rotation (generalizes to unseen head directions, impossible without the heading), and gain-field units emerged as its internal code. The RSC/PPC transform, with the Zipser-Andersen signature \u2014 measured, not imposed."
+}

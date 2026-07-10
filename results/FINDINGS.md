@@ -1144,6 +1144,38 @@ trajectories at the origin (so phase tracks true position) exposed the clean bas
 that rather than tuning around it is the difference between a measured result and a manufactured one.
 (`results/grid_shearing.json`, `results/grid_shearing.svg`.)
 
+### The egocentric→allocentric bridge — RSC/PPC transform with emergent gain fields (GAPS.md #5e, n=5)
+
+Perception is first-person: the parietal cortex knows a landmark is "to my left." The cognitive map is
+world-centred: the landmark is "north." The retrosplenial cortex bridges them with a **head-direction-gated
+rotation**, and cortex builds that rotation out of **gain fields** — neurons whose egocentric response is
+*multiplicatively* scaled by a directional signal (Andersen & Zipser 1988; Byrne, Becker & Burgess 2007). The
+repo had egocentric and allocentric codes coexisting but not the transform circuit. `src/eval/reference_transform.py`
+trains a **plain MLP** to output only a landmark's *allocentric* position from its egocentric view (distance,
+bearing-to-head) plus head direction — it is never told about rotation or gain fields — and measures what falls
+out:
+
+- **(A) It learned the transform, not a lookup.** Trained on head directions *outside* a held-out band, it
+  predicts allocentric position for head directions it **never saw** at **RMSE 0.068 ± 0.009 — 4% of the target
+  scale** (in-distribution 0.040). Only a network that internalised the *systematic rotation* generalises to
+  unseen headings; a table of memorised cases cannot. This is the same non-circular test as the concept-grid
+  (#8): generalise beyond the training support or admit you memorised.
+- **(B) Gain fields emerge.** Nothing in the loss mentions them, yet **27%** of hidden units develop
+  **multiplicative ego×head-direction tuning** — measured as the extra variance their activity needs from the
+  multiplicative terms (`cos θ_e·cos φ`, …) beyond the additive ones: **0.080 trained vs 0.015 untrained**. The
+  network reinvents the Zipser–Andersen gain-field code as its solution.
+- **(C) Falsifiers.** SHUFFLE the head direction (wrong heading) → RMSE **0.90**; REMOVE it entirely → **2.24**,
+  *worse than predicting zero* — the transform is genuinely impossible without the correct directional signal, so
+  the head direction is load-bearing, not decorative.
+
+**Honest grade (kept deliberately un-inflated):** this is a *mechanism demonstration with a real emergent
+internal code*, not a surprising emergence. The gain fields are genuine and learned (they are not there at init),
+but a multiplicative task naturally breeds multiplicative units — the *expected* solution — so this sits with the
+ephaptic result on the "expected emergence" rung, a clear step below the grid shearing, where the model produced
+a deformation it was never built toward. The bridge from first-person perception to a world-centred map, with the
+biologically-observed gain-field signature — measured, never imposed. (`results/reference_transform.json`,
+`results/reference_transform.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

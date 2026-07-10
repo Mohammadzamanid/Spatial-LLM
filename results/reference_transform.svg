@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="654" height="328" font-family="Segoe UI, Arial">
+<rect width="654" height="328" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">RSC/PPC egocentric&#8594;allocentric transform, with emergent gain fields</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">trained only on allocentric output, it generalizes to unseen head directions (learned the rotation) and cannot work without the heading; gain-field units emerge</text>
+<text x="60" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(A) transform error (RMSE, lower=better)</text>
+<line x1="60" y1="250" x2="310" y2="250" stroke="#33415c"/>
+<rect x="82" y="245.0" width="52" height="5.0" fill="#2ca25f" opacity="0.9"/>
+<text x="108" y="239" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.07</text>
+<text x="108" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">held-out</text>
+<text x="108" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">HD</text>
+<rect x="156" y="183.4" width="52" height="66.6" fill="#c98a1a" opacity="0.9"/>
+<text x="182" y="177" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.90</text>
+<text x="182" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">shuffled</text>
+<text x="182" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">HD</text>
+<rect x="230" y="84.0" width="52" height="166.0" fill="#c9341a" opacity="0.9"/>
+<text x="256" y="78" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">2.24</text>
+<text x="256" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">no</text>
+<text x="256" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">HD</text>
+<text x="60" y="286" font-size="9" fill="#5b6b8c">held-out HD is near-zero (generalizes); wrong/removed HD explodes</text>
+<text x="384" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(B) emergent gain-field code (extra R&#178;)</text>
+<line x1="384" y1="250" x2="634" y2="250" stroke="#33415c"/>
+<rect x="428" y="84.0" width="64" height="166.0" fill="#2ca25f" opacity="0.9"/>
+<text x="460" y="78" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.080</text>
+<text x="460" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">trained</text>
+<text x="460" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">network</text>
+<rect x="528" y="219.7" width="64" height="30.3" fill="#9aa6bd" opacity="0.9"/>
+<text x="560" y="214" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.015</text>
+<text x="560" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">untrained</text>
+<text x="560" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">(init)</text>
+<text x="384" y="286" font-size="9" fill="#5b6b8c">27% of units become gain fields (multiplicative ego&#215;HD) with training</text>
+</svg>

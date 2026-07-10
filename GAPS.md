@@ -181,6 +181,25 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   the anchoring can no longer tile it hexagonally, so it shears/fragments — the grid is *shaped by* the
   environment, not a rigid ruler laid over it.
 
+### 5e. Egocentric↔allocentric bridge — **RSC/PPC reference-frame transform + emergent gain fields** ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/reference_transform.py` (n=5). Posterior parietal cortex codes space
+  egocentrically; the retrosplenial cortex transforms it to allocentric world coordinates via a head-direction-
+  gated rotation, implemented in cortex by GAIN FIELDS (Andersen & Zipser 1988; Byrne, Becker & Burgess 2007;
+  Bicanski & Burgess 2018). The repo had egocentric & allocentric codes coexisting (landmark_anchoring.py) but
+  not the transform circuit. A plain MLP is trained ONLY to output a landmark's ALLOCENTRIC position from its
+  egocentric view (dist, bearing-to-head) + head direction, and we MEASURE, never in the loss: (A) **it learned
+  the TRANSFORM** — trained on head directions OUTSIDE a held-out band, it generalizes to unseen head directions
+  at **RMSE 0.07 (4% of the target scale)**, which a lookup cannot; (B) **GAIN FIELDS EMERGE** — **27%** of
+  hidden units develop multiplicative ego×head-direction tuning (extra variance from the multiplicative terms
+  **0.08 vs 0.015** untrained; the Zipser-Andersen signature); (C) **falsifiers** — SHUFFLED heading → RMSE
+  **0.90**, REMOVED heading → **2.24** (worse than predicting zero) — impossible without the correct direction.
+  **Honest grade:** a mechanism demonstration with a *real emergent internal code* (gain fields), but the
+  *expected* solution to a multiplicative transform — not a surprising emergence like the grid shearing.
+  See `results/FINDINGS.md`.
+- **Neuro basis.** RSC/PPC rotate egocentric sensory geometry into the hippocampal allocentric map using head
+  direction, via multiplicative gain-field neurons — the bridge from first-person perception to a world-centred
+  cognitive map.
+
 ### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
 - **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;
