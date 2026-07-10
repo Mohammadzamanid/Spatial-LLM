@@ -1,0 +1,58 @@
+{
+  "n_seeds": 5,
+  "N": 200,
+  "steps": 3000,
+  "g_field": 8.0,
+  "target_rate": 1.0,
+  "results": {
+    "chi_field": {
+      "mean": 0.9987,
+      "ci95": 0.0001
+    },
+    "chi_off": {
+      "mean": 0.0715,
+      "ci95": 0.0013
+    },
+    "chi_sparse_syn": {
+      "mean": 0.109,
+      "ci95": 0.0027
+    },
+    "chi_half_field": {
+      "mean": 0.9304,
+      "ci95": 0.0041
+    },
+    "rate_field": {
+      "mean": 1.0361,
+      "ci95": 0.01
+    },
+    "rate_off": {
+      "mean": 1.0014,
+      "ci95": 0.0018
+    },
+    "coin_field": {
+      "mean": 0.2216,
+      "ci95": 0.0019
+    },
+    "coin_off": {
+      "mean": 0.0079,
+      "ci95": 0.0033
+    },
+    "sync_gap": {
+      "mean": 0.9272,
+      "ci95": 0.0013
+    },
+    "field_vs_sparse": {
+      "mean": 0.8897,
+      "ci95": 0.0027
+    },
+    "rate_mismatch": {
+      "mean": 0.0347,
+      "ci95": 0.0091
+    },
+    "coin_gap": {
+      "mean": 0.2137,
+      "ci95": 0.005
+    }
+  },
+  "verdict": "SOUND \u2014 a self-generated ZERO-MEAN field synchronizes spike timing at matched firing rate where a matched-budget sparse-synaptic network does not, and zeroing the field abolishes it; the synchrony drives a downstream coincidence detector. A non-synaptic channel doing computational work."
+}

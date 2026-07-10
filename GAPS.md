@@ -144,6 +144,24 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   pattern separation (preventing catastrophic interference between similar experiences), **CA3** auto-associates
   for completion, **CA1** compares CA3's prediction against entorhinal input to flag novelty/mismatch.
 
+### 5c. Non-synaptic channel — **ephaptic field coupling** ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/ephaptic_coupling.py` (n=5). The whole model coordinates neurons through
+  synaptic weights; ephaptic coupling is a NON-classical channel — transmembrane currents sum into a local
+  field that biases neighbouring spike TIMING with no synapse (Anastassiou & Koch 2011; Chiang, Han, Durand
+  2019: activity propagates via endogenous fields with synaptic *and* gap-junction transmission blocked). A
+  self-generated **zero-mean** field on a LIF population (E = g·(population low-pass − slow baseline), so it
+  sharpens the rhythm without net drive), measured against the by-construction trap (a field that just added
+  common drive would raise the RATE, so every comparison is at a **rate-matched** operating point): (A) field ON
+  synchronizes spike timing (**χ 1.00 vs 0.07** without) at **matched rate** (|Δrate| 0.03 → it is timing, not
+  drive), with a dose-response transition (0.07 → 0.93 → 1.00); (B) the diffuse **global field beats
+  matched-budget SPARSE synapses** (χ 1.00 vs 0.11) — a coherent field coordinates where equally-strong local
+  wiring cannot, and needs no synapses at all; (C) **falsifier** — zero the field → χ 0.07 (uncoupled baseline);
+  (D) **computational work** — the field-made synchrony drives a downstream coincidence detector (fires **0.22 vs
+  0.01** at matched input rate), so the timing is *readable* where rate alone is not. See `results/FINDINGS.md`.
+- **Neuro basis.** Endogenous electric fields (the LFP) feed back onto membranes and entrain spike timing
+  independently of synapses — a volume-transmission / non-synaptic computational channel the connectionist
+  substrate omits.
+
 ### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
 - **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;
