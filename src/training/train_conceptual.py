@@ -296,7 +296,15 @@ def main():
         train_params = [p for p in model.parameters() if p.requires_grad] + list(head.parameters())
         opt = torch.optim.AdamW(train_params, lr=a.lr); model.train()
         g = torch.Generator().manual_seed(a.seed); tr_t = torch.tensor(tr)
+        warmup = max(1, int(0.08 * a.steps))                   # LR warmup + cosine decay: the weak 2-D-metric
+        def lr_at(step):                                       # signal takes off late & seed-sensitively; a gentle
+            if step < warmup:                                 # warmup then cosine stabilizes it (fixes stalled seeds)
+                return a.lr * (step + 1) / warmup
+            p = (step - warmup) / max(1, a.steps - warmup)
+            return a.lr * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * p)))
         for step in range(a.steps):
+            for pg in opt.param_groups:
+                pg["lr"] = lr_at(step)
             sel = tr_t[torch.randint(len(tr_t), (a.bs,), generator=g)]
             # jitter each of the three positions (keeps the closer-ordering: jitter < spacing/2)
             def jit(ix):
