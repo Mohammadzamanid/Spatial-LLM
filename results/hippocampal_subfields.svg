@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="654" height="328" font-family="Segoe UI, Arial">
+<rect width="654" height="328" fill="#ffffff"/>
+<text x="26" y="24" font-size="15" font-weight="800" fill="#0b1324">Hippocampal subfields: DG pattern separation + CA1 comparator</text>
+<text x="26" y="42" font-size="10.5" fill="#5b6b8c">sparse DG orthogonalizes similar environments so CA3 recalls them without interference (a dense expansion of the same size fails); CA1 detects novelty only with the memory</text>
+<text x="60" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(A) CA3 recall of SIMILAR environments (higher=better)</text>
+<line x1="60" y1="250" x2="310" y2="250" stroke="#33415c"/>
+<rect x="82" y="105.0" width="52" height="145.0" fill="#2ca25f" opacity="0.9"/>
+<text x="108" y="99" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.87</text>
+<text x="108" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">DG</text>
+<text x="108" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">(sparse)</text>
+<rect x="156" y="188.9" width="52" height="61.1" fill="#c9341a" opacity="0.9"/>
+<text x="182" y="183" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.37</text>
+<text x="182" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">dense</text>
+<text x="182" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">exp</text>
+<rect x="230" y="106.4" width="52" height="143.6" fill="#9aa6bd" opacity="0.9"/>
+<text x="256" y="100" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.86</text>
+<text x="256" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">direct</text>
+<text x="256" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">EC</text>
+<text x="60" y="286" font-size="9" fill="#5b6b8c">DG &amp; dense share the CA3 size N_dg — only DG adds sparse separation</text>
+<text x="384" y="56" font-size="11.5" font-weight="700" fill="#0b1324">(B) CA1 novelty detection (AUC)</text>
+<line x1="384" y1="250" x2="634" y2="250" stroke="#33415c"/>
+<line x1="384" y1="167" x2="634" y2="167" stroke="#9aa6bd" stroke-dasharray="4 3"/>
+<text x="632" y="164" font-size="8.5" fill="#9aa6bd" text-anchor="end">chance 0.5</text>
+<rect x="428" y="84.0" width="64" height="166.0" fill="#2ca25f" opacity="0.9"/>
+<text x="460" y="78" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="460" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">EC + CA3</text>
+<text x="460" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">memory</text>
+<rect x="528" y="167.0" width="64" height="83.0" fill="#c9341a" opacity="0.9"/>
+<text x="560" y="161" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.50</text>
+<text x="560" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">ablate CA3</text>
+<text x="560" y="273" font-size="8.5" fill="#28324a" text-anchor="middle">(no memory)</text>
+<text x="384" y="286" font-size="9" fill="#5b6b8c">novelty needs the stored memory — a genuine entorhinal-vs-CA3 comparator</text>
+</svg>

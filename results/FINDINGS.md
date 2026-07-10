@@ -1050,6 +1050,36 @@ signal for movement through concept space — the human cognitive map, from spac
 code is the bat-faithful/human-faithful one **and** the mechanistic origin of the hexadirectional signature is
 measured, not assumed. (`results/hexadirectional.json`, `results/hexadirectional.svg`.)
 
+### Hippocampal subfields — DG pattern separation + CA1 comparator around the CA3 auto-associator (GAPS.md #5b, n=5)
+
+The repo had **CA3** (`HopfieldAssociativeMemory` — a Marr/Hopfield/Treves-Rolls recurrent auto-associator that
+pattern-*completes* a cue and *interferes* when stored patterns are too similar) but not the two subfields that
+make the triad work. `src/eval/hippocampal_subfields.py` adds them and **measures** the functional consequences,
+guarding the by-construction trap — a sparse random expansion trivially orthogonalizes, so the headline is the
+*downstream recall*, not the DG orthogonality itself.
+
+- **(A) Separation → interference-free recall.** Store **M = 24 SIMILAR environments** (entorhinal overlap 0.6)
+  and recall each from a **30 %-degraded cue**. The **dentate gyrus** — a massive **sparse expansion** (5 %
+  active over N_dg = 1500) — lets CA3 recall the *correct* environment **0.87 ± 0.02**, where a **dense**
+  expansion of the **same size** intrudes on a similar one (**0.37 ± 0.03**; gap **+0.51 ± 0.03**). The mechanism
+  check confirms the *why*: DG's separation index (output overlap ÷ input overlap) is **0.54** (orthogonalized)
+  versus **1.00** for the dense code (overlap preserved) — but the reported headline is the recall, not the
+  separation.
+- **(A′) A large CA3 is *actively harmful* unless sparse.** The dense expansion (0.37) is **worse than not
+  expanding at all** (direct-EC 0.86). Expansion alone doesn't help — it *hurts*, by giving overlapping inputs
+  more room to collide; DG's **sparsity** is what turns the expansion from a liability into pattern separation.
+- **(B) Dense-expansion falsifier.** Same N_dg, same random expansion, only the k-WTA sparsity removed →
+  interference returns (0.37). So it is the sparse **separation**, not the extra dimensionality, doing the work.
+- **(C) CA1 comparator — novelty needs the memory.** CA1 reads the **mismatch** between CA3's completed
+  prediction and the entorhinal input. It discriminates **novel vs familiar** environments at **AUC 1.00 ±
+  0.00**; **ablate the CA3 stream and the AUC falls to 0.50** (chance) — so it is a genuine *entorhinal-vs-memory*
+  comparator (Lisman & Grace 2005; Vinogradova 1995), not an input-novelty detector (which the NE organ, #5,
+  already is).
+
+So the hippocampal triad is now differentiated the way the systems-neuroscience account requires: **DG**
+separates, **CA3** completes, **CA1** compares — each validated against its own falsifier, nothing put in a
+loss. (`results/hippocampal_subfields.json`, `results/hippocampal_subfields.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

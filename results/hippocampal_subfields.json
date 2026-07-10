@@ -1,0 +1,48 @@
+{
+  "n_seeds": 5,
+  "N_ec": 120,
+  "k": 24,
+  "M": 24,
+  "N_dg": 1500,
+  "sparse": 0.05,
+  "overlap": 0.6,
+  "results": {
+    "recall_dg": {
+      "mean": 0.8733,
+      "ci95": 0.0189
+    },
+    "recall_dense": {
+      "mean": 0.3683,
+      "ci95": 0.0265
+    },
+    "recall_direct": {
+      "mean": 0.865,
+      "ci95": 0.0203
+    },
+    "sep_index_dg": {
+      "mean": 0.5363,
+      "ci95": 0.0132
+    },
+    "sep_index_dense": {
+      "mean": 0.9954,
+      "ci95": 0.0095
+    },
+    "ca1_auc": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "ca1_auc_ablate": {
+      "mean": 0.5,
+      "ci95": 0.0
+    },
+    "recall_gap": {
+      "mean": 0.505,
+      "ci95": 0.0337
+    },
+    "ca1_gap": {
+      "mean": 0.5,
+      "ci95": 0.0
+    }
+  },
+  "verdict": "SOUND \u2014 sparse DG separation gives interference-free CA3 recall of similar environments where a matched-size dense expansion fails, and a CA1 comparator detects novelty only with the CA3 memory stream. The hippocampal DG/CA3/CA1 triad, measured against its falsifiers."
+}

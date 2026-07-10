@@ -124,6 +124,26 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   and trigger reset/remap on NE-like surprise; **measure** that encoding-mode blocks intrusion of old memories
   and that a surprising cue triggers remapping — signatures, not objectives. CPU.
 
+### 5b. Hippocampal subfield micro-architecture — **DG pattern separation + CA1 comparator** ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/hippocampal_subfields.py` (n=5). The repo had CA3 (`HopfieldAssociativeMemory`,
+  pattern completion) but not the subfields around it. DG = a massive **sparse expansion** (few % active) that
+  **orthogonalizes** similar entorhinal inputs; CA1 = a **comparator** of CA3's completion vs the entorhinal
+  reality (novelty/prediction-error). Measured, never in a loss, guarded against the by-construction trap (a
+  random sparse expansion trivially orthogonalizes — so the headline is the *downstream recall*, not the DG
+  orthogonality): (A) storing **M=24 SIMILAR** environments (entorhinal overlap 0.6) and recalling from a
+  30%-degraded cue, the sparse DG code lets CA3 recall the **correct** environment **0.87 ± 0.02** where a
+  **matched-size DENSE** expansion intrudes on a similar one (**0.37 ± 0.03**; gap **+0.51**). Strikingly the
+  dense expansion is *worse than not expanding at all* (direct-EC 0.86) — so a large CA3 is **actively harmful
+  unless sparse**; DG's separation is what makes the expansion usable. Mechanism check: DG's separation index
+  (output/input overlap) **0.54** (orthogonalized) vs dense **1.00** (overlap preserved). (B) **Falsifier** =
+  the dense expansion (same N_dg, no k-WTA) → interference returns. (C) **CA1 comparator**: mismatch discriminates
+  novel vs familiar (**AUC 1.00**); **ablate the CA3 stream → 0.50** (chance) — a genuine entorhinal-vs-memory
+  comparator, not an input-novelty detector (which the NE organ already is). (Marr 1971; Treves & Rolls 1994;
+  Lisman & Grace 2005; Vinogradova 1995.) See `results/FINDINGS.md`.
+- **Neuro basis.** The hippocampal triad splits memory into specialized nodes: **DG** sparsifies/expands for
+  pattern separation (preventing catastrophic interference between similar experiences), **CA3** auto-associates
+  for completion, **CA1** compares CA3's prediction against entorhinal input to flag novelty/mismatch.
+
 ### 6. **Replay** used for planning & consolidation — not just present as a ripple signature
 - **Neuro basis.** Hippocampal **replay** (forward for planning, reverse for credit assignment) supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018 prioritized replay;
