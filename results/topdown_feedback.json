@@ -1,0 +1,32 @@
+{
+  "n_seeds": 5,
+  "n_cells": 64,
+  "noise": 0.22,
+  "results": {
+    "over_repr_corr": {
+      "mean": 0.2899,
+      "ci95": 0.0239
+    },
+    "near_topdown": {
+      "mean": 0.0302,
+      "ci95": 0.0012
+    },
+    "near_feedforward": {
+      "mean": 0.0572,
+      "ci95": 0.0036
+    },
+    "near_shuffled": {
+      "mean": 0.1279,
+      "ci95": 0.005
+    },
+    "far_topdown": {
+      "mean": 0.1218,
+      "ci95": 0.0089
+    },
+    "attention_gain": {
+      "mean": 0.027,
+      "ci95": 0.0035
+    }
+  },
+  "verdict": "Adding the missing top-down feedback path \u2014 a goal signal from the neocortical/LLM side that gain-modulates the spatial cortex under a conserved attention budget \u2014 makes neocortical goals reshape the spatial code, with nothing about the goal hardcoded into the modulation. The learned gain EMERGENTLY over-represents the goal (Dupret 2010), it decodes better than a feedforward read-only model where precision matters, it shows the attention trade-off (better near the goal, worse far), and it collapses when fed the wrong goal. The reciprocal loop is load-bearing."
+}

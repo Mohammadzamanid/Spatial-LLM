@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Closing the reciprocal loop: top-down goals reshape the spatial cortex</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">a learned feedback path (conserved attention budget) &#8212; nothing about enhancing the goal is hardcoded</text>
+<text x="44" y="76" font-size="11" font-weight="700" fill="#28324a">near-goal decode error</text>
+<rect x="44" y="225" width="58" height="34" fill="#2ca25f" opacity="0.85"/>
+<text x="73" y="220" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.030</text>
+<text x="73" y="272" font-size="9" fill="#28324a" text-anchor="middle">top-down</text>
+<text x="73" y="283" font-size="9" fill="#28324a" text-anchor="middle">(loop)</text>
+<rect x="114" y="194" width="58" height="65" fill="#e6842a" opacity="0.85"/>
+<text x="143" y="189" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.057</text>
+<text x="143" y="272" font-size="9" fill="#28324a" text-anchor="middle">feedfwd</text>
+<text x="143" y="283" font-size="9" fill="#28324a" text-anchor="middle">(read-only)</text>
+<rect x="184" y="113" width="58" height="146" fill="#c9341a" opacity="0.85"/>
+<text x="213" y="108" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.128</text>
+<text x="213" y="272" font-size="9" fill="#28324a" text-anchor="middle">wrong</text>
+<text x="213" y="283" font-size="9" fill="#28324a" text-anchor="middle">goal</text>
+<line x1="40" y1="259" x2="254" y2="259" stroke="#33415c"/>
+<text x="300" y="76" font-size="11" font-weight="700" fill="#28324a">attention trade-off</text>
+<rect x="300" y="223" width="60" height="36" fill="#2ca25f" opacity="0.85"/>
+<text x="330" y="218" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.030</text>
+<text x="330" y="272" font-size="9" fill="#28324a" text-anchor="middle">near</text>
+<text x="330" y="283" font-size="9" fill="#28324a" text-anchor="middle">goal</text>
+<rect x="374" y="113" width="60" height="146" fill="#8c8c8c" opacity="0.85"/>
+<text x="404" y="108" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">0.122</text>
+<text x="404" y="272" font-size="9" fill="#28324a" text-anchor="middle">far</text>
+<line x1="296" y1="259" x2="448" y2="259" stroke="#33415c"/>
+<text x="300" y="299" font-size="8.5" fill="#5b6b8c">better where attended, worse elsewhere</text>
+<text x="500" y="76" font-size="11" font-weight="700" fill="#28324a">emergent (never in loss)</text>
+<text x="500" y="124" font-size="12" fill="#2b8cbe">goal over-representation</text>
+<text x="500" y="154" font-size="24" font-weight="800" fill="#0b1324">+0.29</text>
+<text x="500" y="172" font-size="9" fill="#5b6b8c">corr(gain, goal-proximity)</text>
+<text x="500" y="204" font-size="10" fill="#2ca25f">the map reorganises toward</text>
+<text x="500" y="218" font-size="10" fill="#2ca25f">the goal (Dupret 2010)</text>
+</svg>

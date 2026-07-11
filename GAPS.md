@@ -437,6 +437,31 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   allothetic landmark correction and hypothalamic drive into one goal-directed survival loop; the organs are
   functionally interdependent, not modular add-ons.
 
+### 12. Reciprocal integration — **top-down feedback that reshapes the spatial cortex** ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/topdown_feedback.py` (n=5). The pipeline was read-only: spatial tokens flow
+  INTO the frozen LLM via gated cross-attention (`fusion.py`, query=text/key=spatial), but the LLM had no path
+  back to the spatial cortex — whereas the entorhinal-hippocampal loop is reciprocal, and neocortical GOALS
+  reshape place-cell tuning (place fields over-represent goal locations; Hollup 2001; Dupret-O'Neill-Csicsvari
+  2010; Kentros 2004). This adds the feedback path and hardcodes NONE of the behaviour — no "enhance cells near
+  the goal" rule. The only things built: a top-down gain modulation of the spatial cortex under a conserved
+  attention BUDGET (N·softmax, so attention is a limited resource that must be allocated — Reynolds-Heeger), and a
+  goal-weighted precision objective. What emerges:
+  - **(A) GOAL OVER-REPRESENTATION.** The learned top-down gain concentrates on cells whose fields are near the
+    goal — corr(gain, goal-proximity) **+0.29** — the map reorganises toward the goal (Dupret), never in the loss.
+  - **(B) THE RECIPROCAL LOOP PAYS.** Near the goal the top-down model decodes at **0.030** vs a FEEDFORWARD
+    read-only model's **0.057** — closing the loop beats the read-only pipeline where precision matters.
+  - **(C) THE ATTENTION TRADE-OFF.** Limited budget → better near the goal (**0.030**) but worse far (**0.122**),
+    the hallmark of attention, not a free lunch.
+  - **(D) FALSIFIER.** Feed the WRONG goal → the gain enhances the wrong region → near-goal error **0.128**. The
+    feedback must MATCH the goal, not merely be present.
+- **Honest grade:** *emergent behaviour, mechanism-only inputs* — nothing tells the top-down signal to enhance the
+  goal; goal over-representation and the attention trade-off fall out of a limited-budget feedback path trained for
+  goal-directed precision, and the read-only baseline + wrong-goal falsifier show the loop is load-bearing. Note:
+  the eval demonstrates the feedback ORGAN; wiring an LLM→cortex path into the main `fusion.py` pipeline is the
+  natural follow-on integration. See `results/FINDINGS.md`.
+- **Neuro basis.** The hippocampus projects back via deep MEC to the neocortex, and neocortical goals drive
+  top-down spatial attention and goal-related place-field reorganisation — the loop is reciprocal, not read-only.
+
 ---
 
 ## Tier 3 — GPU / language
