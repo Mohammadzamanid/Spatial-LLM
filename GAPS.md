@@ -219,6 +219,31 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** Gap-junction-coupled astrocytes spread Ca²⁺ across a syncytium, letting one synapse's glial
   signal reach its neighbours — a spatial, non-synaptic substrate for coordinating plasticity across an ensemble.
 
+### 5g. Non-Euclidean **path integration** — curvature read from self-motion (Gauss-Bonnet holonomy) ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/curved_path_integration.py` (n=5). The critique's "3-D / non-Euclidean
+  topologies" item had two halves. The **3-D volume** half is already covered: `grid_3d.py` / `local_3d_order.py`
+  build the bat-regime 3-D code (local order, no global lattice; Ginosar 2021), path-integrating and localizing
+  in 3-D. **Honest note:** I first tried to make that regime *emerge* from plane-wave interference and it does
+  NOT — generic 3-D interference gives *disordered* fields, not regular-spacing local order (that regime is a
+  packing property, which the repo already models by construction). Rather than manufacture an emergence, I
+  closed the genuinely-open **non-Euclidean** half: what a flat grid/head-direction integrator DOES on a curved
+  manifold. The answer is exact and never put in the code:
+  - **(A) CURVATURE FROM SELF-MOTION.** The parallel-transport holonomy around a closed loop equals the enclosed
+    **area × curvature** (= solid angle; Gauss-Bonnet): slope **1.00**, corr **1.00**, calibration residual
+    **1.3%**; a geodesic triangle with three right angles gives holonomy **π/2** (1.57). A flat compass reads
+    curvature purely from having walked a loop.
+  - **(B) FLAT FALSIFIER + DOSE-RESPONSE.** In flat space (zero-curvature limit) the holonomy is **0.03 ≈ 0**
+    (loops close); at fixed enclosed area it grows as **1/R²** (monotone in curvature) — the signal is the flat
+    assumption meeting curvature, not a bug.
+  - **(C) BEHAVIOURAL CONSEQUENCE.** An agent that path-integrates its heading flatly then heads for a remembered
+    goal mis-homes by the holonomy — miss **1.98** on the curved world vs **0.03** flat.
+- **Honest grade:** the non-Euclidean analogue of grid shearing — a flat mechanism meets a geometry it was never
+  built for and an exact geometric signature (Gauss-Bonnet) falls out. The holonomy = area × curvature is a
+  mathematical identity, so the emergence is that the flat neural integrator *inherits* it and mis-navigates by
+  a computable amount; clean and faithful, with a perfect flat-space falsifier. See `results/FINDINGS.md`.
+- **Neuro basis.** Head-direction and grid path integration assume a locally-flat plane; on a curved surface the
+  transported heading accumulates the Gauss-Bonnet holonomy — a concrete, testable non-Euclidean prediction.
+
 ### 6. **Replay** used for planning & credit assignment — not just present as a ripple signature ✅ CLOSED (Jul 2026)
 - **Status: implemented.** `src/eval/replay_planning.py` (n=8), extends `successor.py`. The repo had a
   `SharpWaveRipple` organ and offline experience-replay that *consolidates a decode map* (`pillars.py`), but

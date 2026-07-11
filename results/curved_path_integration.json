@@ -1,0 +1,38 @@
+{
+  "n_seeds": 5,
+  "results": {
+    "holonomy_vs_solidangle_slope": {
+      "mean": 1.0004,
+      "ci95": 0.0086
+    },
+    "holonomy_vs_solidangle_corr": {
+      "mean": 0.9998,
+      "ci95": 0.0001
+    },
+    "gauss_bonnet_rel_residual": {
+      "mean": 0.0134,
+      "ci95": 0.004
+    },
+    "triangle_right_angle_excess": {
+      "mean": 1.568,
+      "ci95": 0.0244
+    },
+    "flat_holonomy": {
+      "mean": 0.0335,
+      "ci95": 0.0103
+    },
+    "curvature_dose_monotone": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "homing_miss_curved": {
+      "mean": 1.9814,
+      "ci95": 0.0058
+    },
+    "homing_miss_flat": {
+      "mean": 0.0334,
+      "ci95": 0.0103
+    }
+  },
+  "verdict": "A flat grid/head-direction path-integrator DETECTS curvature from self-motion alone: the parallel-transport holonomy around a closed loop equals the enclosed area \u00d7 curvature (Gauss-Bonnet; slope\u22481, residual<1%), is exactly 0 in flat space, and makes a flat compass mis-home on a curved world by a computable amount. The signature is never put in the code \u2014 it falls out of running a flat integrator on a curved manifold, the non-Euclidean analogue of grid shearing. (The 3-D VOLUME/bat-regime story is covered by grid_3d.py.)"
+}

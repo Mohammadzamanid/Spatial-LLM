@@ -1305,6 +1305,42 @@ behaviour provably tracks that *internal belief*, including when the belief is w
 scalar bolted on; it is read from the grid code and it changes what the agent does. (`results/uncertainty_behavior.json`,
 `results/uncertainty_behavior.svg`.)
 
+### A flat compass on a curved world — curvature read from self-motion (Gauss-Bonnet holonomy) (GAPS.md #5g, n=5)
+
+The "3-D / non-Euclidean topologies" critique had two halves, and honesty requires separating them. The **3-D
+volume** half is already handled: `grid_3d.py` builds the bat-regime 3-D code (local order, no global lattice;
+Ginosar 2021) that path-integrates and localizes in 3-D. I tried to make that regime *emerge* from the standard
+plane-wave grid-generative model — and it **does not**: generic 3-D plane-wave interference produces *disordered*
+fields (local order ≈ 0.1), not the bat's regular nearest-neighbour spacing, which is a *packing* property the
+repo already models by construction. Manufacturing an "emergence" there would have been dishonest, so I stopped
+and closed the genuinely-open **non-Euclidean** half instead: what does a flat path-integration code — the thing
+grid and head-direction cells *are* — do on a curved manifold?
+
+`src/eval/curved_path_integration.py` answers it exactly, and the signature is never written into the code:
+
+- **(A) Curvature falls out of self-motion.** Parallel-transporting the head-direction vector around a closed loop
+  rotates it by the enclosed **area × curvature** — the Gauss-Bonnet holonomy — even though the animal returns
+  home. Across many loop sizes and sphere radii the measured holonomy equals the enclosed solid angle with slope
+  **1.00**, correlation **1.00**, and a calibration residual of **1.3%**; the textbook check — a geodesic triangle
+  with three right angles — gives holonomy **π/2** (1.57). A flat compass reads the curvature of its world purely
+  from having walked a loop in it.
+- **(B) Zero in flat space, dose-responsive in curvature.** In the zero-curvature limit the holonomy is **0.03 ≈
+  0** — loops close, as they must in Euclidean space — and at a fixed enclosed area it grows as **1/R²** as the
+  surface curves more tightly. So the signal is specifically the *flat assumption meeting curvature*, not a bug or
+  noise: turn the curvature off and it vanishes.
+- **(C) It corrupts behaviour by a computable amount.** An agent that path-integrates its heading flatly and then
+  strikes out for a remembered goal is off by exactly the holonomy: a homing miss of **1.98** on the curved world
+  versus **0.03** in flat space. This is a concrete, testable non-Euclidean prediction — a flat grid/HD system
+  mis-navigates a curved world in proportion to the area it has enclosed.
+
+**Honest grade — the non-Euclidean analogue of grid shearing.** A flat mechanism meets a geometry it was never
+built for, and an exact geometric signature emerges — there, a sheared lattice; here, the Gauss-Bonnet holonomy.
+The holonomy = area × curvature is a mathematical identity, so what is "emergent" is that the flat *neural*
+integrator inherits it and mis-homes by a computable amount, with a perfect flat-space falsifier. And the honest
+delta from the existing 3-D code is stated plainly: the bat local-order regime is a packing put in by
+construction (no clean interference-emergence), while the curvature signature genuinely falls out of the geometry.
+(`results/curved_path_integration.json`, `results/curved_path_integration.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)
