@@ -372,6 +372,30 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** The hippocampus receives dense hypothalamic/amygdalar input; place fields, replay and value
   remap with homeostatic state, and navigation is vector-driven by interoceptive deficits (thirst, hunger, fear).
 
+### 11. **Adult neurogenesis** — temporal stamping + reduced interference from cohort turnover ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/neurogenesis_stamp.py` (n=5). The net had a fixed parameter count; the adult
+  dentate gyrus adds granule cells continuously, each passing a brief maturation window when it is hyper-EXCITABLE
+  and hyper-PLASTIC before it freezes (Aimone-Wiles-Gage 2006/2009; Kee 2007; Rangel 2014). **We hardcode none of
+  the behaviour:** TIME is never encoded, per-event content is random and decorrelated from time, and the only
+  thing built is the mechanism (a young cohort of K cells is born each step, fires readily, learns fast, then
+  freezes). What emerges:
+  - **(A) TEMPORAL STAMPING.** Because only the current young cohort is plastic and hyper-excitable, events close
+    in time are bound by the SAME cells, so DG-code overlap tracks temporal proximity (corr(overlap, Δt) **−0.60**)
+    and near-vs-far-in-time is decodable from the code (**AUC 0.96**) — even though content carries no time. A
+    STATIC DG shows **corr +0.00 / AUC 0.50** (content-only): the stamp is the cohort.
+  - **(B) REDUCED INTERFERENCE.** Fresh cells absorb new memories while mature cells stay frozen, so old memories
+    are retained (recall **0.44** vs static **0.31**) and recall is FLAT across age (retention gap **−0.01**),
+    where the static net catastrophically forgets the old for the new (gap **+0.52**).
+  - **(C) THE FALSIFIER.** A static DG (no turnover, uniform excitability + plasticity) has neither the stamp nor
+    the retention — both effects are the turnover, not the substrate.
+- **Honest grade:** *emergent behaviour, mechanism-only inputs.* Nothing encodes time or protects old memories by
+  hand; a temporal metric and age-flat retention fall out of a young cohort turning over, and the static ablation
+  proves it. Birth is stochastic, so the stamp is an emergent noisy metric, not an exact clock. The same
+  "hardcode at most the mechanism" bar as #9/#10. See `results/FINDINGS.md`.
+- **Neuro basis.** Newborn granule cells time-stamp memories (same-cohort cells encode temporally-near events) and
+  segregate new from old learning, giving the DG a continuous-time index and continual-learning capacity a static
+  population cannot.
+
 ---
 
 ## Tier 3 — GPU / language

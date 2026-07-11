@@ -1,0 +1,42 @@
+{
+  "n_seeds": 5,
+  "N": 360,
+  "K": 44,
+  "T": 60,
+  "maturation_window": 9,
+  "results": {
+    "stamp_corr_neuro": {
+      "mean": -0.6039,
+      "ci95": 0.0084
+    },
+    "stamp_corr_static": {
+      "mean": 0.0005,
+      "ci95": 0.0213
+    },
+    "near_far_auc_neuro": {
+      "mean": 0.9567,
+      "ci95": 0.0108
+    },
+    "near_far_auc_static": {
+      "mean": 0.4971,
+      "ci95": 0.0163
+    },
+    "old_recall_neuro": {
+      "mean": 0.4377,
+      "ci95": 0.0197
+    },
+    "old_recall_static": {
+      "mean": 0.3112,
+      "ci95": 0.0526
+    },
+    "retention_gap_neuro": {
+      "mean": -0.0047,
+      "ci95": 0.0237
+    },
+    "retention_gap_static": {
+      "mean": 0.5228,
+      "ci95": 0.0362
+    }
+  },
+  "verdict": "A dentate gyrus whose newborn cells pass through a hyper-excitable/hyper-plastic maturation window before freezing develops, with no time encoded anywhere, a TEMPORAL STAMP (events close in time share the young cohort, so code overlap decodes temporal proximity even though content is random) and REDUCED INTERFERENCE (fresh cells absorb new memories while mature cells stay frozen, so old memories are retained where a static net catastrophically forgets). A static DG shows neither \u2014 both effects are the turnover, not the substrate."
+}

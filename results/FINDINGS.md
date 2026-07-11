@@ -1443,6 +1443,36 @@ the body near its set-point, and the drive-blind ablation proves the map reads t
 habit. Beyond dopamine, the cognitive map gets its homeostatic anchor. (`results/interoceptive_map.json`,
 `results/interoceptive_map.svg`.)
 
+### Time-stamped by young cells — adult neurogenesis for temporal coding and continual learning (GAPS.md #11, n=5)
+
+A fixed parameter count cannot do what the adult dentate gyrus does: it keeps *adding* granule cells, and every
+newborn cell spends a few weeks hyper-excitable and hyper-plastic before it stabilises (Aimone, Wiles & Gage 2006,
+2009). Two computations are claimed from this — a *temporal stamp* on memories and protection against catastrophic
+forgetting — and, holding to the rule, we hardcode neither. `neurogenesis_stamp.py` never encodes time anywhere,
+draws each event's content at random (so content is decorrelated from time), and builds only the mechanism: at
+each step a fresh cohort of cells is "born," those young cells fire readily and learn fast, and once mature they
+freeze. What emerges:
+
+- **(A) The code stamps time by itself.** Because only the current young cohort is plastic and hyper-excitable,
+  two events that happen close in time get bound by the *same* cells. So the overlap between two events' dentate
+  codes tracks how far apart in time they were (correlation **−0.60**), and near-versus-far-in-time is decodable
+  straight from the code (**AUC 0.96**) — even though the content of the events says nothing about time. A static
+  dentate gyrus, with no turnover, shows a flat **+0.00 / 0.50**: its code carries content, not time. The temporal
+  metric is the cohort, and it is emergent — birth is stochastic, so it is a noisy metric, not a clock we wired in.
+- **(B) Old memories survive the new ones.** Fresh cells absorb each new memory while the mature cells stay frozen,
+  so old memories are retained (recall **0.44**) where the static network — every cell forever plastic — overwrites
+  them for the recent ones (**0.31**). The neurogenic recall curve is essentially *flat with memory age* (retention
+  gap **−0.01**); the static curve collapses toward the present (gap **+0.52**, catastrophic recency). Continual
+  learning falls out of allocating fresh cells to fresh memories.
+- **(C) Both effects are the turnover.** The static ablation — same substrate, no birth-and-maturation — has
+  neither the temporal stamp nor the retention. So neither is a property of the cells; both are the *cohort turning
+  over*.
+
+**Honest grade — emergent behaviour from mechanism-only inputs.** Nothing writes time into the code or protects
+old memories by hand; a graded temporal index and age-flat retention both fall out of a young cohort that is born,
+learns, and freezes, and the static ablation is the receipt. A network that grows its own cells gets a clock and a
+guard against forgetting for free. (`results/neurogenesis_stamp.json`, `results/neurogenesis_stamp.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)
