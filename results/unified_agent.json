@@ -1,0 +1,38 @@
+{
+  "n_seeds": 5,
+  "results": {
+    "drive_intact": {
+      "mean": 36.32,
+      "ci95": 0.0
+    },
+    "drive_no_grid": {
+      "mean": 70.6053,
+      "ci95": 0.4207
+    },
+    "drive_no_uncertainty": {
+      "mean": 44.5667,
+      "ci95": 0.0
+    },
+    "drive_no_landmark": {
+      "mean": 44.5667,
+      "ci95": 0.0
+    },
+    "drive_no_drive": {
+      "mean": 42.156,
+      "ci95": 3.86
+    },
+    "cost_unc_with_lm": {
+      "mean": 8.2467,
+      "ci95": 0.0
+    },
+    "cost_unc_without_lm": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "interaction": {
+      "mean": 8.2467,
+      "ci95": 0.0
+    }
+  },
+  "verdict": "One agent whose only objective is to survive composes a grid position sense, an uncertainty read-out, landmark relocalisation and interoceptive drives into a coherent animal: an N-organ lesion dissociation shows all four are load-bearing (each ablation fails in its own way), and an emergent super-additive interaction shows the uncertainty organ is worthless without the landmark organ \u2014 the parts form circuits, not a pile. Nothing about which resource or when to relocalise is hardcoded; it emerges from staying alive."
+}

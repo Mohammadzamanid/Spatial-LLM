@@ -1473,6 +1473,40 @@ old memories by hand; a graded temporal index and age-flat retention both fall o
 learns, and freezes, and the static ablation is the receipt. A network that grows its own cells gets a clock and a
 guard against forgetting for free. (`results/neurogenesis_stamp.json`, `results/neurogenesis_stamp.svg`.)
 
+### The organs act as one machine — the unified agent (GAPS.md integration capstone, n=5)
+
+Every result above proves a mechanism *in isolation*. The obvious next question — and the one no single eval can
+answer — is whether they cohere into an animal. `unified_agent.py` wires the survival-critical organs into ONE
+agent whose *only* objective is to stay alive (keep total homeostatic drive low), and lets everything else emerge.
+The world composes platforms already validated on their own: a grid **position** sense that path-integrates and
+**drifts** (#7/#8), an **uncertainty** read-out that knows how lost it is (#7), **landmarks** that reset the drift
+when reached (#1), and asymmetric **interoceptive drives** — thirst and hunger, one racing the other each life —
+that are reduced only by the matching resource and only *well* when the agent is localised (a lost animal misses;
+#4). A single belief-state planner over (position, uncertainty, thirst, hunger) maximises survival; nothing tells
+it which resource to seek or when to relocalise.
+
+- **(A) All four organs are load-bearing, and each fails in its own way.** With everything intact the agent holds
+  mean drive at **36**. Take away the **grid** position sense and it can't navigate at all — drive jumps to **71**
+  (it wanders and starves). Take away the **uncertainty** read-out and it can't tell when it's lost, so it commits
+  to resources it will miss — **45**. Take away the **landmarks** and it can't undo drift — **45**. Take away
+  **interoception** and it can't tell which deficit is killing it, so it mis-allocates its trips — **42**. The grid
+  is the foundation (no position, no animal); the other three add graded survival on top. This is the multi-organ
+  dissociation the isolated evals could only gesture at, now on one body.
+- **(B) The organs form a circuit, not a pile.** The sharpest emergent result is an *interaction*: removing the
+  uncertainty read-out costs **+8** drive when landmarks are present, but **+0** once the landmarks are gone.
+  Knowing you are lost is worth nothing unless you can re-anchor — the uncertainty organ and the landmark organ are
+  a *functional pair*, and the value of the upstream signal is contingent on the downstream actuator. That
+  super-additive complementarity is invisible to either organ alone; it exists only in the assembled machine.
+
+**Honest grade — emergent behaviour from mechanism-only inputs, and an honest fix along the way.** One survival
+objective composes four organs into a coherent animal, with drive-appropriate navigation, uncertainty-timed
+relocalisation and homeostatic regulation all emerging — none of it hardcoded. The process note matters: an early
+version *inflated* the landmark lesion by letting the agent keep chasing re-anchoring that no longer worked, which
+also produced a suspiciously large "interaction." A lesion should mean the organ is *gone and the brain re-plans
+without it*; doing that honestly shrank the landmark lesion to its true size and made the complementarity clean.
+The machine runs, and it runs as a measured, falsifiable whole. (`results/unified_agent.json`,
+`results/unified_agent.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

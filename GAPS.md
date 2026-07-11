@@ -396,6 +396,30 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   segregate new from old learning, giving the DG a continuous-time index and continual-learning capacity a static
   population cannot.
 
+### Integration capstone. **The unified agent** — the organs act as one machine ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/unified_agent.py` (n=5). The register proved a shelf of mechanisms in
+  isolation; this wires the survival-critical ones into ONE agent and asks the question isolation cannot: do they
+  cohere into an animal? The agent's SOLE objective is to survive (keep total homeostatic drive low). The world
+  composes validated platforms — a grid POSITION sense that DRIFTS (#7/#8), an UNCERTAINTY read-out (#7),
+  LANDMARK relocalisation (#1), and asymmetric INTEROCEPTIVE drives (#4) reduced only by the matching resource and
+  only well when localised. A single belief-state planner over (position, uncertainty, thirst, hunger) maximises
+  survival; which resource and when to relocalise are never hardcoded.
+  - **(A) N-ORGAN LESION DISSOCIATION.** Survival needs all four organs; each ablation fails in its own way —
+    intact mean drive **36**, − grid **71** (can't navigate, catastrophic), − uncertainty **45** (can't tell when
+    it's lost), − landmark **45** (can't undo drift), − interoception **42** (can't tell which deficit is killing
+    it). Grid is the most fundamental; the rest give graded survival benefit.
+  - **(B) EMERGENT CROSS-ORGAN INTERACTION.** The organs form a CIRCUIT, not a pile: removing the uncertainty
+    read-out costs **+8** drive when landmarks are present but **+0** once they are gone — knowing you are lost is
+    worthless unless you can re-anchor. A super-additive complementarity neither organ shows alone.
+- **Honest grade:** *emergent behaviour, mechanism-only inputs* — one survival objective composes four organs
+  into a coherent animal with the drive-appropriate navigation, relocalisation and homeostasis all emerging. Honest
+  process note: an early version inflated the landmark lesion by letting the agent chase re-anchoring that no
+  longer worked; a lesion should mean the organ is gone and the brain re-plans without it, which both removes the
+  artefact and makes the complementarity clean. See `results/FINDINGS.md`.
+- **Neuro basis.** A behaving animal integrates entorhinal grid path-integration, an uncertainty/confidence signal,
+  allothetic landmark correction and hypothalamic drive into one goal-directed survival loop; the organs are
+  functionally interdependent, not modular add-ons.
+
 ---
 
 ## Tier 3 — GPU / language
