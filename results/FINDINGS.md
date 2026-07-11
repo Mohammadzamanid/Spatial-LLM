@@ -1538,6 +1538,36 @@ This is the strongest form of the original ask: not "validated organs composed,"
 the actual grid cortex — the position sense, the uncertainty, the drift and the re-anchoring are all the real
 substrate, and the machine still coheres. (`results/unified_agent_cortex.json`, `results/unified_agent_cortex.svg`.)
 
+### The agent learns its world — replay + CLS added to the survival loop (GAPS.md capstone, learning, n=5)
+
+The grounded capstone still *plans* with a known world model. `unified_agent_learn.py` gives the agent the memory
+organs so it *learns* its world instead: it is dropped in **not knowing where water and food are**, discovers them
+by acting, and builds a value map from experience — nothing about resource locations is handed to it. Two organs
+proven in isolation now shape that learning inside the behaving agent.
+
+- **It learns its world.** Mean drive falls over the lifetime — **56** early, **46** late — as the agent finds the
+  resources and learns the routes to them. The competence is earned from experience, not configured.
+- **Replay teaches the map fast.** When the agent discovers a resource, replay (#6) propagates that value across
+  the whole map — a few real visits teach the entire route. Measuring the learned map a fixed window *after* each
+  seed first finds the resource (so discovery luck is controlled for), replay reaches the true distance-to-resource
+  value almost perfectly — **1.00 with replay vs 0.66 without**. The honest caveat, stated plainly: this strongly
+  speeds *map-learning* but only mildly lowers *survival drive*, because in this small world the bottleneck is
+  *finding* the resource (exploration), not *propagating* its value. Replay does exactly its #6 job; the coarse
+  survival metric just isn't propagation-limited. I probed two ways to make replay move survival (static learning,
+  a moved resource) and neither did, so rather than tune until it looked load-bearing I measured it on the metric
+  it actually governs.
+- **Consolidation keeps the world.** A slow "cortical" value map consolidates the fast "hippocampal" one over the
+  lifetime (CLS, #2). After the lifetime the hippocampal store is lesioned: *with* consolidation the agent keeps
+  navigating its familiar world from the slow weights (drive **47**), *without* it the lesion is fatal (**65**).
+  The systems-consolidation result — remote memory surviving a hippocampal lesion — reproduced in a behaving
+  animal.
+
+So the agent doesn't just plan in its world; it **learns** it, quickly (replay) and durably (consolidation). The
+memory organs, proven one-at-a-time, do their jobs in the assembled agent. (Localization is perfect here to
+isolate the memory organs; the perception-grounding on the real cortex is the separate `unified_agent_cortex`
+result, and combining all layers — real perception + learning + memory — is the natural next integration.)
+(`results/unified_agent_learn.json`, `results/unified_agent_learn.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

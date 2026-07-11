@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">The unified agent LEARNS its world: replay teaches the map, CLS keeps it</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">dropped in not knowing where resources are; nothing about their locations is hardcoded</text>
+<text x="44" y="74" font-size="11" font-weight="700" fill="#28324a">(A) it learns (drive)</text>
+<rect x="44" y="111" width="50" height="146" fill="#c9341a" opacity="0.85"/>
+<text x="69" y="106" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">56</text>
+<text x="69" y="270" font-size="9" fill="#28324a" text-anchor="middle">early</text>
+<text x="69" y="281" font-size="9" fill="#28324a" text-anchor="middle">life</text>
+<rect x="110" y="137" width="50" height="120" fill="#2ca25f" opacity="0.85"/>
+<text x="135" y="132" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">46</text>
+<text x="135" y="270" font-size="9" fill="#28324a" text-anchor="middle">late</text>
+<text x="135" y="281" font-size="9" fill="#28324a" text-anchor="middle">life</text>
+<line x1="40" y1="257" x2="174" y2="257" stroke="#33415c"/>
+<text x="250" y="74" font-size="11" font-weight="700" fill="#28324a">(B) replay teaches map</text>
+<rect x="250" y="82" width="50" height="175" fill="#2b8cbe" opacity="0.85"/>
+<text x="275" y="77" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="275" y="270" font-size="9" fill="#28324a" text-anchor="middle">replay</text>
+<rect x="316" y="141" width="50" height="116" fill="#8c8c8c" opacity="0.85"/>
+<text x="341" y="136" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.66</text>
+<text x="341" y="270" font-size="9" fill="#28324a" text-anchor="middle">no</text>
+<text x="341" y="281" font-size="9" fill="#28324a" text-anchor="middle">replay</text>
+<line x1="246" y1="257" x2="380" y2="257" stroke="#33415c"/>
+<text x="250" y="297" font-size="8.5" fill="#5b6b8c">map accuracy 60steps post-discovery</text>
+<text x="470" y="74" font-size="11" font-weight="700" fill="#28324a">(C) CLS keeps the world</text>
+<rect x="470" y="153" width="58" height="104" fill="#2ca25f" opacity="0.85"/>
+<text x="499" y="148" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">47</text>
+<text x="499" y="270" font-size="9" fill="#28324a" text-anchor="middle">CLS on</text>
+<text x="499" y="281" font-size="9" fill="#28324a" text-anchor="middle">(retained)</text>
+<rect x="548" y="111" width="58" height="146" fill="#c9341a" opacity="0.85"/>
+<text x="577" y="106" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">65</text>
+<text x="577" y="270" font-size="9" fill="#28324a" text-anchor="middle">CLS off</text>
+<text x="577" y="281" font-size="9" fill="#28324a" text-anchor="middle">(fatal)</text>
+<line x1="466" y1="257" x2="620" y2="257" stroke="#33415c"/>
+<text x="470" y="297" font-size="8.5" fill="#5b6b8c">drive after a hippocampal lesion</text>
+</svg>

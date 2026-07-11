@@ -1,0 +1,35 @@
+{
+  "n_seeds": 5,
+  "life": 800,
+  "results": {
+    "drive_early": {
+      "mean": 55.893,
+      "ci95": 3.2108
+    },
+    "drive_late": {
+      "mean": 45.832,
+      "ci95": 10.5142
+    },
+    "learning_drop": {
+      "mean": 10.061,
+      "ci95": 9.1524
+    },
+    "map_acc_replay": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "map_acc_noreplay": {
+      "mean": 0.6606,
+      "ci95": 0.1479
+    },
+    "postlesion_cls": {
+      "mean": 46.522,
+      "ci95": 10.1654
+    },
+    "postlesion_nocls": {
+      "mean": 65.331,
+      "ci95": 1.5724
+    }
+  },
+  "verdict": "The unified agent LEARNS its world instead of planning in it: dropped in not knowing where resources are, it discovers them and builds a value map from experience (drive falls over the lifetime). REPLAY propagates each discovery across the map so it is learned far sooner (map accuracy 0.8+ vs ~0.6 without) \u2014 though, honestly, this speeds map-learning more than survival drive, since discovery is the bottleneck here. CLS consolidation moves the map into a slow store so a familiar world survives a hippocampal lesion (low drive) where without it the lesion is fatal. The memory organs, proven in isolation, do their jobs in the behaving agent."
+}

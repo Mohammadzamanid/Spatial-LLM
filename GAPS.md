@@ -424,6 +424,15 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   the interoceptive DRIVE organ, cleanly load-bearing for resource CHOICE in #4, barely moves survival here
   (**46 ≈ 48**) — with two symmetric resources a non-adaptive alternation nearly suffices — so grounding yields a
   clean **3-organ** dissociation, not 4, and we report all four and say so.
+- **Learning its world (memory organs).** `src/eval/unified_agent_learn.py` (n=5) upgrades the agent from PLANNING
+  with a known model to LEARNING an unknown one: dropped in not knowing where resources are, it discovers them and
+  builds a value map from experience (nothing about locations hardcoded). **(A)** it learns — mean drive falls
+  over the lifetime (**56 → 46**); **(B)** REPLAY (#6) propagates each discovery across the map, so the map is
+  learned far sooner — accuracy a fixed window after discovery **1.00 with replay vs 0.66 without** (honest note:
+  this speeds *map-learning*; it moves *survival drive* only mildly, since discovery, not propagation, is the
+  bottleneck here); **(C)** CLS consolidation (#2) moves the map into a slow store so a familiar world survives a
+  hippocampal lesion — drive **47 with consolidation vs 65 without**. The memory organs, proven in isolation, do
+  their jobs in the behaving agent.
 - **Neuro basis.** A behaving animal integrates entorhinal grid path-integration, an uncertainty/confidence signal,
   allothetic landmark correction and hypothalamic drive into one goal-directed survival loop; the organs are
   functionally interdependent, not modular add-ons.
