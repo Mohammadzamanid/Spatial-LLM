@@ -1376,6 +1376,41 @@ kills the whole effect. It closes the CLS gap honestly: the "hippocampal" depend
 moves the map into the cortical weights over time. (`results/systems_consolidation.json`,
 `results/systems_consolidation.svg`.)
 
+### Acting to know — epistemic foraging emerges from a purely pragmatic goal (GAPS.md #9, n=5)
+
+The pipeline was a passive observer of trajectories it did not choose. Active inference (Friston) says the
+opposite: the entorhinal-hippocampal system *drives the body* to reduce its own spatial uncertainty — the animal
+detours to a landmark to relocalise before committing to a goal. The trap here is obvious and we refuse to fall
+into it: if you write "when uncertain, go to a landmark," you have hardcoded the answer. So `active_inference.py`
+rewards the agent for **one thing only — reaching the goal**. There is no landmark reward, no information-gain
+bonus, no exploration term anywhere. The *only* thing we build is the platform physics, and it is exactly the
+uncertainty of #7: path integration drifts, so uncertainty *u* grows with every step; a landmark is sensed and
+resets it; and committing to the remembered goal succeeds with a probability that falls as *u* grows (if your
+position estimate is off, then when you believe you are at the goal your true body is not — you miss). Then a
+belief-state planner that maximises expected *goal* reward is turned loose:
+
+- **(A) The detour emerges.** From **52%** of start states the optimal policy goes *out of its way* to a landmark
+  to relocalise before heading to the goal — purely because a well-localised approach actually arrives and a
+  drifted one misses. Information-seeking behaviour falls out of pure goal-seeking.
+- **(B) The proof it isn't hardcoded.** In a *no-drift* world — where uncertainty never grows — the same planner
+  detours from **0%** of starts. With nothing to relocalise, the landmark holds no value. The detour was never a
+  built-in landmark preference; it is contingent on *reducible uncertainty*, which is the definition of epistemic
+  value.
+- **(C) It pays.** The uncertainty-aware planner reaches the goal **47%** of the time, against a σ-blind greedy
+  agent that beelines with the *same goal reward* (**21%**) and a random agent (**4%**).
+- **(D) It has to feel its own uncertainty.** Blind to *u*, the planner cannot time the detour and collapses to
+  the greedy rate (**20%**) — so the behaviour is genuinely driven by the internal uncertainty signal.
+- **(E) A learner discovers it too.** A model-free Q-learner trained *only* on the goal reward — no planning, no
+  model handed to it — develops the same detour-when-uncertain policy (**82%** relocalisation). The emergence is
+  not an artefact of the planner; it is what goal-seeking under reducible uncertainty *is*.
+
+**Honest grade — emergent behaviour from mechanism-only inputs.** This is the standard the request set: hardcode
+at most the mechanism (the platform's drift-and-landmark physics, and a goal-reward optimiser), and let the
+behaviour emerge. Nothing about uncertainty, landmarks, or exploration appears in the objective; epistemic
+foraging arises because uncertainty is *instrumentally* costly to a goal-seeker, and the no-drift dissociation
+proves the effect is uncertainty-driven rather than a landmark reflex. The passive observer becomes an agent that
+moves to know. (`results/active_inference.json`, `results/active_inference.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

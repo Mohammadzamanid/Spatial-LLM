@@ -1,0 +1,40 @@
+{
+  "n_seeds": 5,
+  "drift_std": 0.45,
+  "goal_tol": 0.8,
+  "results": {
+    "detour_frac_drift": {
+      "mean": 0.5174,
+      "ci95": 0.1178
+    },
+    "detour_frac_nodrift": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "success_planner": {
+      "mean": 0.472,
+      "ci95": 0.1084
+    },
+    "success_greedy": {
+      "mean": 0.212,
+      "ci95": 0.0367
+    },
+    "success_random": {
+      "mean": 0.045,
+      "ci95": 0.0103
+    },
+    "success_ablated": {
+      "mean": 0.201,
+      "ci95": 0.0266
+    },
+    "success_qlearn": {
+      "mean": 0.376,
+      "ci95": 0.2621
+    },
+    "detour_qlearn": {
+      "mean": 0.825,
+      "ci95": 0.0715
+    }
+  },
+  "verdict": "Epistemic foraging (detour to a landmark to relocalise before committing to the goal) EMERGES from a purely pragmatic objective \u2014 reach the goal, with no landmark/information-gain/exploration reward anywhere. The proof it is uncertainty-driven and not a hardcoded landmark preference: in a no-drift world the same agent stops detouring. It beats a \u03c3-blind greedy agent and random, collapses when blind to its own uncertainty, and a model-free Q-learner trained only on the goal reward discovers the same policy."
+}

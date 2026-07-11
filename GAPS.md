@@ -322,6 +322,32 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** Sharp-wave-ripple replay slowly trains the neocortex on hippocampal memories until a familiar
   environment is recalled without the hippocampus — the complementary fast/slow learning systems.
 
+### 9. **Active inference** — epistemic foraging that drives the body to reduce spatial uncertainty ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/active_inference.py` (n=5). The pipeline treated navigation as passive
+  observation; active inference (Friston) says the system *acts* to reduce its own spatial uncertainty. **The one
+  thing we refuse to hardcode is the behaviour** — the agent is rewarded ONLY for reaching the goal (no landmark
+  reward, no information-gain bonus, no exploration term). The only thing built is the PLATFORM physics (the #7
+  uncertainty: path integration drifts so uncertainty *u* grows, a landmark resets it, and a goal-commit succeeds
+  with probability P(u) that falls as u grows). A belief-state planner that maximises expected GOAL reward — and,
+  independently, a model-free Q-learner — do the rest:
+  - **(A) EPISTEMIC FORAGING EMERGES.** The optimal policy DETOURS to a landmark to relocalise before committing,
+    from **52%** of start states under drift — purely to raise its chance of actually arriving.
+  - **(B) THE NON-HARDCODING PROOF (dissociation).** In a NO-DRIFT world the SAME planner detours from **0%** of
+    starts: with no uncertainty to reduce there is no epistemic value, so the detour was never a hardcoded
+    landmark preference — it is contingent on *reducible uncertainty*.
+  - **(C) IT PAYS.** The uncertainty-aware planner reaches the goal **47%** vs a σ-BLIND greedy agent (same goal
+    reward, cannot see u) **21%** and random **4%**.
+  - **(D) IT MUST SENSE ITS UNCERTAINTY (ablation).** Blind to u, the planner cannot time the detour and collapses
+    to **20%** (≈ greedy).
+  - **(E) IT ALSO EMERGES FROM LEARNING.** A model-free Q-learner trained ONLY on the goal reward develops the
+    same detour-when-uncertain policy (**82%** relocalisation) — the behaviour is not special to the planner.
+- **Honest grade:** *emergent behaviour, mechanism-only inputs.* Nothing about uncertainty, landmarks or
+  exploration is in the objective — information-seeking falls out of pure goal-seeking because uncertainty is
+  instrumentally costly, and the no-drift dissociation proves it. This is exactly the "hardcode at most the
+  mechanism, let the behaviour emerge" bar. See `results/FINDINGS.md`.
+- **Neuro basis.** The entorhinal-hippocampal system drives exploratory action to minimise expected free energy
+  (spatial uncertainty); epistemic foraging is implicit in acting to reach preferred states under uncertainty.
+
 ---
 
 ## Tier 3 — GPU / language
