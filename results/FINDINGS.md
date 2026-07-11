@@ -1341,6 +1341,41 @@ delta from the existing 3-D code is stated plainly: the bat local-order regime i
 construction (no clean interference-emergence), while the curvature signature genuinely falls out of the geometry.
 (`results/curved_path_integration.json`, `results/curved_path_integration.svg`.)
 
+### The map moves into the weights — neocortical systems consolidation (CLS) (GAPS.md #8, n=5)
+
+A pointed critique: the architecture keeps the LLM frozen and *reads* a spatial cortex through cross-attention, so
+it depends on the "hippocampal" module forever — whereas Complementary Learning Systems says a memory is
+hippocampus-dependent only at first and, over nights of replay, is slowly transferred into the neocortical weights
+until a familiar place is recalled *without* the hippocampus (McClelland, McNaughton & O'Reilly 1995; Squire &
+Alvarez 1995; Frankland & Bontempi 2005). The repo had replay *consolidating a decode map* but never this
+*transfer between two stores*. `src/eval/systems_consolidation.py` builds the loop — a fast one-shot **hippocampus**
+(a content-addressable store standing for the CA3/place-cell memory) and a slow gradient-trained **cortex** (the
+analogue of the LLM's slow weights) that learns *only* from replayed samples — and measures the textbook
+signatures, none of them in a loss:
+
+- **(A) Retrograde amnesia is temporally graded.** Lesion the hippocampus (recall from cortex alone) and accuracy
+  becomes a graded function of a memory's *age*: remote maps are recalled at **61%**, recent ones at **23%**
+  (gradient **+0.39**, recall-rises-with-age correlation **0.87**, chance 0.10). Nothing puts a time-gradient in —
+  older maps have simply been replayed on more nights, so more of them have reached the cortex.
+- **(B) The gradient exists only on lesion — the double dissociation.** With the hippocampus *intact*, recall is
+  **100%** at every age: the fast store holds everything, so there is no gradient at all. The graded forgetting
+  appears *only* when the hippocampus is removed, and *only* for recent memories — exactly the Scoville-Milner /
+  Squire pattern of temporally-graded retrograde amnesia.
+- **(C) Replay is the cause, not time (falsifier).** Turn replay off and the cortex never learns: remote recall
+  collapses to **13%** (chance) and the gradient vanishes (**+0.02**). So the transfer is carried by the replay,
+  not by the mere passage of days.
+- **(D) The familiar map ends up in the weights.** The cortex *alone* — hippocampus-independent — recalls remote
+  maps at 61%. The spatial structure has been internalised into the slow weights, which is precisely what the
+  frozen-LLM-plus-cross-attention design was said to prevent. Consolidation gives the semantic network a path to
+  own the map.
+
+**Honest grade — expected mechanism, faithful signature.** A two-store system with replay is *expected* to
+consolidate; the value is that the specific, non-obvious neuroscience — a *temporally-graded* retrograde amnesia
+with remote memory surviving a hippocampal lesion — falls out of it, with a replay-off falsifier that cleanly
+kills the whole effect. It closes the CLS gap honestly: the "hippocampal" dependency is not permanent; replay
+moves the map into the cortical weights over time. (`results/systems_consolidation.json`,
+`results/systems_consolidation.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

@@ -1,0 +1,72 @@
+{
+  "n_seeds": 5,
+  "days": 14,
+  "chance": 0.1,
+  "results": {
+    "lesioned_remote": {
+      "mean": 0.61,
+      "ci95": 0.012
+    },
+    "lesioned_recent": {
+      "mean": 0.225,
+      "ci95": 0.0279
+    },
+    "retrograde_gradient": {
+      "mean": 0.385,
+      "ci95": 0.0211
+    },
+    "recall_age_corr": {
+      "mean": 0.8674,
+      "ci95": 0.0361
+    },
+    "intact_remote": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "intact_recent": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "noreplay_remote": {
+      "mean": 0.13,
+      "ci95": 0.0199
+    },
+    "noreplay_gradient": {
+      "mean": 0.02,
+      "ci95": 0.0252
+    }
+  },
+  "curve_lesioned_on": {
+    "1": 0.175,
+    "2": 0.2,
+    "3": 0.2375,
+    "4": 0.175,
+    "5": 0.3375,
+    "6": 0.25,
+    "7": 0.375,
+    "8": 0.4125,
+    "9": 0.5125,
+    "10": 0.5625,
+    "11": 0.45,
+    "12": 0.55,
+    "13": 0.75,
+    "14": 0.7375
+  },
+  "curve_lesioned_off": {
+    "1": 0.1125,
+    "2": 0.0875,
+    "3": 0.1375,
+    "4": 0.1125,
+    "5": 0.1,
+    "6": 0.1125,
+    "7": 0.075,
+    "8": 0.1375,
+    "9": 0.0875,
+    "10": 0.1125,
+    "11": 0.15,
+    "12": 0.175,
+    "13": 0.1125,
+    "14": 0.1
+  },
+  "verdict": "Replay transfers a map from the fast hippocampal store into the slow cortical (LLM-analogue) weights: cortex-only recall is a GRADED function of age (remote survives a hippocampal lesion, recent is lost), the gradient appears only on lesion (intact recall is flat and high), and it vanishes without replay. The familiar map ends up in the neocortical weights, hippocampus-independent \u2014 the systems consolidation the frozen-LLM read was said to prevent."
+}

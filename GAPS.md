@@ -296,6 +296,32 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** The brain represents **posterior uncertainty** and confidence gates exploration and
   cue-weighting (Ma 2006; Pouget 2013; Ernst-Banks 2002).
 
+### 8. Neocortical **systems consolidation** — replay moves the map into the cortical weights ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/systems_consolidation.py` (n=5). The repo showed replay *consolidating a
+  decode map* (`pillars.py`) and the LLM *reading* a frozen cortex (`structural_transfer.py`) — but that read is
+  a permanent structural DEPENDENCY on the hippocampal module, the opposite of what Complementary Learning
+  Systems predicts (McClelland-McNaughton-O'Reilly 1995; Squire-Alvarez 1995; Frankland-Bontempi 2005). This
+  builds the two-store loop — a fast one-shot HIPPOCAMPAL store (stands for the CA3 Hopfield / place-cell memory)
+  and a slow gradient-trained CORTICAL network (the frozen-LLM-weights analogue) that learns ONLY from replayed
+  samples — and measures the classic signatures, none in a loss:
+  - **(A) TEMPORALLY-GRADED RETROGRADE AMNESIA.** After a hippocampal lesion (cortex-only recall) accuracy is a
+    GRADED function of a map's age: remote **0.61** vs recent **0.23** (gradient **+0.39**, recall↑age corr
+    **0.87**, chance 0.10). Older maps were simply replayed on more nights — the gradient EMERGES.
+  - **(B) THE DOUBLE DISSOCIATION.** With the hippocampus INTACT, recall is **100%** at every age (no gradient —
+    the fast store has everything); the gradient appears ONLY on lesion, only for RECENT memories (Scoville-
+    Milner / Squire).
+  - **(C) REPLAY IS CAUSAL (falsifier).** Replay OFF → the cortex never learns → remote collapses to **0.13**
+    (chance) and the gradient vanishes (**+0.02**): the transfer is the replay, not the passage of time.
+  - **(D) THE MAP IS IN THE WEIGHTS.** The cortex alone (hippocampus-independent) recalls remote maps at 61% —
+    the spatial structure has been internalised into the slow weights, which the frozen-LLM read was said to
+    prevent.
+- **Honest grade:** *expected mechanism, faithful signature* — a two-store + replay system is *expected* to
+  produce a consolidation gradient, but reproducing the temporally-graded retrograde amnesia + hippocampus-
+  independence of remote memory (the Squire pattern), with the replay-off falsifier killing it, is a clean,
+  literature-faithful closure of the CLS gap. See `results/FINDINGS.md`.
+- **Neuro basis.** Sharp-wave-ripple replay slowly trains the neocortex on hippocampal memories until a familiar
+  environment is recalled without the hippocampus — the complementary fast/slow learning systems.
+
 ---
 
 ## Tier 3 — GPU / language
