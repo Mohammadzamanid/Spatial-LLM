@@ -1264,6 +1264,47 @@ reproducing the reverse/forward dissociation from a *single* value rule is faith
 Daw literature. Replay here computes, in both of the brain's directions. (`results/replay_planning.json`,
 `results/replay_planning.svg`.)
 
+### Knowing when it's lost — a calibrated uncertainty read from the grid population, driving behavior (GAPS.md #7, n=5)
+
+An animal that has path-integrated a long way without a landmark should *know* it is uncertain, and act on it —
+lean on the next landmark, and re-anchor. The repo had *implicit* uncertainty (near-optimal cue integration, a
+Fisher-information capacity bound) but, tellingly, `agent_cue_integration.py` **explicitly left open** the strict
+reliability-weighting law `w = σ_PI²/(σ_PI²+σ_L²)`: a recurrent fuser temporally averages *unbiased* cues, so a
+noisy cue never *has* to be down-weighted. `src/eval/uncertainty_behavior.py` closes that and makes the
+uncertainty explicit, calibrated, and behaviourally coupled — on the real grid cortex, three ways:
+
+- **(A) The uncertainty is read straight out of the population code.** Real grid modules are independent
+  attractors (Burak & Fiete 2009), so independent per-module drift makes them *disagree*. The **reconstruction
+  residual** `ρ = ‖code − grid_code_at(decode(code))‖` — how badly *any* single position can explain the whole
+  population — is that disagreement, and it is an instantaneous, calibrated uncertainty (a grid code is an
+  error-*correcting* code precisely because the modules must agree; Sreenivasan & Fiete 2011). ρ is calibrated
+  to the true decode error (**corr 0.87**), **rises 2.5×** over path integration, and **drops (−1.70)** the moment
+  a cue re-anchors the phase. **The honest boundary, reported as the control:** under *shared* drift (all modules
+  integrating the same noisy velocity) the modules stay mutually consistent, so ρ is **flat and uncalibrated
+  (corr 0.19)** — the code is *confidently wrong*, blind to coherent drift. The uncertainty signal exists only
+  because real modules drift *independently*; that is a property of the population, measured, not assumed.
+- **(B) That uncertainty drives Bayesian cue re-weighting — the law the repo left open.** A single-shot head
+  trained *only* to localize (MSE) develops an effective landmark weight that tracks the inverse-variance optimum
+  `w*`, **driven by ρ**: slope **0.65**, correlation **0.94** across the full range of `w*` (Ernst & Banks 2002).
+  A head **blind** to the reliabilities `(ρ, σ_L)` can only average — slope **0.09** (falsifier). Single-shot
+  cues remove the temporal-averaging confound the repo flagged, so clean down-weighting is finally visible. The
+  slope being *below 1* is itself honest: the behaviour is driven by the **noisy population signal ρ** (corr 0.87
+  with error), not an oracle — a perfect input would give slope 1, the real internal estimate gives 0.65.
+- **(C) Behaviour follows the belief, not the truth — the metacognition clincher.** Inflating ρ *without* changing
+  the true error makes the head trust the landmark **more** (Δ **+0.34**) — it is acting on its *internal*
+  uncertainty estimate, not on privileged access to the truth; the reliability-blind head does not budge
+  (**+0.00**). And the re-anchor decision is threshold-at-the-right-place: the crossover distance at which the
+  agent starts trusting a landmark moves **+38 steps** as the landmark becomes less reliable. This is the
+  register's "I am lost → switch strategy," driven by a decoded confidence.
+
+**Honest grade — expected mechanism, faithful and non-trivial signature.** Inverse-variance weighting is the
+Bayes-optimal solution an MSE learner is *expected* to discover, so (B) on its own is not a surprising emergence.
+What lifts this above a tautology is (A): a genuine, calibrated uncertainty is decodable *from the population code
+itself*, with a clean "confidently wrong" boundary that a lesser treatment would have hidden — and (C): the
+behaviour provably tracks that *internal belief*, including when the belief is wrong. Uncertainty here is not a
+scalar bolted on; it is read from the grid code and it changes what the agent does. (`results/uncertainty_behavior.json`,
+`results/uncertainty_behavior.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

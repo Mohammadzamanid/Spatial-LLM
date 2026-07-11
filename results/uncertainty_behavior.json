@@ -1,0 +1,48 @@
+{
+  "n_seeds": 5,
+  "sm": 0.06,
+  "dmax": 70,
+  "results": {
+    "calib_corr_independent": {
+      "mean": 0.8722,
+      "ci95": 0.0046
+    },
+    "calib_corr_shared": {
+      "mean": 0.1905,
+      "ci95": 0.0391
+    },
+    "rho_growth_independent": {
+      "mean": 2.5353,
+      "ci95": 0.0729
+    },
+    "reset_drop": {
+      "mean": 1.7035,
+      "ci95": 0.1116
+    },
+    "weight_slope_aware": {
+      "mean": 0.6511,
+      "ci95": 0.0184
+    },
+    "weight_slope_blind": {
+      "mean": 0.085,
+      "ci95": 0.0143
+    },
+    "weight_corr_aware": {
+      "mean": 0.9412,
+      "ci95": 0.0038
+    },
+    "belief_delta_aware": {
+      "mean": 0.336,
+      "ci95": 0.0129
+    },
+    "belief_delta_blind": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "crossover_shift": {
+      "mean": 38.4,
+      "ci95": 4.4523
+    }
+  },
+  "verdict": "An explicit, calibrated uncertainty read out of the grid population (the reconstruction residual = inter-module inconsistency) rises with path integration, resets at a cue, and is calibrated to the true decode error \u2014 but ONLY under independent module drift (under shared drift the code is confidently wrong). That uncertainty drives emergent Bayesian cue re-weighting (the reliability law agent_cue_integration.py left open) and a re-anchor switch that follows the BELIEF, not the truth. Reliability-blind controls fail all three."
+}

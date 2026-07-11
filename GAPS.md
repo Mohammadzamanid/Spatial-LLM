@@ -243,16 +243,33 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** Hippocampal **replay** — reverse for credit assignment, forward for planning — supports
   model-based decisions and offline consolidation (Ólafsdóttir 2018; Mattar & Daw 2018; Liu 2019).
 
-### 7. Explicit **uncertainty / confidence** that drives behavior
-- **Neuro basis.** The brain represents **posterior uncertainty** (probabilistic population codes, neural
-  sampling) and confidence signals gate exploration and cue-weighting (Ma 2006; Pouget 2013).
-- **Model status: partial.** Cue integration is *near-optimal* (`agent_cue_integration.py`) and grid capacity
-  is quantified with Fisher information — uncertainty is thus **implicit**. `AdaptiveGain` estimates an
-  uncertainty scalar but is not behaviorally coupled. No explicit "I am lost → switch strategy" confidence
-  read-out.
-- **Proposed experiment (emergence).** Decode a calibrated posterior width from the population; **measure**
-  that behavior (explore vs. exploit, cue re-weighting) tracks it, and that it rises with path-integration
-  drift and falls at a landmark reset. CPU.
+### 7. Explicit **uncertainty / confidence** that drives behavior ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/uncertainty_behavior.py` (n=5), on the real grid cortex. The repo had
+  *implicit* uncertainty (near-optimal cue integration; Fisher capacity) and `agent_cue_integration.py`
+  explicitly **left open** the strict reliability-weighting law (a recurrent fuser temporally averages
+  *unbiased* cues, so a noisy cue never must be down-weighted). This makes uncertainty **explicit, calibrated,
+  and behaviourally coupled**, three ways — each with a falsifier, none of the signatures in a loss:
+  - **(A) A CALIBRATED UNCERTAINTY DECODED FROM THE POPULATION.** Real grid modules are independent attractors
+    (Burak-Fiete 2009), so independent per-module drift makes them DISAGREE; the reconstruction residual
+    ρ = ‖code − grid_code_at(decode(code))‖ (how badly any single position explains the population — the grid
+    code as an error-CORRECTING code, Sreenivasan-Fiete 2011) is calibrated to the true decode error
+    (**corr 0.87**), RISES with path integration (**2.5×**) and RESETS at a cue (**−1.70**). FALSIFIER / honest
+    boundary: under SHARED drift the modules stay mutually consistent → ρ is **uncalibrated (corr 0.19)**, flat:
+    the code is "confidently wrong," blind to coherent drift.
+  - **(B) IT DRIVES BAYESIAN CUE RE-WEIGHTING (closes the open item).** A single-shot head trained ONLY to
+    localize develops an effective landmark weight that tracks the inverse-variance optimum
+    w* = σ_PI²/(σ_PI²+σ_L²), **driven by ρ** — slope **0.65**, corr **0.94** (Ernst-Banks 2002). FALSIFIER: a
+    head blind to (ρ, σ_L) can only average (slope **0.09**). The <1 slope is honest — behaviour is driven by
+    the *noisy population signal* ρ, not an oracle.
+  - **(C) IT DRIVES A SWITCH, ON THE BELIEF NOT THE TRUTH.** Inflating ρ WITHOUT changing the true error raises
+    landmark trust (**Δ+0.34** vs blind **+0.00**) — the agent acts on its internal estimate (metacognition);
+    the re-anchor crossover moves **+38 steps** with landmark reliability.
+- **Honest grade:** *expected mechanism, faithful+non-trivial signature.* Inverse-variance weighting is the
+  Bayes solution an MSE learner is expected to find; what is non-trivial is that a genuine, calibrated
+  uncertainty is read straight out of the population code (A) with a clean "confidently wrong" boundary, and
+  that behaviour provably follows that internal estimate rather than an oracle (C). See `results/FINDINGS.md`.
+- **Neuro basis.** The brain represents **posterior uncertainty** and confidence gates exploration and
+  cue-weighting (Ma 2006; Pouget 2013; Ernst-Banks 2002).
 
 ---
 
