@@ -1,0 +1,40 @@
+{
+  "n_seeds": 5,
+  "arena": 2.0,
+  "drift_std": 0.13,
+  "results": {
+    "drive_intact": {
+      "mean": 47.8382,
+      "ci95": 4.016
+    },
+    "drive_no_grid": {
+      "mean": 68.5607,
+      "ci95": 0.4423
+    },
+    "drive_no_uncertainty": {
+      "mean": 59.9156,
+      "ci95": 1.6571
+    },
+    "drive_no_landmark": {
+      "mean": 65.9896,
+      "ci95": 1.0063
+    },
+    "drive_no_drive": {
+      "mean": 46.1636,
+      "ci95": 3.7
+    },
+    "cost_unc_with_lm": {
+      "mean": 12.0773,
+      "ci95": 2.8504
+    },
+    "cost_unc_without_lm": {
+      "mean": -2.7973,
+      "ci95": 1.3872
+    },
+    "interaction": {
+      "mean": 14.8747,
+      "ci95": 3.4093
+    }
+  },
+  "verdict": "The unified survival agent runs on the ACTUAL grid cortex: position is decoded from the real drifting grid code and uncertainty is the real #7 reconstruction residual (no counters). The three POSITION organs \u2014 grid, uncertainty read-out, landmark relocalisation \u2014 dissociate cleanly (each ablation raises drive), and the emergent uncertainty\u00d7landmark complementarity survives grounding (the real \u03c1 is worth survival only WITH landmarks). Honest limit: the interoceptive DRIVE organ, cleanly load-bearing for resource CHOICE in #4, barely moves survival in this two-resource regime where non-adaptive alternation nearly suffices \u2014 so the grounded capstone is a clean 3-organ dissociation, not 4. Nothing about which resource or when to relocalise is hardcoded."
+}

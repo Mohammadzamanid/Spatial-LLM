@@ -1507,6 +1507,37 @@ without it*; doing that honestly shrank the landmark lesion to its true size and
 The machine runs, and it runs as a measured, falsifiable whole. (`results/unified_agent.json`,
 `results/unified_agent.svg`.)
 
+### The machine on the real substrate — the unified agent grounded on the grid cortex (GAPS.md capstone, grounded, n=5)
+
+The capstone above composed the organs at the belief level. `unified_agent_cortex.py` runs the *same* emergent
+survival policy but replaces the abstracted perception with the **actual shared substrate**: the agent's position
+is *decoded from the real velocity-driven `_HexGridModules` grid code* as it path-integrates and drifts (#7/#8),
+and its uncertainty is the *real reconstruction residual* ρ = ‖code − grid_code_at(decode(code))‖ that #7 showed
+is calibrated to the true decode error. There are no counters left — the drift, the missed resource, and the sense
+of being lost are all produced by the cortex. The agent believes it is at `p̂ = decode(grid code)`, navigates
+toward a resource *using that belief*, and so when the code has drifted it aims wrong and the true body misses;
+a landmark, sensed allothetically, re-anchors the cortex.
+
+- **The three position organs cohere on the real cortex.** Intact mean drive **48**; scramble the **grid** decode
+  and it can't navigate → **69**; ignore the real residual (**uncertainty**) and it can't tell when it's lost →
+  **60**; block **landmark** re-anchoring and it can't undo the real drift → **66**. Each is clearly load-bearing
+  when driven by the genuine cortex, with tight intervals — the position-maintaining machine survives grounding.
+- **The emergent circuit survives grounding.** The uncertainty×landmark complementarity from the abstract capstone
+  reappears with the *real* residual: knowing ρ is worth **+12** drive when landmarks are present but **−3** once
+  they're gone. The real uncertainty read-out only helps if you can act on it — the organs are still a circuit.
+- **An honest limit, reported not hidden.** The interoceptive **drive** organ — cleanly load-bearing for resource
+  *choice* in its own eval (#4) — barely moves *survival* here (**46 ≈ 48**). With two symmetric resources, a
+  non-adaptive alternation nearly suffices, so the which-resource decision is not the bottleneck; the position
+  challenge is. Grounding therefore yields a clean **three-organ** dissociation, not four, and I show all four
+  lesions and say exactly this rather than tuning until a fourth bar appears. (Two other honest tuning notes: a
+  single stochastic rollout per condition gave uselessly wide intervals until I averaged over drift realisations;
+  and the drift had to be strong enough that un-corrected error actually pushes the true body off the resource, or
+  the robust cortex+decoder makes the auxiliary organs look free.)
+
+This is the strongest form of the original ask: not "validated organs composed," but the survival agent running on
+the actual grid cortex — the position sense, the uncertainty, the drift and the re-anchoring are all the real
+substrate, and the machine still coheres. (`results/unified_agent_cortex.json`, `results/unified_agent_cortex.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

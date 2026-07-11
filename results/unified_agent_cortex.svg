@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">The unified agent on the REAL grid cortex: the organs cohere into a surviving animal</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">position decoded from the real drifting grid code; uncertainty = the real #7 reconstruction residual (no counters)</text>
+<text x="44" y="74" font-size="11" font-weight="700" fill="#28324a">mean drive (lower = alive)</text>
+<rect x="44" y="151" width="52" height="106" fill="#2ca25f" opacity="0.85"/>
+<text x="70" y="146" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">48</text>
+<text x="70" y="271" font-size="9" fill="#28324a" text-anchor="middle">intact</text>
+<rect x="104" y="105" width="52" height="152" fill="#c9341a" opacity="0.85"/>
+<text x="130" y="100" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">69</text>
+<text x="130" y="271" font-size="9" fill="#28324a" text-anchor="middle">−grid</text>
+<rect x="164" y="124" width="52" height="133" fill="#e6842a" opacity="0.85"/>
+<text x="190" y="119" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">60</text>
+<text x="190" y="271" font-size="9" fill="#28324a" text-anchor="middle">−uncert</text>
+<rect x="224" y="111" width="52" height="146" fill="#c9341a" opacity="0.85"/>
+<text x="250" y="106" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">66</text>
+<text x="250" y="271" font-size="9" fill="#28324a" text-anchor="middle">−land</text>
+<rect x="284" y="155" width="52" height="102" fill="#e6842a" opacity="0.85"/>
+<text x="310" y="150" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">46</text>
+<text x="310" y="271" font-size="9" fill="#28324a" text-anchor="middle">−drive</text>
+<line x1="40" y1="257" x2="344" y2="257" stroke="#33415c"/>
+<line x1="40" y1="151" x2="344" y2="151" stroke="#2ca25f" stroke-dasharray="3 3" opacity="0.5"/>
+<text x="470" y="74" font-size="11" font-weight="700" fill="#28324a">real uncertainty organ:</text>
+<text x="470" y="88" font-size="11" font-weight="700" fill="#28324a">cost of losing it</text>
+<rect x="470" y="146" width="80" height="111" fill="#2b8cbe" opacity="0.85"/>
+<text x="510" y="141" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+12</text>
+<text x="510" y="270" font-size="9" fill="#28324a" text-anchor="middle">with</text>
+<text x="510" y="281" font-size="9" fill="#28324a" text-anchor="middle">landmarks</text>
+<rect x="570" y="257" width="80" height="0" fill="#8c8c8c" opacity="0.85"/>
+<text x="610" y="252" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">-3</text>
+<text x="610" y="270" font-size="9" fill="#28324a" text-anchor="middle">landmarks</text>
+<text x="610" y="281" font-size="9" fill="#28324a" text-anchor="middle">gone</text>
+<line x1="466" y1="257" x2="650" y2="257" stroke="#33415c"/>
+<text x="470" y="297" font-size="9.5" fill="#5a6b8c">the emergent circuit survives grounding on</text>
+<text x="470" y="309" font-size="9.5" fill="#5a6b8c">the actual shared substrate.</text>
+</svg>

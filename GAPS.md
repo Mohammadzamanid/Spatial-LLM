@@ -416,6 +416,14 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   process note: an early version inflated the landmark lesion by letting the agent chase re-anchoring that no
   longer worked; a lesion should mean the organ is gone and the brain re-plans without it, which both removes the
   artefact and makes the complementarity clean. See `results/FINDINGS.md`.
+- **Grounded on the real cortex.** `src/eval/unified_agent_cortex.py` (n=5) re-runs the SAME emergent survival
+  policy with PERCEPTION from the actual substrate: position is decoded from the real drifting `_HexGridModules`
+  grid code, uncertainty is the real #7 reconstruction residual (no counters). The three POSITION organs still
+  dissociate cleanly — intact drive **48**, − grid **69**, − uncertainty **60**, − landmark **66** — and the
+  uncertainty×landmark complementarity survives grounding (**+12** with landmarks, **−3** without). *Honest limit:*
+  the interoceptive DRIVE organ, cleanly load-bearing for resource CHOICE in #4, barely moves survival here
+  (**46 ≈ 48**) — with two symmetric resources a non-adaptive alternation nearly suffices — so grounding yields a
+  clean **3-organ** dissociation, not 4, and we report all four and say so.
 - **Neuro basis.** A behaving animal integrates entorhinal grid path-integration, an uncertainty/confidence signal,
   allothetic landmark correction and hypothalamic drive into one goal-directed survival loop; the organs are
   functionally interdependent, not modular add-ons.
