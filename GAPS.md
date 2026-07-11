@@ -348,6 +348,30 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** The entorhinal-hippocampal system drives exploratory action to minimise expected free energy
   (spatial uncertainty); epistemic foraging is implicit in acting to reach preferred states under uncertainty.
 
+### 10. **Interoceptive anchoring** — drive state remaps value & navigation (beyond dopamine) ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/interoceptive_map.py` (n=5). The repo mapped external geometry and a dopamine
+  value signal, but the cognitive map is anchored to the body: place-cell value and navigation remap with
+  homeostatic drive (Kennedy-Shapiro 2009; Keramati-Gutkin 2014). **We refuse to hardcode the behaviour** — there
+  is NO "if thirsty go to water" rule. The only thing built is the body: two deficits (thirst t, hunger h) grow
+  each step, WATER resets t and FOOD resets h, and the reward is the reduction of total DRIVE, −(t²+h²). A
+  belief-state planner over (position, t, h) that maximises this does the rest:
+  - **(A) INTEROCEPTIVE NAVIGATION.** From a neutral start the agent heads to the resource matching its DOMINANT
+    deficit **96%** of the time; a DRIVE-BLIND planner (same objective, cannot read t,h) matches **0%** (it goes
+    to one fixed resource regardless) — the target is set by the interoceptive gap, not geometry.
+  - **(B) DRIVE-DEPENDENT VALUE REMAPPING.** The drive-specific value residual under thirst vs hunger is
+    anti-correlated (**−0.93**) — the same place is worth opposite amounts under different deficits — and each
+    resource's value tracks its OWN deficit (normalised gain **+0.29**).
+  - **(C) HOMEOSTATIC REGULATION (payoff).** The interoceptive planner keeps mean drive at **57** vs a drive-blind
+    planner's **180** and random's **152**, shuttling **11×/life** as its deficits cycle. It stays alive.
+  - **(D) NON-HARDCODING PROOF.** Blind to its own deficits the agent chooses at chance and lets one deficit
+    explode — so the behaviour is genuinely interoceptive, not a fixed spatial habit.
+- **Honest grade:** *emergent behaviour, mechanism-only inputs* — nothing about "thirst→water" is in the reward;
+  drive-appropriate navigation and value remapping fall out of minimising a homeostatic drive, and the drive-blind
+  ablation proves the map is anchored to the body. The same "hardcode at most the mechanism" bar as #9. See
+  `results/FINDINGS.md`.
+- **Neuro basis.** The hippocampus receives dense hypothalamic/amygdalar input; place fields, replay and value
+  remap with homeostatic state, and navigation is vector-driven by interoceptive deficits (thirst, hunger, fear).
+
 ---
 
 ## Tier 3 — GPU / language

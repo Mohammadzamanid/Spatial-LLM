@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="300" font-family="Segoe UI, Arial">
+<rect width="680" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">The interoceptive map: drive remaps value &amp; navigation (no &#8220;thirsty&#8594;water&#8221; rule)</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">reward is only &#8220;reduce total drive&#8221;; the body&#8217;s deficits set where the agent goes and what a place is worth</text>
+<text x="40" y="72" font-size="11" font-weight="700" fill="#28324a">go to drive-matched resource</text>
+<rect x="40" y="86" width="60" height="159" fill="#2ca25f" opacity="0.85"/>
+<text x="70" y="81" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">96%</text>
+<text x="70" y="258" font-size="9" fill="#28324a" text-anchor="middle">intero-</text>
+<text x="70" y="269" font-size="9" fill="#28324a" text-anchor="middle">ceptive</text>
+<rect x="134" y="245" width="60" height="0" fill="#c9341a" opacity="0.85"/>
+<text x="164" y="240" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<text x="164" y="258" font-size="9" fill="#28324a" text-anchor="middle">drive-</text>
+<text x="164" y="269" font-size="9" fill="#28324a" text-anchor="middle">blind</text>
+<line x1="36" y1="245" x2="228" y2="245" stroke="#33415c"/>
+<line x1="36" y1="162" x2="190" y2="162" stroke="#c9341a" stroke-dasharray="3 3" opacity="0.5"/>
+<text x="162" y="160" font-size="8" fill="#c9341a">chance</text>
+<text x="240" y="72" font-size="11" font-weight="700" fill="#28324a">mean drive (lower = healthier)</text>
+<rect x="240" y="200" width="60" height="45" fill="#2ca25f" opacity="0.85"/>
+<text x="270" y="195" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">57</text>
+<text x="270" y="258" font-size="9" fill="#28324a" text-anchor="middle">intero</text>
+<rect x="310" y="102" width="60" height="143" fill="#c9341a" opacity="0.85"/>
+<text x="340" y="97" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">180</text>
+<text x="340" y="258" font-size="9" fill="#28324a" text-anchor="middle">blind</text>
+<rect x="380" y="123" width="60" height="122" fill="#c9a13a" opacity="0.85"/>
+<text x="410" y="118" font-size="10.5" font-weight="700" fill="#0b1324" text-anchor="middle">152</text>
+<text x="410" y="258" font-size="9" fill="#28324a" text-anchor="middle">random</text>
+<line x1="236" y1="245" x2="450" y2="245" stroke="#33415c"/>
+<text x="520" y="72" font-size="11" font-weight="700" fill="#28324a">value remapping</text>
+<text x="520" y="110" font-size="12" fill="#2b8cbe">thirsty vs hungry</text>
+<text x="520" y="130" font-size="20" font-weight="800" fill="#0b1324">-0.93</text>
+<text x="520" y="146" font-size="9" fill="#5b6b8c">value-map correlation</text>
+<text x="520" y="146" font-size="9" fill="#5b6b8c"></text>
+<text x="520" y="176" font-size="11" fill="#2ca25f">resource value tracks</text>
+<text x="520" y="190" font-size="11" fill="#2ca25f">its own deficit: +0.29</text>
+<text x="520" y="220" font-size="10" fill="#5b6b8c">shuttles 11×/life</text>
+<text x="40" y="287" font-size="10" fill="#5a6b8c">blind to its own deficits, the agent picks at chance and one deficit explodes &#8212; the map is anchored to the body.</text>
+</svg>

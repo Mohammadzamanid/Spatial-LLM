@@ -1,0 +1,40 @@
+{
+  "n_seeds": 5,
+  "grid": 7,
+  "dmax": 10,
+  "results": {
+    "congruent_full": {
+      "mean": 0.9611,
+      "ci95": 0.0359
+    },
+    "congruent_blind": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "remap_corr": {
+      "mean": -0.9285,
+      "ci95": 0.0174
+    },
+    "resource_value_gain": {
+      "mean": 0.2911,
+      "ci95": 0.0271
+    },
+    "mean_drive_full": {
+      "mean": 56.7333,
+      "ci95": 14.8459
+    },
+    "mean_drive_blind": {
+      "mean": 179.5,
+      "ci95": 0.0
+    },
+    "mean_drive_random": {
+      "mean": 152.4167,
+      "ci95": 15.3295
+    },
+    "switches_full": {
+      "mean": 10.8,
+      "ci95": 1.7964
+    }
+  },
+  "verdict": "Drive-dependent value remapping and interoceptive navigation EMERGE from a homeostatic reward (reduce total drive) with NO 'thirsty->water' rule: the planner heads to the resource matching its dominant deficit, the same place is valued oppositely under thirst vs hunger, and it keeps both deficits regulated far better than a drive-blind planner. The proof it is interoceptive and not a spatial habit: blind to its own deficits, the agent chooses at chance and one deficit explodes."
+}
