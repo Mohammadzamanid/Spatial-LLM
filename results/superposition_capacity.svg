@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Polysemantic superposition: 32 place cells store 128 fields (4&#215; more environments than cells)</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">emergent, and bought by sparsity (one place active at a time) &#8212; densify the activity and it collapses</text>
+<text x="44" y="76" font-size="11" font-weight="700" fill="#28324a">fraction of 128 fields recalled</text>
+<rect x="44" y="84" width="62" height="175" fill="#2ca25f" opacity="0.85"/>
+<text x="75" y="79" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="75" y="272" font-size="9" fill="#28324a" text-anchor="middle">sparse</text>
+<text x="75" y="283" font-size="9" fill="#28324a" text-anchor="middle">(superpos)</text>
+<rect x="118" y="173" width="62" height="86" fill="#c9341a" opacity="0.85"/>
+<text x="149" y="168" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.49</text>
+<text x="149" y="272" font-size="9" fill="#28324a" text-anchor="middle">dense</text>
+<text x="149" y="283" font-size="9" fill="#28324a" text-anchor="middle">(collapse)</text>
+<rect x="192" y="215" width="62" height="44" fill="#8c8c8c" opacity="0.85"/>
+<text x="223" y="210" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.25</text>
+<text x="223" y="272" font-size="9" fill="#28324a" text-anchor="middle">mono</text>
+<text x="223" y="283" font-size="9" fill="#28324a" text-anchor="middle">ceiling</text>
+<line x1="40" y1="259" x2="266" y2="259" stroke="#33415c"/>
+<text x="320" y="76" font-size="11" font-weight="700" fill="#28324a">recall vs activity density</text>
+<rect x="320" y="84" width="48" height="175" fill="#2ca25f" opacity="0.85"/>
+<text x="344" y="79" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="344" y="272" font-size="9" fill="#28324a" text-anchor="middle">.04</text>
+<rect x="378" y="84" width="48" height="175" fill="#e6842a" opacity="0.85"/>
+<text x="402" y="79" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="402" y="272" font-size="9" fill="#28324a" text-anchor="middle">.12</text>
+<rect x="436" y="167" width="48" height="92" fill="#c9341a" opacity="0.85"/>
+<text x="460" y="162" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.52</text>
+<text x="460" y="272" font-size="9" fill="#28324a" text-anchor="middle">.30</text>
+<line x1="316" y1="259" x2="494" y2="259" stroke="#33415c"/>
+<text x="320" y="297" font-size="8.5" fill="#5b6b8c">sparser &#8594; more superposition</text>
+<text x="540" y="76" font-size="11" font-weight="700" fill="#28324a">emergent</text>
+<text x="540" y="118" font-size="12" fill="#2b8cbe">polysemanticity</text>
+<text x="540" y="150" font-size="26" font-weight="800" fill="#0b1324">4</text>
+<text x="540" y="168" font-size="9" fill="#5b6b8c">fields per cell (&#8811;1)</text>
+<text x="540" y="200" font-size="10" fill="#2ca25f">each cell encodes</text>
+<text x="540" y="214" font-size="10" fill="#2ca25f">many places at once</text>
+</svg>

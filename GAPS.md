@@ -494,6 +494,32 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   dopamine value; separating "where I am" from "what it is worth" gives instant reward revaluation and multi-goal
   reuse a fused representation cannot.
 
+### Polysemantic **superposition** — N place cells store MORE than N environments ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/superposition_capacity.py` (n=5). The critique: a localized one-cell-per-place
+  read-out is *monosemantic* — N cells hold at most N fields — but high-density human intracranial recordings show
+  hippocampal neurons are extremely POLYSEMANTIC, each encoding many unrelated places at once, the same
+  high-dimensional SUPERPOSITION that lets an LLM's MLP pack more features than it has neurons (Elhage et al.
+  2022, "Toy Models of Superposition"). Nothing about the coding is imposed: the only things built are the
+  **mechanism** (a tied autoencoder — an N-cell bottleneck reconstructs its input) and the **task** (the input is a
+  SPARSE set of active place fields, because you are in ONE place at a time, drawn from F = 4·N fields spanning
+  many environments). Superposition, polysemanticity, and their sparsity-dependence all EMERGE:
+  - **(A) SUPERPOSITION CAPACITY.** With sparse activity the 32 cells recall **1.00** of all **128** fields —
+    **128 fields in 32 cells, 4× more environments than cells** — where a monosemantic one-cell-per-place code
+    could recall only N/F = **0.25**.
+  - **(B) POLYSEMANTICITY EMERGES.** Each cell ends up participating in **4.5 ± 0.1** fields (≫1) — the
+    superpositional coding the intracranial data report, never put in a loss.
+  - **(C) SPARSITY IS LOAD-BEARING (falsifier).** Train on DENSE activity (many fields at once) and superposition
+    cannot form — recall collapses to **0.49**, toward the monosemantic ceiling. A dose-response confirms it:
+    recall **1.00** (p=.04) → **1.00** (p=.12) → **0.52** (p=.30). The compression is bought precisely by
+    exploiting "one place active at a time"; remove the sparsity and it is gone.
+- **Honest grade:** *known mechanism, faithful spatial reframing* — Elhage's superposition is an established result,
+  so the compression itself is not a surprise; the contribution is showing a **place code** realizes it exactly,
+  reproducing the polysemantic hippocampal coding from nothing but a bottleneck + sparse-field reconstruction, with
+  the sparsity dependence as a clean falsifier. See `results/FINDINGS.md`.
+- **Neuro basis.** Because natural experience is sparse (one location active at a time), a fixed population can
+  superpose many more place fields than it has cells; the cost is polysemantic, interference-prone cells — exactly
+  what dense human recordings find, and why dense (non-sparse) activity destroys the capacity.
+
 ---
 
 ## Tier 3 — GPU / language

@@ -1,0 +1,41 @@
+{
+  "n_seeds": 5,
+  "N": 32,
+  "F": 128,
+  "ratio": 4,
+  "results": {
+    "recall_superposition": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "recall_dense": {
+      "mean": 0.4938,
+      "ci95": 0.0031
+    },
+    "fields_recalled": {
+      "mean": 128.0,
+      "ci95": 0.0
+    },
+    "monosemantic_ceiling": {
+      "mean": 0.25,
+      "ci95": 0.0
+    },
+    "polysemanticity": {
+      "mean": 4.4656,
+      "ci95": 0.0874
+    },
+    "dose_p04": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "dose_p12": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "dose_p30": {
+      "mean": 0.5234,
+      "ci95": 0.0128
+    }
+  },
+  "verdict": "A place code stores far MORE environments than it has cells by high-dimensional superposition, exactly the polysemantic coding the intracranial recordings report (Elhage 2022). N cells recall ~4N sparse place fields (4x more environments than cells) where a monosemantic one-cell-per-place code could recall only N/F; each cell emerges polysemantic; and the compression collapses when activity is dense \u2014 so it is bought precisely by exploiting 'one place active at a time', not imposed."
+}

@@ -1656,6 +1656,34 @@ the repo's organs (an SR map plus a separate striatal value) are the right split
 worth are computed by different structures, and keeping them apart is the whole point. (`results/map_value_decouple.json`,
 `results/map_value_decouple.svg`.)
 
+### Polysemantic superposition — a place code stores MORE environments than it has cells (GAPS.md superposition, n=5)
+
+A localized, one-cell-per-place read-out is *monosemantic*: N cells hold at most N place fields. But high-density
+human intracranial recordings show hippocampal neurons are extremely POLYSEMANTIC — each encodes many unrelated
+locations at once — the same high-dimensional SUPERPOSITION that lets an LLM's MLP pack more features than it has
+neurons (Elhage et al. 2022, "Toy Models of Superposition"). Per the standing rule, none of that coding is imposed.
+The only things built are the **mechanism** — a tied autoencoder, an N-cell bottleneck that must reconstruct its
+input — and the **task** — the input is a *sparse* set of active place fields (you occupy one place at a time, so
+few fields fire) drawn from F = 4·N fields spanning many environments. Superposition, polysemanticity, and their
+sparsity-dependence all emerge.
+
+- **Superposition capacity — 4× more environments than cells.** With sparse activity the **32** cells recall
+  **1.00** of all **128** fields — 128 place fields stored in 32 cells — where a monosemantic one-cell-per-place
+  code could recall only N/F = **0.25**. The bottleneck packs four times more environments than it has cells.
+- **Polysemanticity emerges.** Each cell ends up participating in **4.5 ± 0.1** fields (≫1) — every cell encodes
+  many places at once, the superpositional coding the intracranial data report, never put in a loss.
+- **Sparsity is load-bearing (falsifier).** Train on DENSE activity (many fields active at once) and superposition
+  cannot form: recall collapses to **0.49**, back toward the monosemantic ceiling. A dose-response pins the
+  mechanism — recall **1.00** at p = .04 → **1.00** at p = .12 → **0.52** at p = .30. The compression is bought
+  precisely by exploiting "one place active at a time"; remove the sparsity and it is gone.
+
+**Honest grade — known mechanism, faithful spatial reframing.** Elhage's superposition is an established result, so
+the compression itself is not the surprise; the contribution is showing a **place code** realizes it exactly —
+reproducing the polysemantic hippocampal coding from nothing but a bottleneck plus sparse-field reconstruction,
+with the sparsity dependence as a clean falsifier. Because natural experience is sparse, a fixed population can
+superpose far more fields than it has cells; the price is polysemantic, interference-prone cells — exactly what
+dense human recordings find. (`results/superposition_capacity.json`, `results/superposition_capacity.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)
