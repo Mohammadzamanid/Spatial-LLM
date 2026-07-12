@@ -1601,6 +1601,34 @@ demonstrates the top-down feedback *organ*; wiring an actual LLM→cortex path i
 cross-attention (so the frozen model's own goal state modulates the grid cortex) is the natural follow-on. The
 loop is no longer one-way. (`results/topdown_feedback.json`, `results/topdown_feedback.svg`.)
 
+### Does the manifold itself deform? — the deeper question behind grid shearing (GAPS.md #5d follow-up, n=5)
+
+Grid shearing (#5d) showed the *rate map* shears in a trapezoid. A sharper critique asks whether the **neural
+manifold** — the geometry of the population activity itself — deforms to the environment, or whether it stays a
+rigid torus while only the *map* from physical space onto the manifold warps. The distinction matters: in vivo the
+grid population's toroidal topology is preserved across environments and even sleep (Gardner et al. 2022), which
+predicts a *rigid* manifold. `manifold_geometry.py` measures it.
+
+- **The standard attractor's manifold does not deform.** Take the anchored grid codes of #5d in a square and a
+  trapezoid. The trapezoid population codes lie on the *same* manifold as the square's — overlap **0.88**,
+  essentially equal to the square-vs-square reference of **0.90**, so the deformation is **+0.02 ≈ 0**. The
+  manifold is a rigid torus; the shearing of #5d is entirely a warping of the space→manifold *map*, not a
+  reshaping of the manifold. This is the honest, Gardner-consistent answer: the continuous attractor keeps its
+  toroidal perfection.
+- **Deforming the manifold requires plasticity — which the rigid CAN lacks.** In a strongly non-Euclidean
+  *barrier* environment (a narrow-doorway maze, the hairpin case the critique names), the fixed grid ignores the
+  wall: its neural distances track *Euclidean* distance, so geodesic distance predicts them no better than
+  Euclidean does (geodesic-advantage **+0.02**). A **plastic** code — one whose geometry is shaped by experience
+  of the environment — reshapes so its neural distances track the *geodesic* (wall-respecting) geometry
+  (geodesic-advantage **+0.27**). Its manifold bends around the barrier; the grid's does not.
+
+So the deeper answer is precise and honest: the standard continuous-attractor manifold is *rigid* (a torus,
+map-warped but not deformed — #5d is a read-out effect), and a manifold that genuinely conforms to the
+environment's non-Euclidean geometry requires a plastic attractor. The critique's instinct — that a rigid CAN
+retains a mathematical perfection biology abandons — is exactly right, and this pins down what closes the gap:
+plasticity in the attractor, not just boundary-driven phase resets. (`results/manifold_geometry.json`,
+`results/manifold_geometry.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

@@ -1,0 +1,28 @@
+{
+  "n_seeds": 5,
+  "shear": 2.2,
+  "barrier_gap": 1,
+  "results": {
+    "manifold_overlap_trapezoid": {
+      "mean": 0.8833,
+      "ci95": 0.0056
+    },
+    "manifold_overlap_reference": {
+      "mean": 0.8999,
+      "ci95": 0.0014
+    },
+    "manifold_deformation_grid": {
+      "mean": 0.0166,
+      "ci95": 0.0062
+    },
+    "barrier_respect_grid": {
+      "mean": 0.0185,
+      "ci95": 0.0
+    },
+    "barrier_respect_plastic": {
+      "mean": 0.2692,
+      "ci95": 0.0007
+    }
+  },
+  "verdict": "Beyond the rate-map shearing of #5d, the NEURAL MANIFOLD of the standard continuous attractor does NOT deform: trapezoid population codes lie on the same manifold as the square's (overlap ~ the square-vs-square reference), a rigid torus consistent with Gardner 2022 -- so #5d is a warping of the space->manifold MAP, not the manifold. In a non-Euclidean (barrier) environment the fixed grid ignores the wall (neural distance ~ Euclidean) while a PLASTIC code reshapes to the geodesic geometry (respects the wall). Manifold deformation to the environment's actual geometry requires plasticity, which the rigid CAN lacks."
+}

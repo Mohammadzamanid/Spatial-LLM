@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Does the attractor manifold itself deform? Rigid torus (map warps) vs a plastic code</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">the #5d shearing is a warping of the space&#8594;manifold MAP; the manifold stays a torus (Gardner 2022)</text>
+<text x="44" y="76" font-size="11" font-weight="700" fill="#28324a">(A) grid manifold overlap</text>
+<rect x="44" y="101" width="66" height="153" fill="#8c8c8c" opacity="0.85"/>
+<text x="77" y="96" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.90</text>
+<text x="77" y="267" font-size="9" fill="#28324a" text-anchor="middle">square</text>
+<text x="77" y="278" font-size="9" fill="#28324a" text-anchor="middle">(reference)</text>
+<rect x="126" y="104" width="66" height="150" fill="#2ca25f" opacity="0.85"/>
+<text x="159" y="99" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.88</text>
+<text x="159" y="267" font-size="9" fill="#28324a" text-anchor="middle">trapezoid</text>
+<line x1="40" y1="254" x2="208" y2="254" stroke="#33415c"/>
+<text x="44" y="294" font-size="8.5" fill="#5b6b8c">equal -> the manifold is a RIGID torus</text>
+<text x="380" y="76" font-size="11" font-weight="700" fill="#28324a">(B) does the manifold respect a barrier?</text>
+<rect x="380" y="246" width="96" height="8" fill="#c9341a" opacity="0.85"/>
+<text x="428" y="241" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.02</text>
+<text x="428" y="267" font-size="9" fill="#28324a" text-anchor="middle">fixed grid</text>
+<text x="428" y="278" font-size="9" fill="#28324a" text-anchor="middle">(rigid)</text>
+<rect x="496" y="133" width="96" height="121" fill="#2ca25f" opacity="0.85"/>
+<text x="544" y="128" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.27</text>
+<text x="544" y="267" font-size="9" fill="#28324a" text-anchor="middle">plastic</text>
+<text x="544" y="278" font-size="9" fill="#28324a" text-anchor="middle">(deforms)</text>
+<line x1="376" y1="254" x2="612" y2="254" stroke="#33415c"/>
+<text x="380" y="294" font-size="8.5" fill="#5b6b8c">geodesic minus Euclidean corr; &gt;0 = manifold bends to the wall</text>
+</svg>

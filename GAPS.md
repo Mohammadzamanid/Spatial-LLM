@@ -177,6 +177,16 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   (gap **+1.14 ± 0.01**). The grid deforms *itself* with environmental geometry, never put in a loss. Honest
   note: this took diagnosing a phase-offset setup bug (trajectories must start at the origin so grid phase tracks
   true position) before the baseline was cleanly hexagonal — reported, not hidden. See `results/FINDINGS.md`.
+- **Deeper — does the MANIFOLD itself deform?** `src/eval/manifold_geometry.py` (n=5) answers the sharper
+  question: the #5d shear is a RATE-MAP (read-out over space) effect — does the neural population MANIFOLD deform,
+  or stay a rigid torus? **(A)** the trapezoid grid codes lie on the SAME manifold as the square's (overlap
+  **0.88** vs the square-vs-square reference **0.90**; deformation **+0.02 ≈ 0**) — the manifold is a **rigid
+  torus** (consistent with Gardner et al. 2022, toroidal topology preserved across environments), so #5d is a
+  warping of the space→manifold MAP, not the manifold. **(B)** in a non-Euclidean BARRIER environment the fixed
+  grid ignores the wall (neural distance tracks Euclidean, geodesic-advantage **+0.02**) while a PLASTIC code
+  reshapes to the geodesic geometry (**+0.27**) — manifold deformation to the environment's actual geometry
+  REQUIRES a plastic attractor, the capacity the rigid CAN lacks. The honest answer: the standard CAN retains its
+  toroidal perfection; #5d is a map effect.
 - **Neuro basis.** A grid is a self-organized code anchored to boundaries; when boundary geometry is polarized,
   the anchoring can no longer tile it hexagonally, so it shears/fragments — the grid is *shaped by* the
   environment, not a rigid ruler laid over it.
