@@ -1723,6 +1723,42 @@ finite-size navigable optimum sits lower (~1.4), and the emergent exponent lands
 navigable band. So the claim is "use grows the exponent into the navigable band and beats every fixed-exponent
 graph," not "converges to 2." (`results/small_world_search.json`, `results/small_world_search.svg`.)
 
+### Anisotropic 3-D coding — vertical fields elongate because experience is gravity-biased (GAPS.md anisotropic-3D, n=5)
+
+Naively scaling a continuous attractor from 2-D to 3-D gives a perfectly isotropic lattice. But mammals do not code
+volumetric space isotropically: rats on climbing walls and helices have place/grid fields of normal horizontal
+extent but **elongated vertically** ("stripes"), with vertical odometry selectively impaired — "at least when the
+rat itself remains horizontal" (Hayman, Verriotis, Jovalekic, Fenton & Jeffery, *Nature Neuroscience* 2011). Freely-
+flying bats, which traverse the volume symmetrically, code 3-D far more isotropically (Ginosar 2021 — the regime the
+repo's `LocalOrder3DGrid` already models). Hayman's own reading — the anisotropy follows from the body being held
+horizontal — is the emergent mechanism, and per the standing rule nothing about it is imposed. The only things built
+are **isotropic hardware** (isotropic code noise, isotropic weight init, one shared power budget — every axis
+identical) and the **task**: a capacity-limited code must reconstruct 3-D position from a *gravity-biased* experience
+distribution (large horizontal spread, small vertical, because a terrestrial body lives near the ground). Anisotropy
+then emerges by rate-distortion / water-filling.
+
+- **Vertical coarsening emerges.** The **normalized** decode error — error as a fraction of each axis's traversed
+  range, so it measures pure *resolution*, not range — is **0.50** vertical vs **0.15** horizontal: a
+  **vertical/horizontal ratio of 3.33 ± 0.11**. The code resolves height ~3× more coarsely than the horizontal
+  plane — elongated vertical fields — with hardware that treats every axis identically.
+- **The falsifier: isotropic experience.** Give the *same* code isotropic experience (equal vertical spread, the
+  flying regime) and the anisotropy vanishes — ratio **1.04 ± 0.06**. The asymmetry is in the experience, not the
+  architecture.
+- **Dose-response follows the water-filling law.** As vertical experience shrinks, the anisotropy grows
+  monotonically — ratio **1.00 → 1.66 → 3.32 → 6.61** for vertical/horizontal experience **1.0 → 0.6 → 0.3 →
+  0.15** — almost exactly 1/(experience ratio). The code allocates resolution to the well-sampled axes and lets the
+  poorly-sampled vertical fall below the coding threshold, precisely the rate-distortion prediction.
+- **Absolute vs normalized — the honest nuance.** In *absolute* terms the vertical error is *small* (**0.044** vs
+  horizontal **0.15**): the animal barely leaves its height band, so little is at stake and vertical coding can look
+  perfectly fine. The disproportionate loss shows up *only* in the normalized (resolution) measure. Both are
+  reported so the absolute-small / relative-large distinction is explicit.
+
+**Honest grade — clean emergence.** The anisotropy self-organises from experience under isotropic hardware, with a
+clean isotropic-experience falsifier and a dose-response that follows the rate-distortion law; nothing about the
+vertical axis is treated differently in the model. This directly serves a **terrestrial / climbing** embodied agent
+(the anisotropic regime); an aerial agent would sit in the isotropic falsifier regime — the two regimes are the
+same code under two experience distributions. (`results/anisotropic_3d.json`, `results/anisotropic_3d.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

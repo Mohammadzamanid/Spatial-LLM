@@ -1,0 +1,52 @@
+{
+  "n_seeds": 5,
+  "K": 8,
+  "sh": 1.0,
+  "sz_terrestrial": 0.3,
+  "sz_isotropic": 1.0,
+  "code_noise": 0.7,
+  "budget": 0.12,
+  "results": {
+    "horiz_abs": {
+      "mean": 0.1494,
+      "ci95": 0.0019
+    },
+    "vert_abs": {
+      "mean": 0.0444,
+      "ci95": 0.0006
+    },
+    "horiz_norm": {
+      "mean": 0.15,
+      "ci95": 0.0032
+    },
+    "vert_norm": {
+      "mean": 0.4997,
+      "ci95": 0.0104
+    },
+    "ratio_terr": {
+      "mean": 3.3322,
+      "ci95": 0.1064
+    },
+    "ratio_iso": {
+      "mean": 1.0358,
+      "ci95": 0.0609
+    },
+    "dose_10": {
+      "mean": 0.9961,
+      "ci95": 0.0142
+    },
+    "dose_06": {
+      "mean": 1.6566,
+      "ci95": 0.0205
+    },
+    "dose_03": {
+      "mean": 3.3214,
+      "ci95": 0.0386
+    },
+    "dose_015": {
+      "mean": 6.6122,
+      "ci95": 0.06
+    }
+  },
+  "verdict": "Anisotropic 3-D coding (vertically elongated fields + impaired vertical odometry, Hayman 2011) EMERGES from gravity-biased experience, never hardcoded. With isotropic hardware (isotropic code noise, isotropic init, one shared power budget) a capacity-limited code allocates resolution to well-experienced axes by rate-distortion/water-filling; the low-experience vertical axis falls below the noise floor and is disproportionately under-coded (normalized vertical/horizontal error ratio ~3x). FALSIFIER: isotropic experience gives an isotropic code (ratio ~1, the flying-bat/Ginosar regime), so the anisotropy is experience, not architecture; a dose-response confirms it tracks the vertical deficit. Honest note: absolute vertical error is small (small range), so only the normalized resolution measure reveals the disproportionate loss."
+}

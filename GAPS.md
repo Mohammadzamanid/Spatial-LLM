@@ -555,6 +555,38 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   where the goal is — and use-dependent plasticity selecting the shortcuts that actually carry greedy traffic
   grows exactly that distribution.
 
+### Anisotropic 3-D coding — vertical coarsening emerges from gravity-biased experience ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/anisotropic_3d.py` (n=5). The critique: naively scaling a continuous
+  attractor from 2-D to 3-D gives a perfectly ISOTROPIC lattice, but mammals do not code volumetric space
+  isotropically — rats on climbing walls/helices have place/grid fields elongated VERTICALLY ("stripes") and
+  selectively impaired vertical odometry "when the rat itself remains horizontal" (Hayman, Verriotis, Jovalekic,
+  Fenton & Jeffery, *Nature Neuroscience* 2011; Grieves 2020), while freely-flying bats — which traverse the
+  volume symmetrically — code 3-D far more isotropically (Ginosar 2021, the regime the repo's `LocalOrder3DGrid`
+  already models). So the anisotropy is a fact about EXPERIENCE, not hardware, and — per the standing rule — none
+  of it is hardcoded. Built only: ISOTROPIC hardware (isotropic code noise, isotropic weight init, one shared
+  power budget) + the TASK (a capacity-limited code reconstructs 3-D position from a gravity-biased experience
+  distribution — large horizontal spread, small vertical, because a terrestrial body lives near the ground). The
+  anisotropy emerges by rate-distortion / water-filling:
+  - **(A) EMERGENT VERTICAL COARSENING.** NORMALIZED decode error (error as a fraction of each axis's range —
+    pure resolution, not range) is **0.50** vertically vs **0.15** horizontally: **vertical/horizontal = 3.33 ±
+    0.11**, coarser vertical fields (Hayman's stripes), with isotropic hardware.
+  - **(B) FALSIFIER — isotropic experience.** The SAME code given isotropic (flying-regime) experience is
+    isotropic: ratio **1.04 ± 0.06**. So it is the experience, not the architecture.
+  - **(C) DOSE-RESPONSE.** As vertical experience shrinks the anisotropy grows monotonically — ratio **1.00 → 1.66
+    → 3.32 → 6.61** for vertical/horizontal experience **1.0 → 0.6 → 0.3 → 0.15** — tracking the deficit almost
+    exactly as 1/(experience ratio), the water-filling law.
+  - **(D) ABSOLUTE vs NORMALIZED (honesty).** In ABSOLUTE terms the vertical error is SMALL (**0.044** vs
+    horizontal **0.15**) — the animal barely leaves its height band, so little is at stake and vertical coding can
+    look fine; the disproportionate loss is visible only in the NORMALIZED resolution measure, so both are reported.
+- **Honest grade:** *clean emergence.* The anisotropy self-organises from experience under isotropic hardware, with
+  a clean isotropic-experience falsifier and a dose-response that follows the rate-distortion law — nothing about
+  the vertical axis is treated differently in the model. Directly relevant to a **terrestrial/climbing** embodied
+  agent (anisotropic regime); an aerial agent would sit in the isotropic falsifier regime. See `results/FINDINGS.md`.
+- **Neuro basis.** A body held horizontal by gravity experiences large horizontal and small vertical self-motion;
+  a fixed-capacity neural code with isotropic noise allocates resolution to the well-sampled horizontal axes and
+  lets the poorly-sampled vertical fall below the coding threshold — elongated vertical fields and impaired
+  vertical odometry, exactly as recorded, without any built-in vertical/horizontal asymmetry.
+
 ---
 
 ## Tier 3 — GPU / language
