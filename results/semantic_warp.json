@@ -1,0 +1,54 @@
+{
+  "n_seeds": 5,
+  "L": 10,
+  "K": 5,
+  "D": 12,
+  "beta_relevant": 1.5,
+  "results": {
+    "warp_rel": {
+      "mean": 0.268,
+      "ci95": 0.0214
+    },
+    "spatial_rel": {
+      "mean": 0.624,
+      "ci95": 0.0879
+    },
+    "probe_rel": {
+      "mean": 0.6,
+      "ci95": 0.1882
+    },
+    "warp_np": {
+      "mean": 0.0022,
+      "ci95": 0.0175
+    },
+    "spatial_np": {
+      "mean": 0.7673,
+      "ci95": 0.0898
+    },
+    "probe_np": {
+      "mean": 0.2267,
+      "ci95": 0.0433
+    },
+    "chance": {
+      "mean": 0.2,
+      "ci95": 0.0
+    },
+    "dose_00": {
+      "mean": 0.0094,
+      "ci95": 0.0039
+    },
+    "dose_05": {
+      "mean": 0.0846,
+      "ci95": 0.0228
+    },
+    "dose_10": {
+      "mean": 0.1904,
+      "ci95": 0.0247
+    },
+    "dose_20": {
+      "mean": 0.3175,
+      "ci95": 0.0198
+    }
+  },
+  "verdict": "The cognitive map warps by a non-spatial concept, becoming mixed-selective (Boccara 2019), ONLY when the concept is behaviourally relevant -- never imposed. A capacity-limited code reconstructing [position, value] stays a spatial map (high spatial partial correlation) yet its metric warps by concept (positive concept-partial-correlation controlling for space) when the value depends on the concept; removing the perforant projection (the semantic input) leaves the map purely spatial (warp ~0, the falsifier) even though the concept is still relevant, and with the path present but the concept irrelevant (beta=0) the warp is ~0 too; the warp grows with behavioural relevance (dose-response); and a held-out linear probe reads the concept off the warped map far above chance but is at chance without the perforant path, so a downstream reader inherits semantic-spatial structure for free instead of learning it from scratch."
+}

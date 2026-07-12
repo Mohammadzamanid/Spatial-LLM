@@ -1759,6 +1759,41 @@ vertical axis is treated differently in the model. This directly serves a **terr
 (the anisotropic regime); an aerial agent would sit in the isotropic falsifier regime — the two regimes are the
 same code under two experience distributions. (`results/anisotropic_3d.json`, `results/anisotropic_3d.svg`.)
 
+### Semantic warping — the cognitive map bends toward a concept when it matters (GAPS.md semantic-warp, n=5)
+
+The critique: the model treats the cortex as a purely geographic and value substrate, leaving all semantic meaning to
+the language model. But the hippocampal map is not rigidly geographic — the **perforant path** projects non-spatial,
+behaviourally-relevant features directly into grid and place assemblies, and grid cells **warp toward remembered
+reward/goal locations, becoming mixed-selective to reward and space** (Boccara et al., *Science* 2019; "the
+entorhinal cognitive map is attracted to goals", Butler 2019; non-spatial binding: Aronov & Tank 2017; Constantinescu
+2016; the Tolman-Eichenbaum Machine, Whittington 2020). If the map already warps to reflect conceptual relations, a
+downstream reader (the LLM) reads them off the map rather than learning the semantic-spatial mapping from scratch. Per
+the standing rule the warp is hardcoded nowhere: the only things built are a capacity-limited code with a spatial
+pathway **and** a perforant/semantic input pathway, and the task — reconstruct **position** and a scalar **value**
+(position forces a spatial map; the value may or may not depend on the concept). The warp is never a target.
+
+- **The map warps, yet stays spatial (mixed selectivity).** When the concept is behaviourally relevant, the
+  representational metric warps by concept — the partial correlation of representational distance with
+  concept-difference, *controlling for spatial distance*, is **+0.27 ± 0.02** (same-concept locations pulled closer
+  at matched spatial distance) — while the code stays strongly spatial (spatial partial correlation **+0.62**). Both
+  at once is exactly the mixed-selective warped map Boccara records: a spatial map bent toward what matters, not a
+  concept map that has forgotten space.
+- **Double-dissociation falsifier.** Remove the perforant projection (same relevant task, no semantic input) and the
+  map cannot warp — **+0.00 ± 0.02** (spatial +0.77). And with the path *present* but the concept made *irrelevant*
+  (relevance β = 0), the warp is **+0.01** as well. Each ablation kills the warp on its own: it requires **both** the
+  perforant path (the substrate) and behavioural relevance (the driver).
+- **Dose-response.** The warp grows monotonically with behavioural relevance — **+0.01 → +0.08 → +0.19 → +0.32** for
+  β = 0 → 0.5 → 1 → 2. The map is attracted to a concept in proportion to how much it matters, precisely the
+  goal-attraction Boccara/Butler describe.
+- **The payoff — why it helps the reader.** A held-out linear probe reads the concept off the *warped* map at
+  **0.60**, but only **0.23** (chance 0.20) without the perforant path. A downstream reader inherits the
+  semantic-spatial structure for free from the warped map, instead of learning it from scratch — the concrete sense
+  in which an early semantic projection lightens the LLM's load.
+
+**Honest grade — clean emergence with a double dissociation.** The warp self-organises, is never in the loss, and is
+independently abolished by removing either the perforant path or the concept's relevance; the readout payoff makes
+the benefit to a downstream reader explicit. (`results/semantic_warp.json`, `results/semantic_warp.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

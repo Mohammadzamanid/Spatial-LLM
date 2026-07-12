@@ -587,6 +587,34 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   lets the poorly-sampled vertical fall below the coding threshold — elongated vertical fields and impaired
   vertical odometry, exactly as recorded, without any built-in vertical/horizontal asymmetry.
 
+### Semantic warping of the map — the metric bends toward a relevant concept ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/semantic_warp.py` (n=5). The critique: the model treats the cortex as a purely
+  geographic + value substrate and leaves all semantic meaning to the LLM, but biologically the **perforant path**
+  projects non-spatial/behavioural features directly into grid & place assemblies, so the map is not rigidly
+  geographic — grid cells warp toward remembered reward/goal locations, becoming **mixed-selective to reward and
+  space** (Boccara et al., *Science* 2019; "the cognitive map is attracted to goals", Butler 2019; non-spatial
+  binding: Aronov & Tank 2017, Constantinescu 2016, TEM/Whittington 2020). Per the standing rule the warp is
+  hardcoded nowhere. Built only: a capacity-limited code with a spatial pathway AND a perforant/semantic input
+  pathway, and the task (reconstruct POSITION and a scalar VALUE — position forces a spatial map; the value may or
+  may not depend on the concept). The warp is never in the loss; it emerges:
+  - **(A) THE MAP WARPS, YET STAYS SPATIAL (mixed selectivity).** When the concept is behaviourally relevant the
+    representational metric warps by concept (partial corr of representational distance with concept-difference,
+    controlling spatial distance, **+0.27 ± 0.02**) WHILE the code stays strongly spatial (spatial partial corr
+    **+0.62**) — the mixed-selective warped map, not a concept map.
+  - **(B) DOUBLE-DISSOCIATION FALSIFIER.** Remove the perforant projection (same relevant task, no semantic input):
+    the map cannot warp (**+0.00 ± 0.02**, spatial +0.77). And with the path present but the concept **irrelevant**
+    (β=0) the warp is **+0.01** too — the warp needs BOTH the perforant path AND behavioural relevance.
+  - **(C) DOSE-RESPONSE.** Warp grows with relevance β: **+0.01 → +0.08 → +0.19 → +0.32** for β = 0 → 0.5 → 1 → 2.
+  - **(D) PAYOFF.** A held-out LINEAR probe reads the concept off the WARPED map at **0.60** but is at chance
+    (**0.23**, chance 0.20) without the perforant path — a downstream reader inherits the semantic-spatial structure
+    for free instead of learning it from scratch, exactly the critique's point.
+- **Honest grade:** *clean emergence with a double dissociation.* The warp self-organises, is never in the loss, and
+  requires both the perforant projection and behavioural relevance (each ablation kills it independently); the
+  payoff shows why it helps the LLM. See `results/FINDINGS.md`.
+- **Neuro basis.** The perforant path binds non-spatial meaning into the hippocampal map; when a concept is
+  behaviourally relevant the map deforms toward it (mixed selectivity), so relational/semantic structure is read
+  off the map rather than recomputed downstream.
+
 ---
 
 ## Tier 3 — GPU / language

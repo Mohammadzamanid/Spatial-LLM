@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" font-family="Segoe UI, Arial">
+<rect width="760" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Semantic warping: the spatial map bends toward a concept &#8212; only when the concept matters</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">mixed-selective (Boccara 2019): the map stays spatial yet warps by concept; nothing about the warp is in the loss</text>
+<text x="44" y="92" font-size="11" font-weight="700" fill="#28324a">warp (concept|space)</text>
+<rect x="44" y="116" width="46" height="134" fill="#2ca25f" opacity="0.85"/>
+<text x="67" y="111" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.27</text>
+<text x="67" y="263" font-size="9" fill="#28324a" text-anchor="middle">concept</text>
+<text x="67" y="274" font-size="9" fill="#28324a" text-anchor="middle">RELEVANT</text>
+<rect x="110" y="249" width="46" height="1" fill="#c9341a" opacity="0.85"/>
+<text x="133" y="244" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">+0.00</text>
+<text x="133" y="263" font-size="9" fill="#28324a" text-anchor="middle">no</text>
+<text x="133" y="274" font-size="9" fill="#28324a" text-anchor="middle">perforant</text>
+<line x1="40" y1="250" x2="176" y2="250" stroke="#33415c"/>
+<text x="44" y="288" font-size="8.5" fill="#5b6b8c">map stays spatial (corr 0.62) in both</text>
+<text x="300" y="92" font-size="11" font-weight="700" fill="#28324a">warp vs relevance &#946;</text>
+<rect x="300" y="246" width="36" height="4" fill="#c9341a" opacity="0.85"/>
+<text x="318" y="242" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">+0.01</text>
+<text x="318" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">0</text>
+<rect x="344" y="218" width="36" height="32" fill="#e6842a" opacity="0.85"/>
+<text x="362" y="214" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">+0.08</text>
+<text x="362" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">.5</text>
+<rect x="388" y="178" width="36" height="72" fill="#e6842a" opacity="0.85"/>
+<text x="406" y="174" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">+0.19</text>
+<text x="406" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">1</text>
+<rect x="432" y="130" width="36" height="120" fill="#2ca25f" opacity="0.85"/>
+<text x="450" y="126" font-size="9" font-weight="700" fill="#0b1324" text-anchor="middle">+0.32</text>
+<text x="450" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">2</text>
+<line x1="296" y1="250" x2="476" y2="250" stroke="#33415c"/>
+<text x="300" y="280" font-size="8.5" fill="#5b6b8c">more relevant &#8594; more warp</text>
+<text x="560" y="92" font-size="11" font-weight="700" fill="#28324a">read concept off map</text>
+<rect x="560" y="160" width="56" height="90" fill="#2ca25f" opacity="0.85"/>
+<text x="588" y="155" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.60</text>
+<text x="588" y="263" font-size="9" fill="#28324a" text-anchor="middle">warped</text>
+<rect x="632" y="216" width="56" height="34" fill="#c9341a" opacity="0.85"/>
+<text x="660" y="211" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.23</text>
+<text x="660" y="263" font-size="9" fill="#28324a" text-anchor="middle">no</text>
+<text x="660" y="274" font-size="9" fill="#28324a" text-anchor="middle">perforant</text>
+<line x1="556" y1="250" x2="704" y2="250" stroke="#33415c"/>
+<line x1="556" y1="220" x2="704" y2="220" stroke="#8c8c8c" stroke-dasharray="3 3"/>
+<text x="702" y="217" font-size="8" fill="#8c8c8c" text-anchor="end">chance</text>
+<text x="20" y="308" font-size="9.5" fill="#5b6b8c">The reader inherits semantic-spatial structure for free from the warped map &#8212; on the un-warped map it would learn it from scratch.</text>
+</svg>
