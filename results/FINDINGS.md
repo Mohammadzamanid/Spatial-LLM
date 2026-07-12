@@ -1825,8 +1825,30 @@ heading-*equivariant* "which way do I turn to reach the object," and **memory** 
 lower the total training loss — a full-capacity unified head fits both tasks — so this is not an efficiency win. The
 payoff is clean functional segregation: target-appropriate routing and selective lesionability, measured on that
 metric rather than a coarse loss (the same lesson that recurs across the integration capstones — a specific-benefit
-organ has to be scored on the axis where it acts). Wiring an action/memory split into the `fusion.py` gate is the
-natural follow-on integration. (`results/rsc_routing.json`, `results/rsc_routing.svg`.)
+organ has to be scored on the axis where it acts). (`results/rsc_routing.json`, `results/rsc_routing.svg`.)
+
+### Folding the two organs into the live pipeline — `fusion.py`
+
+Both the RSC split and the perforant input were standalone evals; they are now wired into the model's actual
+spatial→LLM bridge (`src/models/fusion.py`), so they are options the real `TrajectoryLLM` and `SpatialLLM` can turn
+on rather than demonstrations that live only in `src/eval/`. They follow the same opt-in, zero-init discipline as
+the existing organ flags (`use_place_memory`, `per_module_gates`, …), so every existing checkpoint loads unchanged
+and all 12 original fusion tests still pass.
+
+- **RSC bifurcation — `rsc_split=True`.** The spatial injection splits into two independently-gated output pathways,
+  `action_proj` and `memory_proj` (M2/motor and AD/thalamus). Both gates are zero-init, so the block is still an
+  exact identity at start; opening the action gate versus the memory gate produces different outputs, and lesioning
+  one gate removes only that pathway — the double-dissociation substrate the `rsc_routing` eval measured, now present
+  in the model itself (`tests/test_fusion.py::test_rsc_split_*`).
+- **Perforant input — `perforant=True` + `semantic_tokens`.** A gated perforant attention lets the text pull
+  non-spatial concept features bound alongside space. It is skipped entirely when no semantic tokens are supplied
+  (byte-identical to before) and its gate is zero-init, so it is fully backward compatible; supplying semantics makes
+  it load-bearing (`tests/test_fusion.py::test_perforant_*`).
+
+**Honest scope.** This is the substrate — the two pathways are wired, threaded through the real forward passes, and
+unit-tested on CPU (19 fusion tests pass). The *emergence* they enable (the reference-frame dissociation and the
+metric warp) was established in the standalone evals; turning the flags on inside a full LLM training run is a GPU
+step, like the other language capstones. Nothing is enabled by default — the model is unchanged until a flag is set.
 
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 

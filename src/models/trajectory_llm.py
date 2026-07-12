@@ -49,6 +49,8 @@ class TrajectoryLLM(nn.Module):
         sweep_angle_deg: float = 25.0,
         sweep_steps: int = 8,
         n_sweep_cycles: int = 2,             # left + right theta cycles
+        rsc_split: bool = False,             # RSC action/memory output pathways (Molecular Psychiatry 2024)
+        perforant: bool = False,             # perforant semantic input pathway (Boccara 2019)
     ):
         super().__init__()
         logger.info(f"Loading base LLM: {base_llm}")
@@ -81,7 +83,8 @@ class TrajectoryLLM(nn.Module):
         # on the spatial channel, so a zero gate (SpatialLLM's anti-garbage default)
         # would give the LLM no spatial signal and no gradient to ever open the gates.
         self.fusion = MultiScaleSpatialFusion(
-            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2, gate_init=gate_init
+            hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2, gate_init=gate_init,
+            rsc_split=rsc_split, perforant=perforant,
         )
         # Theta-cycle look-around (Vollan, Gardner, Moser & Moser, Nature 2025): each theta cycle the grid map
         # sweeps OUTWARD from the agent (alternating left/right, ~20% of module spacing). We turn those swept
@@ -148,12 +151,14 @@ class TrajectoryLLM(nn.Module):
         return tok
 
     def forward(self, input_ids, attention_mask, heading, speed, vz,
-                labels=None, k=None, ablate_cortex=False, sweep_mode="real"):
+                labels=None, k=None, ablate_cortex=False, sweep_mode="real", semantic_tokens=None):
         text = self._embed()(input_ids)                          # (B, T, D)
         spatial = self._spatial_tokens(heading, speed, vz, k, ablate=ablate_cortex, sweep_mode=sweep_mode)
         if spatial.dtype != text.dtype:
             spatial = spatial.to(text.dtype)
-        fused = self.fusion(text, spatial)
+        if semantic_tokens is not None and semantic_tokens.dtype != text.dtype:
+            semantic_tokens = semantic_tokens.to(text.dtype)
+        fused = self.fusion(text, spatial, semantic_tokens=semantic_tokens)
         return self.llm(inputs_embeds=fused, attention_mask=attention_mask, labels=labels)
 
     @torch.no_grad()

@@ -107,12 +107,16 @@ class SpatialLLM(nn.Module):
         use_neuromodulation: bool = True,
         per_module_gates: bool = False,
         load_in_4bit: bool = False,
+        rsc_split: bool = False,             # RSC action/memory output pathways (Molecular Psychiatry 2024)
+        perforant: bool = False,             # perforant semantic input pathway (Boccara 2019)
     ):
         super().__init__()
         self.use_place_memory = use_place_memory
         self.use_predictive_coding = use_predictive_coding
         self.use_neuromodulation = use_neuromodulation
         self.per_module_gates = per_module_gates
+        self.rsc_split = rsc_split
+        self.perforant = perforant
 
         # ── LLM backbone + LoRA ────────────────────────────────────────
         logger.info(f"Loading base LLM: {base_llm}")
@@ -196,6 +200,7 @@ class SpatialLLM(nn.Module):
         self.fusion = MultiScaleSpatialFusion(
             hidden_dim=llm_dim, num_heads=fusion_num_heads, num_layers=2,
             num_spatial_groups=4 if per_module_gates else 1,
+            rsc_split=rsc_split, perforant=perforant,
         )
 
         # Cache embed layer reference inside a list so nn.Module does NOT register
@@ -271,6 +276,7 @@ class SpatialLLM(nn.Module):
         coords: torch.Tensor,
         pixel_values: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
+        semantic_tokens: Optional[torch.Tensor] = None,
     ):
         spatial_tokens, pc_loss, group_sizes = self._encode_spatial(coords, pixel_values)
 
@@ -280,9 +286,12 @@ class SpatialLLM(nn.Module):
         # so LayerNorm/attention in fusion don't hit "expected Half but found Float".
         if spatial_tokens.dtype != text_embeds.dtype:
             spatial_tokens = spatial_tokens.to(text_embeds.dtype)
+        if semantic_tokens is not None and semantic_tokens.dtype != text_embeds.dtype:
+            semantic_tokens = semantic_tokens.to(text_embeds.dtype)
         fused = self.fusion(                                    # (B, T, D)
             text_embeds, spatial_tokens,
             group_sizes=group_sizes if self.per_module_gates else None,
+            semantic_tokens=semantic_tokens,
         )
 
         outputs = self.llm(

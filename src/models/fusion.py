@@ -45,6 +45,8 @@ class SpatialFusionLayer(nn.Module):
         dropout: float = 0.1,
         num_spatial_groups: int = 1,
         gate_init: float = 0.0,
+        rsc_split: bool = False,
+        perforant: bool = False,
     ):
         super().__init__()
         self.num_spatial_groups = num_spatial_groups
@@ -71,6 +73,40 @@ class SpatialFusionLayer(nn.Module):
             nn.Linear(hidden_dim * 4, hidden_dim),
         )
 
+        # ── RSC bifurcation (optional) — two separately-gated OUTPUT pathways ──────
+        # The retrosplenial cortex does not forward one unified map: M2-projecting
+        # neurons carry an egocentric ACTION-affordance stream (to motor cortex),
+        # AD-projecting neurons an allocentric location-MEMORY stream (to thalamus),
+        # each independently lesionable (Molecular Psychiatry 2024). rsc_split gives
+        # the injection two independently-gated read-outs of the spatial map — an
+        # action pathway and a memory pathway — so downstream layers can weight, and
+        # a probe can lesion, each on its own. Both gates follow the same zero-init
+        # convention, so the block is still an exact identity at start.
+        # Emergent reference-frame dissociation: src/eval/rsc_routing.py.
+        self.rsc_split = bool(rsc_split)
+        if self.rsc_split:
+            self.action_proj = nn.Linear(hidden_dim, hidden_dim)
+            self.memory_proj = nn.Linear(hidden_dim, hidden_dim)
+            self.action_gate = nn.Parameter(torch.full((1,), float(gate_init)))
+            self.memory_gate = nn.Parameter(torch.full((1,), float(gate_init)))
+
+        # ── Perforant semantic input (optional) ───────────────────────────────────
+        # The perforant path projects non-spatial / behaviourally-relevant features
+        # directly into grid & place assemblies, so the map is not purely geographic —
+        # it warps by relevant concepts, mixed-selective to meaning and space
+        # (Boccara 2019). When ``semantic_tokens`` are supplied, this gated pathway
+        # lets the text pull that semantic structure (bound alongside space) from the
+        # map. perforant_gate is zero-init, so with no semantic tokens (or at init)
+        # it changes nothing. Emergent metric warp: src/eval/semantic_warp.py.
+        self.perforant = bool(perforant)
+        if self.perforant:
+            self.norm_perforant = nn.LayerNorm(hidden_dim)
+            self.perforant_attn = nn.MultiheadAttention(
+                hidden_dim, num_heads=num_heads, dropout=dropout, batch_first=True
+            )
+            self.perforant_proj = nn.Linear(hidden_dim, hidden_dim)
+            self.perforant_gate = nn.Parameter(torch.full((1,), float(gate_init)))
+
     def _attend(
         self,
         query: torch.Tensor,
@@ -89,6 +125,7 @@ class SpatialFusionLayer(nn.Module):
         spatial_tokens: torch.Tensor,
         key_padding_mask: torch.Tensor | None = None,
         group_sizes: list[int] | None = None,
+        semantic_tokens: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """
         Args:
@@ -99,6 +136,8 @@ class SpatialFusionLayer(nn.Module):
                              given and the layer has >1 gate, each module is
                              attended + gated independently. Ignored for a
                              single-gate (shared) layer.
+            semantic_tokens: (B, S_sem, D) optional non-spatial / concept features
+                             for the perforant pathway (only used when perforant=True).
         Returns:
             fused: (B, T, D) enriched text hidden states
         """
@@ -106,7 +145,18 @@ class SpatialFusionLayer(nn.Module):
         spatial_norm = self.norm_spatial(spatial_tokens)
         query = self.norm1(text_hidden)
 
-        if self.num_spatial_groups > 1 and group_sizes is not None:
+        if self.rsc_split:
+            # RSC bifurcation: one attention read of the spatial map -> TWO
+            # separately-gated output streams (action, memory). Uses the shared
+            # spatial blend (the split is output-side, orthogonal to input grouping).
+            # Zero-init gates keep the block an exact identity at start.
+            attended = self._attend(query, spatial_norm, key_padding_mask)
+            text_hidden = (
+                text_hidden
+                + self.action_gate.tanh() * self.action_proj(attended)
+                + self.memory_gate.tanh() * self.memory_proj(attended)
+            )
+        elif self.num_spatial_groups > 1 and group_sizes is not None:
             # Per-module gating: attend each spatial group on its own, scale by that
             # group's gate, and sum. Every gated term is 0 at init (gate=0), so the
             # LLM still sees its pristine embeddings and generates coherently;
@@ -134,6 +184,15 @@ class SpatialFusionLayer(nn.Module):
             attended = self._attend(query, spatial_norm, key_padding_mask)
             text_hidden = text_hidden + self.attn_gate[0].tanh() * attended
 
+        # Perforant semantic pathway (optional): a gated read of non-spatial concept
+        # features, so the text pulls semantic structure bound alongside space.
+        # Skipped when no semantic tokens are supplied, so it is fully backward
+        # compatible; zero-init gate makes it an identity even when they are.
+        if self.perforant and semantic_tokens is not None:
+            sem_norm = self.norm_perforant(semantic_tokens)
+            attended_sem, _ = self.perforant_attn(query=query, key=sem_norm, value=sem_norm)
+            text_hidden = text_hidden + self.perforant_gate.tanh() * self.perforant_proj(attended_sem)
+
         # Gated feed-forward — shared, since it transforms the text state rather
         # than any one spatial module (same reasoning: don't swamp the tiny inputs).
         text_hidden = text_hidden + self.ffn_gate.tanh() * self.ffn(self.norm2(text_hidden))
@@ -147,7 +206,9 @@ class MultiScaleSpatialFusion(nn.Module):
     Useful when spatial context needs multiple rounds of refinement.
 
     ``num_spatial_groups`` is forwarded to every layer so per-module gating can be
-    toggled for the whole stack at once.
+    toggled for the whole stack at once. ``rsc_split`` (action/memory output
+    pathways) and ``perforant`` (semantic input pathway) are likewise forwarded to
+    every layer; both default off, so the stack is unchanged unless requested.
     """
 
     def __init__(
@@ -157,12 +218,16 @@ class MultiScaleSpatialFusion(nn.Module):
         num_layers: int = 2,
         num_spatial_groups: int = 1,
         gate_init: float = 0.0,
+        rsc_split: bool = False,
+        perforant: bool = False,
     ):
         super().__init__()
         self.num_spatial_groups = num_spatial_groups
+        self.rsc_split = rsc_split
+        self.perforant = perforant
         self.layers = nn.ModuleList([
             SpatialFusionLayer(hidden_dim, num_heads, num_spatial_groups=num_spatial_groups,
-                               gate_init=gate_init)
+                               gate_init=gate_init, rsc_split=rsc_split, perforant=perforant)
             for _ in range(num_layers)
         ])
 
@@ -171,7 +236,9 @@ class MultiScaleSpatialFusion(nn.Module):
         text_hidden: torch.Tensor,
         spatial_tokens: torch.Tensor,
         group_sizes: list[int] | None = None,
+        semantic_tokens: torch.Tensor | None = None,
     ) -> torch.Tensor:
         for layer in self.layers:
-            text_hidden = layer(text_hidden, spatial_tokens, group_sizes=group_sizes)
+            text_hidden = layer(text_hidden, spatial_tokens, group_sizes=group_sizes,
+                                semantic_tokens=semantic_tokens)
         return text_hidden

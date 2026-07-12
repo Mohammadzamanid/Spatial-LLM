@@ -614,6 +614,10 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** The perforant path binds non-spatial meaning into the hippocampal map; when a concept is
   behaviourally relevant the map deforms toward it (mixed selectivity), so relational/semantic structure is read
   off the map rather than recomputed downstream.
+- **Wired into the live model ✅.** `fusion.py` now takes `perforant=True` and an optional `semantic_tokens` input:
+  a gated perforant pathway lets the LLM pull semantic structure bound alongside space (threaded through
+  `TrajectoryLLM` and `SpatialLLM`, opt-in). The pathway is skipped when no semantic tokens are supplied and its gate
+  is zero-init, so it is fully backward compatible; supplying semantics makes it load-bearing (`tests/test_fusion.py`).
 
 ### Bifurcated RSC routing — an action pathway and a memory pathway ✅ CLOSED (Jul 2026)
 - **Status: implemented.** `src/eval/rsc_routing.py` (n=5). The critique: the model bridges the spatial cortex to
@@ -638,8 +642,11 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Honest grade:** *clean emergent dissociation; the benefit is segregation, not efficiency.* The split does NOT
   lower total training loss — a full-capacity unified head fits both tasks — so the payoff is clean functional
   segregation (target-appropriate routing + selective lesionability), measured on that metric rather than a coarse
-  loss (the project's recurring point that specific-benefit organs need their own metric). Wiring an action/memory
-  split into the `fusion.py` gate is the natural follow-on. See `results/FINDINGS.md`.
+  loss (the project's recurring point that specific-benefit organs need their own metric). See `results/FINDINGS.md`.
+- **Wired into the live model ✅.** `fusion.py` now takes `rsc_split=True`: the spatial injection splits into two
+  independently-gated `action_proj`/`memory_proj` output pathways (threaded through `TrajectoryLLM` and `SpatialLLM`,
+  opt-in like the other organ flags). Zero-init gates keep the block an exact identity, so existing checkpoints load
+  unchanged; each pathway is separately gated and lesionable (`tests/test_fusion.py`).
 - **Neuro basis.** RSC ships two streams, not one map: an egocentric action-affordance stream to motor cortex and an
   allocentric location stream to the thalamus; the segregation is why the two functions can be independently
   engaged, lesioned, and read.
