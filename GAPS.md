@@ -472,6 +472,28 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
 - **Neuro basis.** The hippocampus projects back via deep MEC to the neocortex, and neocortical goals drive
   top-down spatial attention and goal-related place-field reorganisation — the loop is reciprocal, not read-only.
 
+### 13. Decoupling **the map from value** — one hippocampal map, many striatal values ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/map_value_decouple.py` (n=8). The critique: fusing a dopamine value into the
+  spatial read-out conflates the transition MODEL (the cognitive map) with the reinforcement MODEL (value).
+  Biologically the hippocampus provides a goal-INDEPENDENT successor representation M, and value is V = M·R (the
+  striatal reward assignment; Dayan 1993; Stachenfeld 2017; Momennejad 2017). The repo already keeps these
+  separate (`successor.py` = M; `basal_ganglia.py` = striatal value); this shows the PAYOFF a fused map+value
+  cannot have:
+  - **(A) ONE MAP, MANY GOALS.** A single goal-independent SR map solves **8** goals via V = M[:, g] — reuse
+    success **1.00**. The map is learned once and reused.
+  - **(B) INSTANT REVALUATION.** When the goal moves, the decoupled agent revalues for free (V = M[:, g_new], a
+    lookup) → **1.00**; a FUSED agent whose value is baked into its state read-out stays stuck on the OLD goal →
+    **0.15** (paired p=0.016).
+  - **(C) THE COST OF FUSION.** The fused agent must relearn a competent policy for the moved goal — **15** value-
+    iteration sweeps — against the decoupled agent's **0**. That relearning cost is paid on every reward change.
+- **Honest grade:** *expected mechanism, faithful payoff* — the SR revaluation advantage (Momennejad 2017) is a
+  known result, so not a surprising emergence; but it is the faithful demonstration of the map/value decoupling
+  the critique asks for, cleanly dissociated from a fused agent, and it confirms the repo's organs (SR map +
+  striatal value) are the right factorisation. See `results/FINDINGS.md`.
+- **Neuro basis.** The hippocampus builds the state-space (successor/predictive map); the striatum assigns
+  dopamine value; separating "where I am" from "what it is worth" gives instant reward revaluation and multi-goal
+  reuse a fused representation cannot.
+
 ---
 
 ## Tier 3 — GPU / language

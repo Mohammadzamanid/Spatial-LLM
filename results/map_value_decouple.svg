@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" font-family="Segoe UI, Arial">
+<rect width="700" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Decoupling the map from value: one hippocampal map, many striatal values</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">value = M &#183; R, so one goal-independent map serves every goal and revalues instantly (Dayan 1993; Momennejad 2017)</text>
+<text x="44" y="76" font-size="11" font-weight="700" fill="#28324a">revaluation after the goal moves</text>
+<rect x="44" y="84" width="66" height="175" fill="#2b8cbe" opacity="0.85"/>
+<text x="77" y="79" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="77" y="272" font-size="9" fill="#28324a" text-anchor="middle">reuse</text>
+<text x="77" y="283" font-size="9" fill="#28324a" text-anchor="middle">(8 goals)</text>
+<rect x="120" y="84" width="66" height="175" fill="#2ca25f" opacity="0.85"/>
+<text x="153" y="79" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.00</text>
+<text x="153" y="272" font-size="9" fill="#28324a" text-anchor="middle">decoupled</text>
+<text x="153" y="283" font-size="9" fill="#28324a" text-anchor="middle">(instant)</text>
+<rect x="196" y="232" width="66" height="27" fill="#c9341a" opacity="0.85"/>
+<text x="229" y="227" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.15</text>
+<text x="229" y="272" font-size="9" fill="#28324a" text-anchor="middle">fused</text>
+<text x="229" y="283" font-size="9" fill="#28324a" text-anchor="middle">(stuck)</text>
+<line x1="40" y1="259" x2="272" y2="259" stroke="#33415c"/>
+<text x="44" y="299" font-size="8.5" fill="#5b6b8c">navigation success to the MOVED goal</text>
+<text x="440" y="76" font-size="11" font-weight="700" fill="#28324a">cost of fusion (relearn sweeps)</text>
+<rect x="440" y="259" width="90" height="0" fill="#2ca25f" opacity="0.85"/>
+<text x="485" y="254" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">0</text>
+<text x="485" y="272" font-size="9" fill="#28324a" text-anchor="middle">decoupled</text>
+<text x="485" y="283" font-size="9" fill="#28324a" text-anchor="middle">(0, free)</text>
+<rect x="552" y="119" width="90" height="140" fill="#c9341a" opacity="0.85"/>
+<text x="597" y="114" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">15</text>
+<text x="597" y="272" font-size="9" fill="#28324a" text-anchor="middle">fused</text>
+<text x="597" y="283" font-size="9" fill="#28324a" text-anchor="middle">(relearn)</text>
+<line x1="436" y1="259" x2="664" y2="259" stroke="#33415c"/>
+<text x="440" y="299" font-size="8.5" fill="#5b6b8c">the fused agent pays this on every reward change</text>
+</svg>

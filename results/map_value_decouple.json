@@ -1,0 +1,29 @@
+{
+  "n_seeds": 8,
+  "G": 11,
+  "k_goals": 8,
+  "results": {
+    "sr_reuse": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "sr_reval": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "fused_stale": {
+      "mean": 0.1532,
+      "ci95": 0.2377
+    },
+    "sr_relearn_steps": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "fused_relearn_steps": {
+      "mean": 15.0,
+      "ci95": 2.9863
+    }
+  },
+  "revaluation_paired_p": 0.0158,
+  "verdict": "The successor representation decouples the cognitive MAP (goal-independent occupancy, the hippocampal state-space) from VALUE (V = M\u00b7R, the striatal reward assignment). One learned map serves many goals and revalues INSTANTLY when the goal moves (a matrix lookup), where a fused agent whose value is baked into its state read-out stays stuck on the old goal and must relearn its value from scratch. Keeping 'where I am' separate from 'what it is worth' is the computational payoff the critique asks for, cleanly dissociated."
+}

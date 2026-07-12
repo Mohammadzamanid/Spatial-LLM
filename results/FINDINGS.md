@@ -1629,6 +1629,33 @@ retains a mathematical perfection biology abandons — is exactly right, and thi
 plasticity in the attractor, not just boundary-driven phase resets. (`results/manifold_geometry.json`,
 `results/manifold_geometry.svg`.)
 
+### One map, many values — decoupling the cognitive map from reward (GAPS.md #13, n=8)
+
+The critique's fifth point: fusing a dopamine value into the spatial read-out conflates the transition model (the
+*map* — where you are, what follows what) with the reinforcement model (*value* — what it's worth). The
+biologically-factored alternative is the successor representation: the hippocampus builds a goal-*independent*
+state-space M, and value is a striatal read-out V = M·R (Dayan 1993; Stachenfeld 2017; Momennejad 2017). The repo
+already keeps these as separate organs (`successor.py` learns M; `basal_ganglia.py` assigns dopamine value);
+`map_value_decouple.py` shows the payoff the fusion the critique describes cannot have.
+
+- **One map serves every goal.** A single goal-independent SR map solves **8** different goals — value for each is
+  just its column, V = M[:, g], and the greedy policy on it reaches that goal (reuse success **1.00**). The map is
+  learned once and reused; the goal is a separate vector.
+- **Revaluation is instant.** When the goal moves, the decoupled agent revalues *for free* — a matrix lookup,
+  V = M[:, g_new] — and navigates to the new goal immediately (**1.00**). A **fused** agent, whose value is baked
+  into its state read-out, keeps ascending toward the *old* goal and fails (**0.15**; paired p = 0.016). It cannot
+  separate "where I am" from "what it's worth," so a change in worth stranded it.
+- **The cost of fusion, quantified.** To recover on the moved goal the fused agent must relearn a competent value
+  from scratch — **15** value-iteration sweeps — where the decoupled agent pays **0**. That relearning cost is due
+  on *every* reward change; the decoupled architecture buys you out of it.
+
+**Honest grade — expected mechanism, faithful payoff.** The successor-representation revaluation advantage is a
+known result (Momennejad 2017), so this is not a surprising emergence; its value is that it demonstrates, cleanly
+and dissociated from a fused baseline, exactly the map/value factorisation the critique asks for — and confirms
+the repo's organs (an SR map plus a separate striatal value) are the right split. Where you are and what it is
+worth are computed by different structures, and keeping them apart is the whole point. (`results/map_value_decouple.json`,
+`results/map_value_decouple.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)
