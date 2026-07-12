@@ -615,6 +615,35 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   behaviourally relevant the map deforms toward it (mixed selectivity), so relational/semantic structure is read
   off the map rather than recomputed downstream.
 
+### Bifurcated RSC routing — an action pathway and a memory pathway ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/rsc_routing.py` (n=5). The critique: the model bridges the spatial cortex to
+  the LLM through a single unified gated cross-attention (`fusion.py`), but the retrosplenial cortex is **bifurcated**
+  — M2-projecting neurons route to secondary motor cortex for ACTION affordances, AD-projecting neurons to anterior
+  thalamus for allocentric location MEMORY, and inactivating one pathway impairs place-action association, the other
+  object-location memory (projection-specific dissociation, *Molecular Psychiatry* 2024; RSC→M2 *J. Neurosci.* 2016).
+  This is an architecture claim, so we hardcode only the two-pathway wiring (as the anatomy does) and let the CONTENT
+  and the benefit emerge. Two conflicting demands are placed on the spatial read-out — ACTION = egocentric,
+  heading-EQUIVARIANT "which way to turn"; MEMORY = allocentric, heading-INVARIANT "where the object is":
+  - **(A) REFERENCE FRAMES DISSOCIATE (emergent).** Trained only on the combined task, heading is decodable from the
+    ACTION head (**0.82**) but not the MEMORY head (**0.04**) — an egocentric/allocentric split never assigned.
+  - **(B) SELECTIVE ROUTING.** The memory pathway carries the allocentric location, not the egocentric turn
+    (selectivity **+0.95**), whereas a unified code is ENTANGLED (carries both, **0.76**).
+  - **(C) THE SPLIT ENABLES THE DOUBLE DISSOCIATION.** Lesion the action pathway → action ×**5.5**, memory ×1.0;
+    lesion the memory pathway → memory ×**58**, action ×1.0 (each lesion hits ONE task). A UNIFIED code lesioned by
+    the same amount loses BOTH (action **+772%**, memory **+650%**) — so it is the segregation that makes the
+    observed optogenetic double dissociation possible at all.
+  - **(D) FALSIFIER — no conflict.** Make both tasks allocentric: the memory pathway stops excluding the action
+    signal (action readable **0.41** vs **0.01** under conflict) — the specialization emerges from the conflicting
+    frames, not the wiring.
+- **Honest grade:** *clean emergent dissociation; the benefit is segregation, not efficiency.* The split does NOT
+  lower total training loss — a full-capacity unified head fits both tasks — so the payoff is clean functional
+  segregation (target-appropriate routing + selective lesionability), measured on that metric rather than a coarse
+  loss (the project's recurring point that specific-benefit organs need their own metric). Wiring an action/memory
+  split into the `fusion.py` gate is the natural follow-on. See `results/FINDINGS.md`.
+- **Neuro basis.** RSC ships two streams, not one map: an egocentric action-affordance stream to motor cortex and an
+  allocentric location stream to the thalamus; the segregation is why the two functions can be independently
+  engaged, lesioned, and read.
+
 ---
 
 ## Tier 3 — GPU / language

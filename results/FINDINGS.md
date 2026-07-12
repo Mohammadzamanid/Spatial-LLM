@@ -1794,6 +1794,40 @@ pathway **and** a perforant/semantic input pathway, and the task — reconstruct
 independently abolished by removing either the perforant path or the concept's relevance; the readout payoff makes
 the benefit to a downstream reader explicit. (`results/semantic_warp.json`, `results/semantic_warp.svg`.)
 
+### Bifurcated routing — an action pathway and a memory pathway, not one map (GAPS.md rsc-routing, n=5)
+
+The critique: the model bridges the spatial cortex to the language model through a single unified gated
+cross-attention, but the retrosplenial cortex does not pass a unified map forward — it is bifurcated. M2-projecting
+RSC neurons route to secondary motor cortex for action-affordances; AD-projecting neurons route to anterior thalamus
+to anchor allocentric location memory; and inactivating one pathway impairs place-action association, the other
+object-location memory (projection-specific dissociation, *Molecular Psychiatry* 2024; RSC→M2, *J. Neurosci.* 2016).
+This is an architecture claim, so we hardcode only the two-pathway wiring — as the anatomy does — and let the content
+and the benefit emerge. Two conflicting demands are placed on the same spatial read-out: **action** = the egocentric,
+heading-*equivariant* "which way do I turn to reach the object," and **memory** = the allocentric, heading-*invariant*
+"where the object is." A unified head would have to be both heading-dependent and heading-invariant at once.
+
+- **The reference frames dissociate, emergently.** Trained only on the combined task, heading is decodable from the
+  **action** head at R² **0.82** but from the **memory** head at only **0.04**. The action pathway became egocentric
+  and the memory pathway allocentric — a reference-frame split that was never assigned, only wired as two pathways.
+- **Selective routing vs entanglement.** The memory pathway carries the allocentric location but not the egocentric
+  turn (location-minus-action selectivity **+0.95**), whereas a unified code is entangled — it carries **both**
+  (0.76), so every downstream target would receive everything instead of what it needs.
+- **The split is what enables the double dissociation.** Lesion the action pathway and the action task's error rises
+  ×**5.5** while memory is untouched (×1.0); lesion the memory pathway and memory rises ×**58** while action is
+  untouched. A *unified* code lesioned by the same amount loses **both** (action **+772%**, memory **+650%**). So the
+  clean optogenetic double dissociation the 2024 paper reports is only possible *because* the pathways are
+  segregated — a unified read-out cannot be selectively lesioned to dissociate action from memory.
+- **Falsifier — remove the conflict.** Make both tasks allocentric (a shared reference frame) and the memory pathway
+  stops excluding the action signal — the action signal becomes readable from it at **0.41** versus **0.01** under
+  conflict. The specialization emerges from the conflicting frames, not from the wiring.
+
+**Honest grade — clean emergent dissociation; the benefit is segregation, not efficiency.** The split does *not*
+lower the total training loss — a full-capacity unified head fits both tasks — so this is not an efficiency win. The
+payoff is clean functional segregation: target-appropriate routing and selective lesionability, measured on that
+metric rather than a coarse loss (the same lesson that recurs across the integration capstones — a specific-benefit
+organ has to be scored on the axis where it acts). Wiring an action/memory split into the `fusion.py` gate is the
+natural follow-on integration. (`results/rsc_routing.json`, `results/rsc_routing.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

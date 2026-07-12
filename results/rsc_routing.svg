@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="770" height="320" font-family="Segoe UI, Arial">
+<rect width="770" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Bifurcated RSC routing: action &amp; memory pathways emerge with dissociated reference frames</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">the split enables the double dissociation a unified gate cannot &#8212; wiring hardcoded, content &amp; benefit emergent</text>
+<text x="44" y="92" font-size="11" font-weight="700" fill="#28324a">heading in head (R&#178;)</text>
+<rect x="44" y="127" width="52" height="123" fill="#e6842a" opacity="0.85"/>
+<text x="70" y="122" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.82</text>
+<text x="70" y="263" font-size="9" fill="#28324a" text-anchor="middle">ACTION</text>
+<text x="70" y="274" font-size="9" fill="#28324a" text-anchor="middle">(egocentric)</text>
+<rect x="112" y="243" width="52" height="7" fill="#2b8cbe" opacity="0.85"/>
+<text x="138" y="238" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.04</text>
+<text x="138" y="263" font-size="9" fill="#28324a" text-anchor="middle">MEMORY</text>
+<text x="138" y="274" font-size="9" fill="#28324a" text-anchor="middle">(allocentric)</text>
+<line x1="40" y1="250" x2="180" y2="250" stroke="#33415c"/>
+<text x="44" y="288" font-size="8.5" fill="#5b6b8c">frames dissociate (never assigned)</text>
+<text x="300" y="92" font-size="11" font-weight="700" fill="#28324a">lesion &#8594; deficit</text>
+<rect x="300" y="177" width="40" height="73" fill="#c9341a" opacity="0.85"/>
+<text x="320" y="173" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">+451%</text>
+<text x="320" y="262" font-size="8" fill="#28324a" text-anchor="middle">killA</text>
+<text x="320" y="272" font-size="8" fill="#28324a" text-anchor="middle">→act</text>
+<rect x="346" y="250" width="40" height="0" fill="#8c8c8c" opacity="0.85"/>
+<text x="366" y="246" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">+0%</text>
+<text x="366" y="262" font-size="8" fill="#28324a" text-anchor="middle">killA</text>
+<text x="366" y="272" font-size="8" fill="#28324a" text-anchor="middle">→mem</text>
+<rect x="392" y="125" width="40" height="125" fill="#c9341a" opacity="0.85"/>
+<text x="412" y="121" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">+772%</text>
+<text x="412" y="262" font-size="8" fill="#28324a" text-anchor="middle">uni½</text>
+<text x="412" y="272" font-size="8" fill="#28324a" text-anchor="middle">→act</text>
+<rect x="438" y="145" width="40" height="105" fill="#c9341a" opacity="0.85"/>
+<text x="458" y="141" font-size="8.5" font-weight="700" fill="#0b1324" text-anchor="middle">+650%</text>
+<text x="458" y="262" font-size="8" fill="#28324a" text-anchor="middle">uni½</text>
+<text x="458" y="272" font-size="8" fill="#28324a" text-anchor="middle">→mem</text>
+<line x1="296" y1="250" x2="484" y2="250" stroke="#33415c"/>
+<text x="300" y="284" font-size="8" fill="#5b6b8c">split: one task each; unified: BOTH</text>
+<text x="560" y="92" font-size="11" font-weight="700" fill="#28324a">memory pathway</text>
+<text x="560" y="122" font-size="10" fill="#2b8cbe">selectivity +0.95</text>
+<text x="560" y="137" font-size="9" fill="#5b6b8c">(carries WHERE, not the turn)</text>
+<text x="560" y="162" font-size="10" fill="#c9341a">unified entangled 0.76</text>
+<text x="560" y="177" font-size="9" fill="#5b6b8c">(carries BOTH)</text>
+<text x="560" y="204" font-size="10" font-weight="700" fill="#28324a">falsifier (no conflict)</text>
+<text x="560" y="222" font-size="9.5" fill="#28324a">action leak into memory: 0.01 &#8594; 0.41</text>
+<text x="20" y="308" font-size="9.5" fill="#5b6b8c">Honest: the split does not lower total loss &#8212; a full unified head fits both. The benefit is clean segregation for routing + lesionability.</text>
+</svg>

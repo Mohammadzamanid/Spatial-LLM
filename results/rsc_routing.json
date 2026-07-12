@@ -1,0 +1,56 @@
+{
+  "n_seeds": 5,
+  "capacity_total": 16,
+  "centres": 12,
+  "results": {
+    "act_head_heading": {
+      "mean": 0.8231,
+      "ci95": 0.0461
+    },
+    "mem_head_heading": {
+      "mean": 0.045,
+      "ci95": 0.0741
+    },
+    "mem_pathway_selectivity": {
+      "mean": 0.9533,
+      "ci95": 0.014
+    },
+    "split_les_action_on_action": {
+      "mean": 5.5062,
+      "ci95": 1.4975
+    },
+    "split_les_action_on_memory": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "split_les_memory_on_memory": {
+      "mean": 57.8408,
+      "ci95": 17.2505
+    },
+    "split_les_memory_on_action": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "unified_lesion_action_deficit": {
+      "mean": 7.7176,
+      "ci95": 5.1433
+    },
+    "unified_lesion_memory_deficit": {
+      "mean": 6.4978,
+      "ci95": 4.3959
+    },
+    "unified_entanglement": {
+      "mean": 0.7558,
+      "ci95": 0.03
+    },
+    "mem_pathway_action_conflict": {
+      "mean": 0.0054,
+      "ci95": 0.0032
+    },
+    "mem_pathway_action_aligned": {
+      "mean": 0.4084,
+      "ci95": 0.0232
+    }
+  },
+  "verdict": "Splitting the spatial read-out into an ACTION pathway (M2/motor) and a MEMORY pathway (AD/thalamus), as the retrosplenial cortex does (Molecular Psychiatry 2024), makes the two reference frames DISSOCIATE emergently -- the action head becomes egocentric (heading-equivariant), the memory head allocentric (heading-invariant), never assigned -- and routes each target its own signal (the memory pathway carries location not the turn, while a unified code is entangled). The segregation is what ENABLES the observed double dissociation: lesioning one split pathway hits one task, but lesioning a unified code hits BOTH. A no-conflict falsifier (both tasks allocentric) blurs the specialization, so it emerges from the conflicting frames, not the wiring. Honest note: the split does NOT lower total loss (a full-capacity unified head fits both); the benefit is clean functional segregation for differential routing and selective lesionability, measured on that metric rather than a coarse loss."
+}
