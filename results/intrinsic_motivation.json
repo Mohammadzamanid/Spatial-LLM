@@ -1,0 +1,49 @@
+{
+  "n_seeds": 5,
+  "grid": 9,
+  "steps": 1400,
+  "noise_std": 1.5,
+  "results": {
+    "mastered_progress": {
+      "mean": 77.0,
+      "ci95": 0.0
+    },
+    "mastered_novelty": {
+      "mean": 77.0,
+      "ci95": 0.0
+    },
+    "mastered_random": {
+      "mean": 42.8,
+      "ci95": 2.0927
+    },
+    "dwell_progress": {
+      "mean": 0.1046,
+      "ci95": 0.0086
+    },
+    "dwell_novelty": {
+      "mean": 0.3061,
+      "ci95": 0.0222
+    },
+    "dwell_random": {
+      "mean": 0.2386,
+      "ci95": 0.0474
+    },
+    "steps90_progress": {
+      "mean": 352.0,
+      "ci95": 3.099
+    },
+    "steps90_novelty": {
+      "mean": 437.2,
+      "ci95": 26.3793
+    },
+    "steps90_random": {
+      "mean": 1400.0,
+      "ci95": 0.0
+    },
+    "n_learn": {
+      "mean": 77.0,
+      "ci95": 0.0
+    }
+  },
+  "verdict": "Self-directed exploration and mastery emerge from an intrinsic drive alone -- the agent is rewarded only by improving its own world model, with no external reward and no goal. A learning-progress agent masters the learnable environment where random action does not, and -- the key falsifier -- it escapes the noisy-TV trap (irreducible randomness) that a pure-novelty / prediction-error agent is caught in: novelty dwells ~3x longer on the noise and reaches mastery slower, because error itself is fooled by noise while error REDUCTION (learning progress) is not. The load-bearing detail: learning progress must be the across-visit drop in held-out error, not the within-visit fit. Honest note: pure novelty also masters the learnable cells eventually -- both drives produce directed exploration; the learning-progress advantage is trap-avoidance and efficiency, not raw coverage."
+}

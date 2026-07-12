@@ -1850,6 +1850,41 @@ unit-tested on CPU (19 fusion tests pass). The *emergence* they enable (the refe
 metric warp) was established in the standalone evals; turning the flags on inside a full LLM training run is a GPU
 step, like the other language capstones. Nothing is enabled by default — the model is unchanged until a flag is set.
 
+### Intrinsic motivation — behaviour that comes from inside, and the noisy-TV trap (GAPS.md agency 1, n=5)
+
+Every organ so far makes the *map* a richer brain, but the agent's *will* has been external — it plans toward a
+reward someone hands it. The autonomy frontier ("free will," functionally) needs a drive that makes the agent *do
+things* when nothing external tells it to. The faithful, non-circular form is intrinsic motivation as **learning
+progress** (Oudeyer & Kaplan 2007; Schmidhuber's formal curiosity): the agent is rewarded only by *improving its own
+world model*. Per the standing rule the reward is computed purely from the agent's own prediction-error dynamics —
+there is no external reward, no goal, and no hand-placed "explore here" signal; the environment never even tells the
+agent which regions are learnable. Structured behaviour then emerges and is measured.
+
+- **Self-directed mastery emerges.** With no external reward, the agent systematically masters the learnable
+  environment — driving its own held-out prediction error below threshold across **77 / 77** cells — where a
+  random-acting agent masters only **43** in the same lifetime. The behaviour is organised and purposeful, not merely
+  active; direction comes from the drive, not from any task.
+- **The noisy-TV falsifier.** Add a region of *irreducible* randomness — a "noisy TV" whose prediction error is
+  maximal forever and can never be reduced (Burda/Pathak 2019). A pure-**novelty** agent, rewarded by prediction
+  error *itself*, is trapped there for **31%** of its life: the noise is always the most "surprising" place, so it
+  keeps coming back. A **learning-progress** agent, rewarded by error *reduction*, samples the noise, sees no
+  across-visit competence gain, and leaves — **10%**. This is the sharp dissociation between novelty (fooled by
+  noise) and genuine curiosity (not), and it is exactly why the drive must be error-reduction, not error.
+- **And it pays off.** Learning progress reaches 90% mastery in **352** steps versus novelty's **437**; a random
+  policy never reaches it. Avoiding the trap is efficient, not just tidy.
+- **Honest note.** Pure novelty *also* masters the learnable cells eventually (77) — both intrinsic drives produce
+  directed exploration, so the learning-progress advantage is specifically trap-avoidance and efficiency, not raw
+  coverage. Reported, not hidden.
+
+The load-bearing detail was found the honest way — by a probe that first *failed*. Naive learning progress ("did my
+error just drop when I practised here?") is fooled by noise, because updating toward the current random target always
+reduces the error to *that* target; the noisy cell then looks like the most improvable place in the world. Only the
+**across-visit** drop in held-out error — competence gain measured *before* learning, across separate visits —
+distinguishes learnable structure from a noisy TV. **Honest grade — clean emergence with the canonical falsifier.**
+This is the seed of autonomy: self-generated, structured behaviour from the agent improving its own model, with the
+noisy-TV dissociation as the non-circular test. The next agency organ, **goal generation**, turns this drive into
+self-proposed goals the agent pursues. (`results/intrinsic_motivation.json`, `results/intrinsic_motivation.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

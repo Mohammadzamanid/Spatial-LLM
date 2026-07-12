@@ -893,6 +893,44 @@ learning partners. Every item is a measured-emergence experiment in the house st
 
 ---
 
+## Agency / autonomy — the self-directed frontier
+
+*The spatial/memory/learning register makes the map a rich brain, but the agent's WILL has been external: it plans
+toward a reward handed to it. Autonomy — the functional substrate of "free will" — needs organs that make the agent
+generate its own goals and act on its own drives. This is a different axis from the register above, and it is where
+an embodied agent in an open world stops being a planner and starts behaving. Built in the same house style: each
+signature emerges from the mechanism and is measured against falsifiers, never hardcoded.*
+
+### Agency 1. Intrinsic motivation — self-directed behaviour from an internal drive ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/intrinsic_motivation.py` (n=5). The seed of autonomy: a drive that makes the
+  agent DO things with no external reward and no goal. The faithful, non-circular form is **learning progress**
+  (Oudeyer & Kaplan 2007; Schmidhuber 1991/2010) — the agent is rewarded only by *improving its own world model*,
+  computed purely from its own prediction-error dynamics, never from task reward or a hardcoded "explore here". The
+  environment never tells the agent which regions are learnable; it discovers that through its own error.
+  - **(A) SELF-DIRECTED MASTERY EMERGES.** With no external reward, the agent systematically masters the learnable
+    environment (**77/77** cells) where a random-acting agent masters far less (**43**) — organised, purposeful
+    behaviour, not mere activity.
+  - **(B) NOISY-TV FALSIFIER (Burda/Pathak 2019).** Add a region of irreducible randomness (maximal, un-learnable
+    error forever). A pure-NOVELTY / prediction-error agent is TRAPPED there (**31%** of its life) because the error
+    is always maximal; a LEARNING-PROGRESS agent samples it, sees no across-visit competence gain, and leaves
+    (**10%**). The crucial dissociation: error *itself* is fooled by noise, error *reduction* is not.
+  - **(C) AND IT PAYS OFF.** Learning progress reaches 90% mastery in **352** steps vs novelty's **437**; random
+    never reaches it. The trap-avoidance is efficient, not just tidy.
+  - **(D) Honest note:** pure novelty *also* masters the learnable cells eventually (77) — both intrinsic drives
+    produce directed exploration; the learning-progress advantage is specifically trap-avoidance and efficiency, not
+    raw coverage.
+- **Honest grade:** *clean emergence with the canonical falsifier.* The behaviour is fully self-generated (no
+  external reward anywhere) and the noisy-TV dissociation is the sharp, non-circular test that separates genuine
+  curiosity from novelty-chasing. The load-bearing detail, found the honest way (a probe that first failed): learning
+  progress must be the *across-visit* drop in held-out error, not the within-visit fit — naive "did my error just
+  drop" is fooled by noise. See `results/FINDINGS.md`.
+- **Neuro basis.** Dopaminergic novelty/curiosity signals and prefrontal competence-based exploration drive
+  self-directed behaviour; modelling the drive as learning progress (not raw novelty) is what makes an autonomous
+  agent master its world instead of staring at static. **Next agency organ: goal generation** — turning this drive
+  into self-proposed goals the agent pursues.
+
+---
+
 ## Top recommendation
 
 Tiers 1–2 are closed (#1 BTSP, #2 hexadirectional, #3 goal/reward, #4 social space, #5 neuromodulation); the
