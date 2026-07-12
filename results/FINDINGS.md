@@ -1885,6 +1885,37 @@ This is the seed of autonomy: self-generated, structured behaviour from the agen
 noisy-TV dissociation as the non-circular test. The next agency organ, **goal generation**, turns this drive into
 self-proposed goals the agent pursues. (`results/intrinsic_motivation.json`, `results/intrinsic_motivation.svg`.)
 
+### Goal generation — the agent decides what to want, and a curriculum emerges (GAPS.md agency 2, n=5)
+
+Intrinsic motivation gave the agent a drive; goal generation turns that drive into self-proposed **goals**, so the
+agent is no longer handed a goal vector — it chooses what to pursue. The faithful, non-circular form is the
+**autotelic agent** (Colas, Karch, Sigaud & Oudeyer 2022; developmental robotics): it samples which goals to
+practise by learning progress over a goal space, preferring goals at the frontier of its ability (the zone of
+proximal development). Per the standing rule, nothing is scheduled — the agent is never told a goal, never told a
+difficulty order — and the goal space contains **impossible** goals (ceiling competence 0, the goal-space "noisy
+TV") it must learn to avoid. A developmental trajectory then emerges.
+
+- **A curriculum emerges — unscheduled.** The mean difficulty of the goals the autotelic agent proposes for itself
+  *rises* over its lifetime — **0.39 → 0.56** (Δ **+0.17**) — easy goals first, harder goals as it masters them. This
+  is a developmental ordering the agent generated for itself; a random-goal agent's proposed difficulty stays flat
+  (Δ −0.01). No schedule, no curriculum designer — the ordering falls out of goal-level learning progress.
+- **Goal-space mastery.** The autotelic agent masters **48 / 49** learnable goals, versus **40** for random goals.
+- **It threads the zone of proximal development — between two ways of failing.** An "always hardest" agent chases the
+  most difficult goals and wastes **100%** of its practice on the *impossible* ones, mastering **0** — the goal-space
+  noisy TV, exactly the trap organ 1 identified, now over goals. An "always easiest" agent coasts on already-trivial
+  goals and masters **1**. The autotelic agent self-organises onto the productive frontier (**52%** of proposals
+  land on learnable, not-yet-mastered goals; only **13%** are wasted on impossible ones) — which is *why* it masters
+  the space where both fixed strategies fail.
+- **Honest note.** A random-goal agent also masters many goals (40) — novelty carries it part way — so the autotelic
+  advantage is the emergent curriculum, completeness, and avoiding *both* failure modes, not raw activity. Reported.
+
+**Honest grade — clean emergence, developmental.** A self-organising curriculum falls out of goal-level learning
+progress with no schedule, and the agent threads between chasing the impossible and coasting on the trivial. It
+builds directly on organ 1 — the same learning-progress drive, now generating the goals rather than choosing states.
+With a drive and self-set goals, the planner has become an agent that generates its own objectives; the remaining
+agency organs (forward model / sense-of-agency, imagination, affect) deepen it. (`results/goal_generation.json`,
+`results/goal_generation.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

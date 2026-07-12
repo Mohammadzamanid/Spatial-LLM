@@ -929,6 +929,31 @@ signature emerges from the mechanism and is measured against falsifiers, never h
   agent master its world instead of staring at static. **Next agency organ: goal generation** — turning this drive
   into self-proposed goals the agent pursues.
 
+### Agency 2. Goal generation — the agent proposes its own goals ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/goal_generation.py` (n=5). Intrinsic motivation gave a drive; goal generation
+  turns it into self-proposed GOALS, so the agent is no longer handed a goal vector — it decides what to want. The
+  faithful form is the **autotelic agent** (Colas, Karch, Sigaud & Oudeyer 2022; developmental robotics): it samples
+  goals to practise by learning progress over a goal space, preferring the frontier of its ability (zone of proximal
+  development). Nothing is scheduled — no handed goal, no difficulty order — and the space contains IMPOSSIBLE goals
+  (ceiling competence 0, the goal-space "noisy TV") it must learn to avoid. A developmental trajectory emerges:
+  - **(A) A CURRICULUM EMERGES.** The mean difficulty of self-proposed goals RISES over the lifetime, **0.39 → 0.56**
+    (Δ **+0.17**), easy first then harder — never scheduled; a random-goal agent's difficulty stays flat (Δ −0.01).
+  - **(B) GOAL-SPACE MASTERY.** The autotelic agent masters **48 / 49** learnable goals, vs random **40**, and the
+    fixed strategies fail.
+  - **(C) IT THREADS THE ZONE OF PROXIMAL DEVELOPMENT.** An "always hardest" agent wastes **100%** of practice on
+    impossible goals and masters **0** (the goal-space noisy TV); an "always easiest" agent stalls on trivial goals
+    (masters **1**); the autotelic agent self-organises onto the productive frontier (**52%** of proposals, **13%**
+    wasted on impossible goals) and so masters the space.
+  - **(D) Honest note:** a random-goal agent also masters many goals (40) — novelty carries it part way; the autotelic
+    advantage is the emergent curriculum, completeness, and avoiding BOTH failure modes, not raw activity.
+- **Honest grade:** *clean emergence, developmental.* A self-organising curriculum falls out of goal-level learning
+  progress with no schedule, and the agent threads between the two ways of failing (chasing the impossible, coasting
+  on the trivial). Builds directly on organ 1 — the same drive, now generating the goals. See `results/FINDINGS.md`.
+- **Neuro basis.** Prefrontal cortex proposes and sequences abstract goals; sampling them by competence progress
+  yields the developmental curriculum seen in infants (Oudeyer) — the agent chooses what to want, at the edge of what
+  it can do. With a drive (organ 1) and self-set goals (organ 2), the planner has become an agent that generates its
+  own objectives; the remaining agency organs (forward model / sense-of-agency, imagination, affect) deepen it.
+
 ---
 
 ## Top recommendation

@@ -1,0 +1,85 @@
+{
+  "n_seeds": 5,
+  "n_goals": 60,
+  "impossible_above": 0.8,
+  "steps": 1600,
+  "results": {
+    "mastered_autotelic": {
+      "mean": 47.6,
+      "ci95": 3.3147
+    },
+    "mastered_random": {
+      "mean": 39.8,
+      "ci95": 4.6133
+    },
+    "mastered_hardest": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "mastered_easiest": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "curric_autotelic": {
+      "mean": 0.1709,
+      "ci95": 0.0229
+    },
+    "curric_random": {
+      "mean": -0.0127,
+      "ci95": 0.0286
+    },
+    "curric_hardest": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "curric_easiest": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "impossible_autotelic": {
+      "mean": 0.127,
+      "ci95": 0.0524
+    },
+    "impossible_random": {
+      "mean": 0.1859,
+      "ci95": 0.0608
+    },
+    "impossible_hardest": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "impossible_easiest": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "frontier_autotelic": {
+      "mean": 0.5222,
+      "ci95": 0.0638
+    },
+    "frontier_random": {
+      "mean": 0.4765,
+      "ci95": 0.0572
+    },
+    "frontier_hardest": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "frontier_easiest": {
+      "mean": 0.0128,
+      "ci95": 0.0056
+    },
+    "diff_early_auto": {
+      "mean": 0.3909,
+      "ci95": 0.045
+    },
+    "diff_late_auto": {
+      "mean": 0.5618,
+      "ci95": 0.047
+    },
+    "n_learn": {
+      "mean": 48.6,
+      "ci95": 3.9493
+    }
+  },
+  "verdict": "An autotelic agent proposes its OWN goals by learning progress over a goal space, with no handed goal and no difficulty schedule. A developmental curriculum EMERGES -- the difficulty of self-proposed goals rises over the lifetime (easy first, hard later), never scheduled -- and the agent masters essentially all learnable goals. It threads the zone of proximal development between two failure modes: an 'always hardest' agent wastes ~100% of practice on impossible goals and masters nothing (the goal-space noisy TV), while an 'always easiest' agent stalls on trivial goals; the autotelic agent self-organises onto the productive frontier. Honest note: a random-goal agent also masters many goals (novelty carries it part way); the autotelic advantage is the emergent curriculum, completeness, and avoiding both failure modes, not raw activity. Builds on organ 1 (intrinsic motivation) -- the drive now generates the goals."
+}

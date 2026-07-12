@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="770" height="320" font-family="Segoe UI, Arial">
+<rect width="770" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Goal generation: the agent proposes its own goals &#8212; a curriculum emerges, unscheduled</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">no handed goal, no difficulty schedule; the agent picks goals at its own competence frontier (learning progress)</text>
+<text x="44" y="92" font-size="11" font-weight="700" fill="#28324a">autotelic goal difficulty</text>
+<rect x="44" y="191" width="46" height="59" fill="#2ca25f" opacity="0.55"/>
+<text x="67" y="186" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.39</text>
+<text x="67" y="263" font-size="9" fill="#28324a" text-anchor="middle">early</text>
+<text x="67" y="274" font-size="9" fill="#28324a" text-anchor="middle">life</text>
+<rect x="110" y="166" width="46" height="84" fill="#2ca25f" opacity="0.8500000000000001"/>
+<text x="133" y="161" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.56</text>
+<text x="133" y="263" font-size="9" fill="#28324a" text-anchor="middle">late</text>
+<text x="133" y="274" font-size="9" fill="#28324a" text-anchor="middle">life</text>
+<line x1="40" y1="250" x2="176" y2="250" stroke="#33415c"/>
+<path d="M67 175 L133 150" stroke="#2ca25f" stroke-width="2" marker-end="url(#a)" fill="none"/>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2ca25f"/></marker></defs>
+<text x="44" y="288" font-size="8.5" fill="#5b6b8c">curriculum: easy &#8594; hard</text>
+<text x="300" y="92" font-size="11" font-weight="700" fill="#28324a">goals mastered (of 49)</text>
+<rect x="300" y="103" width="40" height="147" fill="#2ca25f" opacity="0.85"/>
+<text x="320" y="98" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">48</text>
+<text x="320" y="263" font-size="8" fill="#28324a" text-anchor="middle">autote</text>
+<rect x="348" y="127" width="40" height="123" fill="#8c8c8c" opacity="0.85"/>
+<text x="368" y="122" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">40</text>
+<text x="368" y="263" font-size="8" fill="#28324a" text-anchor="middle">random</text>
+<rect x="396" y="250" width="40" height="0" fill="#c9341a" opacity="0.85"/>
+<text x="416" y="245" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0</text>
+<text x="416" y="263" font-size="8" fill="#28324a" text-anchor="middle">hardes</text>
+<rect x="444" y="247" width="40" height="3" fill="#e6842a" opacity="0.85"/>
+<text x="464" y="242" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">1</text>
+<text x="464" y="263" font-size="8" fill="#28324a" text-anchor="middle">easies</text>
+<line x1="296" y1="250" x2="492" y2="250" stroke="#33415c"/>
+<text x="300" y="284" font-size="8.5" fill="#5b6b8c">hardest &amp; easiest both fail</text>
+<text x="560" y="92" font-size="11" font-weight="700" fill="#28324a">practice on IMPOSSIBLE goals</text>
+<rect x="560" y="231" width="60" height="19" fill="#2ca25f" opacity="0.85"/>
+<text x="590" y="226" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">13%</text>
+<text x="590" y="263" font-size="9" fill="#28324a" text-anchor="middle">autotelic</text>
+<rect x="638" y="100" width="60" height="150" fill="#c9341a" opacity="0.85"/>
+<text x="668" y="95" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">100%</text>
+<text x="668" y="263" font-size="9" fill="#28324a" text-anchor="middle">hardest</text>
+<line x1="556" y1="250" x2="716" y2="250" stroke="#33415c"/>
+<text x="560" y="284" font-size="8.5" fill="#5b6b8c">the goal-space noisy TV</text>
+<text x="20" y="308" font-size="9.5" fill="#5b6b8c">Autonomy over goals: self-proposed at the competence frontier &#8212; a developmental curriculum, no schedule. Builds on intrinsic motivation.</text>
+</svg>
