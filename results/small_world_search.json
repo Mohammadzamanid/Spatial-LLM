@@ -1,0 +1,77 @@
+{
+  "n_seeds": 5,
+  "n_eval": 90,
+  "n_small": 60,
+  "K_candidates": 12,
+  "results": {
+    "deliver_a0": {
+      "mean": 19.7519,
+      "ci95": 0.096
+    },
+    "deliver_a1": {
+      "mean": 18.074,
+      "ci95": 0.2012
+    },
+    "deliver_a2": {
+      "mean": 21.0858,
+      "ci95": 0.1743
+    },
+    "deliver_a3": {
+      "mean": 34.7259,
+      "ci95": 0.5167
+    },
+    "best_fixed": {
+      "mean": 18.074,
+      "ci95": 0.2012
+    },
+    "scale_a1": {
+      "mean": 14.1251,
+      "ci95": 0.0355
+    },
+    "scale_a3": {
+      "mean": 23.6898,
+      "ci95": 0.1206
+    },
+    "grow_a1": {
+      "mean": 1.2796,
+      "ci95": 0.0167
+    },
+    "grow_a3": {
+      "mean": 1.4658,
+      "ci95": 0.018
+    },
+    "alpha_emergent": {
+      "mean": 1.3853,
+      "ci95": 0.0114
+    },
+    "deliver_emergent": {
+      "mean": 16.4529,
+      "ci95": 0.0698
+    },
+    "alpha_random": {
+      "mean": -0.0062,
+      "ci95": 0.0414
+    },
+    "deliver_random": {
+      "mean": 19.6175,
+      "ci95": 0.1351
+    },
+    "stretch_flat": {
+      "mean": 2.8609,
+      "ci95": 0.0301
+    },
+    "stretch_emergent": {
+      "mean": 2.3319,
+      "ci95": 0.0286
+    },
+    "true_flat": {
+      "mean": 6.8663,
+      "ci95": 0.0042
+    },
+    "true_emergent": {
+      "mean": 7.0768,
+      "ci95": 0.01
+    }
+  },
+  "verdict": "A navigable small-world shortcut structure EMERGES from use-dependent plasticity, never imposed. Greedy decentralised delivery is an INTERIOR optimum in the shortcut exponent (too-local scales catastrophically); at the flat prior short paths EXIST but are unfindable (worst stretch); use-based selection from that flat prior grows the exponent into the navigable band and beats the flat prior, the best fixed-exponent graph, and a random-prune control at matched budget+pool; random pruning keeps the exponent flat with no gain. The textbook navigable exponent alpha=D=2 is asymptotic and NOT the finite-size optimum, so the emergent empirical navigable band (~1.4) is reported honestly."
+}

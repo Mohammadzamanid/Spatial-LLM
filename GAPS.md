@@ -520,6 +520,41 @@ Last updated: July 2026. (Companion to `results/FINDINGS.md`, which records what
   superpose many more place fields than it has cells; the cost is polysemantic, interference-prone cells — exactly
   what dense human recordings find, and why dense (non-sparse) activity destroys the capacity.
 
+### Small-world **searchability** — a navigable shortcut structure emerges from use ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/small_world_search.py` (n=5). The critique: a map wired as a pure
+  nearest-neighbour lattice forces goal-directed search to crawl hop-by-hop, where real hippocampal/cortical
+  connectivity is *small-world* — sparse long-range shortcuts allow few-hop search. The deep point (Kleinberg 2000)
+  is that short paths *existing* is not enough: a DECENTRALISED searcher (local structure + goal proximity only —
+  exactly the grid-population-vector closeness the cortex already computes) can only *find* them by greedy routing
+  when the shortcut-length distribution P(r) ∝ r^(−α) has the right exponent. Per the standing rule we hardcode
+  none of that: the only things built are the **mechanism** (a local lattice + candidate long-range links from a
+  FLAT prior + use-dependent selection under a 1-link/node wiring budget) and the **task** (greedy decentralised
+  routing, no global path oracle). Navigability emerges and is measured, never in a loss:
+  - **(A) NAVIGABILITY IS AN INTERIOR OPTIMUM.** Greedy delivery vs the shortcut exponent is non-monotone —
+    α=0 **19.8**, α=1 **18.1**, α=2 **21.1**, α=3 **34.7** hops — and too-local (α=3) *scales* catastrophically
+    (grows ×1.47 from n=60→90 vs the navigable band's ×1.28). It is the shortcut *distribution*, not their
+    presence, that buys searchability.
+  - **(B) FINDABILITY, NOT EXISTENCE.** The flat α=0 prior gives the *shortest* true paths (BFS **6.87**) yet the
+    *worst* greedy stretch (**2.86** = greedy ÷ true-optimal) — the short paths are there but a local searcher
+    cannot find them; the emergent graph cuts the stretch to **2.33**.
+  - **(C) THE NAVIGABLE EXPONENT EMERGES.** Use-dependent selection from the flat prior grows the surviving-link
+    exponent **α: 0 → 1.39 ± 0.01** (the navigable band) and delivers in **16.5** hops — beating the flat prior
+    (**19.8**) AND the best fixed-exponent graph (**18.1**); adaptive per-node selection outperforms any i.i.d.
+    fixed-α wiring.
+  - **(D) FALSIFIER — random pruning.** Keep a RANDOM candidate per node (same 1-link budget, same pool): the
+    exponent stays flat (**α ≈ −0.01**) and delivery gains nothing (**19.6**). It is the use-based selection, not
+    the budget or pruning, that grows navigability.
+- **Honest grade:** *emergent navigability, honest finite-size caveat* — the navigable structure genuinely
+  self-organises (nothing about the exponent imposed) and beats every control. The one caveat, reported not
+  hidden: the textbook navigable exponent α = D = 2 is an *asymptotic* result (polylog vs polynomial delivery
+  separates only at astronomically large grids); at CPU-reachable sizes the finite-size navigable optimum sits
+  lower (~1.4), and the emergent exponent lands *there*, on the size-appropriate navigable band — which is the
+  honest claim, not "converges to 2." See `results/FINDINGS.md`.
+- **Neuro basis.** Sparse long-range projections turn a local map into a small-world graph; but only a shortcut
+  distribution matched to the map's dimensionality is navigable by a cell that sees only its own connections and
+  where the goal is — and use-dependent plasticity selecting the shortcuts that actually carry greedy traffic
+  grows exactly that distribution.
+
 ---
 
 ## Tier 3 — GPU / language

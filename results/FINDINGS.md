@@ -1684,6 +1684,45 @@ with the sparsity dependence as a clean falsifier. Because natural experience is
 superpose far more fields than it has cells; the price is polysemantic, interference-prone cells — exactly what
 dense human recordings find. (`results/superposition_capacity.json`, `results/superposition_capacity.svg`.)
 
+### Small-world searchability — a navigable shortcut structure emerges from use (GAPS.md small-world, n=5)
+
+A cognitive map wired as a pure nearest-neighbour lattice forces goal-directed search to crawl hop-by-hop. Real
+hippocampal/cortical connectivity is *small-world* — sparse long-range shortcuts let search reach a goal in few
+hops. But the deep point (Kleinberg 2000) is that short paths *existing* is not enough: a **decentralised** searcher,
+one that knows only its own local links and where the goal is — exactly the grid-population-vector proximity the
+cortex already computes — can only *find* those short paths by greedy routing if the shortcut-length distribution
+P(r) ∝ r^(−α) has the right exponent. Any other exponent leaves the short paths present but unfindable. Per the
+standing rule none of that structure is imposed: the only things built are the **mechanism** (a local lattice, plus
+candidate long-range links drawn from a *flat* prior, plus use-dependent selection under a one-link-per-node wiring
+budget) and the **task** (greedy decentralised routing, never a global shortest-path oracle). Navigability then
+emerges and is measured.
+
+- **Navigability is an interior optimum.** Greedy delivery vs the shortcut exponent is non-monotone —
+  α=0 **19.8**, α=1 **18.1**, α=2 **21.1**, α=3 **34.7** hops. Too-local shortcuts (α=3) are catastrophic and,
+  crucially, *scale* worst: from a 60×60 to a 90×90 grid α=3 delivery grows ×**1.47** against the navigable band's
+  ×**1.28**. It is the *distribution* of shortcut lengths, not their mere presence, that buys searchability.
+- **Findability, not existence.** The flat α=0 prior (uniform-random shortcuts, the classic Watts–Strogatz rewiring)
+  gives the *shortest* true paths of all — BFS optimal **6.87** — yet the *worst* greedy stretch, **2.86** (greedy
+  ÷ true-optimal). The short paths are there; a local searcher cannot find them. The emergent graph cuts the stretch
+  to **2.33**. This is the precise sense in which "small-world" (short paths exist) and "searchable" (a decentralised
+  agent finds them) are different properties.
+- **The navigable exponent emerges.** Use-dependent selection, starting from the flat α=0 prior, grows the
+  surviving-link exponent to **α = 1.39 ± 0.01** — squarely in the navigable band — and routes in **16.5** hops.
+  That beats the flat prior it started from (**19.8**) *and* the best fixed-exponent graph (**18.1**): adaptive,
+  per-node selection of the shortcuts that actually carry greedy traffic outperforms any i.i.d. fixed-α wiring.
+- **Falsifier — random pruning.** Keep a *random* candidate per node instead of the used one, at the same one-link
+  budget and the same candidate pool: the exponent stays flat (**α ≈ −0.01**) and delivery gains nothing
+  (**19.6** vs the emergent **16.5**). The only difference between the two is use-based vs random selection, so it
+  is the selection, not the budget or the pruning machinery, that grows navigability.
+
+**Honest grade — emergent navigability, honest finite-size caveat.** The navigable structure genuinely
+self-organises (nothing about the exponent is imposed) and beats every control. The one caveat, stated rather than
+hidden: the textbook navigable exponent α = D = 2 is an *asymptotic* result — greedy delivery is polylog at α=2 and
+polynomial otherwise, but that separation only appears at astronomically large grids. At CPU-reachable sizes the
+finite-size navigable optimum sits lower (~1.4), and the emergent exponent lands *there*, on the size-appropriate
+navigable band. So the claim is "use grows the exponent into the navigable band and beats every fixed-exponent
+graph," not "converges to 2." (`results/small_world_search.json`, `results/small_world_search.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" font-family="Segoe UI, Arial">
+<rect width="760" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Small-world searchability: a navigable shortcut exponent EMERGES from use</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">greedy decentralised routing &#8212; nothing about the shortcut distribution imposed; the wiring self-organises into the navigable band</text>
+<text x="44" y="88" font-size="11" font-weight="700" fill="#28324a">delivery hops vs exponent α</text>
+<rect x="44" y="172" width="40" height="74" fill="#7690b8" opacity="0.85"/>
+<text x="64" y="167" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">20</text>
+<text x="64" y="259" font-size="9" fill="#28324a" text-anchor="middle">α=0</text>
+<rect x="94" y="178" width="40" height="68" fill="#2ca25f" opacity="0.85"/>
+<text x="114" y="173" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">18</text>
+<text x="114" y="259" font-size="9" fill="#28324a" text-anchor="middle">α=1</text>
+<rect x="144" y="167" width="40" height="79" fill="#7690b8" opacity="0.85"/>
+<text x="164" y="162" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">21</text>
+<text x="164" y="259" font-size="9" fill="#28324a" text-anchor="middle">α=2</text>
+<rect x="194" y="116" width="40" height="130" fill="#c9341a" opacity="0.85"/>
+<text x="214" y="111" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">35</text>
+<text x="214" y="259" font-size="9" fill="#28324a" text-anchor="middle">α=3</text>
+<line x1="40" y1="246" x2="244" y2="246" stroke="#33415c"/>
+<text x="44" y="280" font-size="8.5" fill="#5b6b8c">interior optimum; α=3 too-local</text>
+<text x="300" y="88" font-size="11" font-weight="700" fill="#28324a">delivery (1 link/node budget)</text>
+<rect x="300" y="184" width="46" height="62" fill="#2ca25f" opacity="0.85"/>
+<text x="323" y="179" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">16.5</text>
+<text x="323" y="259" font-size="9" fill="#28324a" text-anchor="middle">emergent</text>
+<rect x="358" y="172" width="46" height="74" fill="#c9341a" opacity="0.85"/>
+<text x="381" y="167" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">19.6</text>
+<text x="381" y="259" font-size="9" fill="#28324a" text-anchor="middle">random</text>
+<text x="381" y="270" font-size="9" fill="#28324a" text-anchor="middle">prune</text>
+<rect x="416" y="172" width="46" height="74" fill="#8c8c8c" opacity="0.85"/>
+<text x="439" y="167" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">19.8</text>
+<text x="439" y="259" font-size="9" fill="#28324a" text-anchor="middle">flat</text>
+<text x="439" y="270" font-size="9" fill="#28324a" text-anchor="middle">α=0</text>
+<line x1="296" y1="246" x2="474" y2="246" stroke="#33415c"/>
+<text x="560" y="88" font-size="11" font-weight="700" fill="#28324a">emergent exponent</text>
+<text x="560" y="126" font-size="11" fill="#5b6b8c">flat prior α = 0.0</text>
+<text x="560" y="158" font-size="30" font-weight="800" fill="#2ca25f">1.39</text>
+<text x="560" y="176" font-size="9" fill="#5b6b8c">use-selected (navigable band)</text>
+<text x="560" y="208" font-size="11" fill="#c9341a">random prune α = -0.01</text>
+<text x="560" y="222" font-size="9" fill="#5b6b8c">stays flat &#8212; no navigability</text>
+<text x="20" y="306" font-size="9.5" fill="#5b6b8c">stretch (greedy÷optimal): flat prior 2.86 (short paths exist, unfindable) &#8594; emergent 2.33. Textbook α=2 is asymptotic; finite-size navigable optimum is lower.</text>
+</svg>
