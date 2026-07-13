@@ -1,0 +1,73 @@
+{
+  "n_seeds": 5,
+  "lam": 0.06,
+  "alpha": 0.15,
+  "gains": [
+    0.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0
+  ],
+  "results": {
+    "mom_onset": {
+      "mean": 0.201,
+      "ci95": 0.0031
+    },
+    "mom_steady": {
+      "mean": -0.0015,
+      "ci95": 0.0062
+    },
+    "mom_bad_onset": {
+      "mean": -0.2029,
+      "ci95": 0.0061
+    },
+    "moodstd_f0": {
+      "mean": 0.0297,
+      "ci95": 0.0007
+    },
+    "moodstd_f1": {
+      "mean": 0.035,
+      "ci95": 0.001
+    },
+    "moodstd_f2": {
+      "mean": 0.0457,
+      "ci95": 0.0019
+    },
+    "moodstd_f3": {
+      "mean": 0.086,
+      "ci95": 0.0061
+    },
+    "moodstd_f4": {
+      "mean": 0.6409,
+      "ci95": 0.0017
+    },
+    "moodstd_f5": {
+      "mean": 1.0698,
+      "ci95": 0.0019
+    },
+    "moodstd_f6": {
+      "mean": 1.4125,
+      "ci95": 0.0022
+    },
+    "autocorr_stable": {
+      "mean": -0.0069,
+      "ci95": 0.038
+    },
+    "autocorr_swing": {
+      "mean": 0.6752,
+      "ci95": 0.0032
+    },
+    "valuestd_stable": {
+      "mean": 0.1001,
+      "ci95": 0.0024
+    },
+    "valuestd_swing": {
+      "mean": 3.1279,
+      "ci95": 0.0071
+    }
+  },
+  "verdict": "A global mood state emerges from reward-prediction-error momentum (Eldar-Dayan 2016): mood is a leaky integral of RPE and biases perceived reward. Emergent, never imposed: (A) mood tracks SURPRISE not reward level -- it spikes at a streak's onset and decays as the streak becomes expected, ~0 under steady expected reward; a single global scalar. (B) The mood->perception feedback is self-reinforcing, so above a CRITICAL gain mood self-amplifies from a small fast tracker into large SLOW swings (bipolar-like), a clean dose-response in the gain with slow autocorrelation appearing. (C) In a stationary world those swings inject spurious swings into the agent's value estimates -- affect colours (and can distort) perceived worth. (D) Cutting the feedback (gain 0) leaves mood a passive fast uncorrelated read-out with no swings and no value distortion -- the loop is required. The mood BIAS is the built mechanism; the swings, the slow structure, and the value colouring are what emerge from it."
+}

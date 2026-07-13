@@ -1993,6 +1993,44 @@ Four agency organs down (drive → goals → self → deliberation): the planner
 itself, sets its own goals, knows what it caused, and thinks before it acts.
 (`results/imagination_planning.json`, `results/imagination_planning.svg`.)
 
+### Affect / valence — the global tone that colours what matters (GAPS.md agency 5, n=5)
+
+The agent already values individual outcomes (dopamine, the basal ganglia). Affect is a different thing: a slow,
+diffuse, **global** good/bad state — mood — not tied to any one stimulus, that colours everything. The faithful,
+non-circular mechanism is Eldar & Dayan's **"mood as representation of momentum"** (2016): mood is a leaky integral
+of reward *prediction errors* — how much better or worse than expected things have been going — and it feeds back to
+bias how the *next* outcome is perceived, a positive mood inflating rewards and a negative mood deflating them. That
+mood-bias is the built mechanism; the swings, the slow structure, and the value-colouring are what emerge from the
+single momentum loop.
+
+- **Mood is the momentum of surprise, not the reward level.** Mood spikes at the *onset* of a better-than-expected
+  streak (**+0.20**), then decays back toward zero as the streak becomes expected (the value catches up, **−0.00**),
+  and swings negative at a worse-than-expected onset (**−0.20**). A steady, fully-expected reward leaves mood at
+  zero. It is one global scalar summarising "are things going better or worse than I thought," not a per-stimulus
+  value — exactly the diffuse, stimulus-independent character of mood.
+- **Self-reinforcing swings emerge (bipolar-like).** Because mood biases perception and perception drives mood, the
+  loop has positive feedback. Sweeping the feedback gain, above a *critical* gain the mood self-amplifies from a
+  small, fast tracker into large, *slow* swings: mood standard deviation **0.03 → 0.05 → 0.64 → 1.41** across gains
+  f = 0 → 2 → 4 → 6, with slow-lag autocorrelation climbing from **−0.01** to **+0.68** — spontaneous mood cycles in
+  a stationary world. Nothing about swings is programmed; they fall out of the momentum loop, exactly as Eldar &
+  Dayan predict for mood instability.
+- **Affect colours a stationary world — the double edge.** In an unchanging (mean-zero) environment those swings
+  inject spurious swings into the agent's *value* estimates — value-estimate standard deviation rises from **0.10**
+  to **3.13** — so it perceives the same world as better or worse depending on its mood. This is "colours what
+  matters" made concrete, and it shows the mechanism is double-edged: the tone that makes things matter can also
+  distort their worth.
+- **Falsifier — cut the feedback.** With no mood→perception feedback (gain 0), mood is a passive, fast, uncorrelated
+  read-out of surprise: standard deviation 0.03, no slow structure, value swing 0.10 — no swings, no distortion. The
+  swings *require* the loop.
+
+**Honest grade — clean emergence, honest about the mechanism.** The mood→perception bias is the built mechanism, not
+claimed as emergent; what emerges — and is measured against a clean feedback-cut falsifier — is the momentum/surprise
+structure, the critical-gain swings, and the colouring of a stationary world. **The agency stack is complete — five
+organs:** the system now *wants* (intrinsic motivation), *chooses what to want* (goal generation), *knows what it
+caused and can move a body* (forward model), *thinks before it acts* (imagination/planning), and carries a *global
+affective tone* (affect). Every cognitive piece of an autonomous agent now exists, each an emergent signature with a
+falsifier, none of it scripted. (`results/affect_valence.json`, `results/affect_valence.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

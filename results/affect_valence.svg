@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="320" font-family="Segoe UI, Arial">
+<rect width="780" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Affect / valence: a global mood, and its swings, emerge from surprise momentum</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">mood = leaky momentum of reward prediction error, biasing perception &#8212; the swings &amp; value-colouring are never put in</text>
+<text x="44" y="92" font-size="11" font-weight="700" fill="#28324a">mood vs surprise</text>
+<rect x="44" y="125" width="46" height="50" fill="#2ca25f" opacity="0.85"/>
+<text x="67" y="121" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">+0.20</text>
+<text x="67" y="263" font-size="9" fill="#28324a" text-anchor="middle">good</text>
+<text x="67" y="274" font-size="9" fill="#28324a" text-anchor="middle">onset</text>
+<rect x="98" y="175" width="46" height="0" fill="#8c8c8c" opacity="0.85"/>
+<text x="121" y="187" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">-0.00</text>
+<text x="121" y="263" font-size="9" fill="#28324a" text-anchor="middle">steady</text>
+<text x="121" y="274" font-size="9" fill="#28324a" text-anchor="middle">(expected)</text>
+<rect x="152" y="175" width="46" height="51" fill="#c9341a" opacity="0.85"/>
+<text x="175" y="238" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">-0.20</text>
+<text x="175" y="263" font-size="9" fill="#28324a" text-anchor="middle">bad</text>
+<text x="175" y="274" font-size="9" fill="#28324a" text-anchor="middle">onset</text>
+<line x1="40" y1="175.0" x2="206" y2="175.0" stroke="#33415c"/>
+<text x="44" y="286" font-size="8.5" fill="#5b6b8c">spikes at onset, decays when expected</text>
+<text x="300" y="92" font-size="11" font-weight="700" fill="#28324a">mood swing size vs gain f</text>
+<rect x="300" y="247" width="30" height="3" fill="#2ca25f" opacity="0.85"/>
+<text x="315" y="263" font-size="8" fill="#28324a" text-anchor="middle">0</text>
+<rect x="335" y="247" width="30" height="3" fill="#2ca25f" opacity="0.85"/>
+<text x="350" y="263" font-size="8" fill="#28324a" text-anchor="middle">1</text>
+<rect x="370" y="246" width="30" height="4" fill="#2ca25f" opacity="0.85"/>
+<text x="385" y="263" font-size="8" fill="#28324a" text-anchor="middle">2</text>
+<rect x="405" y="242" width="30" height="8" fill="#e6842a" opacity="0.85"/>
+<text x="420" y="263" font-size="8" fill="#28324a" text-anchor="middle">3</text>
+<rect x="440" y="191" width="30" height="59" fill="#c9341a" opacity="0.85"/>
+<text x="455" y="263" font-size="8" fill="#28324a" text-anchor="middle">4</text>
+<rect x="475" y="151" width="30" height="99" fill="#c9341a" opacity="0.85"/>
+<text x="490" y="263" font-size="8" fill="#28324a" text-anchor="middle">5</text>
+<rect x="510" y="120" width="30" height="130" fill="#c9341a" opacity="0.85"/>
+<text x="525" y="263" font-size="8" fill="#28324a" text-anchor="middle">6</text>
+<line x1="296" y1="250" x2="545" y2="250" stroke="#33415c"/>
+<text x="300" y="280" font-size="8.5" fill="#5b6b8c">critical gain -> emergent swings</text>
+<text x="585" y="92" font-size="11" font-weight="700" fill="#28324a">value swing (fixed world)</text>
+<rect x="585" y="246" width="58" height="4" fill="#2ca25f" opacity="0.85"/>
+<text x="614" y="241" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.10</text>
+<text x="614" y="263" font-size="9" fill="#28324a" text-anchor="middle">f=1</text>
+<text x="614" y="274" font-size="9" fill="#28324a" text-anchor="middle">(stable)</text>
+<rect x="659" y="125" width="58" height="125" fill="#c9341a" opacity="0.85"/>
+<text x="688" y="120" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">3.13</text>
+<text x="688" y="263" font-size="9" fill="#28324a" text-anchor="middle">f=5</text>
+<text x="688" y="274" font-size="9" fill="#28324a" text-anchor="middle">(mood)</text>
+<line x1="581" y1="250" x2="733" y2="250" stroke="#33415c"/>
+<text x="585" y="280" font-size="8.5" fill="#5b6b8c">affect colours a stationary world</text>
+<text x="20" y="308" font-size="9.5" fill="#5b6b8c">A global good/bad tone from the momentum of surprise; its own feedback makes it swing. Falsifier: cut the feedback (f=0) &#8594; no swings.</text>
+</svg>

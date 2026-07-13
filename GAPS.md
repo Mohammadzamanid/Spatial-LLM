@@ -1013,6 +1013,35 @@ signature emerges from the mechanism and is measured against falsifiers, never h
   that motivates itself, sets its own goals, knows what it caused, and thinks before it acts. Affect remains; then
   the embodied 3-D agent.
 
+### Agency 5. Affect / valence — the global tone that colours what matters ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/affect_valence.py` (n=5). The agent already values individual outcomes
+  (dopamine / basal ganglia); affect is different — a slow, diffuse, GLOBAL good/bad state (mood) not tied to any
+  one stimulus. The faithful, non-circular mechanism is Eldar & Dayan's **mood as momentum** (2016): mood is a leaky
+  integral of reward PREDICTION ERRORS and biases how the next outcome is perceived (a positive mood inflates
+  rewards). That mood *bias* is the built mechanism; the swings, the slow structure, and the value-colouring emerge:
+  - **(A) MOOD = MOMENTUM OF SURPRISE.** Mood spikes at a better-than-expected streak's onset (**+0.20**), decays to
+    ~0 as the streak becomes expected (**−0.00**), and drops at a worse-than-expected onset (**−0.20**). A steady
+    expected reward leaves mood at zero — a global scalar for "better or worse than I thought", not a per-item value.
+  - **(B) SELF-REINFORCING SWINGS EMERGE (bipolar-like).** Because mood biases perception and perception drives mood,
+    above a CRITICAL feedback gain the loop self-amplifies from a small fast tracker into large slow swings: mood std
+    **0.03 → 0.05 → 0.64 → 1.41** across gain f = 0 → 2 → 4 → 6, with slow autocorrelation appearing (**−0.01 →
+    +0.68**). Spontaneous mood cycles in a stationary world, never programmed.
+  - **(C) AFFECT COLOURS A STATIONARY WORLD (double edge).** In an unchanging environment those swings inject
+    spurious swings into the agent's VALUE estimates — value-estimate std **0.10 → 3.13** — it perceives the same
+    world as better/worse with its mood. Affect colours what matters, and the same mechanism can distort it.
+  - **(D) FALSIFIER — cut the feedback.** Gain 0 leaves mood a passive, fast, uncorrelated read-out (std 0.03, no
+    slow structure, value std 0.10): no swings, no distortion. The loop is required.
+- **Honest grade:** *clean emergence, honest about the mechanism.* The mood→perception bias is the built mechanism
+  (not claimed as emergent); what emerges — and is measured against a clean feedback-cut falsifier — is the
+  momentum/surprise structure, the critical-gain swings (bipolar-like), and the colouring of a stationary world.
+  See `results/FINDINGS.md`.
+- **Neuro basis.** Serotonergic/limbic systems carry a slow global affective tone that integrates recent reward
+  momentum and biases perception, learning, and valuation; its own feedback can drive mood instability
+  (Eldar-Dayan's account of bipolar-like swings). **The agency stack is complete — five organs:** the system now
+  wants (drive), chooses what to want (goals), knows what it caused and moves a body (self/forward model), thinks
+  before acting (imagination/planning), and has a global affective tone (affect). Next: assemble the embodied 3-D
+  agent — every cognitive piece now exists.
+
 ---
 
 ## Top recommendation
