@@ -954,6 +954,36 @@ signature emerges from the mechanism and is measured against falsifiers, never h
   it can do. With a drive (organ 1) and self-set goals (organ 2), the planner has become an agent that generates its
   own objectives; the remaining agency organs (forward model / sense-of-agency, imagination, affect) deepen it.
 
+### Agency 3. Forward model + efference copy — the sense of self, and the body ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/forward_model.py` (n=5). A planner that reads the world cannot tell what IT
+  caused from what the world did, and cannot act through the delay in its own senses. Both are solved by one organ:
+  a forward model that, from a copy of the motor command (the **efference copy**), predicts the sensory consequence
+  of the agent's own action (von Holst & Mittelstaedt 1950; Sperry 1950; Wolpert & Miall; the comparator model of
+  agency, Frith & Blakemore 2000). Per the standing rule we build only the forward model + the task (predict the
+  next sensation from sensation + efference copy, self-supervised) — never a self/world label in the loss. Both a
+  sense of agency AND motor control emerge:
+  - **(A) A SENSE OF AGENCY EMERGES.** Prediction error is LOW for self-caused change (reafference, **0.003**) and
+    HIGH for world-caused change (exafference, **0.456**); a reader recovers self-vs-world from the error alone
+    (**AUC 0.97 ± 0.01**), never trained on the label. The world's influence is in the training stream and drawn
+    from the SAME distribution as the agent's own effect, so it is high-error because UNPREDICTABLE, not novel/OOD.
+  - **(B) SENSORY ATTENUATION.** The self-caused sensation is predicted away — residual **0.01×** an identical
+    world-caused one ("you can't tickle yourself"; Blakemore, Wolpert & Frith).
+  - **(C) THE EFFERENCE COPY IS THE CAUSE (falsifier).** Remove it: self **0.460** ≈ world **0.465**, agency
+    **AUC 0.50** — collapses to chance. It is the efference copy, not the sensation, that grounds the distinction.
+  - **(D) THE SAME MODEL CONTROLS THE BODY (double duty).** Used as a Smith predictor through the sensory delay, it
+    tracks a moving target where stale-feedback control lags — tracking error forward-model vs stale: delay 0
+    **0.04 = 0.04**, delay 3 **0.13 vs 1.84**, delay 6 **0.21 vs 3.51**. Equal at zero delay, so it is
+    delay-compensation, not a rigged baseline. One self-supervised model → the sense of self AND the body.
+- **Honest grade:** *clean emergence, double duty.* Agency, attenuation, and delay-compensated control all fall out
+  of one self-supervised forward model, with the efference-copy ablation as the sharp falsifier and the
+  magnitude-matched self/world perturbations ensuring only predictability (not amplitude) separates them. Four
+  independent design agents converged on this exact non-circular design. The forward model is the organ the embodied
+  3-D agent needs for continuous motor control, and the same organ gives it a sense of self. See `results/FINDINGS.md`.
+- **Neuro basis.** The cerebellum learns a forward model of the body; corollary discharge cancels self-generated
+  reafference (so the world stands out) and predicts through sensorimotor delay. Agency is the match between
+  predicted and actual sensation — low error means "I did that." **Three agency organs down** (drive, goals, self);
+  imagination and affect remain to deepen the autonomous agent.
+
 ---
 
 ## Top recommendation

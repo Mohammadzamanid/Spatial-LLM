@@ -1,0 +1,64 @@
+{
+  "n_seeds": 5,
+  "a_range": 1.6,
+  "delays": [
+    0,
+    3,
+    6
+  ],
+  "results": {
+    "err_self": {
+      "mean": 0.003,
+      "ci95": 0.0015
+    },
+    "err_world": {
+      "mean": 0.456,
+      "ci95": 0.0096
+    },
+    "attenuation": {
+      "mean": 0.0065,
+      "ci95": 0.0034
+    },
+    "agency_auc": {
+      "mean": 0.9671,
+      "ci95": 0.0121
+    },
+    "err_self_noEC": {
+      "mean": 0.46,
+      "ci95": 0.0131
+    },
+    "err_world_noEC": {
+      "mean": 0.4645,
+      "ci95": 0.0088
+    },
+    "agency_auc_noEC": {
+      "mean": 0.5035,
+      "ci95": 0.0089
+    },
+    "track_fm_d0": {
+      "mean": 0.0397,
+      "ci95": 0.0007
+    },
+    "track_fm_d3": {
+      "mean": 0.1267,
+      "ci95": 0.0321
+    },
+    "track_fm_d6": {
+      "mean": 0.2137,
+      "ci95": 0.0698
+    },
+    "track_stale_d0": {
+      "mean": 0.0397,
+      "ci95": 0.0007
+    },
+    "track_stale_d3": {
+      "mean": 1.8422,
+      "ci95": 0.0051
+    },
+    "track_stale_d6": {
+      "mean": 3.5075,
+      "ci95": 0.0141
+    }
+  },
+  "verdict": "A sense of agency and motor control both emerge from ONE self-supervised forward model that predicts the sensory consequence of the agent's own action from an efference copy, with no self/world label ever in the loss. Self-caused sensory change is low-error (predicted) and world-caused change high-error (unpredictable) -- world is in the training stream and drawn from the same distribution as the agent's own effect, so it is high-error because unpredictable, not novel; a reader recovers self-vs-world from the error alone (AUC >> 0.5). Self-generated sensation is attenuated (you can't tickle yourself). Removing the efference copy equalises the errors and collapses agency to chance -- the efference copy is the cause. And the SAME model, used as a Smith predictor through the sensory delay, controls a tracking task where stale-feedback control lags, with the advantage growing with delay (equal at zero delay). One model: the sense of self and the body."
+}

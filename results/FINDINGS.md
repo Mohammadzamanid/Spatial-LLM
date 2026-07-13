@@ -1916,6 +1916,47 @@ With a drive and self-set goals, the planner has become an agent that generates 
 agency organs (forward model / sense-of-agency, imagination, affect) deepen it. (`results/goal_generation.json`,
 `results/goal_generation.svg`.)
 
+### Forward model + efference copy — the sense of self, and the body (GAPS.md agency 3, n=5)
+
+A planner that reads the world has two blind spots: it cannot tell what *it* caused from what the *world* did, and
+it cannot act through the delay in its own senses. Both are solved by a single organ — a **forward model** that,
+from a copy of the motor command (the **efference copy**), predicts the sensory consequence of the agent's own
+action (von Holst & Mittelstaedt 1950; Sperry 1950; Wolpert & Miall; the comparator model of agency, Frith &
+Blakemore 2000). Per the standing rule we build only the forward model and the task — predict the next sensation
+from the current sensation and the efference copy, trained self-supervised — and **never put a self/world label in
+the loss.** The sensation is one reading of the agent's effector plus an independent world influence; a nonlinear
+actuator moves the effector, so the model must *learn* its own action→sensation mapping. Both a sense of agency and
+motor control then emerge.
+
+- **A sense of agency emerges.** The model's prediction error is low for self-caused sensory change (reafference —
+  predicted from the efference copy, **0.003**) and high for world-caused change (exafference — no efference copy
+  predicts it, **0.456**). A reader recovers self-vs-world from the prediction error *alone* — **AUC 0.97 ± 0.01**,
+  never trained on the label. The crucial non-circular guard: the world's influence is *in* the training stream and
+  drawn from the *same distribution* as the agent's own effect, so world-caused change is high-error because it is
+  **unpredictable**, not because it is novel or out-of-distribution. Only predictability-given-the-efference-copy can
+  separate them.
+- **Sensory attenuation — you can't tickle yourself.** The self-caused sensation is predicted away; its residual is
+  **0.01×** an identical world-caused one (Blakemore, Wolpert & Frith). The self-generated tickle is cancelled; the
+  external one is not.
+- **The efference copy is the cause (falsifier).** Remove it — predict from the sensation alone — and self- and
+  world-caused changes become equally unpredictable: self **0.460** ≈ world **0.465**, agency **AUC 0.50**, exactly
+  chance. It is the efference copy, not the sensation, that grounds the self/world distinction.
+- **The same model controls the body (double duty).** Used as a Smith predictor — rolling the forward model forward
+  through the sensory *delay* using the agent's own recent commands — it lets a controller track a moving target
+  where a controller acting on stale, delayed feedback lags badly. Tracking error (forward model vs stale): delay 0
+  **0.04 = 0.04**, delay 3 **0.13 vs 1.84**, delay 6 **0.21 vs 3.51**. The two are *equal at zero delay* and the
+  forward model's advantage *grows* with delay — so this is delay-compensation from the model, not a rigged
+  baseline. One self-supervised model yields both the sense of self and the control of the body.
+
+**Honest grade — clean emergence, double duty.** Agency, sensory attenuation, and delay-compensated control all fall
+out of one self-supervised forward model, with the efference-copy ablation as the sharp falsifier and the
+magnitude-matched perturbations ensuring only predictability separates self from world. (Four independent design
+agents, run as an adversarial design sweep, converged on this exact non-circular design; the sweep's red-team phase
+was cut short by a session limit, so the guarantee rests on the three CPU crux-probes and the convergent designs, not
+on that phase.) This is the organ the embodied 3-D agent needs for continuous motor control — and the *same* organ
+gives it a sense of self. Three agency organs down (drive, goals, self); imagination and affect remain.
+(`results/forward_model.json`, `results/forward_model.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

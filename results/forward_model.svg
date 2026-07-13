@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="320" font-family="Segoe UI, Arial">
+<rect width="780" height="320" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Forward model + efference copy: the sense of self, and the body, from one model</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">predict the sensory consequence of your own action; agency &amp; motor control emerge &#8212; no self/world label in the loss</text>
+<text x="44" y="92" font-size="11" font-weight="700" fill="#28324a">prediction error</text>
+<rect x="44" y="249" width="44" height="1" fill="#2ca25f" opacity="0.85"/>
+<text x="66" y="244" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.00</text>
+<text x="66" y="263" font-size="9" fill="#28324a" text-anchor="middle">self</text>
+<text x="66" y="274" font-size="9" fill="#28324a" text-anchor="middle">+EC</text>
+<rect x="98" y="131" width="44" height="119" fill="#c9341a" opacity="0.85"/>
+<text x="120" y="126" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.46</text>
+<text x="120" y="263" font-size="9" fill="#28324a" text-anchor="middle">world</text>
+<text x="120" y="274" font-size="9" fill="#28324a" text-anchor="middle">+EC</text>
+<rect x="152" y="130" width="44" height="120" fill="#8c8c8c" opacity="0.85"/>
+<text x="174" y="125" font-size="10" font-weight="700" fill="#0b1324" text-anchor="middle">0.46</text>
+<text x="174" y="263" font-size="9" fill="#28324a" text-anchor="middle">self</text>
+<text x="174" y="274" font-size="9" fill="#28324a" text-anchor="middle">-EC</text>
+<line x1="40" y1="250" x2="206" y2="250" stroke="#33415c"/>
+<text x="44" y="286" font-size="9" fill="#2ca25f">attenuation 0.01&#215; (can't tickle yourself)</text>
+<text x="300" y="92" font-size="11" font-weight="700" fill="#28324a">agency AUC (0.5 = chance)</text>
+<rect x="300" y="108" width="62" height="142" fill="#2ca25f" opacity="0.85"/>
+<text x="331" y="103" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.97</text>
+<text x="331" y="263" font-size="9" fill="#28324a" text-anchor="middle">with EC</text>
+<rect x="382" y="224" width="62" height="26" fill="#c9341a" opacity="0.85"/>
+<text x="413" y="219" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0.50</text>
+<text x="413" y="263" font-size="9" fill="#28324a" text-anchor="middle">no EC</text>
+<text x="413" y="274" font-size="9" fill="#28324a" text-anchor="middle">(falsifier)</text>
+<line x1="296" y1="250" x2="464" y2="250" stroke="#33415c"/>
+<line x1="296" y1="225" x2="464" y2="225" stroke="#8c8c8c" stroke-dasharray="3 3"/>
+<text x="462" y="222" font-size="8" fill="#8c8c8c" text-anchor="end">chance</text>
+<text x="560" y="92" font-size="11" font-weight="700" fill="#28324a">tracking error vs delay</text>
+<rect x="560" y="248" width="23" height="2" fill="#2ca25f" opacity="0.85"/>
+<rect x="586" y="248" width="23" height="2" fill="#c9341a" opacity="0.85"/>
+<text x="585" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">d=0</text>
+<rect x="626" y="245" width="23" height="5" fill="#2ca25f" opacity="0.85"/>
+<rect x="652" y="178" width="23" height="72" fill="#c9341a" opacity="0.85"/>
+<text x="651" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">d=3</text>
+<rect x="692" y="242" width="23" height="8" fill="#2ca25f" opacity="0.85"/>
+<rect x="718" y="114" width="23" height="136" fill="#c9341a" opacity="0.85"/>
+<text x="717" y="263" font-size="8.5" fill="#28324a" text-anchor="middle">d=6</text>
+<line x1="556" y1="250" x2="758" y2="250" stroke="#33415c"/>
+<text x="560" y="280" font-size="8.5" fill="#5b6b8c"><tspan fill="#2ca25f">forward model</tspan> vs <tspan fill="#c9341a">stale feedback</tspan></text>
+<text x="20" y="308" font-size="9.5" fill="#5b6b8c">One self-supervised forward model grounds both the sense of self (what I caused) and control of the body (acting through my own sensory delay).</text>
+</svg>
