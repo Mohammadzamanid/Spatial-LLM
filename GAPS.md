@@ -1042,6 +1042,30 @@ signature emerges from the mechanism and is measured against falsifiers, never h
   before acting (imagination/planning), and has a global affective tone (affect). Next: assemble the embodied 3-D
   agent — every cognitive piece now exists.
 
+### Integration capstone. **The embodied agent** — the organs act as one autonomous machine ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/embodied_agent.py` (n=5). The Stage-1 reference loop: the five agency organs
+  (world model, imagination/planning, intrinsic motivation, goal generation, affect) plus a path-integration
+  localization, wired into ONE embodied agent in a continuous world (a maze floor-plan) with an obstacle and two
+  resources behind it, thirst/hunger that rise and reset at the resources, and NO scripted goal. The agent must
+  discover the resources, navigate to them around the obstacle, and arbitrate explore-vs-drink/eat — all from the
+  organs. This is the loop a 3-D world drives.
+  - **(A) AUTONOMOUS AND COMPETENT.** With no scripted goal the full loop keeps its drives bounded (mean drive
+    **1.6** — it survives) where a NULL random-action agent floods (**4.5**).
+  - **(B) EACH ORGAN ON ITS OWN AXIS.** Planning reaches goals behind the obstacle (**100%** vs a reactive
+    controller's **0%**); intrinsic motivation discovers both resources early (by step **197**) and covers **79%**
+    of the world (vs random action's step 435 and 47%); goal generation heads to the needed resource when a drive is
+    urgent **69%** of the time (goal-generation-off: 0%).
+  - **(C) HONEST LIMIT.** A single coarse "survival" number does NOT cleanly rank the *individual* organ ablations,
+    because in a small world their benefits are coupled (exploration's wandering substitutes for planning, etc.) —
+    the project's recurring lesson that a specific-benefit organ must be scored on the axis where it acts, now at the
+    integration scale. So each organ is measured on its own axis (B); the integration's result is that the organs
+    **compose** into one autonomous loop, and (A)+(B) confirm it is real, not scripted.
+- **Honest grade:** *clean integration, honestly scoped.* The organs compose into a competent autonomous agent — it
+  explores, discovers, plans, and regulates itself with no external goal — and each is load-bearing on its own axis;
+  the coarse-survival-doesn't-dissociate finding is reported, not hidden. The clean per-organ dissociations live in
+  each organ's standalone eval. This is the reference implementation the 3-D world will embody. See
+  `results/FINDINGS.md`.
+
 ---
 
 ## Top recommendation

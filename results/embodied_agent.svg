@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="300" font-family="Segoe UI, Arial">
+<rect width="780" height="300" fill="#ffffff"/>
+<text x="20" y="26" font-size="15" font-weight="800" fill="#0b1324">Integrated embodied agent: five agency organs, one autonomous loop</text>
+<text x="20" y="45" font-size="10.5" fill="#5b6b8c">no scripted goal &#8212; it explores, discovers its resources, plans around obstacles, and keeps itself regulated</text>
+<text x="44" y="84" font-size="11" font-weight="700" fill="#28324a">survival (mean drive)</text>
+<rect x="44" y="197" width="48" height="45" fill="#2ca25f" opacity="0.85"/>
+<text x="68" y="192" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">1.6</text>
+<text x="68" y="255" font-size="9" fill="#28324a" text-anchor="middle">full</text>
+<text x="68" y="266" font-size="9" fill="#28324a" text-anchor="middle">loop</text>
+<rect x="102" y="117" width="48" height="125" fill="#c9341a" opacity="0.85"/>
+<text x="126" y="112" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">4.5</text>
+<text x="126" y="255" font-size="9" fill="#28324a" text-anchor="middle">null</text>
+<text x="126" y="266" font-size="9" fill="#28324a" text-anchor="middle">(random)</text>
+<line x1="40" y1="242" x2="164" y2="242" stroke="#33415c"/>
+<text x="44" y="278" font-size="8.5" fill="#5b6b8c">bounded = survives</text>
+<text x="230" y="84" font-size="11" font-weight="700" fill="#28324a">planning: reach behind obstacle</text>
+<rect x="230" y="92" width="54" height="150" fill="#2ca25f" opacity="0.85"/>
+<text x="257" y="87" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">100%</text>
+<text x="257" y="255" font-size="9" fill="#28324a" text-anchor="middle">rollouts</text>
+<rect x="296" y="242" width="54" height="0" fill="#c9341a" opacity="0.85"/>
+<text x="323" y="237" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">0%</text>
+<text x="323" y="255" font-size="9" fill="#28324a" text-anchor="middle">reactive</text>
+<line x1="226" y1="242" x2="366" y2="242" stroke="#33415c"/>
+<text x="430" y="84" font-size="11" font-weight="700" fill="#28324a">exploration: coverage</text>
+<rect x="430" y="123" width="48" height="119" fill="#2ca25f" opacity="0.85"/>
+<text x="454" y="118" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">79%</text>
+<text x="454" y="255" font-size="9" fill="#28324a" text-anchor="middle">full</text>
+<rect x="488" y="172" width="48" height="70" fill="#c9341a" opacity="0.85"/>
+<text x="512" y="167" font-size="11" font-weight="700" fill="#0b1324" text-anchor="middle">47%</text>
+<text x="512" y="255" font-size="9" fill="#28324a" text-anchor="middle">random</text>
+<line x1="426" y1="242" x2="550" y2="242" stroke="#33415c"/>
+<text x="600" y="84" font-size="11" font-weight="700" fill="#28324a">goal arbitration</text>
+<rect x="612" y="138" width="60" height="104" fill="#2b8cbe" opacity="0.85"/>
+<text x="642" y="133" font-size="12" font-weight="700" fill="#0b1324" text-anchor="middle">69%</text>
+<text x="642" y="255" font-size="8.5" fill="#28324a" text-anchor="middle">urgent&#8594;resource</text>
+<line x1="608" y1="242" x2="700" y2="242" stroke="#33415c"/>
+<text x="20" y="288" font-size="9.5" fill="#5b6b8c">Coarse survival does not rank individual organ ablations (their benefits are coupled) &#8212; each organ is scored on the axis where it acts.</text>
+</svg>

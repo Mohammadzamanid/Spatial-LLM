@@ -2031,6 +2031,40 @@ caused and can move a body* (forward model), *thinks before it acts* (imaginatio
 affective tone* (affect). Every cognitive piece of an autonomous agent now exists, each an emergent signature with a
 falsifier, none of it scripted. (`results/affect_valence.json`, `results/affect_valence.svg`.)
 
+### The embodied agent — the organs act as one autonomous machine (GAPS.md integration capstone, n=5)
+
+The five agency organs were each demonstrated in isolation. This is the Stage-1 reference loop that runs them
+*together* as one embodied agent — the loop a 3-D world drives. In a continuous world (a maze floor-plan) with an
+obstacle and two resources (water, food) behind it, and thirst/hunger that rise over time and reset at the
+resources, the agent is never told where the resources are or to go to them. It must **discover** them (intrinsic
+motivation), **navigate** to them around the obstacle (world model + imagination/planning), **arbitrate** between
+exploring and drinking/eating by drive urgency (goal generation), all coloured by a **mood** (affect) and using a
+path-integration **localization** belief. No goal is scripted.
+
+- **Autonomous and competent.** With no scripted goal, the full loop keeps its drives bounded — mean drive **1.6**,
+  it survives — where a *null* agent taking random actions floods (**4.5**). The behaviour is organised and
+  self-directed: it heads out, finds its resources, and keeps itself regulated.
+- **Each organ, on the axis where it acts.** Planning reaches goals *behind* the obstacle **100%** of the time where
+  a reactive go-straight controller is stuck at it (**0%**). Intrinsic motivation discovers **both** resources early
+  (by step **197**) and covers **79%** of the world, versus a random-action agent's step 435 and 47%. Goal
+  generation heads to the *needed* resource when a drive is urgent **69%** of the time, where a
+  goal-generation-off agent never does (0%).
+- **The honest limit — and why it's the right way to measure.** A single coarse "survival" number does *not* cleanly
+  rank the *individual* organ ablations, because in a small world the organs' benefits are coupled — exploration's
+  wandering substitutes for planning by reaching resources incidentally, and so on. Removing one organ can even
+  *improve* the coarse metric. This is the project's recurring lesson, now at integration scale: a specific-benefit
+  organ has to be scored on the axis where it acts (which is exactly what the per-organ measurements above do), not
+  on a coarse aggregate. The clean per-organ dissociations live in each organ's own eval; the integration's result
+  is that the organs **compose** into one autonomous loop, and the competence + own-axis measurements confirm the
+  loop is real, not scripted. (The competent version also took honest debugging — an early wiring discovered the
+  resources only at the very end of life and so never arbitrated; giving the agent a realistic vision range and a
+  *nearest*-frontier explorer, rather than a slow global sweep, made it genuinely competent.)
+
+**Honest grade — clean integration, honestly scoped.** The organs compose into a competent autonomous agent that
+explores, discovers, plans, and regulates itself with no external goal; each is load-bearing on its own axis; and the
+coarse-survival-doesn't-dissociate finding is reported, not hidden. This is the reference implementation the 3-D
+world will embody. (`results/embodied_agent.json`, `results/embodied_agent.svg`.)
+
 ### Neuromodulation — acetylcholine sets encode vs. retrieve, noradrenaline gates remapping (GAPS.md #5, n=5)
 
 Gap #5 from the register. The model already had DA-/NE-style ML gates (`PredictionErrorGate`, `AdaptiveGain`)

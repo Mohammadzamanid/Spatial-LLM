@@ -1,0 +1,60 @@
+{
+  "n_seeds": 5,
+  "world": "2D box + central obstacle + water/food behind it",
+  "steps": 600,
+  "results": {
+    "drive_full": {
+      "mean": 1.5993,
+      "ci95": 0.9899
+    },
+    "drive_null": {
+      "mean": 4.4847,
+      "ci95": 1.8306
+    },
+    "reach_plan": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "reach_greedy": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "disc_full": {
+      "mean": 196.8,
+      "ci95": 67.7786
+    },
+    "disc_null": {
+      "mean": 435.0,
+      "ci95": 136.4109
+    },
+    "cover_full": {
+      "mean": 0.792,
+      "ci95": 0.0814
+    },
+    "cover_null": {
+      "mean": 0.468,
+      "ci95": 0.1056
+    },
+    "arb_full": {
+      "mean": 0.6901,
+      "ci95": 0.1087
+    },
+    "cover_intrinsic": {
+      "mean": 0.792,
+      "ci95": 0.0814
+    },
+    "cover_random_goal": {
+      "mean": 0.452,
+      "ci95": 0.0862
+    },
+    "disc_intrinsic": {
+      "mean": 196.8,
+      "ci95": 67.7786
+    },
+    "disc_random_goal": {
+      "mean": 377.2,
+      "ci95": 225.0447
+    }
+  },
+  "verdict": "The five agency organs wire into ONE autonomous embodied loop. With no scripted goal the full loop keeps its drives bounded (survives) where a null random-action agent's drives run away; and each organ is load-bearing on the axis where it acts -- planning reaches goals behind the obstacle that a reactive controller cannot; intrinsic motivation discovers both resources and covers the world where random action does not; goal generation arbitrates to the needed resource when a drive is urgent. Honest limit: a coarse survival number does not cleanly rank individual organ ablations because in a small world their benefits are coupled (exploration's wandering substitutes for planning), so each organ is scored on its own axis -- the project's recurring lesson at integration scale. The integration's result is that the organs COMPOSE into an autonomous agent; the clean per-organ dissociations live in each organ's own eval."
+}
