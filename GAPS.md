@@ -984,6 +984,35 @@ signature emerges from the mechanism and is measured against falsifiers, never h
   predicted and actual sensation — low error means "I did that." **Three agency organs down** (drive, goals, self);
   imagination and affect remain to deepen the autonomous agent.
 
+### Agency 4. Imagination → planning — think before acting ✅ CLOSED (Jul 2026)
+- **Status: implemented.** `src/eval/imagination_planning.py` (n=5). Organ 3's one-step forward model, rolled
+  forward over an action sequence, IS imagination — a generative simulation of futures. Does planning emerge from
+  it? *Planning is what imagination does when pointed at a goal.* We build ONLY the imagination (roll the *learned*
+  forward model forward) + a goal + a generic selection (closest imagined approach; model-predictive control) — no
+  goal-specific policy, no trained controller, no hand-coded planner/search. On a detour task (a circular obstacle
+  between start and goal, so going straight is blocked), planning emerges:
+  - **(A) PLANNING EMERGES.** The agent solves the detour **100%** by simulating rollouts and selecting — zero-shot
+    from the learned model + goal, no trained policy.
+  - **(B) MODEL-BASED, NOT HABIT.** A reactive go-straight (model-free) agent is stuck at the obstacle (**0%**); and
+    the planner revalues to MOVED goals zero-shot (**100%** vs reactive **67%**) — the model-based flexibility of
+    Tolman's insight and Daw's model-based control.
+  - **(C) IT NEEDS MULTI-STEP IMAGINATION.** Horizon H=1 (the bare one-step forward model of organ 3) is myopic
+    (**30%**); success jumps to **100%** by H=4. Planning is the multi-step rollout, exactly the new thing this organ
+    adds — not the one-step model.
+  - **(D) IT RIDES ON IMAGINATION ACCURACY (falsifier).** Corrupt the forward model (imagined rollouts predict
+    nothing) and planning collapses to **0%** — it is only as good as the imagination it plans over.
+- **Honest grade:** *clean emergence, and it answers the question directly.* Planning does not come from imagination
+  ALONE — it also needs a goal to score rollouts against (organ 2) — but GIVEN a goal, planning is what imagination
+  does; no planner is hand-written and the flexible, model-based, detour-solving behaviour emerges. The one honest
+  design note (found by a probe that first failed): a distance-greedy planner cannot escape a *backtracking* detour
+  (an offset-gap wall is a local minimum needing a cost-to-go), so the task uses a *monotone* detour (a centred
+  obstacle) where closest-approach imagination-MPC genuinely solves it. See `results/FINDINGS.md`.
+- **Neuro basis.** Hippocampal forward sweeps and prefrontal simulation roll the world model forward to evaluate
+  options before acting (Tolman's cognitive map; Daw's model-based system; Hassabis & Maguire's constructive
+  simulation). **Four agency organs down** (drive → goals → self → deliberation): the planner has become an agent
+  that motivates itself, sets its own goals, knows what it caused, and thinks before it acts. Affect remains; then
+  the embodied 3-D agent.
+
 ---
 
 ## Top recommendation

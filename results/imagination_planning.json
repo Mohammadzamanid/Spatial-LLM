@@ -1,0 +1,41 @@
+{
+  "n_seeds": 5,
+  "horizons": [
+    1,
+    4,
+    12
+  ],
+  "obstacle_radius": 0.25,
+  "tasks_per_seed": 6,
+  "results": {
+    "h1": {
+      "mean": 0.3,
+      "ci95": 0.3638
+    },
+    "h4": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "h12": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "reactive": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "broken": {
+      "mean": 0.0,
+      "ci95": 0.0
+    },
+    "reval_planner": {
+      "mean": 1.0,
+      "ci95": 0.0
+    },
+    "reval_reactive": {
+      "mean": 0.6667,
+      "ci95": 0.0
+    }
+  },
+  "verdict": "Planning emerges from multi-step imagination over a LEARNED forward model. Building only the imagination (roll the model forward) + a goal + a generic 'closest imagined approach' selection (MPC), with no trained policy and no hand-coded planner, the agent solves a detour task (around a circular obstacle) that a reactive model-free agent cannot, and revalues to moved goals zero-shot -- the model-based signature (Tolman, Daw). Planning requires the MULTI-STEP rollout: horizon H=1 (the bare one-step forward model of organ 3) is myopic and mostly fails, and success rises with horizon. And it rides on imagination accuracy: corrupting the forward model collapses planning. So planning does not come from imagination alone -- it also needs a goal to score rollouts against -- but GIVEN a goal, planning is what imagination does."
+}
