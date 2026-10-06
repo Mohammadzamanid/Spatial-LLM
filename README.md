@@ -6,7 +6,7 @@
 
 **A neuroscience-inspired model that learns space the way the brain does — and a language model that reads the resulting cognitive map to navigate, plan, reason, and remember.**
 
-Most "spatial" models stop at coordinate embeddings. This one builds the mammalian navigation system from its computational primitives: a self-supervised cortex with **emergent hexagonal grid cells**, **place cells**, **path integration**, **boundary error-correction**, **replay**, and a **dopamine value system** — then a LoRA-adapted LLM reads that map to answer questions in natural language. Every step below is a real neuroscience mechanism, **measured on held-out data, with honest caveats** (full record in [`results/FINDINGS.md`](results/FINDINGS.md)).
+Most "spatial" models stop at coordinate embeddings. This one builds the mammalian navigation system from its computational primitives: a self-supervised spatial substrate with **biologically constrained hexagonal grid modules**, **place cells**, **path integration**, **boundary error-correction**, **replay**, and a **dopamine value system** — then a LoRA-adapted LLM reads that map to answer questions in natural language. Every step below is a real neuroscience mechanism, **measured on held-out data, with honest caveats** (full record in [`results/FINDINGS.md`](results/FINDINGS.md)).
 
 > The thesis: a human learns by *being in a place, over time* — in 4D (x, y, z, t). So we don't hand the model coordinates; we have it **move, sense, and path-integrate**, building a cognitive map the way the entorhinal–hippocampal system does, and let language ride on top.
 
@@ -24,13 +24,13 @@ A path of self-motion → **conjunctive velocity cells** → a **velocity-driven
 
 Each result is reproducible on CPU (`python -m src.eval.<name>`); the language results run on a single T4 (`notebooks/*.py`).
 
-### 1 · Grid cells *emerge* (and a falsification taught us why they're hexagonal)
+### 1 · Periodic spatial fields emerge; hexagonal geometry is an explicit inductive bias
 
-Trained only to predict bounded place cells, the path-integrating units develop **periodic, multi-field firing maps on their own** (Banino 2018; Hafting 2005). A square-torus attractor yields *square* grids; twisting the torus alone didn't help — but the canonical **velocity-driven** construction flips gridness from −0.46 to **+0.87** (255/256 units hexagonal). *Velocity, not connectivity, sets grid symmetry* — a prediction we falsified, then confirmed.
+Trained only to predict bounded place cells, the unconstrained path-integrating units develop **periodic, multi-field firing maps** (Banino 2018; Hafting 2005), but they do **not** spontaneously acquire hexagonal symmetry (mean gridness −0.46). The publication model therefore uses an explicit biologically motivated hexagonal torus / velocity-driven module: under that architectural prior, gridness is **+0.87** (255/256 units hexagonal). This is an **inductive-bias experiment, not a claim that hexagonal geometry emerged from an unconstrained network**. The learned question is what downstream computation this bounded periodic code enables, compared with fair non-grid alternatives.
 
-<img src="results/emergence_gridcells_hexvel.svg" width="760" alt="Emergent hexagonal grid cells"/>
+<img src="results/emergence_gridcells_hexvel.svg" width="760" alt="Hexagonal fields produced by the constrained velocity-driven grid module"/>
 
-`src/eval/emergence.py` · also: path-integration distance-compression, head-direction tuning, and the **7±2** working-memory limit all emerge.
+`src/eval/emergence.py` · also: the same evaluation measures path-integration drift/compression and head-direction tuning. Emergence claims are reserved for properties not explicitly encoded by the architecture.
 
 ### 2 · It generalizes — across path length and across environments
 
@@ -170,9 +170,9 @@ cd Spatial-LLM
 pip install -e ".[dev]"
 
 # --- the cognitive-map arc (CPU, minutes each; writes results/*.json + *.svg) ---
-python -m src.eval.emergence            # emergent grid cells, PI drift, HD tuning, 7±2
+python -m src.eval.emergence            # periodic-field control, PI drift, HD tuning
 python -m src.eval.emergence --topology hex            # twisted torus (falsification)
-python -m src.eval.emergence --constrained             # velocity-driven hexagonal grids (+0.87)
+python -m src.eval.emergence --constrained             # explicit hexagonal grid prior (+0.87 gridness)
 python -m src.eval.generalize_trajectory # length generalization (scale-free vs /T)
 python -m src.eval.boundary_anchoring    # boundary drift-correction (geometric/learned/bootstrap)
 python -m src.eval.pillars               # remapping, replay, Hebbian place cells
