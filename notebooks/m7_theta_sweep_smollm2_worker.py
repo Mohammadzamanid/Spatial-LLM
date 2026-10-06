@@ -7,8 +7,13 @@ Protocol V2 fixes two issues discovered in the diagnostic run:
 Launch with CUDA_VISIBLE_DEVICES set externally, e.g.
 CUDA_VISIBLE_DEVICES=0 python -u notebooks/m7_theta_sweep_smollm2_worker.py --seeds 0 2 4 6
 """
-import argparse, json, math, os, random, time
+import argparse, json, math, os, random, time, sys
 from pathlib import Path
+
+# Make repository root importable even when this file is executed as notebooks/<script>.py.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import torch
 import torch.nn as nn
