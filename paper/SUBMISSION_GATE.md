@@ -25,7 +25,7 @@ This file is the publication stop rule. Do not expand the architecture until the
 - Raw JSON artifacts, figures, reproducibility script, and tests are committed.
 - Negative and failed results are retained in the record.
 
-## Two remaining scientific blockers for a flagship submission
+## Remaining scientific blocker for a flagship submission
 
 ### Gate A — independent evaluation
 
@@ -40,7 +40,7 @@ Minimum acceptable design:
 
 A visual benchmark such as MindCube or VSI-Bench is valuable related work, but using it directly would require adding a visual scene encoder and would test a different system.
 
-### Gate B — backbone replication
+### Gate B — backbone replication ✅ PASSED
 
 Repeat the strongest causal language experiment on at least one second open-weight language model family or materially different scale.
 
@@ -54,6 +54,8 @@ Required conditions:
 - report all seeds and convergence diagnostics.
 
 The claim needed is not identical absolute accuracy. The required replication is the **direction and causal specificity** of the spatial-channel effect.
+
+**Completed on SmolLM2-1.7B-Instruct (n=8, forced-choice evaluation, 1600 steps):** ON 69.9% ±12.6 vs NO-SWEEP 49.8% ±0.3, Δ=+20.1 points, 7 wins / 0 losses / 1 tie, exact paired sign-flip p=0.0156. ON also exceeded text-only OFF by +19.9 points (p=0.0156) and wrong-heading sweep by +14.4 points (p=0.0156). This closes Gate B.
 
 ## Engineering / release gate
 
@@ -70,6 +72,6 @@ The claim needed is not identical absolute accuracy. The required replication is
 
 ## Submission stop rule
 
-A flagship submission is ready when Gates A and B are complete, CI is green, and the paper contains only claims directly supported by the committed artifacts.
+A flagship submission is ready when Gate A is complete, CI is green, and the paper contains only claims directly supported by the committed artifacts. Gate B is complete.
 
 Do **not** delay submission to add astrocytes, basal ganglia, additional plasticity mechanisms, or other modules unless a reviewer or a pre-registered hypothesis requires them. Those are follow-on papers.
