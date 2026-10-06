@@ -623,6 +623,8 @@ sense an LLM speaks from, each causally traced to its organ. *Honest scope:* FAC
 readout (a nonlinear cross-organ combination) was null and is left as future work; ON magnitude is
 seed-variable (as in torus/time). (`results/deadreckoning_llm_agg.json`.)
 
+**Second-backbone replication — SmolLM2-1.7B-Instruct.** To test whether the theta-sweep effect was specific to Qwen, we repeated the blocked-ahead experiment on a second open-weight model family with the same cortex and the same ON / OFF / NO-SWEEP / wrong-heading controls, using forced-choice logits to avoid output-format confounds. Across **n=8 seeds**, cortex-ON reached **69.9% ±12.6** versus **49.8% ±0.3** for NO-SWEEP (**Δ=+20.1 points; 7 wins, 0 losses, 1 tie; exact paired sign-flip p=0.0156**). ON also exceeded text-only OFF (**+19.9 points, p=0.0156**) and wrong-heading sweep (**+14.4 points, p=0.0156**). One seed remained at chance in all conditions and one showed only a small ON gain, so the replication supports the **causal direction and specificity**, not uniform convergence or identical absolute accuracy across backbones. This closes the backbone-specificity concern while preserving the observed seed variability. (`results/sweep_llm_smollm2_v2.json`.)
+
 **The map speaks BOTH reference frames — allocentric and egocentric, organ-specifically**
 (`notebooks/m6_multiframe_llm_kaggle.py`, n=8). The language counterpart of the unified multi-reference-frame
 agent: a frozen Qwen reads the combined code — grid (global) + egocentric object-vector cells
@@ -665,7 +667,7 @@ changes a language model's behavior rather than assuming that brain-inspired str
 
 ## 10. Limitations
 
-- The central controlled experiments use synthetic/self-generated environments and a single Qwen2.5-1.5B backbone. This gives unusually clean interventions but does **not** establish transfer to natural multiview/video spatial benchmarks or to other LLM families.
+- The central controlled experiments still use synthetic/self-generated environments, although the strongest theta-sweep causal effect now replicates on two LLM families (Qwen2.5-1.5B and SmolLM2-1.7B). This does **not** establish transfer to natural multiview/video spatial benchmarks.
 - The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
   best pure path-integrator.
 - The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
@@ -693,6 +695,7 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 - ✅ Claim language now distinguishes learned/emergent phenomena from the explicitly constrained hexagonal prior.
 - ✅ Null results and non-convergent seeds remain reported rather than removed post hoc.
 - ✅ Reproducibility instructions, raw JSON results, tests, and figures are in-repository.
-- ⚠️ Before a flagship submission, add one **independent external evaluation** matched to the model's input modality and one **second LLM backbone or scale**. These are the two remaining scientific blockers; they are not paper-writing blockers.
+- ✅ Second-backbone replication complete: SmolLM2-1.7B reproduces the theta-sweep causal effect (primary ON vs NO-SWEEP p=0.0156).
+- ⚠️ One scientific blocker remains before a flagship submission: an **independent external evaluation** matched to the model's input modality.
 - ⚠️ The grid-vs-place LLM comparison remains underpowered at n=3 and is treated as inconclusive, not as a positive headline.
 - Framing locked: causal cognitive-map interface + regime map of wins/ties/failures; **no claim that grid cells are universally superior or that hexagonal geometry emerged unconstrained**.
