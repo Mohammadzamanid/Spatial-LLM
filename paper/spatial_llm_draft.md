@@ -638,13 +638,30 @@ object-vector cells. The review's vision at the language level: a map that answe
 
 ## 9. Related work
 
-Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
-(Banino 2018; Cueva & Wei 2018); modular coding for range/capacity (Fiete; Stensola 2012; Sreenivasan &
-Fiete 2011); the Tolman-Eichenbaum Machine and grid codes in concept space (Whittington 2020;
-Constantinescu 2016); Complementary Learning Systems (McClelland, McNaughton & O'Reilly 1995); length
-generalization in sequence models (the default does not generalize — the motivation for positional-
-encoding research). Our contribution is the *fair, multi-seed characterization* of which of these
-properties transfer to a trained model + the integrative LLM demonstration.
+**Neural spatial codes.** Grid cells and path integration motivate the bounded periodic code (Hafting
+2005; Burak & Fiete 2009), while trained recurrent integrators show that grid-like representations can
+arise under navigation objectives (Banino 2018; Cueva & Wei 2018). Modular coding work explains the
+range/capacity trade-off (Stensola 2012; Sreenivasan & Fiete 2011). We use these results as computational
+priors rather than claiming that every anatomical detail is reproduced.
+
+**Cognitive maps beyond physical space.** The Tolman–Eichenbaum Machine and concept-space results motivate
+relational transfer (Whittington 2020; Constantinescu 2016), while Complementary Learning Systems motivates
+the separation between rapid episodic storage and slower parametric learning (McClelland, McNaughton &
+O'Reilly 1995).
+
+**Spatial reasoning in foundation models.** Recent benchmarks increasingly test whether multimodal models
+construct internal spatial models rather than merely recognize visible relations. VSI-Bench evaluates
+configurational, metric, and spatiotemporal reasoning from egocentric videos, while MindCube (ICLR 2026)
+tests cognitive mapping, perspective taking, and mental simulation from limited views and finds large gains
+from an explicit map-then-reason scaffold. These benchmarks are complementary rather than directly
+interchangeable with our experiments: they begin from visual observations, whereas our causal tests isolate
+the effect of a latent self-motion/cognitive-map channel on a language model. Extending the present cortex
+with a visual scene encoder and evaluating on those benchmarks is therefore a separate multimodal question,
+not a drop-in validation of the current system.
+
+Our contribution is a controlled causal characterization: we intervene on the spatial channel and its
+subcodes, include fair non-neural baselines and certified nulls, and ask **when** a structured cognitive map
+changes a language model's behavior rather than assuming that brain-inspired structure is always beneficial.
 
 ## 10. Limitations
 
