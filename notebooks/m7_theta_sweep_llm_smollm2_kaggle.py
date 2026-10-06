@@ -31,7 +31,7 @@
 import os, torch
 assert torch.cuda.is_available(), "No GPU. Enable Settings -> Accelerator -> GPU T4 x1, then re-run."
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"; os.environ["HF_HUB_DISABLE_XET"] = "1"
-!if [ -d Spatial-LLM ]; then cd Spatial-LLM && git pull origin main; else git clone https://github.com/Mohammadzamanid/Spatial-LLM.git; fi
+!if [ -d Spatial-LLM ]; then cd Spatial-LLM && git fetch origin submission-ready-2026-10 && git checkout submission-ready-2026-10 && git pull origin submission-ready-2026-10; else git clone --branch submission-ready-2026-10 --single-branch https://github.com/Mohammadzamanid/Spatial-LLM.git; fi
 %cd Spatial-LLM
 !pip -q install -U "transformers>=4.40" peft accelerate
 !pip -q uninstall -y torchao
@@ -222,7 +222,7 @@ def run_seed(seed, smoke=False):
     return {"on": acc("on"), "off": acc("off"), "no_sweep": acc("no_sweep"), "shuffle": acc("shuffle")}
 
 
-OUT = "results_sweep_llm"; os.makedirs(OUT, exist_ok=True)
+OUT = "results_sweep_llm_smollm2"; os.makedirs(OUT, exist_ok=True)
 res = []
 for s in SEEDS:
     f = f"{OUT}/seed{s}.json"
@@ -254,5 +254,5 @@ for key, name in [("off", "OFF  (text-only, cortex ablated)"), ("no_sweep", "NO-
 print("  Headline: a frozen LLM judges whether the path AHEAD is blocked in a NOVEL layout ONLY when it is")
 print("  given the theta-sweep look-ahead tokens; removing them (or mis-directing the sweep) drops it to chance.")
 print("  The Vollan look-around, made load-bearing for language.")
-json.dump({"n_seeds": len(res), "per_seed": res}, open("results_sweep_llm.json", "w"), indent=2)
-print("\nwrote results_sweep_llm.json -- paste the table back")
+json.dump({"n_seeds": len(res), "per_seed": res}, open("results_sweep_llm_smollm2.json", "w"), indent=2)
+print("\nwrote results_sweep_llm_smollm2.json -- paste the table back")
