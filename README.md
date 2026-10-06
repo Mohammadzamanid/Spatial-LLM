@@ -218,10 +218,10 @@ The original geographic-QA stack (grid-cell coordinate encoder, ViT tiles, hippo
 ## Citation
 
 ```bibtex
-@software{spatial_llm_2025,
+@software{spatial_llm_2026,
   author  = {Mohammadzamanid},
   title   = {Spatial-LLM: a neuroscience-inspired spatial cognitive map read by a language model},
-  year    = {2025},
+  year    = {2026},
   url     = {https://github.com/Mohammadzamanid/Spatial-LLM}
 }
 ```
