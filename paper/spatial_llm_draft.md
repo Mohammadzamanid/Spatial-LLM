@@ -1,17 +1,12 @@
-# A self-supervised cognitive-map cortex for language models — and an honest account of what brain-faithful spatial coding does and does not buy
+# Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not
 
-**Working draft — Spatial-LLM.** Status markers: ✅ = result in hand, multi-seed with 95% CI; ⏳ =
-specified, GPU run pending; ✎ = prose to finalize. Every number is reproduced by a script in
-`src/eval/` or a notebook in `notebooks/`; raw values in `results/*.json`. This draft commits to an
-*honest* framing: we report ties and negative results as first-class findings.
+**Submission draft — Spatial-LLM.** Every quantitative claim below is tied to a committed script or notebook and raw result artifact. We distinguish properties that **emerge under learning** from properties imposed as **architectural priors**, and report null/negative results as first-class findings.
 
 ---
 
-## Abstract ✎
+## Abstract
 
-We give a frozen language model a brain-faithful spatial substrate — a self-supervised cortex of
-velocity-driven **grid cells** and **place cells** that path-integrates self-motion into a periodic,
-multi-scale metric — and study, with multi-seed error-barred controls, what that representation
+We give a frozen language model a brain-faithful spatial substrate — a self-supervised spatial substrate built around a biologically constrained, velocity-driven **grid code** and learned **place-cell** readouts that path-integrates self-motion into a bounded periodic, multi-scale metric — and study, with multi-seed error-barred controls, what that representation
 contributes. Two things. First, an **integrative result**: a *single* self-supervised code, learned
 with no coordinate labels, transfers spatial competence to a frozen LLM (it answers navigation
 questions through the cortex, not the text) and — with its metric unchanged — also supports
@@ -33,8 +28,7 @@ do not claim grid cells are a uniquely necessary substrate for a trained system,
 additive integrators provably cannot — flat at the oracle floor where they collapse to chance, and a
 world a language prior cannot fake (a built-in leakage control); and **abstract relational inference**,
 where a *space-trained, frozen* metric supports transitive inference and schema transfer, falsified by
-shuffling the metric (p=0.009). Finally, prompted by the neuroscience of space *and time*, we extend the
-purely-geometric cortex along the two axes it omits: a **successor-representation** map that plans
+shuffling the metric (p=0.009). Finally, prompted by the neuroscience of space *and time*, we extend the geometric substrate along two additional axes: a **successor-representation** map that plans
 detours around barriers where a metric map stalls (100% vs 62%, paired p=0.009) and bends its fields to
 geodesic rather than Euclidean distance, and a recurrent substrate that, trained only to read elapsed
 time, **grows time cells** whose latency-dependent widening reproduces the brain's scalar (Weber) timing
@@ -46,7 +40,7 @@ the prompt.
 
 ---
 
-## 1. Introduction ✎
+## 1. Introduction
 
 Coordinate embeddings let a model memorize a map; they do not obviously let it *compute* over space in
 a way that survives a change of scale or serves many downstream uses. The mammalian
@@ -57,13 +51,13 @@ that substrate, self-supervised and label-free, and let a frozen language model 
 buy, and what does it not?** We answer with fair baselines and multiple seeds throughout, and we let the
 negative results stand.
 
-## 2. The system ✎
+## 2. The system
 
-A path of self-motion → conjunctive velocity cells → a velocity-driven hexagonal grid code (fixed
-gains, geometric scale ratios; phase = gain·∫v wrapped on a hexagonal torus) → a learned place/value
-readout → gated cross-attention into a frozen Qwen2.5-1.5B + LoRA. The cortex is pre-trained only to
+A path of self-motion → conjunctive velocity cells → a **biologically constrained** velocity-driven hexagonal grid code (fixed gains, geometric scale ratios; phase = gain·∫v wrapped on a hexagonal torus) → a learned place/value readout → gated cross-attention into a frozen Qwen2.5-1.5B + LoRA. The cortex is pre-trained only to
 predict bounded place-cell activity from self-motion (no coordinate labels). Architecture and configs:
 `src/models/`, `results/architecture.svg`.
+**Claim calibration.** The hexagonal geometry of the publication model is **not** claimed to emerge from an unconstrained network. The unconstrained attractor develops periodic multi-field responses but not hexagonal symmetry (mean gridness −0.46). The hexagonal publication condition uses an explicit biologically motivated toroidal lattice / velocity-driven module and yields mean gridness +0.87. We therefore treat hexagonality as an inductive bias and ask what causal computational role the resulting bounded periodic code plays downstream.
+
 
 ## 3. What transfers: length generalization ✅
 
@@ -642,7 +636,7 @@ object-vector cells. The review's vision at the language level: a map that answe
 "where am I relative to the landmark?", both frames coexisting and each causally traced to its organ.
 (`results/multiframe_llm_agg.json`.)
 
-## 9. Related work ✎
+## 9. Related work
 
 Grid cells / path integration (Hafting 2005; Burak & Fiete 2009); grid codes in trained integrators
 (Banino 2018; Cueva & Wei 2018); modular coding for range/capacity (Fiete; Stensola 2012; Sreenivasan &
@@ -652,9 +646,9 @@ generalization in sequence models (the default does not generalize — the motiv
 encoding research). Our contribution is the *fair, multi-seed characterization* of which of these
 properties transfer to a trained model + the integrative LLM demonstration.
 
-## 10. Limitations (honest) ✎
+## 10. Limitations
 
-- The representation tasks are 2-D, unbiased random walk (~√T magnitude growth), single-T4 LLM scale.
+- The central controlled experiments use synthetic/self-generated environments and a single Qwen2.5-1.5B backbone. This gives unusually clean interventions but does **not** establish transfer to natural multiview/video spatial benchmarks or to other LLM families.
 - The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
   best pure path-integrator.
 - The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
@@ -662,7 +656,7 @@ properties transfer to a trained model + the integrative LLM demonstration.
 - §8 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
   Emergence, boundary, replay pillars are demonstrations.
 
-## 11. Methods ✎
+## 11. Methods
 
 **Grid cortex** (`_HexGridModules`): K modules, fixed velocity gains `side/spacing`,
 `spacing = base·ratio^k`; per-step velocity advances a phase integrated and min-image-wrapped on a
@@ -678,13 +672,10 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 ---
 
 ### Status / path to submission
-- ✅ §3 Fig 1, §4 ablations + fair seq baselines, §5 necessity + boundary + frontier, §6 stats — all
-  multi-seed, committed.
-- ✅ §7 predictive (SR) + temporal (time-cell) map — CPU, n=8, committed; temporal signatures EMERGE.
-- ✅ §8 causal language readouts, **both significant at n=6 (paired p=0.033, every seed ON≫OFF)**:
-  **torus-QA** (space) ON 84/74/63% vs OFF ~10% at T=8/16/24; **elapsed-time** (time) ON 55%±20 vs OFF
-  16%±6 exact. A frozen LLM reads the emergent spatial *and* temporal codes it was never given in text.
-- ➕ optional: n≥8 LLM seeds to resolve the (modest, bearing-trending) grid-vs-place effect.
-- ✎ tighten abstract/intro/related work; assemble figure panels; expand Methods/Extended Data.
-- Framing locked: honest characterization (wins, ties, boundaries) + integrative demo; **no uniqueness
-  claim**.
+- ✅ Core CPU characterization and causal language readouts are committed with multi-seed artifacts.
+- ✅ Claim language now distinguishes learned/emergent phenomena from the explicitly constrained hexagonal prior.
+- ✅ Null results and non-convergent seeds remain reported rather than removed post hoc.
+- ✅ Reproducibility instructions, raw JSON results, tests, and figures are in-repository.
+- ⚠️ Before a flagship submission, add one **independent external evaluation** matched to the model's input modality and one **second LLM backbone or scale**. These are the two remaining scientific blockers; they are not paper-writing blockers.
+- ⚠️ The grid-vs-place LLM comparison remains underpowered at n=3 and is treated as inconclusive, not as a positive headline.
+- Framing locked: causal cognitive-map interface + regime map of wins/ties/failures; **no claim that grid cells are universally superior or that hexagonal geometry emerged unconstrained**.
