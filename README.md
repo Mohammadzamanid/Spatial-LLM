@@ -4,11 +4,28 @@
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12-blue)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**A neuroscience-inspired model that learns space the way the brain does — and a language model that reads the resulting cognitive map to navigate, plan, reason, and remember.**
+**Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not.**
 
-Most "spatial" models stop at coordinate embeddings. This one builds the mammalian navigation system from its computational primitives: a self-supervised spatial substrate with **biologically constrained hexagonal grid modules**, **place cells**, **path integration**, **boundary error-correction**, **replay**, and a **dopamine value system** — then a LoRA-adapted LLM reads that map to answer questions in natural language. Every step below is a real neuroscience mechanism, **measured on held-out data, with honest caveats** (full record in [`results/FINDINGS.md`](results/FINDINGS.md)).
+Spatial-LLM tests a narrow question: can a structured latent cognitive map supply spatial state to a language model when the trajectory itself is absent from text, and under which computational regimes is that structure useful?
 
-> The thesis: a human learns by *being in a place, over time* — in 4D (x, y, z, t). So we don't hand the model coordinates; we have it **move, sense, and path-integrate**, building a cognitive map the way the entorhinal–hippocampal system does, and let language ride on top.
+The publication branch is deliberately claim-calibrated:
+
+- **Causal transfer:** cortex-ON beats text-only OFF, and organ-specific lesions selectively impair their corresponding language readouts.
+- **Honest null:** on ordinary Euclidean path integration, a permutation-invariant NoPE+sum Transformer statistically ties the grid code (p=0.94).
+- **Mechanistic wins:** periodicity and remapping help when cyclic topology or context-free memory makes them load-bearing.
+- **Cross-backbone replication:** theta-sweep look-ahead replicates in Qwen2.5-1.5B and SmolLM2-1.7B.
+- **External validation:** the fixed representation transfers to user-disjoint Microsoft GeoLife trajectories.
+- **Not claimed:** unconstrained emergence of hexagonal geometry, universal superiority of grid codes, or full real-world embodied intelligence.
+
+The constrained publication model uses a biologically motivated hexagonal torus/velocity-driven module. Unconstrained units develop periodic multi-field responses but **not** spontaneous hexagonal symmetry; this distinction is explicit in the manuscript.
+
+Publication materials:
+- manuscript: [`paper/spatial_llm_draft.md`](paper/spatial_llm_draft.md)
+- supplementary results: [`paper/SUPPLEMENTARY_RESULTS.md`](paper/SUPPLEMENTARY_RESULTS.md)
+- figure spine: [`paper/FIGURE_SPINE.md`](paper/FIGURE_SPINE.md)
+- figure legends: [`paper/FIGURE_LEGENDS.md`](paper/FIGURE_LEGENDS.md)
+- source-data map: [`paper/SOURCE_DATA_MAP.md`](paper/SOURCE_DATA_MAP.md)
+- reproducibility: [`REPRODUCE.md`](REPRODUCE.md)
 
 ---
 
