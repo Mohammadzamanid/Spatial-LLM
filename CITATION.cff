@@ -11,7 +11,9 @@ authors:
 repository-code: "https://github.com/Mohammadzamanid/Spatial-LLM"
 url: "https://github.com/Mohammadzamanid/Spatial-LLM"
 license: MIT
-version: "1.0.0-rc1"
+doi: "10.5281/zenodo.23223468"
+version: "1.0.2"
+date-released: "2026-10-07"
 keywords:
   - cognitive maps
   - spatial reasoning
@@ -27,4 +29,4 @@ preferred-citation:
       given-names: "Mohammad Ali"
       orcid: "https://orcid.org/0009-0000-9566-4093"
   year: 2026
-  notes: "Manuscript in preparation; replace with journal citation after publication."
+  notes: "Software and reproducibility artifact archived on Zenodo; manuscript submitted separately."
