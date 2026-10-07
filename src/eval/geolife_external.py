@@ -21,8 +21,7 @@ RAW:  exact additive endpoint displacement (dx,dy), passed to the same-size MLP
 OFF:  majority-class predictor estimated on train users.
 ORACLE: label recomputed directly from endpoint displacement (task ceiling).
 
-Primary confirmatory test: 8 readout seeds, GRID vs OFF on 8-way bearing,
-paired exact sign-flip test over seeds. Distance (6 train-quantile bins) is
+Primary confirmatory test: GRID vs OFF on 8-way bearing across held-out USERS.\nReadout seeds quantify optimization variance; paired inference is performed over users. Distance (6 train-quantile bins) is
 secondary. RAW is a calibration baseline, not a straw man we expect GRID to beat.
 """
 from __future__ import annotations
@@ -153,13 +152,29 @@ def majority_acc(ytr,yte):
     return float((yte==maj).mean())
 
 
-def signflip_exact(diffs):
-    diffs=np.asarray(diffs,dtype=float); obs=abs(diffs.mean()); n=len(diffs)
+def signflip_user(diffs, seed=20261007, iters=100000):
+    """Paired sign-flip over held-out USERS (the inferential unit). Exact when feasible."""
+    d=np.asarray(diffs,dtype=float); obs=abs(d.mean()); n=len(d)
+    if n <= 20:
+        count=0
+        for mask in range(1<<n):
+            signs=np.asarray([1 if (mask>>i)&1 else -1 for i in range(n)])
+            count += abs((d*signs).mean()) >= obs-1e-12
+        return count/(1<<n)
+    rng=np.random.default_rng(seed)
     count=0
-    for mask in range(1<<n):
-        signs=np.asarray([1 if (mask>>i)&1 else -1 for i in range(n)])
-        count += abs((diffs*signs).mean()) >= obs-1e-12
-    return count/(1<<n)
+    for _ in range(iters):
+        signs=rng.choice(np.asarray([-1.0,1.0]),size=n)
+        count += abs((d*signs).mean()) >= obs-1e-12
+    return (count+1)/(iters+1)
+
+
+def bootstrap_user_ci(diffs, seed=20261007, iters=20000):
+    d=np.asarray(diffs,dtype=float); rng=np.random.default_rng(seed)
+    means=np.empty(iters,dtype=float)
+    for i in range(iters):
+        means[i]=rng.choice(d,size=len(d),replace=True).mean()
+    return [float(np.quantile(means,.025)),float(np.quantile(means,.975))]
 
 
 def mean_ci(xs):
@@ -199,29 +214,56 @@ def run(a):
         ("bearing",N_CLASSES_BEARING,yb_tr,yb_v,yb_te),
         ("distance",N_CLASSES_DISTANCE,yd_tr,yd_v,yd_te)
     ]:
-        off=majority_acc(ytr,yte)
-        rows=[]
+        vals,cnt=np.unique(ytr,return_counts=True); maj=int(vals[cnt.argmax()])
+        off=float((yte==maj).mean())
+        rows=[]; seed_preds_grid=[]; seed_preds_raw=[]
         print(f"\n{task.upper()} | OFF majority={off:.3f}",flush=True)
         for seed in range(a.seeds):
-            ga,_=fit_eval(xb_tr,ytr,xb_v,yv,xb_te,yte,ncls,seed,device)
-            ra,_=fit_eval(xr_tr,ytr,xr_v,yv,xr_te,yte,ncls,1000+seed,device)
+            ga,gpred=fit_eval(xb_tr,ytr,xb_v,yv,xb_te,yte,ncls,seed,device)
+            ra,rpred=fit_eval(xr_tr,ytr,xr_v,yv,xr_te,yte,ncls,1000+seed,device)
+            seed_preds_grid.append(gpred); seed_preds_raw.append(rpred)
             rows.append({"seed":seed,"grid":ga,"raw":ra,"off":off})
             print(f" seed {seed}: GRID {ga:.3f} | RAW {ra:.3f} | OFF {off:.3f}",flush=True)
-        grid=[r["grid"] for r in rows]; raw=[r["raw"] for r in rows]; offv=[off]*len(rows)
+        grid=[r["grid"] for r in rows]; raw=[r["raw"] for r in rows]
         mg,cg=mean_ci(grid); mr,cr=mean_ci(raw)
-        pg=signflip_exact(np.asarray(grid)-off)
-        pr=signflip_exact(np.asarray(grid)-np.asarray(raw))
-        bylen={}
-        # Final trained-seed accuracy by length is intentionally omitted here because the
-        # readout predictions are seed-specific; pooled seed inference is the confirmatory unit.
+
+        # PRIMARY INFERENCE: held-out user is the independent unit. Average accuracy
+        # across readout seeds within each user, then compare paired user-level effects.
+        users=np.asarray([r["user_id"] for r in test])
+        uniq=sorted(set(users.tolist()))
+        user_rows=[]
+        gmat=np.stack(seed_preds_grid); rmat=np.stack(seed_preds_raw)
+        offpred=np.full(len(yte),maj,dtype=np.int64)
+        for uid in uniq:
+            ix=np.flatnonzero(users==uid)
+            gacc=float((gmat[:,ix]==yte[ix][None,:]).mean(axis=1).mean())
+            racc=float((rmat[:,ix]==yte[ix][None,:]).mean(axis=1).mean())
+            oacc=float((offpred[ix]==yte[ix]).mean())
+            user_rows.append({"user_id":uid,"n":int(len(ix)),"grid":gacc,"raw":racc,"off":oacc})
+
+        gd=np.asarray([u["grid"]-u["off"] for u in user_rows])
+        rd=np.asarray([u["grid"]-u["raw"] for u in user_rows])
+        pg=signflip_user(gd); pr=signflip_user(rd)
+        cig=bootstrap_user_ci(gd); cir=bootstrap_user_ci(rd)
+
         result["tasks"][task]={
           "per_seed":rows,
-          "grid_mean":mg,"grid_ci95":cg,"raw_mean":mr,"raw_ci95":cr,"off":off,
-          "grid_minus_off":mg-off,"p_grid_vs_off_exact_signflip":pg,
-          "grid_minus_raw":mg-mr,"p_grid_vs_raw_exact_signflip":pr,
+          "grid_mean":mg,"grid_ci95_across_readout_seeds":cg,
+          "raw_mean":mr,"raw_ci95_across_readout_seeds":cr,"off":off,
+          "heldout_users":user_rows,
+          "n_test_users":len(user_rows),
+          "user_paired_grid_minus_off_mean":float(gd.mean()),
+          "user_paired_grid_minus_off_ci95_bootstrap":cig,
+          "p_grid_vs_off_user_signflip":pg,
+          "user_paired_grid_minus_raw_mean":float(rd.mean()),
+          "user_paired_grid_minus_raw_ci95_bootstrap":cir,
+          "p_grid_vs_raw_user_signflip":pr,
         }
         print(f" SUMMARY GRID {mg:.3f}±{cg:.3f} | RAW {mr:.3f}±{cr:.3f} | OFF {off:.3f}",flush=True)
-        print(f" GRID-OFF {mg-off:+.3f}, exact p={pg:.4f}; GRID-RAW {mg-mr:+.3f}, p={pr:.4f}",flush=True)
+        print(f" HELD-OUT USERS n={len(user_rows)}: GRID-OFF {gd.mean():+.3f} "
+              f"CI[{cig[0]:+.3f},{cig[1]:+.3f}] p={pg:.5f}",flush=True)
+        print(f" HELD-OUT USERS: GRID-RAW {rd.mean():+.3f} "
+              f"CI[{cir[0]:+.3f},{cir[1]:+.3f}] p={pr:.5f}",flush=True)
 
     out=Path(a.out); out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps(result,indent=2))
