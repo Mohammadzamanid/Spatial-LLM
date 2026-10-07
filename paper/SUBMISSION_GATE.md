@@ -31,12 +31,15 @@ This file is the publication stop rule. Do not expand the architecture until the
 
 Run the cognitive-map interface on **Microsoft GeoLife GPS Trajectories**, an external real-world trajectory dataset that matches the model's current self-motion/path-integration modality. The adapter is committed at `src/data/geolife_trajectory.py` and uses user-disjoint train/validation/test splits. Do not force-fit a multiview/video benchmark unless a visual front-end becomes part of the scientific question.
 
-Minimum acceptable design:
-1. Freeze the task definition and evaluation set before running the model. Primary tasks: endpoint bearing sector and endpoint distance bin from real trajectory windows.
-2. Report cortex-ON, cortex-OFF, and a simple integration baseline.
-3. Use at least 8 seeds if training variance remains material.
-4. Predefine the primary metric and exclusion/non-convergence rule.
-5. Commit the exact evaluation data identifiers, script, raw per-seed outputs, and aggregate statistics.
+Locked protocol (pre-specified before the external run):
+1. Dataset: official Microsoft GeoLife GPS Trajectories 1.3; non-overlapping windows of T={8,16,24}; maximum 4 windows per source trajectory/length.
+2. Split: seeded-random **user-disjoint** 70/15/15 split (seed 20261007). No user appears in more than one split.
+3. Scaling: compute median GPS step length from TRAIN users only and map it to 0.50 model units, matching the original synthetic speed regime. No validation/test scale tuning.
+4. Tasks: primary = 8-way endpoint bearing; secondary = 6-bin endpoint distance with quantile cut-points estimated from TRAIN users only.
+5. Conditions: fixed 6-module constrained GRID population; RAW exact additive endpoint displacement with a matched nonlinear readout; OFF train-majority predictor. RAW is a calibration baseline, not a straw-man target to beat.
+6. Optimization: 8 readout seeds quantify training variance. **Held-out users, not seeds, are the inferential units**; primary significance is the paired GRID−OFF user-level sign-flip test plus a cluster/bootstrap CI over held-out users.
+7. Success criterion for Gate A: GRID must exceed OFF on the primary bearing task with a user-level paired p<0.05 and a 95% user-bootstrap CI excluding zero. RAW performance determines how much information is lost relative to exact additive integration; GRID is not required to beat RAW.
+8. Commit the exact script, result JSON, user-level effects, and aggregate statistics.
 
 A visual benchmark such as MindCube or VSI-Bench is valuable related work, but using it directly would require adding a visual scene encoder and would test a different system.
 
