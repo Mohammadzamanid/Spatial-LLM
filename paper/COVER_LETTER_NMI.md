@@ -10,7 +10,7 @@ We believe this combination of causal intervention, negative controls, cross-bac
 
 The manuscript is not under consideration elsewhere. No closely related manuscript or preprint from this project has been submitted, published or posted elsewhere. The author declares no competing interests, and the work received no specific external funding.
 
-All code, result artifacts and reproducibility instructions are publicly maintained in the Spatial-LLM repository; the exact submission artifact will be archived with a persistent DOI before submission.
+All code, result artifacts and reproducibility instructions are publicly maintained in the Spatial-LLM repository. The exact frozen submission artifact is archived on Zenodo at https://doi.org/10.5281/zenodo.23223468.
 
 Thank you for your consideration.
 
