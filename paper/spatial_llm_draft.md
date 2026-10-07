@@ -6,15 +6,9 @@
 
 ## Abstract
 
-Large language models can describe space without necessarily maintaining a metric state that survives self-motion. We test whether a structured cognitive-map interface can provide that missing state. Our system converts self-motion into a bounded multi-scale spatial population code, injects it into a frozen language model through gated cross-attention, and evaluates the resulting behavior with causal ablations, matched non-neural baselines, multiple seeds, a second LLM family, and an external real-world trajectory dataset.
-
-The central result is causal: when trajectory information reaches the model only through the spatial channel, cortex-ON substantially outperforms text-only OFF controls, and organ-specific lesions produce corresponding losses. A prospective theta-sweep signal improves blocked-ahead reasoning in Qwen2.5-1.5B and independently replicates in SmolLM2-1.7B (ON 69.9% vs NO-SWEEP 49.8%, paired sign-flip p=0.0156). At the representation level, ordinary Euclidean path integration reveals an important boundary condition: a permutation-invariant NoPE+sum Transformer statistically ties the grid code (p=0.94), showing that additive integration rather than grid geometry explains that regime. Periodicity, remapping, and bounded population coding become useful only when those properties are load-bearing, including cyclic worlds and context-free one-shot memory.
-
-Finally, the fixed spatial representation transfers to real human motion in Microsoft GeoLife without architecture changes. On user-disjoint held-out trajectories, 8-way endpoint bearing reaches 76.6% versus a 16.2% OFF baseline (28 users; paired effect +59.3 percentage points, bootstrap 95% CI [+50.5,+67.5], p≈1×10⁻⁵), and 6-bin endpoint distance reaches 92.3% versus 18.4% OFF. Exact Cartesian displacement remains a higher ceiling (98.7–98.8%), so the claim is not that grid coding is universally optimal. Rather, structured cognitive maps provide a causal spatial state to language models, with benefits that can be predicted from the representational demands of the task.
+Language models can describe space without maintaining a metric state that survives self-motion. We test whether a structured cognitive-map interface supplies that missing state. Self-motion is integrated into a bounded multi-scale population code and injected into a frozen language model through gated cross-attention. Causal ablations show that spatial answers depend on this latent channel and on task-relevant subcodes. A prospective theta-sweep signal improves blocked-ahead reasoning in Qwen2.5-1.5B and replicates in SmolLM2-1.7B (ON 69.9% versus NO-SWEEP 49.8%, p=0.0156). Ordinary Euclidean path integration is matched by a simpler additive Transformer, establishing an important boundary condition. On user-disjoint Microsoft GeoLife trajectories, the fixed representation reaches 76.6% bearing and 92.3% distance accuracy, far above OFF baselines. Structured cognitive maps therefore provide causal spatial state to language models, with benefits determined by task-specific representational demands.
 
 ---
-
-## 1. Introduction
 
 Coordinate embeddings let a model memorize a map; they do not obviously let it *compute* over space in
 a way that survives a change of scale or serves many downstream uses. The mammalian
@@ -25,7 +19,9 @@ that substrate, self-supervised and label-free, and let a frozen language model 
 buy, and what does it not?** We answer with fair baselines and multiple seeds throughout, and we let the
 negative results stand.
 
-## 2. The system
+## Results
+
+### System and causal interface
 
 A path of self-motion → conjunctive velocity cells → a **biologically constrained** velocity-driven hexagonal grid code (fixed gains, geometric scale ratios; phase = gain·∫v wrapped on a hexagonal torus) → a learned place/value readout → gated cross-attention into a frozen Qwen2.5-1.5B + LoRA. The cortex is pre-trained only to
 predict bounded place-cell activity from self-motion (no coordinate labels). Architecture and configs:
@@ -33,7 +29,7 @@ predict bounded place-cell activity from self-motion (no coordinate labels). Arc
 **Claim calibration.** The hexagonal geometry of the publication model is **not** claimed to emerge from an unconstrained network. The unconstrained attractor develops periodic multi-field responses but not hexagonal symmetry (mean gridness −0.46). The hexagonal publication condition uses an explicit biologically motivated toroidal lattice / velocity-driven module and yields mean gridness +0.87. We therefore treat hexagonality as an inductive bias and ask what causal computational role the resulting bounded periodic code plays downstream.
 
 
-## 3. What transfers: length generalization ✅
+### Length generalization and bounded representations
 
 Stripping away the LLM (so any effect is the representation), an agent random-walks in 2-D; we train a
 position readout on mixed short paths {6,8,10,12} (scale-free) and test to 4× longer, deriving the
@@ -44,7 +40,7 @@ paths leave its trained box while the grid code degrades gracefully (its phase i
 periodic). An exact-integration oracle is flat, so the gap is the code, not the task. (Figure 1:
 `results/extrapolation.svg`. Honest ceiling: grid itself falls to 75% at 4×; range is finite.)
 
-## 4. Mechanism — it is the inductive bias, not the architecture ✅
+### Additive integration explains ordinary Euclidean path integration
 
 Single-variable ablations (`src/eval/ablations.py`, `seq_baselines.py`, n=5):
 
@@ -61,7 +57,7 @@ So length extrapolation requires an *additive, scale-free, order-invariant integ
 conventional defaults lack it and the grid code has it by construction — but it is **not unique** to
 grid cells. (Figures 2: `results/ablations.svg`, `results/seq_baselines.svg`.)
 
-## 5. Where the population code helps — and where it does not (the characterization) ✅
+### Regime-dependent value of structured population codes
 
 Given that an additive integrator ties on path integration, we test what a *deterministic function of
 displacement* cannot do (`src/eval/code_necessity.py`, `multimap_task.py`, `frontier_probes.py`; n=5):
@@ -121,7 +117,7 @@ is exactly the right inductive bias for a cyclic world: there the brain-faithful
 competitive-but-tied, it is **necessary**. This is also the **leakage rebuttal** — a torus has no
 faithful Euclidean text description, so a language prior cannot substitute for having path-integrated it.
 
-## 6. Causal language transfer through the spatial channel ✅
+### Causal language transfer through the spatial channel
 
 We next ask whether a language model actually uses the latent map rather than solving the task from text. In all headline language experiments, the move sequence is withheld from the prompt and reaches the model only through the spatial channel; cortex-OFF therefore provides a direct leakage control.
 
@@ -131,7 +127,7 @@ We next ask whether a language model actually uses the latent map rather than so
 
 **Boundary condition.** A separate n=3 grid-vs-place LLM comparison is intentionally not used as a headline superiority claim: cortex-ON is far above OFF, but grid vs place is not statistically separable at that sample size (`results/extrapolation_llm.json`). This agrees with the representation-level characterization in Sections 3–5: the robust language claim is the causal usefulness of a structured spatial state, not universal grid dominance.
 
-## 7. Prospective theta-sweep is load-bearing and replicates across LLM families ✅
+### Prospective theta-sweep and cross-backbone replication
 
 A cognitive map is useful not only for representing current state but also for sampling what lies ahead. We therefore expose prospective theta-sweep tokens generated from the grid map and ask a blocked-ahead question in novel per-episode layouts, where the answer cannot be inferred from current position alone.
 
@@ -141,7 +137,7 @@ We then repeated the experiment on a second open-weight family, **SmolLM2-1.7B-I
 
 Together, the Qwen and SmolLM2 results rule out the simplest backbone-specific explanation: prospective information supplied by the cognitive-map channel changes language-model behavior in the predicted direction across two materially different open-weight LLM families.
 
-## 8. Scope of the main claim
+### Scope of the main claim
 
 The repository contains additional biologically inspired components—successor representations, time-cell analyses, replay, semantic warping, boundary/object reanchoring, 3-D/local-order grid variants, content binding, basal-ganglia action selection, and closed-loop behaving agents. These analyses are retained in `paper/SUPPLEMENTARY_RESULTS.md` and the corresponding committed result artifacts.
 
@@ -154,7 +150,7 @@ They are intentionally not part of the flagship causal spine. The main paper req
 
 This separation prevents auxiliary neurobiological demonstrations from being mistaken for necessary premises of the central result.
 
-## 9. External validation on real human trajectories ✅
+### External validation on real human trajectories
 
 The controlled experiments above use synthetic/self-generated motion so that spatial-channel interventions can be isolated exactly. We therefore tested the fixed spatial code on an external real-world dataset, **Microsoft GeoLife GPS Trajectories 1.3**, without changing the grid architecture. GPS traces were converted to east/north self-motion and divided by user into seeded-random **70/15/15 user-disjoint** train/validation/test splits. Spatial scaling and distance-bin cut-points were estimated from TRAIN users only. We evaluated non-overlapping trajectory windows at T={8,16,24}; the inferential unit is the held-out **user**, not the readout seed.
 
@@ -162,7 +158,7 @@ The preregistered primary task was 8-way endpoint bearing. Across eight readout 
 
 A corrected exact-displacement calibration provides the appropriate ceiling: a small RAW-MLP given the exact additive endpoint vector reaches **98.7%** bearing and **98.8%** distance (analytic RAW oracle = 100%). The bounded grid code is therefore **not superior to explicit Cartesian integration**, nor should it be; the external result shows that a fixed bounded periodic neural population retains enough metric information to support accurate decoding on real trajectories from unseen people. This closes the external-validity gap without changing the paper's regime-dependent claim.
 
-## 10. Related work
+## Discussion
 
 **Neural spatial codes.** Grid cells and path integration motivate the bounded periodic code (Hafting
 2005; Burak & Fiete 2009), while trained recurrent integrators show that grid-like representations can
@@ -189,17 +185,11 @@ Our contribution is a controlled causal characterization: we intervene on the sp
 subcodes, include fair non-neural baselines and certified nulls, and ask **when** a structured cognitive map
 changes a language model's behavior rather than assuming that brain-inspired structure is always beneficial.
 
-## 11. Limitations
+The results also define clear limits. The central causal interventions use controlled synthetic environments, while representation-level external validation uses real GeoLife trajectories. The strongest theta-sweep effect replicates across Qwen2.5-1.5B and SmolLM2-1.7B, but the work does not establish natural multiview or video-based embodied reasoning. A NoPE+sum Transformer matches the grid code on ordinary Euclidean path integration, so grid coding is not the best or uniquely necessary pure integrator. Remapping and population-capacity advantages are regime-specific, particularly in fixed-memory and context-free settings. Finally, the n=3 grid-versus-place LLM comparison remains underpowered and is treated as inconclusive rather than a positive headline.
 
-- The central causal interventions use synthetic/self-generated environments, while representation-level external validation uses real GeoLife trajectories. The strongest theta-sweep effect replicates on two LLM families (Qwen2.5-1.5B and SmolLM2-1.7B). The work still does **not** establish natural multiview/video embodied reasoning.
-- The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
-  best pure path-integrator.
-- The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
-  transfer to a trained LLM with a text context label.
-- §8 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
-  Emergence, boundary, replay pillars are demonstrations.
+The main conclusion is therefore narrower than a general claim for brain-inspired superiority: a structured latent map can causally supply spatial state to a language model, while the usefulness of specific neural-style coding properties depends on the computational structure of the task.
 
-## 12. Methods
+## Methods
 
 **Grid cortex** (`_HexGridModules`): K modules, fixed velocity gains `side/spacing`,
 `spacing = base·ratio^k`; per-step velocity advances a phase integrated and min-image-wrapped on a
@@ -213,6 +203,12 @@ Full configs in `results/*.json`; one-command regeneration via `bash reproduce_a
 figure→command→artifact map, verified environment, and Zenodo-release steps in `REPRODUCE.md`.
 
 ---
+
+### Code and data availability
+
+All scripts underlying the main claims, committed result JSONs, GPU notebooks, and reproducibility instructions are available in the Spatial-LLM repository. The exact submission artifact will be archived on Zenodo and the persistent DOI inserted here before submission. The Microsoft GeoLife source archive is not redistributed; the repository contains deterministic preprocessing code and the locked user-disjoint evaluation protocol needed to regenerate the external-validation benchmark from the official dataset.
+
+
 
 ### Status / path to submission
 - ✅ Core CPU characterization and causal language readouts are committed with multi-seed artifacts.
