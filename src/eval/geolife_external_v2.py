@@ -1,0 +1,302 @@
+"""External validation on Microsoft GeoLife GPS trajectories — corrected V2.
+
+Pre-registered Gate-A experiment for Spatial-LLM.
+
+Scientific question
+-------------------
+Does the same fixed, biologically constrained grid population preserve endpoint
+spatial information on REAL human trajectories from users never seen during
+readout training?
+
+The experiment is intentionally representation-level first. It does not train
+an LLM and it does not modify the cortex. GeoLife users are split BEFORE any
+normalization; the spatial scale and distance-bin thresholds are estimated from
+TRAIN users only.
+
+Conditions
+----------
+GRID: fixed 6-module hexagonal grid population after integrating real EN steps.
+RAW-MLP: exact additive endpoint displacement (dx,dy), passed to the same MLP
+         WITHOUT per-example LayerNorm. Inputs are divided by one TRAIN-only scalar,
+         preserving angle and radius. This is the learned non-neural baseline.
+RAW-ORACLE: analytic bearing/distance from exact additive endpoint displacement;
+            this is 100% by construction and is reported only as the task ceiling.
+OFF:  majority-class predictor estimated on train users.
+ORACLE: label recomputed directly from endpoint displacement (task ceiling).
+
+Primary confirmatory test: GRID vs OFF on 8-way bearing across held-out USERS.\nReadout seeds quantify optimization variance; paired inference is performed over users. Distance (6 train-quantile bins) is
+secondary. RAW is a calibration baseline, not a straw man we expect GRID to beat.
+"""
+from __future__ import annotations
+import argparse, json, math, random
+from pathlib import Path
+import numpy as np
+import torch
+import torch.nn as nn
+from src.models.neuro.trajectory_cortex import _HexGridModules
+
+TARGET_MEDIAN_STEP = 0.50  # matches original synthetic speed scale (~0.2..0.8)
+LENGTHS = (8,16,24)
+N_CLASSES_BEARING = 8
+N_CLASSES_DISTANCE = 6
+
+
+def load_jsonl(path):
+    out=[]
+    with open(path,encoding="utf-8") as f:
+        for line in f:
+            out.append(json.loads(line))
+    return out
+
+
+def cap_records(records, n, seed=0):
+    if n is None or len(records)<=n:
+        return records
+    rng=random.Random(seed)
+    idx=list(range(len(records))); rng.shuffle(idx)
+    return [records[i] for i in idx[:n]]
+
+
+def train_scale(train_records):
+    steps=[]
+    for r in train_records:
+        for x,y in r["moves_xy_m"]:
+            d=math.hypot(x,y)
+            if d>0: steps.append(d)
+    med=float(np.median(np.asarray(steps,dtype=np.float64)))
+    if not np.isfinite(med) or med<=0:
+        raise RuntimeError("Invalid training median GPS step")
+    return med/TARGET_MEDIAN_STEP, med
+
+
+def distance_edges(train_records):
+    d=np.asarray([r["distance_m"] for r in train_records],dtype=np.float64)
+    qs=np.quantile(d,np.linspace(0,1,N_CLASSES_DISTANCE+1)[1:-1])
+    # guard against repeated quantiles
+    for i in range(1,len(qs)):
+        if qs[i] <= qs[i-1]:
+            qs[i]=np.nextafter(qs[i-1],np.inf)
+    return qs
+
+
+def labels(records, edges):
+    bearing=np.asarray([int(r["bearing_sector_8"]) for r in records],dtype=np.int64)
+    dist=np.asarray([np.searchsorted(edges,float(r["distance_m"]),side="right")
+                     for r in records],dtype=np.int64)
+    return bearing,dist
+
+
+@torch.no_grad()
+def features(records, scale_m_per_unit, device, batch=512):
+    grid=_HexGridModules(embed_dim=64,n_modules=6,base_spacing=1.6).to(device).eval()
+    grid_feats=[]; raw_feats=[]; lens=[]
+    for i in range(0,len(records),batch):
+        rr=records[i:i+batch]
+        T=max(len(r["moves_xy_m"]) for r in rr)
+        if any(len(r["moves_xy_m"])!=T for r in rr):
+            # records are normally grouped mixed-length; pad by zero motion
+            pass
+        v=torch.zeros(len(rr),T,3,dtype=torch.float32,device=device)
+        raw=torch.zeros(len(rr),2,dtype=torch.float32,device=device)
+        for j,r in enumerate(rr):
+            m=torch.tensor(r["moves_xy_m"],dtype=torch.float32,device=device)/scale_m_per_unit
+            v[j,:len(m),:2]=m
+            raw[j]=m.sum(0)
+        _,cells=grid(v,return_cells=True)
+        grid_feats.append(cells.cpu())
+        raw_feats.append(raw.cpu())
+        lens.extend([len(r["moves_xy_m"]) for r in rr])
+    return torch.cat(grid_feats),torch.cat(raw_feats),np.asarray(lens,dtype=np.int64)
+
+
+def raw_train_scale(xtr):
+    """ONE scalar from TRAIN raw endpoints. Unlike LayerNorm, this preserves both
+    angle and radius exactly up to a constant scale."""
+    r=torch.sqrt((xtr.float()**2).sum(1))
+    s=float(torch.quantile(r,0.75).item())
+    return max(s,1e-6)
+
+
+class Readout(nn.Module):
+    def __init__(self,din,ncls):
+        super().__init__()
+        self.net=nn.Sequential(
+            nn.Linear(din,64),nn.GELU(),nn.Dropout(0.10),
+            nn.Linear(64,ncls)
+        )
+    def forward(self,x): return self.net(x)
+
+
+def fit_eval(xtr,ytr,xv,yv,xte,yte,ncls,seed,device,epochs=80,bs=256):
+    torch.manual_seed(seed); np.random.seed(seed); random.seed(seed)
+    m=Readout(xtr.shape[1],ncls).to(device)
+    opt=torch.optim.AdamW(m.parameters(),lr=2e-3,weight_decay=1e-4)
+    lossf=nn.CrossEntropyLoss()
+    xtr=xtr.to(device); ytr=torch.as_tensor(ytr,device=device)
+    xv=xv.to(device); yv=torch.as_tensor(yv,device=device)
+    best=None; best_acc=-1; bad=0
+    for ep in range(epochs):
+        m.train()
+        perm=torch.randperm(len(xtr),device=device)
+        for i in range(0,len(xtr),bs):
+            ix=perm[i:i+bs]
+            opt.zero_grad(set_to_none=True)
+            loss=lossf(m(xtr[ix]),ytr[ix]); loss.backward(); opt.step()
+        m.eval()
+        with torch.no_grad():
+            acc=(m(xv).argmax(1)==yv).float().mean().item()
+        if acc>best_acc+1e-5:
+            best_acc=acc; bad=0
+            best={k:v.detach().cpu().clone() for k,v in m.state_dict().items()}
+        else:
+            bad+=1
+            if bad>=10: break
+    m.load_state_dict(best); m.eval()
+    with torch.no_grad():
+        pred=m(xte.to(device)).argmax(1).cpu().numpy()
+    return float((pred==yte).mean()),pred
+
+
+def majority_acc(ytr,yte):
+    vals,cnt=np.unique(ytr,return_counts=True); maj=vals[cnt.argmax()]
+    return float((yte==maj).mean())
+
+
+def signflip_user(diffs, seed=20261007, iters=100000):
+    """Paired sign-flip over held-out USERS (the inferential unit). Exact when feasible."""
+    d=np.asarray(diffs,dtype=float); obs=abs(d.mean()); n=len(d)
+    if n <= 20:
+        count=0
+        for mask in range(1<<n):
+            signs=np.asarray([1 if (mask>>i)&1 else -1 for i in range(n)])
+            count += abs((d*signs).mean()) >= obs-1e-12
+        return count/(1<<n)
+    rng=np.random.default_rng(seed)
+    count=0
+    for _ in range(iters):
+        signs=rng.choice(np.asarray([-1.0,1.0]),size=n)
+        count += abs((d*signs).mean()) >= obs-1e-12
+    return (count+1)/(iters+1)
+
+
+def bootstrap_user_ci(diffs, seed=20261007, iters=20000):
+    d=np.asarray(diffs,dtype=float); rng=np.random.default_rng(seed)
+    means=np.empty(iters,dtype=float)
+    for i in range(iters):
+        means[i]=rng.choice(d,size=len(d),replace=True).mean()
+    return [float(np.quantile(means,.025)),float(np.quantile(means,.975))]
+
+
+def mean_ci(xs):
+    x=np.asarray(xs,float); m=float(x.mean())
+    ci=1.96*float(x.std(ddof=1))/math.sqrt(len(x)) if len(x)>1 else 0.0
+    return m,ci
+
+
+def run(a):
+    device="cuda" if torch.cuda.is_available() and not a.cpu else "cpu"
+    root=Path(a.data_dir)
+    train=cap_records(load_jsonl(root/"train.jsonl"),a.max_train,1)
+    val=cap_records(load_jsonl(root/"val.jsonl"),a.max_val,2)
+    test=cap_records(load_jsonl(root/"test.jsonl"),a.max_test,3)
+    print(f"device={device} records train/val/test={len(train)}/{len(val)}/{len(test)}",flush=True)
+
+    scale,med=train_scale(train)
+    edges=distance_edges(train)
+    print(f"TRAIN-only median GPS step={med:.3f} m -> {TARGET_MEDIAN_STEP:.2f} model units",flush=True)
+    print("TRAIN-only distance-bin edges (m):",np.round(edges,2).tolist(),flush=True)
+
+    xb_tr,xr_tr,Ltr=features(train,scale,device,a.feature_batch)
+    xb_v,xr_v,Lv=features(val,scale,device,a.feature_batch)
+    xb_te,xr_te,Lte=features(test,scale,device,a.feature_batch)
+
+    # Corrected RAW calibration: one TRAIN-only scalar, applied unchanged to val/test.
+    # This preserves endpoint geometry (direction and magnitude).
+    raw_scale=raw_train_scale(xr_tr)
+    xr_tr=xr_tr/raw_scale; xr_v=xr_v/raw_scale; xr_te=xr_te/raw_scale
+    print(f"TRAIN-only raw endpoint scale={raw_scale:.4f} model units",flush=True)
+
+    yb_tr,yd_tr=labels(train,edges); yb_v,yd_v=labels(val,edges); yb_te,yd_te=labels(test,edges)
+
+    result={
+      "protocol":"geolife_external_v2_corrected_raw","dataset":"Microsoft GeoLife GPS Trajectories",
+      "user_disjoint":True,"train_only_scale_m_per_unit":scale,"train_median_step_m":med,
+      "target_median_step_model_units":TARGET_MEDIAN_STEP,
+      "raw_train_endpoint_scale_model_units":raw_scale,
+      "distance_edges_m":[float(x) for x in edges],
+      "n":{"train":len(train),"val":len(val),"test":len(test)},
+      "seeds":list(range(a.seeds)),"tasks":{}
+    }
+
+    for task,ncls,ytr,yv,yte in [
+        ("bearing",N_CLASSES_BEARING,yb_tr,yb_v,yb_te),
+        ("distance",N_CLASSES_DISTANCE,yd_tr,yd_v,yd_te)
+    ]:
+        vals,cnt=np.unique(ytr,return_counts=True); maj=int(vals[cnt.argmax()])
+        off=float((yte==maj).mean())
+        rows=[]; seed_preds_grid=[]; seed_preds_raw=[]
+        print(f"\n{task.upper()} | OFF majority={off:.3f}",flush=True)
+        for seed in range(a.seeds):
+            ga,gpred=fit_eval(xb_tr,ytr,xb_v,yv,xb_te,yte,ncls,seed,device)
+            ra,rpred=fit_eval(xr_tr,ytr,xr_v,yv,xr_te,yte,ncls,1000+seed,device)
+            seed_preds_grid.append(gpred); seed_preds_raw.append(rpred)
+            rows.append({"seed":seed,"grid":ga,"raw":ra,"off":off})
+            print(f" seed {seed}: GRID {ga:.3f} | RAW {ra:.3f} | OFF {off:.3f}",flush=True)
+        grid=[r["grid"] for r in rows]; raw=[r["raw"] for r in rows]
+        mg,cg=mean_ci(grid); mr,cr=mean_ci(raw)
+
+        # PRIMARY INFERENCE: held-out user is the independent unit. Average accuracy
+        # across readout seeds within each user, then compare paired user-level effects.
+        users=np.asarray([r["user_id"] for r in test])
+        uniq=sorted(set(users.tolist()))
+        user_rows=[]
+        gmat=np.stack(seed_preds_grid); rmat=np.stack(seed_preds_raw)
+        offpred=np.full(len(yte),maj,dtype=np.int64)
+        for uid in uniq:
+            ix=np.flatnonzero(users==uid)
+            gacc=float((gmat[:,ix]==yte[ix][None,:]).mean(axis=1).mean())
+            racc=float((rmat[:,ix]==yte[ix][None,:]).mean(axis=1).mean())
+            oacc=float((offpred[ix]==yte[ix]).mean())
+            user_rows.append({"user_id":uid,"n":int(len(ix)),"grid":gacc,"raw":racc,"off":oacc})
+
+        gd=np.asarray([u["grid"]-u["off"] for u in user_rows])
+        rd=np.asarray([u["grid"]-u["raw"] for u in user_rows])
+        pg=signflip_user(gd); pr=signflip_user(rd)
+        cig=bootstrap_user_ci(gd); cir=bootstrap_user_ci(rd)
+
+        result["tasks"][task]={
+          "per_seed":rows,
+          "grid_mean":mg,"grid_ci95_across_readout_seeds":cg,
+          "raw_mlp_mean":mr,"raw_mlp_ci95_across_readout_seeds":cr,
+          "raw_oracle":1.0,"off":off,
+          "heldout_users":user_rows,
+          "n_test_users":len(user_rows),
+          "user_paired_grid_minus_off_mean":float(gd.mean()),
+          "user_paired_grid_minus_off_ci95_bootstrap":cig,
+          "p_grid_vs_off_user_signflip":pg,
+          "user_paired_grid_minus_raw_mlp_mean":float(rd.mean()),
+          "user_paired_grid_minus_raw_mlp_ci95_bootstrap":cir,
+          "p_grid_vs_raw_mlp_user_signflip":pr,
+        }
+        print(f" SUMMARY GRID {mg:.3f}±{cg:.3f} | RAW {mr:.3f}±{cr:.3f} | OFF {off:.3f}",flush=True)
+        print(f" HELD-OUT USERS n={len(user_rows)}: GRID-OFF {gd.mean():+.3f} "
+              f"CI[{cig[0]:+.3f},{cig[1]:+.3f}] p={pg:.5f}",flush=True)
+        print(f" HELD-OUT USERS: GRID-RAW {rd.mean():+.3f} "
+              f"CI[{cir[0]:+.3f},{cir[1]:+.3f}] p={pr:.5f}",flush=True)
+
+    out=Path(a.out); out.parent.mkdir(parents=True,exist_ok=True)
+    out.write_text(json.dumps(result,indent=2))
+    print("\nwrote",out,flush=True)
+
+
+if __name__=="__main__":
+    ap=argparse.ArgumentParser()
+    ap.add_argument("--data_dir",default="data/geolife_benchmark")
+    ap.add_argument("--out",default="results/geolife_external_v2.json")
+    ap.add_argument("--seeds",type=int,default=8)
+    ap.add_argument("--max_train",type=int,default=24000)
+    ap.add_argument("--max_val",type=int,default=6000)
+    ap.add_argument("--max_test",type=int,default=12000)
+    ap.add_argument("--feature_batch",type=int,default=512)
+    ap.add_argument("--cpu",action="store_true")
+    run(ap.parse_args())
