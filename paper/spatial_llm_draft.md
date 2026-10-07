@@ -1,6 +1,10 @@
 # Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not
 
-**Submission draft — Spatial-LLM.** Every quantitative claim below is tied to a committed script or notebook and raw result artifact. We distinguish properties that **emerge under learning** from properties imposed as **architectural priors**, and report null/negative results as first-class findings.
+**Mohammad Ali Zamani**¹  
+¹Cognitive Science Program, Faculty of Psychology and Education, University of Tehran, Tehran, Iran  
+Correspondence: M.a.zamani@ut.ac.ir  
+ORCID: 0009-0000-9566-4093
+
 
 ---
 
@@ -90,7 +94,7 @@ noise, the velocity-driven grid code is *competitive but not uniquely necessary*
 The additive integration prior captures the core; the population-code extras matter only in fixed-memory
 or context-free regimes. This map of wins / ties / boundaries — with fair baselines — is the
 contribution, and it is summarized as a single predictive **phase diagram** of *when each inductive bias
-wins* (Figure 9, `src/eval/phase_diagram.py`): grid wins where periodicity / pattern-separation is
+wins* (Fig. 2, `src/eval/phase_diagram.py`): grid wins where periodicity / pattern-separation is
 load-bearing (cyclic worlds, one-shot capacity), ties where a plain integration bias suffices (Euclidean
 extrapolation, labelled multi-map, noise), and loses only in the very-low-data regime. (Figs. 2–3; `results/code_necessity.json`, `results/multimap_task.json`, `results/frontier_probes.json`, `results/phase_diagram.json`.)
 
@@ -206,6 +210,18 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 
 ---
 
+### Author contributions
+
+M.A.Z. conceived the study; designed the computational framework and experiments; developed and curated the software and analysis pipeline; performed the analyses; interpreted the results; prepared the visualizations; and wrote and revised the manuscript.
+
+### Funding
+
+This research received no specific grant from any funding agency in the public, commercial or not-for-profit sectors.
+
+### Competing interests
+
+The author declares no competing interests.
+
 ### AI-assisted development and writing
 
 Generative AI tools (OpenAI ChatGPT) were used during development for code drafting, debugging support, literature-search assistance and editorial restructuring of the manuscript. All experimental designs, scientific claims, code changes, statistical interpretations and manuscript text were reviewed and accepted by the human author, who retains full responsibility for the work. Generative AI was not treated as an author and did not independently generate or alter experimental observations.
@@ -213,15 +229,3 @@ Generative AI tools (OpenAI ChatGPT) were used during development for code draft
 ### Code and data availability
 
 All scripts underlying the main claims, committed result JSONs, GPU notebooks, and reproducibility instructions are available in the Spatial-LLM repository. The exact submission artifact will be archived on Zenodo and the persistent DOI inserted here before submission. The Microsoft GeoLife source archive is not redistributed; the repository contains deterministic preprocessing code and the locked user-disjoint evaluation protocol needed to regenerate the external-validation benchmark from the official dataset.
-
-
-
-### Status / path to submission
-- ✅ Core CPU characterization and causal language readouts are committed with multi-seed artifacts.
-- ✅ Claim language now distinguishes learned/emergent phenomena from the explicitly constrained hexagonal prior.
-- ✅ Null results and non-convergent seeds remain reported rather than removed post hoc.
-- ✅ Reproducibility instructions, raw JSON results, tests, and figures are in-repository.
-- ✅ Second-backbone replication complete: SmolLM2-1.7B reproduces the theta-sweep causal effect (primary ON vs NO-SWEEP p=0.0156).
-- ✅ External real-trajectory validation complete: GeoLife bearing and distance both exceed OFF across held-out users with p≈1×10⁻⁵; corrected exact-displacement baselines are reported as ceilings.
-- ⚠️ The grid-vs-place LLM comparison remains underpowered at n=3 and is treated as inconclusive, not as a positive headline.
-- Framing locked: causal cognitive-map interface + regime map of wins/ties/failures; **no claim that grid cells are universally superior or that hexagonal geometry emerged unconstrained**.
