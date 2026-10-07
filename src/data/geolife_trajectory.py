@@ -116,9 +116,14 @@ def make_windows(steps: Sequence[tuple[float, float]], length: int,
 
 def user_split(user_ids: Iterable[str],
                train_frac: float = 0.70,
-               val_frac: float = 0.15) -> dict[str, str]:
-    """Deterministic user-disjoint split by sorted user id."""
+               val_frac: float = 0.15,
+               seed: int = 20261007) -> dict[str, str]:
+    """Seeded, deterministic USER-disjoint split. Sorting before shuffling makes the
+    assignment independent of filesystem/input order while avoiding a potentially
+    structured split by GeoLife user ID."""
+    import random
     ids = sorted(set(user_ids))
+    random.Random(seed).shuffle(ids)
     n = len(ids)
     n_train = int(round(n * train_frac))
     n_val = int(round(n * val_frac))
@@ -167,7 +172,8 @@ def build_benchmark(root: str | Path, out_dir: str | Path,
 
     meta = {
         "dataset": "Microsoft GeoLife GPS Trajectories",
-        "split_policy": "user-disjoint deterministic 70/15/15",
+        "split_policy": "user-disjoint seeded-random 70/15/15",
+        "split_seed": 20261007,
         "lengths": list(lengths),
         "counts": counts,
         "notes": "GPS jumps >250m per sample and duplicate-like steps <0.5m are filtered.",
