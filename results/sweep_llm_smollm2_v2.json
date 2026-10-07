@@ -1,0 +1,101 @@
+{
+  "model": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+  "protocol": "theta_sweep_second_backbone_v2",
+  "training_steps": 1600,
+  "n_seeds": 8,
+  "scoring": "forced-choice logits for 0 vs 1",
+  "per_seed": [
+    {
+      "seed": 0,
+      "on": 0.945,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.6
+    },
+    {
+      "seed": 1,
+      "on": 0.555,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.507
+    },
+    {
+      "seed": 2,
+      "on": 0.52,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.505
+    },
+    {
+      "seed": 3,
+      "on": 0.972,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.62
+    },
+    {
+      "seed": 4,
+      "on": 0.71,
+      "off": 0.5,
+      "no_sweep": 0.488,
+      "shuffle": 0.572
+    },
+    {
+      "seed": 5,
+      "on": 0.5,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.5
+    },
+    {
+      "seed": 6,
+      "on": 0.742,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.592
+    },
+    {
+      "seed": 7,
+      "on": 0.648,
+      "off": 0.5,
+      "no_sweep": 0.5,
+      "shuffle": 0.542
+    }
+  ],
+  "comparisons": {
+    "off": {
+      "on_mean": 0.6990625,
+      "on_ci95": 0.12625376788931883,
+      "control_mean": 0.5,
+      "control_ci95": 0,
+      "delta": 0.1990625,
+      "exact_signflip_p": 0.015625,
+      "wins": 7,
+      "losses": 0,
+      "ties": 1
+    },
+    "no_sweep": {
+      "on_mean": 0.6990625,
+      "on_ci95": 0.12625376788931883,
+      "control_mean": 0.4984375,
+      "control_ci95": 0.0030625,
+      "delta": 0.200625,
+      "exact_signflip_p": 0.015625,
+      "wins": 7,
+      "losses": 0,
+      "ties": 1
+    },
+    "shuffle": {
+      "on_mean": 0.6990625,
+      "on_ci95": 0.12625376788931883,
+      "control_mean": 0.5546875,
+      "control_ci95": 0.033,
+      "delta": 0.144375,
+      "exact_signflip_p": 0.015625,
+      "wins": 7,
+      "losses": 0,
+      "ties": 1
+    }
+  },
+  "provenance": "Transcribed from completed Kaggle dual-T4 run supplied by the project author; raw Kaggle logs retained outside this repository unless separately archived."
+}

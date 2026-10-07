@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use Spatial-LLM or its results, please cite the software release and the associated paper."
+title: "Spatial-LLM: Causal cognitive-map interfaces for language models"
+type: software
+authors:
+  - family-names: "Zamani"
+    given-names: "Mohammad Ali"
+    orcid: "https://orcid.org/0009-0000-9566-4093"
+    email: "M.a.zamani@ut.ac.ir"
+    affiliation: "Cognitive Science Program, Faculty of Psychology and Education, University of Tehran, Tehran, Iran"
+repository-code: "https://github.com/Mohammadzamanid/Spatial-LLM"
+url: "https://github.com/Mohammadzamanid/Spatial-LLM"
+license: MIT
+doi: "10.5281/zenodo.23223468"
+version: "1.0.2"
+date-released: "2026-10-07"
+keywords:
+  - cognitive maps
+  - spatial reasoning
+  - language models
+  - grid cells
+  - path integration
+  - neuroscience-inspired AI
+preferred-citation:
+  type: article
+  title: "Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not"
+  authors:
+    - family-names: "Zamani"
+      given-names: "Mohammad Ali"
+      orcid: "https://orcid.org/0009-0000-9566-4093"
+  year: 2026
+  notes: "Software and reproducibility artifact archived on Zenodo; manuscript submitted separately."
