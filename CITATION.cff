@@ -3,13 +3,15 @@ message: "If you use Spatial-LLM or its results, please cite the software releas
 title: "Spatial-LLM: Causal cognitive-map interfaces for language models"
 type: software
 authors:
-  - family-names: "Zamani Deravei"
-    given-names: "Seyyed Mohammad Ali"
+  - family-names: "Zamani"
+    given-names: "Mohammad Ali"
+    orcid: "https://orcid.org/0009-0000-9566-4093"
+    email: "M.a.zamani@ut.ac.ir"
+    affiliation: "Cognitive Science Program, Faculty of Psychology and Education, University of Tehran, Tehran, Iran"
 repository-code: "https://github.com/Mohammadzamanid/Spatial-LLM"
 url: "https://github.com/Mohammadzamanid/Spatial-LLM"
 license: MIT
 version: "1.0.0-rc1"
-date-released: "2026-10-07"
 keywords:
   - cognitive maps
   - spatial reasoning
@@ -21,7 +23,8 @@ preferred-citation:
   type: article
   title: "Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not"
   authors:
-    - family-names: "Zamani Deravei"
-      given-names: "Seyyed Mohammad Ali"
+    - family-names: "Zamani"
+      given-names: "Mohammad Ali"
+      orcid: "https://orcid.org/0009-0000-9566-4093"
   year: 2026
   notes: "Manuscript in preparation; replace with journal citation after publication."
