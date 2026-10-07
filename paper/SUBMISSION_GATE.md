@@ -25,9 +25,9 @@ This file is the publication stop rule. Do not expand the architecture until the
 - Raw JSON artifacts, figures, reproducibility script, and tests are committed.
 - Negative and failed results are retained in the record.
 
-## Remaining scientific blocker for a flagship submission
+## Scientific validation gates
 
-### Gate A — independent evaluation
+### Gate A — independent evaluation ✅ PASSED
 
 Run the cognitive-map interface on **Microsoft GeoLife GPS Trajectories**, an external real-world trajectory dataset that matches the model's current self-motion/path-integration modality. The adapter is committed at `src/data/geolife_trajectory.py` and uses user-disjoint train/validation/test splits. Do not force-fit a multiview/video benchmark unless a visual front-end becomes part of the scientific question.
 
@@ -40,6 +40,8 @@ Locked protocol (pre-specified before the external run):
 6. Optimization: 8 readout seeds quantify training variance. **Held-out users, not seeds, are the inferential units**; primary significance is the paired GRID−OFF user-level sign-flip test plus a cluster/bootstrap CI over held-out users.
 7. Success criterion for Gate A: GRID must exceed OFF on the primary bearing task with a user-level paired p<0.05 and a 95% user-bootstrap CI excluding zero. RAW performance determines how much information is lost relative to exact additive integration; GRID is not required to beat RAW.
 8. Commit the exact script, result JSON, user-level effects, and aggregate statistics.
+
+**Completed (GeoLife V2 corrected baseline):** primary 8-way bearing GRID 76.6% vs OFF 16.2%; held-out-user paired Δ=+59.3 points, bootstrap 95% CI [+50.5,+67.5], user-level sign-flip p≈1×10⁻⁵ (28 held-out users). Secondary distance GRID 92.3% vs OFF 18.4%; user-level Δ=+76.5 points, 95% CI [+72.5,+80.3], p≈1×10⁻⁵. A corrected exact-displacement RAW-MLP calibration reaches 98.7% bearing and 98.8% distance, confirming the task is learnable and quantifying the information lost by the bounded grid code. Gate A is therefore closed.
 
 A visual benchmark such as MindCube or VSI-Bench is valuable related work, but using it directly would require adding a visual scene encoder and would test a different system.
 
@@ -67,7 +69,7 @@ The claim needed is not identical absolute accuracy. The required replication is
 - [x] Root MIT LICENSE added
 - [x] Single-seed semantic-warp test made less brittle while preserving the mechanistic assertion
 - [ ] CI green on Python 3.11 and 3.12
-- [ ] Paper figure panels assembled
+- [ ] Paper figure panels assembled (final consolidated layout pending)
 - [ ] References converted to a complete bibliography
 - [ ] Release tag created after acceptance of the final artifact set
 - [ ] Archive release on Zenodo / DOI
@@ -75,6 +77,6 @@ The claim needed is not identical absolute accuracy. The required replication is
 
 ## Submission stop rule
 
-A flagship submission is ready when Gate A is complete, CI is green, and the paper contains only claims directly supported by the committed artifacts. Gate B is complete.
+Both scientific gates are complete. A flagship submission is ready when CI is green, the final figure set is assembled, the bibliography is complete, and the manuscript contains only claims directly supported by committed artifacts.
 
 Do **not** delay submission to add astrocytes, basal ganglia, additional plasticity mechanisms, or other modules unless a reviewer or a pre-registered hypothesis requires them. Those are follow-on papers.
