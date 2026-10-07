@@ -6,37 +6,11 @@
 
 ## Abstract
 
-We give a frozen language model a brain-faithful spatial substrate — a self-supervised spatial substrate built around a biologically constrained, velocity-driven **grid code** and learned **place-cell** readouts that path-integrates self-motion into a bounded periodic, multi-scale metric — and study, with multi-seed error-barred controls, what that representation
-contributes. Two things. First, an **integrative result**: a *single* self-supervised code, learned
-with no coordinate labels, transfers spatial competence to a frozen LLM (it answers navigation
-questions through the cortex, not the text) and — with its metric unchanged — also supports
-vector-based **planning**, dopamine-like **value** learning and goal navigation, **relational/transitive
-inference**, and one-shot **memory**. Second, an **honest characterization** of *which* representational
-properties actually matter, including results that run against the simplest story: on pure path
-integration the grid code is matched by a permutation-invariant, sum-pooling Transformer that shares its
-*additive integration bias*; the population code's distinctive properties (high-capacity
-pattern-separation, environment-specific **remapping**) are decisive only in narrow regimes — fixed
-associative memory and *context-free* settings — and do **not** transfer to a trained model that already
-has an external context label (as an LLM does in its prompt). The contribution is therefore a rigorous,
-fairly-baselined map of *when* brain-faithful spatial coding helps and when a simpler inductive bias
-suffices, together with the integrative demonstration. Every claimed effect is supported by paired
-significance tests (sign-flip permutation, bootstrap CIs, n up to 20; all p<1e-4 with large effect
-sizes), and the central tie is a *certified null* (grid vs a NoPE+sum Transformer: p=0.94, d=0.04). We
-do not claim grid cells are a uniquely necessary substrate for a trained system, and we show why. We
-*do* identify two regimes where the brain-faithful code is **necessary**, not merely competitive:
-**cyclic (non-Euclidean) worlds**, where its periodicity computes toroidal position (∫v mod 2π) that
-additive integrators provably cannot — flat at the oracle floor where they collapse to chance, and a
-world a language prior cannot fake (a built-in leakage control); and **abstract relational inference**,
-where a *space-trained, frozen* metric supports transitive inference and schema transfer, falsified by
-shuffling the metric (p=0.009). Finally, prompted by the neuroscience of space *and time*, we extend the geometric substrate along two additional axes: a **successor-representation** map that plans
-detours around barriers where a metric map stalls (100% vs 62%, paired p=0.009) and bends its fields to
-geodesic rather than Euclidean distance, and a recurrent substrate that, trained only to read elapsed
-time, **grows time cells** whose latency-dependent widening reproduces the brain's scalar (Weber) timing
-law unbidden (17% of units vs 1% untrained) — these temporal signatures *emerge*, not imposed. A frozen
-LLM then reads **both** codes from language — naming which cell of a wrap-around (toroidal) world it
-occupies, and how much time has elapsed, purely through the cortex — each a significant cortex-ON ≫
-text-only-OFF causal control (n=6, paired **p=0.033**), with the elapsed-time question never appearing in
-the prompt.
+Large language models can describe space without necessarily maintaining a metric state that survives self-motion. We test whether a structured cognitive-map interface can provide that missing state. Our system converts self-motion into a bounded multi-scale spatial population code, injects it into a frozen language model through gated cross-attention, and evaluates the resulting behavior with causal ablations, matched non-neural baselines, multiple seeds, a second LLM family, and an external real-world trajectory dataset.
+
+The central result is causal: when trajectory information reaches the model only through the spatial channel, cortex-ON substantially outperforms text-only OFF controls, and organ-specific lesions produce corresponding losses. A prospective theta-sweep signal improves blocked-ahead reasoning in Qwen2.5-1.5B and independently replicates in SmolLM2-1.7B (ON 69.9% vs NO-SWEEP 49.8%, paired sign-flip p=0.0156). At the representation level, ordinary Euclidean path integration reveals an important boundary condition: a permutation-invariant NoPE+sum Transformer statistically ties the grid code (p=0.94), showing that additive integration rather than grid geometry explains that regime. Periodicity, remapping, and bounded population coding become useful only when those properties are load-bearing, including cyclic worlds and context-free one-shot memory.
+
+Finally, the fixed spatial representation transfers to real human motion in Microsoft GeoLife without architecture changes. On user-disjoint held-out trajectories, 8-way endpoint bearing reaches 76.6% versus a 16.2% OFF baseline (28 users; paired effect +59.3 percentage points, bootstrap 95% CI [+50.5,+67.5], p≈1×10⁻⁵), and 6-bin endpoint distance reaches 92.3% versus 18.4% OFF. Exact Cartesian displacement remains a higher ceiling (98.7–98.8%), so the claim is not that grid coding is universally optimal. Rather, structured cognitive maps provide a causal spatial state to language models, with benefits that can be predicted from the representational demands of the task.
 
 ---
 
