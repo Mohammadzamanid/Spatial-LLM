@@ -37,8 +37,7 @@ trajectory-QA tasks from the decoded displacement (`src/eval/extrapolation.py`, 
 place baseline (tiled exactly to the trained region), the grid code wins at every length — at 3×,
 **93% ±0 vs 80% ±1** distance accuracy, non-overlapping CIs — because a bounded place code cliffs once
 paths leave its trained box while the grid code degrades gracefully (its phase is scale-free *and*
-periodic). An exact-integration oracle is flat, so the gap is the code, not the task. (Figure 1:
-`results/extrapolation.svg`. Honest ceiling: grid itself falls to 75% at 4×; range is finite.)
+periodic). An exact-integration oracle is flat, so the gap is the code, not the task. (Fig. 2; `results/extrapolation.json`. Honest ceiling: grid itself falls to 75% at 4×; range is finite.)
 
 ### Additive integration explains ordinary Euclidean path integration
 
@@ -55,7 +54,7 @@ Single-variable ablations (`src/eval/ablations.py`, `seq_baselines.py`, n=5):
 
 So length extrapolation requires an *additive, scale-free, order-invariant integration bias*; the
 conventional defaults lack it and the grid code has it by construction — but it is **not unique** to
-grid cells. (Figures 2: `results/ablations.svg`, `results/seq_baselines.svg`.)
+grid cells. (Fig. 2; `results/ablations.json`, `results/seq_baselines.json`.)
 
 ### Regime-dependent value of structured population codes
 
@@ -93,11 +92,9 @@ or context-free regimes. This map of wins / ties / boundaries — with fair base
 contribution, and it is summarized as a single predictive **phase diagram** of *when each inductive bias
 wins* (Figure 9, `src/eval/phase_diagram.py`): grid wins where periodicity / pattern-separation is
 load-bearing (cyclic worlds, one-shot capacity), ties where a plain integration bias suffices (Euclidean
-extrapolation, labelled multi-map, noise), and loses only in the very-low-data regime. (Figures 3–4:
-`results/code_necessity.svg`, `results/multimap_task.svg`, `results/frontier_probes.svg`;
-`results/phase_diagram.svg`.)
+extrapolation, labelled multi-map, noise), and loses only in the very-low-data regime. (Figs. 2–3; `results/code_necessity.json`, `results/multimap_task.json`, `results/frontier_probes.json`, `results/phase_diagram.json`.)
 
-**Significance (paired tests, `src/eval/significance.py`, Figure 6).** Every claimed effect is
+**Significance (paired tests; Fig. 2; `src/eval/significance.py`).** Every claimed effect is
 statistically significant under a paired sign-flip permutation test with a bootstrap CI of the
 difference (n=20 fast / n=8 heavy): grid−place distance@T24 Δ=+0.124, p<1e-4, d=10.9 (20/20 seeds);
 grid+remap−additive multi-map Δ=+0.766, p<1e-4; population−raw-2D capacity Δ=+0.507, p<1e-4;
@@ -106,8 +103,7 @@ Hebbian−gradient Δ=+0.662, p<1e-4; value−random goal-nav Δ=+0.670, p=0.006
 Transformer on path integration is Δ=+0.002, 95% CI [−0.022,+0.032], **p=0.94, d=0.04**.
 (`results/significance.svg`.)
 
-**The tie inverts on non-Euclidean worlds — where the periodic code is *necessary* (Figure 7,
-`src/eval/torus.py`).** On a torus, true position is θ = (∫velocity) mod 2π; a periodic grid code
+**The tie inverts on non-Euclidean worlds — where the periodic code is *necessary* (Fig. 3; `src/eval/torus.py`).** On a torus, true position is θ = (∫velocity) mod 2π; a periodic grid code
 computes that mod for free (cos ∫v = cos θ at any wrap count) while a non-periodic code sees an unbounded
 ∫v and cannot recover the wrap. Trained on short paths and tested to many wraps (n=8), the grid code is
 **flat at the oracle floor (0.01 rad, 100% within 45°) at every length**, while the *same NoPE+sum
@@ -119,6 +115,8 @@ faithful Euclidean text description, so a language prior cannot substitute for h
 
 ### Causal language transfer through the spatial channel
 
+The main causal transfer results are summarized in **Fig. 1**.
+
 We next ask whether a language model actually uses the latent map rather than solving the task from text. In all headline language experiments, the move sequence is withheld from the prompt and reaches the model only through the spatial channel; cortex-OFF therefore provides a direct leakage control.
 
 **Single-item spatial readouts.** A frozen Qwen2.5-1.5B + LoRA reads path-integrated state from the cortex well above text-only OFF. On the non-Euclidean torus task, cortex-ON reaches **84/74/63%** at T=8/16/24 versus **~9–11%** OFF, with ON>OFF in all six seeds and paired sign-flip **p=0.033** at every length (`results/torus_llm.json`). Because the task depends on wrap-around state that is never described in text, this is the cleanest demonstration that the answer is carried by the integrated spatial representation rather than a language prior. The temporal analogue behaves similarly: elapsed-time EXACT accuracy is **55% ±20** versus **16% ±6** OFF and WITHIN-1 is **70% ±19** versus **37% ±17**, again ON>OFF in all six seeds (**p=0.033**; `results/elapsed_time_llm.json`).
@@ -128,6 +126,8 @@ We next ask whether a language model actually uses the latent map rather than so
 **Boundary condition.** A separate n=3 grid-vs-place LLM comparison is intentionally not used as a headline superiority claim: cortex-ON is far above OFF, but grid vs place is not statistically separable at that sample size (`results/extrapolation_llm.json`). This agrees with the representation-level characterization in Sections 3–5: the robust language claim is the causal usefulness of a structured spatial state, not universal grid dominance.
 
 ### Prospective theta-sweep and cross-backbone replication
+
+Prospective ablations and the second-backbone replication are summarized in **Fig. 4**.
 
 A cognitive map is useful not only for representing current state but also for sampling what lies ahead. We therefore expose prospective theta-sweep tokens generated from the grid map and ask a blocked-ahead question in novel per-episode layouts, where the answer cannot be inferred from current position alone.
 
@@ -151,6 +151,8 @@ They are intentionally not part of the flagship causal spine. The main paper req
 This separation prevents auxiliary neurobiological demonstrations from being mistaken for necessary premises of the central result.
 
 ### External validation on real human trajectories
+
+The preregistered external-validation results are summarized in **Fig. 5**.
 
 The controlled experiments above use synthetic/self-generated motion so that spatial-channel interventions can be isolated exactly. We therefore tested the fixed spatial code on an external real-world dataset, **Microsoft GeoLife GPS Trajectories 1.3**, without changing the grid architecture. GPS traces were converted to east/north self-motion and divided by user into seeded-random **70/15/15 user-disjoint** train/validation/test splits. Spatial scaling and distance-bin cut-points were estimated from TRAIN users only. We evaluated non-overlapping trajectory windows at T={8,16,24}; the inferential unit is the held-out **user**, not the readout seed.
 
@@ -203,6 +205,10 @@ Full configs in `results/*.json`; one-command regeneration via `bash reproduce_a
 figure→command→artifact map, verified environment, and Zenodo-release steps in `REPRODUCE.md`.
 
 ---
+
+### AI-assisted development and writing
+
+Generative AI tools (OpenAI ChatGPT) were used during development for code drafting, debugging support, literature-search assistance and editorial restructuring of the manuscript. All experimental designs, scientific claims, code changes, statistical interpretations and manuscript text were reviewed and accepted by the human author, who retains full responsibility for the work. Generative AI was not treated as an author and did not independently generate or alter experimental observations.
 
 ### Code and data availability
 
