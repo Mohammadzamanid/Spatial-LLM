@@ -135,8 +135,9 @@ save(fig,"Fig2_regime_map")
 # FIGURE 3 — periodicity and remapping
 # ------------------------------------------------------------------
 torus=load("torus.json")
+nec=load("code_necessity.json")
 mm=load("multimap_task.json")
-fig=plt.figure(figsize=(12,5.5)); gs=fig.add_gridspec(1,2)
+fig=plt.figure(figsize=(13.5,5.2)); gs=fig.add_gridspec(1,3)
 
 ax=fig.add_subplot(gs[0,0]); panel(ax,"A")
 T=[8,16,32,64]
@@ -146,17 +147,28 @@ for name in ["grid (periodic)","NoPE+sum Transformer","place (Euclidean)"]:
     ax.errorbar(T,vals,yerr=ci,marker="o",label=name)
 ax.set_xscale("log",base=2); ax.set_xticks(T,T)
 ax.set_ylim(0,1.05); ax.set_xlabel("Path length / wraps"); ax.set_ylabel("Within 45°")
-ax.set_title("Periodicity becomes load-bearing on a torus"); ax.legend(frameon=False,fontsize=8)
+ax.set_title("Periodicity is load-bearing on a torus"); ax.legend(frameon=False,fontsize=7)
 
 ax=fig.add_subplot(gs[0,1]); panel(ax,"B")
+Ms=[1,2,4,8,16]
+for name in ["grid + remap","place + remap","grid, NO remap","additive (raw 2-D)"]:
+    vals=[nec["multimap"][name][str(m)]["mean"] for m in Ms]
+    ci=[nec["multimap"][name][str(m)]["ci95"] for m in Ms]
+    ax.errorbar(Ms,vals,yerr=ci,marker="o",label=name)
+ax.set_xscale("log",base=2); ax.set_xticks(Ms,Ms)
+ax.set_ylim(0,1.05); ax.set_xlabel("Number of contexts"); ax.set_ylabel("One-shot recall")
+ax.set_title("Remapping prevents context collisions")
+ax.legend(frameon=False,fontsize=7)
+
+ax=fig.add_subplot(gs[0,2]); panel(ax,"C")
 Ms=[1,2,4,8,16,32]
 for name in ["grid + remap","grid, no remap","additive (raw 2-D)"]:
     vals=[mm["results"][name][str(m)]["mean"] for m in Ms]
     ax.plot(Ms,vals,marker="o",label=name)
 ax.set_xscale("log",base=2); ax.set_xticks(Ms,Ms)
-ax.set_ylim(0,1.05); ax.set_xlabel("Number of contexts"); ax.set_ylabel("Accuracy")
-ax.set_title("External context labels can substitute for remapping")
-ax.legend(frameon=False,fontsize=8)
+ax.set_ylim(0,1.05); ax.set_xlabel("Number of labelled contexts"); ax.set_ylabel("Accuracy")
+ax.set_title("A context label substitutes for remapping")
+ax.legend(frameon=False,fontsize=7)
 save(fig,"Fig3_periodicity_remapping")
 
 # ------------------------------------------------------------------
