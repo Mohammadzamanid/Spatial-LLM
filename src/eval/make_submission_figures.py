@@ -31,7 +31,7 @@ def save(fig,name):
     plt.close(fig)
 
 def panel(ax,label):
-    ax.text(-0.08,1.05,label,transform=ax.transAxes,fontweight="bold",fontsize=12,va="top")
+    ax.text(-0.12,1.10,label,transform=ax.transAxes,fontweight="bold",fontsize=12,va="top")
 
 # ------------------------------------------------------------------
 # FIGURE 1 — causal language transfer
@@ -217,16 +217,20 @@ fig=plt.figure(figsize=(12,5.5)); gs=fig.add_gridspec(1,3)
 
 ax=fig.add_subplot(gs[0,0]); panel(ax,"A")
 ax.axis("off")
-stages=["GeoLife GPS","EN displacement","User-disjoint\n70/15/15","Fixed grid\npopulation","Readout"]
-xs=np.linspace(.08,.92,len(stages))
-for x,t in zip(xs,stages):
-    ax.text(x,.52,t,ha="center",va="center",transform=ax.transAxes,
-            bbox=dict(boxstyle="round,pad=0.35",fc="white",ec="black"),fontsize=9)
-for a,b in zip(xs[:-1],xs[1:]):
-    ax.annotate("",xy=(b-.07,.52),xytext=(a+.07,.52),xycoords=ax.transAxes,
+stages=[
+    (.50,.84,"GeoLife GPS trajectories"),
+    (.50,.65,"East/north displacement windows"),
+    (.50,.46,"User-disjoint 70/15/15 split"),
+    (.50,.27,"Fixed grid population → readout"),
+]
+for x,y,t in stages:
+    ax.text(x,y,t,ha="center",va="center",transform=ax.transAxes,
+            bbox=dict(boxstyle="round,pad=0.35",fc="white",ec="black"),fontsize=8.5)
+for (_,ya,_),(_,yb,_) in zip(stages[:-1],stages[1:]):
+    ax.annotate("",xy=(.50,yb+.07),xytext=(.50,ya-.07),xycoords=ax.transAxes,
                 arrowprops=dict(arrowstyle="->"))
-ax.text(.5,.18,"Scale + distance bins fixed from TRAIN users only",ha="center",
-        transform=ax.transAxes,fontstyle="italic",fontsize=9)
+ax.text(.5,.06,"Scale + distance bins fixed from TRAIN users only",ha="center",
+        transform=ax.transAxes,fontstyle="italic",fontsize=8)
 
 ax=fig.add_subplot(gs[0,1]); panel(ax,"B")
 tasks=["bearing","distance"]; names=["Bearing","Distance"]
