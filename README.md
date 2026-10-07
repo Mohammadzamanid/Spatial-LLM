@@ -3,6 +3,7 @@
 [![CI](https://github.com/Mohammadzamanid/Spatial-LLM/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohammadzamanid/Spatial-LLM/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12-blue)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23223468.svg)](https://doi.org/10.5281/zenodo.23223468)
 
 **Causal cognitive-map interfaces for language models: when brain-inspired spatial codes help, and when they do not.**
 
@@ -18,6 +19,8 @@ The publication branch is deliberately claim-calibrated:
 - **Not claimed:** unconstrained emergence of hexagonal geometry, universal superiority of grid codes, or full real-world embodied intelligence.
 
 The constrained publication model uses a biologically motivated hexagonal torus/velocity-driven module. Unconstrained units develop periodic multi-field responses but **not** spontaneous hexagonal symmetry; this distinction is explicit in the manuscript.
+
+Frozen submission archive: **https://doi.org/10.5281/zenodo.23223468** (concept DOI: https://doi.org/10.5281/zenodo.23223467)
 
 Publication materials:
 - manuscript: [`paper/spatial_llm_draft.md`](paper/spatial_llm_draft.md)
