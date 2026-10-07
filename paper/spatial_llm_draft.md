@@ -638,7 +638,15 @@ object-vector cells. The review's vision at the language level: a map that answe
 "where am I relative to the landmark?", both frames coexisting and each causally traced to its organ.
 (`results/multiframe_llm_agg.json`.)
 
-## 9. Related work
+## 9. External validation on real human trajectories ✅
+
+The controlled experiments above use synthetic/self-generated motion so that spatial-channel interventions can be isolated exactly. We therefore tested the fixed spatial code on an external real-world dataset, **Microsoft GeoLife GPS Trajectories 1.3**, without changing the grid architecture. GPS traces were converted to east/north self-motion and divided by user into seeded-random **70/15/15 user-disjoint** train/validation/test splits. Spatial scaling and distance-bin cut-points were estimated from TRAIN users only. We evaluated non-overlapping trajectory windows at T={8,16,24}; the inferential unit is the held-out **user**, not the readout seed.
+
+The preregistered primary task was 8-way endpoint bearing. Across eight readout seeds, the fixed grid population reached **76.6%** accuracy versus a train-majority OFF baseline of **16.2%**. Across **28 held-out users**, the paired GRID−OFF effect was **+59.3 percentage points**, bootstrap 95% CI **[+50.5,+67.5]**, with a user-level sign-flip **p≈1×10⁻⁵**. The secondary 6-bin endpoint-distance task reached **92.3%** versus **18.4%** OFF; the held-out-user effect was **+76.5 points**, 95% CI **[+72.5,+80.3]**, **p≈1×10⁻⁵**. (`results/geolife_external_v2.json`.)
+
+A corrected exact-displacement calibration provides the appropriate ceiling: a small RAW-MLP given the exact additive endpoint vector reaches **98.7%** bearing and **98.8%** distance (analytic RAW oracle = 100%). The bounded grid code is therefore **not superior to explicit Cartesian integration**, nor should it be; the external result shows that a fixed bounded periodic neural population retains enough metric information to support accurate decoding on real trajectories from unseen people. This closes the external-validity gap without changing the paper's regime-dependent claim.
+
+## 10. Related work
 
 **Neural spatial codes.** Grid cells and path integration motivate the bounded periodic code (Hafting
 2005; Burak & Fiete 2009), while trained recurrent integrators show that grid-like representations can
@@ -665,9 +673,9 @@ Our contribution is a controlled causal characterization: we intervene on the sp
 subcodes, include fair non-neural baselines and certified nulls, and ask **when** a structured cognitive map
 changes a language model's behavior rather than assuming that brain-inspired structure is always beneficial.
 
-## 10. Limitations
+## 11. Limitations
 
-- The central controlled experiments still use synthetic/self-generated environments, although the strongest theta-sweep causal effect now replicates on two LLM families (Qwen2.5-1.5B and SmolLM2-1.7B). This does **not** establish transfer to natural multiview/video spatial benchmarks.
+- The central causal interventions use synthetic/self-generated environments, while representation-level external validation uses real GeoLife trajectories. The strongest theta-sweep effect replicates on two LLM families (Qwen2.5-1.5B and SmolLM2-1.7B). The work still does **not** establish natural multiview/video embodied reasoning.
 - The headline "grid extrapolates" claim is matched by a NoPE+sum Transformer; the grid code is not the
   best pure path-integrator.
 - The remapping/capacity advantages are regime-specific (fixed memory / context-free) and do not
@@ -675,7 +683,7 @@ changes a language model's behavior rather than assuming that brain-inspired str
 - §8 is n=3 with large seed variance; the grid-vs-place comparison there is inconclusive (needs n≥8).
   Emergence, boundary, replay pillars are demonstrations.
 
-## 11. Methods
+## 12. Methods
 
 **Grid cortex** (`_HexGridModules`): K modules, fixed velocity gains `side/spacing`,
 `spacing = base·ratio^k`; per-step velocity advances a phase integrated and min-image-wrapped on a
@@ -696,6 +704,6 @@ figure→command→artifact map, verified environment, and Zenodo-release steps 
 - ✅ Null results and non-convergent seeds remain reported rather than removed post hoc.
 - ✅ Reproducibility instructions, raw JSON results, tests, and figures are in-repository.
 - ✅ Second-backbone replication complete: SmolLM2-1.7B reproduces the theta-sweep causal effect (primary ON vs NO-SWEEP p=0.0156).
-- ⚠️ One scientific blocker remains before a flagship submission: an **independent external evaluation** matched to the model's input modality.
+- ✅ External real-trajectory validation complete: GeoLife bearing and distance both exceed OFF across held-out users with p≈1×10⁻⁵; corrected exact-displacement baselines are reported as ceilings.
 - ⚠️ The grid-vs-place LLM comparison remains underpowered at n=3 and is treated as inconclusive, not as a positive headline.
 - Framing locked: causal cognitive-map interface + regime map of wins/ties/failures; **no claim that grid cells are universally superior or that hexagonal geometry emerged unconstrained**.
